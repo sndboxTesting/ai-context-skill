@@ -130,12 +130,37 @@
     [
       "n8n",
       "5678",
-      "Up 59 minutes"
+      "Up About an hour"
     ],
     [
       "searxng",
       "8888",
       "Up 2 days"
+    ],
+    [
+      "prometheus",
+      "9090",
+      "Up 10 minutes"
+    ],
+    [
+      "loki",
+      "3100",
+      "Up 10 minutes"
+    ],
+    [
+      "grafana",
+      "4000",
+      "Up 10 minutes"
+    ],
+    [
+      "node-exporter",
+      "9100",
+      "Up 10 minutes"
+    ],
+    [
+      "cadvisor",
+      "9101",
+      "Up 10 minutes (healthy)"
     ]
   ],
   "launchagents": [
@@ -176,5 +201,5 @@
     "MODEL_NLU_FALLBACK": "qwen3:0.6b"
   },
   "ts": "2026-06-15",
-  "_hash": "1305a4563ca66f1b"
+  "_hash": "be54e3ea5cc4adb0"
 }

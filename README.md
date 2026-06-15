@@ -587,6 +587,11 @@ See `notes/ADWI-START-HERE.md` for detailed first-time setup instructions.
 | open-webui | :3000 | ✓ running |
 | n8n | :5678 | ✓ running |
 | searxng | :8888 | ✓ running |
+| prometheus | :9090 | ✓ running |
+| loki | :3100 | ✓ running |
+| grafana | :4000 | ✓ running |
+| node-exporter | :9100 | ✓ running |
+| cadvisor | :9101 | ✓ running |
 *Auto-updated: 2026-06-15*
 <!-- /AUTO:SERVICES -->
 
@@ -604,6 +609,23 @@ See `notes/ADWI-START-HERE.md` for detailed first-time setup instructions.
 | `qdrant` | on demand |
 *Auto-updated: 2026-06-15*
 <!-- /AUTO:AGENTS -->
+
+### Monitoring Stack
+
+<!-- AUTO:MONITORING -->
+| Service | Port | Role | Status |
+|---|---|---|---|
+| prometheus | :9090 | Metrics scraper | ✓ running |
+| loki | :3100 | Log aggregation | ✓ running |
+| promtail | — | Log shipper → Loki | not started |
+| grafana | :4000 | Dashboards UI | ✓ running |
+| node-exporter | :9100 | System metrics | ✓ running |
+| cadvisor | :9101 | Container metrics | ✓ running |
+
+Start: `cd local-ai-stack && docker compose up -d prometheus loki promtail grafana node-exporter cadvisor`
+Dashboard: http://localhost:4000 (user: suneel)
+*Auto-updated: 2026-06-15*
+<!-- /AUTO:MONITORING -->
 
 ### CLI Commands
 

@@ -349,6 +349,7 @@ def stage_safe_files() -> tuple[int, list[str]]:
         "notes/adwi-trace-logs/", "notes/git-backup-logs/",
         "notes/system-inspections/", "notes/adwi-pending-improvements.md",
         "local-ai-stack/docker-compose.yml",
+        "local-ai-stack/monitoring/",       # monitoring stack configs
         ".gitignore", "README.md", "BACKUP_MANIFEST.md",
     ]
     staged = []
@@ -505,6 +506,7 @@ set -euo pipefail
 
 WORKSPACE="/Users/MAC/SuneelWorkSpace"
 LOG_DIR="$WORKSPACE/notes/git-backup-logs"
+VENV_PY="$WORKSPACE/adwi/.venv/bin/python3"
 STAMP=$(date +%Y%m%d-%H%M%S)
 LOG="$LOG_DIR/$STAMP-git-backup.md"
 
@@ -512,6 +514,12 @@ mkdir -p "$LOG_DIR"
 cd "$WORKSPACE"
 
 echo "# Adwi Auto-Backup — $(date)" > "$LOG"
+
+# Phase 5: auto-update README.md before staging
+PY="${VENV_PY:-python3}"
+if [ -f "$WORKSPACE/bin/auto-update-readme" ]; then
+    "$PY" "$WORKSPACE/bin/auto-update-readme" --quiet 2>/dev/null || true
+fi
 
 # Quick secret scan on changed files
 if git status --short | grep -q "^[AM]"; then
@@ -526,6 +534,8 @@ git add adwi/ bin/adwi bin/mcp-status bin/adwi-git-backup \\
     "notes/ADWI-START-HERE.md" "notes/adwi-learning-journal.md" \\
     "notes/adwi-mistakes-and-fixes.md" "notes/adwi-capability-roadmap.md" \\
     "notes/adwi-repair-logs/" "notes/system-inspections/" \\
+    "local-ai-stack/docker-compose.yml" \\
+    "local-ai-stack/monitoring/" \\
     ".gitignore" "README.md" "BACKUP_MANIFEST.md" 2>/dev/null || true
 
 # Check if anything staged

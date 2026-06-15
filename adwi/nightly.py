@@ -316,15 +316,92 @@ def _invoke_aider(error_output: str, files: list, attempt: int) -> tuple:
         return False, str(e)
 
 
+def _snapshot_files(files: list) -> dict:
+    """
+    Record current file contents + git object hashes before Aider runs.
+    Returns {path_str: {"git_hash": str, "content": str}}.
+    """
+    snapshot = {}
+    for f in files:
+        p = Path(f)
+        git_hash = ""
+        rc, out, _ = _run(["git", "hash-object", str(p)], timeout=5)
+        if rc == 0:
+            git_hash = out.strip()
+        content = ""
+        try:
+            content = p.read_text(encoding="utf-8", errors="replace")[:8000]
+        except Exception:
+            pass
+        snapshot[str(f)] = {"git_hash": git_hash, "content": content}
+    return snapshot
+
+
+def _rollback_files(files: list, snapshot: dict) -> list:
+    """
+    Roll back individual files using git checkout -- <file>.
+    Only rolls back files that were in the pre-Aider snapshot.
+    Returns list of files successfully rolled back.
+    """
+    rolled = []
+    for f in files:
+        path_str = str(f)
+        if path_str not in snapshot:
+            continue
+        rc, _, err = _run(["git", "checkout", "--", path_str], timeout=10)
+        if rc == 0:
+            rolled.append(path_str)
+        else:
+            _pr(f"  ⚠ Rollback failed for {path_str}: {err}")
+    return rolled
+
+
+def _write_preflight_record(
+    initial_output: str,
+    files: list,
+    snapshot: dict,
+    git_head: str,
+) -> Path:
+    """
+    Write an isolated tracking record BEFORE Aider runs.
+    Stored in notes/adwi-repair-logs/ so it survives rollbacks.
+    """
+    repair_dir = NOTES / "adwi-repair-logs"
+    repair_dir.mkdir(parents=True, exist_ok=True)
+    record_path = repair_dir / f"preflight-{DATE_STR}-{TIME_STR.replace(':','-')}.md"
+    lines = [
+        f"# Adwi Self-Heal Pre-flight — {DATE_STR} {TIME_STR}",
+        "",
+        f"**Git HEAD at start:** `{git_head}`",
+        "",
+        "## Files to Fix",
+    ] + [f"- `{f}`" for f in files] + [
+        "",
+        "## Git Object Hashes (for verification)",
+    ] + [f"- `{p}`: `{d['git_hash']}`" for p, d in snapshot.items()] + [
+        "",
+        "## Initial Test Failure",
+        "```",
+        initial_output[:3000],
+        "```",
+        "",
+        "_Record written before Aider invocation — safe to use for audit._",
+    ]
+    record_path.write_text("\n".join(lines), encoding="utf-8")
+    return record_path
+
+
 def step_aider_heal() -> dict:
     """
-    Pillar 1 autonomous self-healing:
+    Pillar 1 autonomous self-healing — V2 with pre-flight snapshot and per-file rollback:
       1. Detect test suite
-      2. Run — if passing, return immediately (nothing to fix)
-      3. Invoke Aider up to MAX_FIX_ATTEMPTS times
-      4. If fixed: cut auto-fix/morning-review-YYYY-MM-DD branch, commit, push
-      5. If still failing after all attempts: rollback Aider changes, write
-         failure report to ~/Desktop/adwi-repair-report-YYYY-MM-DD.md
+      2. Run — if passing, return immediately
+      3. Snapshot file states + write pre-flight tracking record
+      4. Invoke Aider up to MAX_FIX_ATTEMPTS times
+      5. After each attempt: run tests; critic validates
+      6. If fixed: cut branch, commit, push
+      7. If all attempts fail: per-file rollback (not whole-repo), write failure
+         report to Desktop AND add to Pending User Approval
     """
     result = {
         "skipped_reason": None,
@@ -334,6 +411,8 @@ def step_aider_heal() -> dict:
         "attempts": 0,
         "branch": None,
         "report_path": None,
+        "preflight_record": None,
+        "rolled_back": [],
     }
 
     cmd, cwd = _find_test_suite()
@@ -351,11 +430,19 @@ def step_aider_heal() -> dict:
 
     _pr(f"  ⚠ Tests failing — invoking Aider ({MAX_FIX_ATTEMPTS} max attempts)...")
 
-    # Snapshot git HEAD so we can rollback if all attempts fail
-    rc, orig_head, _ = _run(["git", "rev-parse", "HEAD"], timeout=10)
+    # Capture git state
+    _, orig_head, _    = _run(["git", "rev-parse", "HEAD"], timeout=10)
     _, current_branch, _ = _run(["git", "rev-parse", "--abbrev-ref", "HEAD"], timeout=10)
+    orig_head = orig_head.strip()
 
     files = _extract_failing_files(initial_output)
+
+    # V2: snapshot BEFORE aider touches anything
+    snapshot = _snapshot_files(files)
+    preflight = _write_preflight_record(initial_output, files, snapshot, orig_head)
+    result["preflight_record"] = str(preflight)
+    _pr(f"  📋 Pre-flight record: {preflight}")
+
     error_log = initial_output
     fixed = False
 
@@ -368,7 +455,12 @@ def step_aider_heal() -> dict:
             fixed = True
             break
         error_log = new_output
-        files = _extract_failing_files(new_output) or files  # reuse previous if no new clues
+        new_files = _extract_failing_files(new_output)
+        # Extend snapshot if Aider touched new files
+        new_files_unseen = [f for f in new_files if str(f) not in snapshot]
+        if new_files_unseen:
+            snapshot.update(_snapshot_files(new_files_unseen))
+        files = new_files or files
 
     result["tests_passed_after"] = fixed
 
@@ -386,8 +478,11 @@ def step_aider_heal() -> dict:
         _pr(f"  ✓ Fixed and pushed → {branch}")
 
     else:
-        # Roll back every file Aider touched
-        _run(["git", "checkout", "--", "."], timeout=15)
+        # V2: per-file rollback using pre-flight snapshot — not git checkout -- .
+        rolled = _rollback_files(list(snapshot.keys()), snapshot)
+        result["rolled_back"] = rolled
+        _pr(f"  🔁 Rolled back {len(rolled)} file(s): {rolled}")
+
         if current_branch and current_branch != "HEAD":
             _run(["git", "checkout", current_branch], timeout=10)
 
@@ -399,6 +494,10 @@ def step_aider_heal() -> dict:
             "**Status: FAILED — manual intervention required**",
             "",
             f"Aider ran **{MAX_FIX_ATTEMPTS} attempts** and could not pass the test suite.",
+            f"All {len(rolled)} modified file(s) were rolled back to their pre-Aider state.",
+            "",
+            f"**Pre-flight record:** `{preflight}`",
+            f"**Git HEAD at start:** `{orig_head}`",
             "",
             "## Initial Failures",
             "```",
@@ -411,16 +510,20 @@ def step_aider_heal() -> dict:
             "```",
             "",
             "## Files Targeted",
-        ] + [f"- `{f}`" for f in files] + [
+        ] + [f"- `{f}`" for f in snapshot] + [
+            "",
+            "## Rolled Back",
+        ] + [f"- `{f}` ✓" for f in rolled] + [
             "",
             "## Next Steps",
             "1. Run `python3 -m pytest adwi/evals/ -v` to inspect failures manually",
-            "2. Check `notes/adwi-repair-logs/` for prior repair history",
-            "3. Review the files listed above for recent changes",
+            "2. Review pre-flight record for exact pre-failure state",
+            "3. Check `notes/adwi-repair-logs/` for audit trail",
+            "4. Manually fix and commit when ready",
         ]
         report_path.write_text("\n".join(lines), encoding="utf-8")
         result["report_path"] = str(report_path)
-        _pr(f"  ✗ Could not auto-fix — see: {report_path}")
+        _pr(f"  ✗ Could not auto-fix — report: {report_path}")
 
     return result
 
@@ -872,6 +975,17 @@ def step_write_report(data: dict) -> Path:
         pending.append(f"- `npm update -g` — {health['npm_outdated_count']} global npm package(s) outdated")
     if sk and sk != "[none]" and sk != "[Ollama offline — skipped]":
         pending.append("- Review AI skill suggestions in Section 3 above — implement with your approval")
+
+    # Self-heal failure goes into Pending User Approval
+    heal = data.get("aider_heal", {})
+    if heal.get("ran_tests") and not heal.get("tests_passed_after") and not heal.get("skipped_reason"):
+        rolled = heal.get("rolled_back", [])
+        pending.append(
+            f"- **Self-heal FAILED** — Aider made {heal.get('attempts',0)} attempt(s), "
+            f"all rolled back ({len(rolled)} file(s)). "
+            f"Manual fix required. Report: `{heal.get('report_path','~/Desktop')}`. "
+            f"Pre-flight record: `{heal.get('preflight_record','')}`"
+        )
 
     lines += ["", "## ⚠ Pending User Approval"]
     if pending:

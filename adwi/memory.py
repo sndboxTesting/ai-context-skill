@@ -60,6 +60,13 @@ CREATE INDEX       IF NOT EXISTS idx_source  ON memories (source);
 CREATE INDEX       IF NOT EXISTS idx_ts      ON memories (ts);
 """
 
+_MIGRATE_V2 = [
+    "ALTER TABLE memories ADD COLUMN importance_score REAL NOT NULL DEFAULT 0.5",
+    "ALTER TABLE memories ADD COLUMN recency_decay    REAL NOT NULL DEFAULT 1.0",
+    "ALTER TABLE memories ADD COLUMN provenance       TEXT NOT NULL DEFAULT 'direct'",
+    "CREATE INDEX IF NOT EXISTS idx_importance ON memories (importance_score)",
+]
+
 
 # ── Pure-Python vector math (no numpy) ──────────────────────────────────────
 
@@ -86,6 +93,26 @@ class AdwiMemory:
         self.conn.execute("PRAGMA journal_mode=WAL")
         self.conn.execute("PRAGMA synchronous=NORMAL")
         self.conn.executescript(_SCHEMA)
+        self._migrate_v2()
+        self.conn.commit()
+
+    def _migrate_v2(self) -> None:
+        """Add Phase 3 scoring columns to existing DBs without touching existing rows."""
+        existing = {row[1] for row in self.conn.execute("PRAGMA table_info(memories)").fetchall()}
+        for stmt in _MIGRATE_V2:
+            col = stmt.split("ADD COLUMN")[1].strip().split()[0] if "ADD COLUMN" in stmt else None
+            if col and col in existing:
+                continue
+            if "CREATE INDEX" in stmt:
+                try:
+                    self.conn.execute(stmt)
+                except sqlite3.OperationalError:
+                    pass
+                continue
+            try:
+                self.conn.execute(stmt)
+            except sqlite3.OperationalError:
+                pass  # column already exists from a prior migration
         self.conn.commit()
 
     # ── Embedding ────────────────────────────────────────────────────────────
@@ -108,7 +135,14 @@ class AdwiMemory:
 
     # ── Write ─────────────────────────────────────────────────────────────────
 
-    def store(self, content: str, source: str, tags: list = None) -> bool:
+    def store(
+        self,
+        content: str,
+        source: str,
+        tags: list = None,
+        provenance: str = "direct",
+        importance_score: float = 0.5,
+    ) -> bool:
         """Insert one memory. Returns True if new, False if duplicate."""
         content = content.strip()
         if len(content) < 20:
@@ -120,9 +154,10 @@ class AdwiMemory:
         emb_json  = json.dumps(embedding) if embedding else None
         try:
             self.conn.execute(
-                "INSERT INTO memories (ts, source, content, content_hash, tags, embedding) "
-                "VALUES (?,?,?,?,?,?)",
-                (ts, source, content, h, tags_json, emb_json),
+                "INSERT INTO memories "
+                "(ts, source, content, content_hash, tags, embedding, importance_score, recency_decay, provenance) "
+                "VALUES (?,?,?,?,?,?,?,?,?)",
+                (ts, source, content, h, tags_json, emb_json, importance_score, 1.0, provenance),
             )
             self.conn.commit()
             return True
@@ -275,7 +310,148 @@ class AdwiMemory:
         by_src = dict(self.conn.execute(
             "SELECT source, COUNT(*) FROM memories GROUP BY source"
         ).fetchall())
-        return {"total": total, "with_embeddings": with_emb, "by_source": by_src}
+        avg_imp = self.conn.execute(
+            "SELECT AVG(importance_score) FROM memories"
+        ).fetchone()[0] or 0.0
+        return {
+            "total": total, "with_embeddings": with_emb,
+            "by_source": by_src, "avg_importance": round(avg_imp, 3),
+        }
+
+    # ── Phase 3: Lifecycle scoring & pruning ──────────────────────────────────
+
+    def apply_recency_decay(self, half_life_days: float = 90.0) -> int:
+        """
+        Decay recency_decay for memories older than half_life_days.
+        Uses exponential decay: decay = 0.5^(age_days / half_life_days).
+        Returns number of rows updated.
+        """
+        rows = self.conn.execute(
+            "SELECT id, ts FROM memories WHERE recency_decay > 0.05"
+        ).fetchall()
+        now = datetime.now()
+        updated = 0
+        for row_id, ts_str in rows:
+            try:
+                age_days = (now - datetime.fromisoformat(ts_str)).days
+            except Exception:
+                continue
+            if age_days <= 0:
+                continue
+            new_decay = 0.5 ** (age_days / half_life_days)
+            self.conn.execute(
+                "UPDATE memories SET recency_decay = ? WHERE id = ?",
+                (round(new_decay, 6), row_id),
+            )
+            updated += 1
+        self.conn.commit()
+        return updated
+
+    def score_memories(self) -> int:
+        """
+        Recompute importance_score for all memories using a heuristic:
+          - git commit memories: +0.2 (deliberate developer decisions)
+          - notes memories: +0.1
+          - terminal: base 0.3
+          - longer content → higher score (up to +0.3)
+          - multiplied by recency_decay
+        Returns number of rows scored.
+        """
+        rows = self.conn.execute(
+            "SELECT id, source, content, recency_decay FROM memories"
+        ).fetchall()
+        scored = 0
+        for row_id, source, content, decay in rows:
+            base = {"git": 0.7, "notes": 0.6, "terminal": 0.3, "manual": 0.8}.get(source, 0.5)
+            length_bonus = min(len(content) / 2000, 0.3)
+            raw_score = (base + length_bonus) * max(float(decay or 1.0), 0.05)
+            importance = round(min(raw_score, 1.0), 4)
+            self.conn.execute(
+                "UPDATE memories SET importance_score = ? WHERE id = ?",
+                (importance, row_id),
+            )
+            scored += 1
+        self.conn.commit()
+        return scored
+
+    def prune_and_summarize(
+        self,
+        max_age_days: int = 365,
+        min_importance: float = 0.2,
+        summary_dest: Optional[Path] = None,
+    ) -> dict:
+        """
+        Summarize memories older than max_age_days with importance < min_importance
+        into a compact reference log, then delete the originals.
+
+        Returns {"pruned": int, "summary_written": bool, "summary_path": str}.
+        """
+        cutoff = datetime.now().replace(
+            year=datetime.now().year - (max_age_days // 365 or 1)
+        ).isoformat(timespec="seconds")
+
+        candidates = self.conn.execute(
+            "SELECT id, ts, source, content FROM memories "
+            "WHERE ts < ? AND importance_score < ? "
+            "ORDER BY ts ASC LIMIT 200",
+            (cutoff, min_importance),
+        ).fetchall()
+
+        if not candidates:
+            return {"pruned": 0, "summary_written": False, "summary_path": ""}
+
+        # Build compact reference block
+        lines = [f"# Adwi Memory Archive — pruned on {datetime.now().strftime('%Y-%m-%d')}"]
+        lines.append(f"# Source: {len(candidates)} low-importance memories older than {max_age_days} days\n")
+        for _, ts, src, content in candidates:
+            lines.append(f"[{ts[:10]}][{src}] {content[:180]}")
+        summary_text = "\n".join(lines)
+
+        # Write to archive file
+        dest = summary_dest or (NOTES_DIR / "adwi-memory-archive.md")
+        dest.parent.mkdir(parents=True, exist_ok=True)
+        existing = dest.read_text(encoding="utf-8") if dest.exists() else ""
+        dest.write_text(existing + "\n\n" + summary_text, encoding="utf-8")
+
+        # Delete pruned rows
+        ids = [r[0] for r in candidates]
+        self.conn.execute(
+            f"DELETE FROM memories WHERE id IN ({','.join('?' * len(ids))})", ids
+        )
+        self.conn.commit()
+
+        return {"pruned": len(ids), "summary_written": True, "summary_path": str(dest)}
+
+    # ── Phase 3: Safety gate ──────────────────────────────────────────────────
+
+    @staticmethod
+    def classify_input_risk(text: str) -> str:
+        """
+        Classify a CLI input string into:
+          SAFE             — read-only, no system mutation
+          REVIEW-REQUIRED  — modifies local files, git, or services
+          BLOCKED          — targets hard-blocked paths or destructive patterns
+
+        Used as a reusable wrapper by adwi_cli.py command dispatch.
+        """
+        _BLOCKED = re.compile(
+            r"(rm\s+-rf|git\s+push\s+--force|DROP\s+TABLE|format\s+disk"
+            r"|diskutil\s+erase|/etc/passwd|/private/var|secrets/"
+            r"|~/.ssh|~/.aws|~/.gnupg|/.kube|reboot|shutdown\s+-[rh])",
+            re.I,
+        )
+        _REVIEW = re.compile(
+            r"(git\s+commit|git\s+push\b|docker\s+compose\s+down|pip\s+install"
+            r"|brew\s+install|brew\s+uninstall|rm\s+-r(?!f)|mv\s+\S+\s+/"
+            r"|launchctl\s+(un)?load|chmod\s+[0-7]|pkill|killall"
+            r"|/backup-now|/nightly-run|/self-heal|/patch-adwi)",
+            re.I,
+        )
+        if _BLOCKED.search(text):
+            return "BLOCKED"
+        if _REVIEW.search(text):
+            return "REVIEW-REQUIRED"
+        return "SAFE"
 
     def close(self):
         self.conn.close()

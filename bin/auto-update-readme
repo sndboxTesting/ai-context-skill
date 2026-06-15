@@ -179,11 +179,38 @@ _MARKER_RE = re.compile(
     re.S,
 )
 
+def build_monitoring_section(snap: dict) -> str:
+    """Report monitoring stack status from docker services list."""
+    monitoring_services = [
+        ("prometheus",    "9090",  "Metrics scraper"),
+        ("loki",          "3100",  "Log aggregation"),
+        ("promtail",      None,    "Log shipper → Loki"),
+        ("grafana",       "4000",  "Dashboards UI"),
+        ("node-exporter", "9100",  "System metrics"),
+        ("cadvisor",      "9101",  "Container metrics"),
+    ]
+    # Check which are live from docker snap
+    running_map = {}
+    for name, port, _ in snap.get("services", []):
+        running_map[name] = port
+
+    lines = ["| Service | Port | Role | Status |", "|---|---|---|---|"]
+    for svc, port, role in monitoring_services:
+        port_str = f":{port}" if port else "—"
+        status = "✓ running" if svc in running_map else "not started"
+        lines.append(f"| {svc} | {port_str} | {role} | {status} |")
+    lines.append("")
+    lines.append("Start: `cd local-ai-stack && docker compose up -d prometheus loki promtail grafana node-exporter cadvisor`")
+    lines.append(f"Dashboard: http://localhost:4000 (user: suneel)")
+    return "\n".join(lines)
+
+
 SECTION_BUILDERS = {
     "SERVICES":    build_services_section,
     "AGENTS":      build_agents_section,
     "MODELS":      build_models_section,
     "COMMANDS":    build_commands_section,
+    "MONITORING":  build_monitoring_section,
 }
 
 

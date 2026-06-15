@@ -3,6 +3,65 @@
 
 ---
 
+## 2026-06-15 — 5-Phase Backend Architecture Overhaul
+
+### Phase 1: Grafana + Loki + Prometheus Monitoring Stack
+- **Added to `local-ai-stack/docker-compose.yml`**: 6 new services
+  - `suneel-prometheus` `:9090` — scrapes Safe Command API, node-exporter, cAdvisor, itself
+  - `suneel-loki` `:3100` — log aggregation backend
+  - `suneel-promtail` — ships adwi logs (`logs/adwi_system_log.md`, nightly logs, trace logs, backup logs)
+  - `suneel-grafana` `:4000` — dashboards UI (avoids :3000 conflict with Open WebUI)
+  - `suneel-node-exporter` `:9100` — host system metrics
+  - `suneel-cadvisor` `:9101` — Docker container metrics
+- **Config tree created**: `local-ai-stack/monitoring/{prometheus,loki,promtail,grafana/provisioning/,grafana/dashboards/}`
+- **Dashboard provisioned**: `adwi-overview.json` tracks tool latency, container memory, backup rates, nightly outcomes
+- **Start command**: `cd local-ai-stack && docker compose up -d prometheus loki promtail grafana node-exporter cadvisor`
+
+### Phase 2: LangGraph Orchestration — `/reason` Refactor
+- **New file**: `adwi/reason_engine.py` (Planner→Executor→Critic stateful graph, stdlib-only)
+  - `PlannerAgent`: maps task → JSON step array via constrained LLM prompt
+  - `ExecutorAgent`: dispatches steps by `action_type` (shell, file_read, file_write, memory_query, web_search, llm_reason, obsidian_write)
+  - `CriticAgent`: reviews each step output; triggers retry up to 3 times
+  - `SafetyGateway`: `classify_risk()` → BLOCKED | REVIEW-REQUIRED | SAFE; REVIEW-REQUIRED steps halt for terminal confirmation
+- **`adwi_cli.py`**: `/reason <task>` now loads `reason_engine.run_reason()` with `interactive=True`; falls back to cloud/local LLM if engine fails
+
+### Phase 3: Memory Lifecycle, Scoring & Safety Gate
+- **`adwi/memory.py`** — schema migration V2 (non-destructive ALTER TABLE):
+  - Added `importance_score REAL DEFAULT 0.5`
+  - Added `recency_decay REAL DEFAULT 1.0`
+  - Added `provenance TEXT DEFAULT 'direct'`
+  - `_migrate_v2()` uses try/except per column; safe on both new and existing DBs
+- **New methods on `AdwiMemory`**:
+  - `apply_recency_decay(half_life_days=90)` — exponential decay on old memories
+  - `score_memories()` — heuristic importance scoring by source, length, decay
+  - `prune_and_summarize(max_age_days, min_importance)` — archives low-value old memories to `notes/adwi-memory-archive.md`, deletes originals
+  - `classify_input_risk(text)` — static safety gate returning BLOCKED | REVIEW-REQUIRED | SAFE
+- **Live DB migrated**: 380 memories, all 3 new columns added, migration verified
+
+### Phase 4: Self-Healing V2 with Rollback Engine
+- **`adwi/nightly.py` `step_aider_heal()`** — replaced whole-repo rollback with:
+  - `_snapshot_files()` — captures git object hash + content per file BEFORE aider runs
+  - `_write_preflight_record()` — writes isolated audit record to `notes/adwi-repair-logs/preflight-YYYY-MM-DD-HH-MM-SS.md`
+  - `_rollback_files()` — per-file `git checkout -- <file>` (never rolls back unrelated files)
+  - Failure entries added to **Pending User Approval** section of morning brief with pre-flight record path
+
+### Phase 5: Zero-Touch README Auto-Documentation
+- **`bin/auto-update-readme`**: added `build_monitoring_section()` + `MONITORING` entry in `SECTION_BUILDERS`
+- **`README.md`**: `<!-- AUTO:MONITORING -->` marker block added (auto-updated on next backup)
+- **`adwi/backup.py`**: `stage_safe_files()` now stages `local-ai-stack/monitoring/`
+- **`BACKUP_SCRIPT_CONTENT`**: shell backup script now runs `auto-update-readme --quiet` before staging, stages `local-ai-stack/monitoring/`
+
+### New Ports
+| Port | Service | Notes |
+|---|---|---|
+| :9090 | Prometheus | Metrics scraper |
+| :3100 | Loki | Log aggregation |
+| :4000 | Grafana | Dashboards (admin: suneel / adwi-local) |
+| :9100 | node-exporter | Host system metrics |
+| :9101 | cAdvisor | Container metrics |
+
+---
+
 ## 2026-06-15 — Phase 1: Environment Discovery & Baseline Audit
 
 **Status: COMPLETE**

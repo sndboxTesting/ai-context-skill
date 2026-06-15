@@ -4443,11 +4443,20 @@ def handle(line: str) -> bool:
     elif line.startswith("/youtube "): run_cmd("youtube", ["summarize-youtube", line[9:].strip()], timeout=600)
     elif line.startswith("/save-youtube "): run_cmd("save-youtube", ["save-youtube-summary", line[14:].strip()], timeout=600)
     elif line.startswith("/reason "):
-        adwi_head("Cloud reasoning")
-        adwi_say(call_cloud(
-            f"Complex reasoning request from Suneel:\n\n{line[8:].strip()}\n\n"
-            "Think step by step. Flag risks. Be specific."
-        ) if _cloud_ok() else stream_local(line[8:].strip()))
+        task = line[8:].strip()
+        adwi_head(f"Reason Engine → {task[:60]}")
+        try:
+            import importlib.util as _ilu
+            _rspec = _ilu.spec_from_file_location("reason_engine", ADWI_DIR / "reason_engine.py")
+            _rmod  = _ilu.module_from_spec(_rspec)
+            _rspec.loader.exec_module(_rmod)
+            adwi_say(_rmod.run_reason(task, interactive=True))
+        except Exception as _re:
+            activity_warning(f"Reason engine unavailable ({_re}), falling back to cloud")
+            adwi_say(call_cloud(
+                f"Complex reasoning request from Suneel:\n\n{task}\n\n"
+                "Think step by step. Flag risks. Be specific."
+            ) if _cloud_ok() else stream_local(task))
     elif line.startswith("/review-plan "):
         ctx = ROADMAP_FILE.read_text(encoding="utf-8")[:2000] if ROADMAP_FILE.exists() else ""
         adwi_say(call_cloud(f"Review this plan:\n\n{line[13:].strip()}\n\nContext:\n{ctx}") if _cloud_ok() else stream_local(line[13:].strip()))

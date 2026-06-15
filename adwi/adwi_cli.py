@@ -312,6 +312,11 @@ _REGEX_INTENTS = [
     (re.compile(r"(in my notes|from my notes|check my notes).{0,30}(about|for|on)", re.I), "rag_search"),
     # Browse / fetch URL
     (re.compile(r"(browse|visit|open|fetch|go to|check out|navigate to).{0,15}(https?://|website|site|webpage|url|\.(com|io|org|dev|net))", re.I), "browse"),
+    # GitHub connectivity — must come BEFORE git_status
+    (re.compile(r"(is|are).{0,20}(github|git hub).{0,20}(connected|linked|set up|configured|working|authenticated|logged in)", re.I), "github_connected"),
+    (re.compile(r"(is adwi|adwi).{0,20}(connected|linked).{0,20}(github|git)", re.I), "github_connected"),
+    (re.compile(r"(github|git hub).{0,20}(account|auth|login|connection|access)", re.I), "github_connected"),
+    (re.compile(r"(connected to|link(ed)? to|set up).{0,20}(github|git hub)", re.I), "github_connected"),
     # Git
     (re.compile(r"git\s+(status|diff|log|show|repos?)\b", re.I), "git_status"),
     (re.compile(r"(what (changed|committed)|show commits|latest commit|my repos?)\b", re.I), "git_status"),
@@ -1338,6 +1343,58 @@ def cmd_run_bash(raw: str) -> None:
     except Exception as e:
         cprint(f"  Error: {e}", RED)
 
+# ── GitHub connectivity status ────────────────────────────────────────────────
+def cmd_github_connected() -> None:
+    """Answer: is Adwi connected to GitHub? Shows auth, remote, last commit."""
+    adwi_head("GitHub connection status")
+    activity_start("is GitHub / Adwi connected to GitHub?", "GitHub Connection Check")
+
+    # 1. gh CLI auth
+    activity_step("running", "gh auth status")
+    gh_out = run_shell("/opt/homebrew/bin/gh auth status 2>&1")
+    if "Logged in" in gh_out or "✓ Logged in" in gh_out:
+        user_m = re.search(r"account\s+(\S+)", gh_out)
+        user = user_m.group(1) if user_m else "your account"
+        cprint(f"  {GREEN}✓ gh CLI authenticated{RESET} as {BOLD}{user}{RESET}", "")
+    elif gh_out.strip():
+        cprint(f"  {YELLOW}⚠ gh auth: {gh_out.splitlines()[0][:80]}{RESET}", "")
+    else:
+        cprint(f"  {GRAY}gh CLI not available or not authenticated{RESET}", "")
+
+    # 2. Git remote
+    activity_step("inspecting", "git remote URL")
+    remote = run_shell(f"git -C '{BASE}' remote get-url origin 2>/dev/null")
+    if remote:
+        safe_remote = re.sub(r"https?://[^@]+@", "https://REDACTED@", remote)
+        cprint(f"  {GREEN}✓ Remote{RESET}  → {CYAN}{safe_remote}{RESET}", "")
+    else:
+        cprint(f"  {YELLOW}⚠ No remote set{RESET} — run /backup-enable to configure", "")
+
+    # 3. Branch + ahead/behind
+    branch = run_shell(f"git -C '{BASE}' branch --show-current 2>/dev/null")
+    ahead  = run_shell(f"git -C '{BASE}' rev-list --count '@{{u}}..HEAD' 2>/dev/null || echo 0").strip()
+    if branch:
+        cprint(f"  {GREEN}✓ Branch{RESET}  → {branch}  ({ahead} commit(s) not yet pushed)", "")
+
+    # 4. Last commit
+    last = run_shell(f"git -C '{BASE}' log --oneline -1 2>/dev/null")
+    if last:
+        cprint(f"  {GREEN}✓ Last commit{RESET}  → {last}", "")
+
+    # 5. Untracked count
+    status = run_shell(f"git -C '{BASE}' status --short 2>/dev/null")
+    untracked = [l for l in status.splitlines() if l.startswith("??")]
+    modified  = [l for l in status.splitlines() if not l.startswith("??")]
+    if untracked:
+        cprint(f"\n  {len(untracked)} file(s) not yet committed → /backup-now to push them", YELLOW)
+    if modified:
+        cprint(f"  {len(modified)} modified file(s) → /backup-now to commit", YELLOW)
+    if not untracked and not modified:
+        cprint(f"\n  {GREEN}✓ Everything pushed — workspace is fully backed up{RESET}", "")
+
+    activity_done("GitHub connection check complete")
+
+
 # ── Git + repository management ────────────────────────────────────────────────
 def _find_git_repo(path: str = None) -> Path:
     """Find a git repo: at given path, in cwd, or first repo in workspace."""
@@ -1365,7 +1422,6 @@ def cmd_git(args: str = "") -> None:
     if sub in ("status", "st", ""):
         branch = run_shell(f"git -C '{repo}' branch --show-current 2>&1")
         if "not a git repository" in branch or "fatal" in branch:
-            # No git repo found — show the repos that do exist instead
             repos = [d for d in sorted(BASE.iterdir()) if d.is_dir() and (d/".git").exists()]
             if repos:
                 adwi_head("Git repos in workspace")
@@ -1377,10 +1433,31 @@ def cmd_git(args: str = "") -> None:
                 adwi_say("No git repositories found in your workspace. To connect GitHub, make sure `gh auth login` has been run.")
             return
         adwi_head(f"Git status: {repo.name}")
-        status = run_shell(f"git -C '{repo}' status --short 2>&1")
+        remote = run_shell(f"git -C '{repo}' remote get-url origin 2>/dev/null")
         ahead  = run_shell(f"git -C '{repo}' rev-list --count '@{{u}}..HEAD' 2>/dev/null || echo 0")
-        cprint(f"  Branch: {branch}  |  {ahead} commit(s) ahead of remote", CYAN)
-        print(status or "  Working tree clean")
+        last   = run_shell(f"git -C '{repo}' log --oneline -1 2>/dev/null")
+        cprint(f"  Branch : {BOLD}{branch}{RESET}", "")
+        if remote:
+            # Redact any embedded tokens from remote URL
+            safe_remote = re.sub(r"https?://[^@]+@", "https://REDACTED@", remote)
+            cprint(f"  Remote : {safe_remote}", CYAN)
+        cprint(f"  Ahead  : {ahead} commit(s) ahead of remote", "")
+        if last:
+            cprint(f"  Last   : {last}", GRAY)
+        # Show modified/staged but NOT a wall of untracked ??
+        status = run_shell(f"git -C '{repo}' status --short 2>&1")
+        if status:
+            tracked_changes = [l for l in status.splitlines() if not l.startswith("??")]
+            untracked       = [l for l in status.splitlines() if l.startswith("??")]
+            if tracked_changes:
+                cprint(f"\n  Changes:", YELLOW)
+                for l in tracked_changes[:15]:
+                    cprint(f"    {l}", "")
+            if untracked:
+                cprint(f"\n  {len(untracked)} untracked file(s) not yet committed", GRAY)
+                cprint(f"  Use /backup-now to commit and push them to GitHub", GRAY)
+        else:
+            cprint(f"\n  {GREEN}✓ Working tree clean{RESET}", "")
 
     elif sub == "log":
         adwi_head(f"Git log: {repo.name}")
@@ -3130,6 +3207,7 @@ def dispatch_natural(text: str):
         "model_status": "Model Status", "use_local": "Switch to Local Model",
         "use_cloud": "Switch to Cloud Model", "capabilities": "Capabilities List",
         "rag_search": "Semantic Notes Search", "browse": "Browse URL",
+        "github_connected": "GitHub Connection Check",
         "git_status": "Git Status", "generate_image": "Generate Image",
         "run_code": "Run Python Code", "benchmark": "Benchmark",
         "gmail": "Gmail", "fix_error": "Fix Error / Self-Repair",
@@ -3213,6 +3291,8 @@ def dispatch_natural(text: str):
     elif intent == "browse":
         url = target or text
         cmd_browse(url)
+    elif intent == "github_connected":
+        cmd_github_connected()
     elif intent == "git_status":
         cmd_git("status")
     elif intent == "generate_image":
@@ -3335,6 +3415,7 @@ def handle(line: str) -> bool:
     elif line.startswith("/browse "): cmd_browse(line[8:].strip())
     elif line.startswith("/run-python"): cmd_run_python(line[11:].strip())
     elif line.startswith("/run-bash "): cmd_run_bash(line[10:].strip())
+    elif line in ("/github-status", "/github", "/gh-status"): cmd_github_connected()
     elif line.startswith("/git"): cmd_git(line[4:].strip())
     elif line.startswith("/generate-image "): cmd_generate_image(line[16:].strip())
     elif line == "/generate-image": cmd_generate_image(input(f"  {CYAN}Image prompt:{RESET} ").strip())

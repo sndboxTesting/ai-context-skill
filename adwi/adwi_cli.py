@@ -3244,6 +3244,9 @@ def dispatch_natural(text: str):
     else:
         ask_adwi(text)
 
+    # Flush any open trace to disk (no-op if already flushed or never started)
+    _flush_trace()
+
 def cmd_what_next():
     adwi_head("What should you build next?")
     ctx = ""

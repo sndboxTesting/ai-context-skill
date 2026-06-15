@@ -94,23 +94,36 @@ def transcribe(audio_path: str | Path, language: str = "en") -> str:
     return text.strip()
 
 
-def record_mic(seconds: int = 5, sample_rate: int = 16000) -> Path | None:
+def record_mic(seconds: int = 6, sample_rate: int = 16000) -> Path | None:
     """
     Record from default microphone for `seconds` seconds.
-    Requires sox (brew install sox). Returns path to .wav file or None.
+    Uses sox if available, falls back to ffmpeg (both work on macOS).
+    Returns path to .wav file or None on failure.
     """
-    sox = subprocess.run(["which", "sox"], capture_output=True, text=True).stdout.strip()
-    if not sox:
-        print("  [voice] sox not found — install: brew install sox")
-        return None
     out = Path(tempfile.mktemp(suffix=".wav"))
-    print(f"  [voice] Recording {seconds}s … (speak now)")
-    r = subprocess.run(
-        ["sox", "-d", "-r", str(sample_rate), "-c", "1", "-b", "16", str(out), "trim", "0", str(seconds)],
-        capture_output=True, text=True,
-    )
-    if r.returncode != 0:
-        print(f"  [voice] Recording failed: {r.stderr.strip()}")
+    print(f"  [voice] Recording {seconds}s … speak now")
+
+    sox_bin  = subprocess.run(["which", "sox"],    capture_output=True, text=True).stdout.strip()
+    ffmpeg   = subprocess.run(["which", "ffmpeg"], capture_output=True, text=True).stdout.strip()
+
+    if sox_bin:
+        r = subprocess.run(
+            [sox_bin, "-d", "-r", str(sample_rate), "-c", "1", "-b", "16", str(out),
+             "trim", "0", str(seconds)],
+            capture_output=True, text=True,
+        )
+    elif ffmpeg:
+        r = subprocess.run(
+            [ffmpeg, "-f", "avfoundation", "-i", ":0", "-t", str(seconds),
+             "-ar", str(sample_rate), "-ac", "1", str(out), "-y"],
+            capture_output=True, text=True,
+        )
+    else:
+        print("  [voice] No recorder found — install: brew install sox")
+        return None
+
+    if r.returncode != 0 or not out.exists() or out.stat().st_size < 1000:
+        print(f"  [voice] Recording failed: {(r.stderr or r.stdout)[:200].strip()}")
         return None
     return out
 

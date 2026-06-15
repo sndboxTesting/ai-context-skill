@@ -1,6 +1,7 @@
 #!/bin/bash
 # Adwi auto-backup script — run by LaunchAgent every 30 minutes.
 # Only commits if there are actual changes and secret scan passes.
+# README.md is auto-updated before every commit via auto-update-readme.
 set -euo pipefail
 
 WORKSPACE="/Users/MAC/SuneelWorkSpace"
@@ -13,6 +14,18 @@ cd "$WORKSPACE"
 
 echo "# Adwi Auto-Backup — $(date)" > "$LOG"
 
+# ── Auto-update README.md before committing ───────────────────────────────────
+VENV_PY="$WORKSPACE/adwi/.venv/bin/python3"
+README_SCRIPT="$WORKSPACE/bin/auto-update-readme"
+if [[ -x "$README_SCRIPT" ]]; then
+    if [[ -x "$VENV_PY" ]]; then
+        "$VENV_PY" "$README_SCRIPT" --quiet 2>> "$LOG" || true
+    else
+        python3 "$README_SCRIPT" --quiet 2>> "$LOG" || true
+    fi
+    echo "auto-readme: done" >> "$LOG"
+fi
+
 # Quick secret scan on changed files
 if git status --short | grep -q "^[AM]"; then
     if git diff --cached | grep -qE 'sk-[A-Za-z0-9]{20}|OPENWEBUI_API_KEY=|GITHUB_TOKEN=|gho_[A-Za-z0-9]{36}|-----BEGIN.*PRIVATE'; then
@@ -21,12 +34,14 @@ if git status --short | grep -q "^[AM]"; then
     fi
 fi
 
-# Stage safe files (never secrets/)
-git add adwi/ bin/adwi bin/mcp-status bin/adwi-git-backup \
+# Stage safe files (never secrets/) — include new bin scripts from pillars
+git add adwi/ bin/ \
     "notes/ADWI-START-HERE.md" "notes/adwi-learning-journal.md" \
     "notes/adwi-mistakes-and-fixes.md" "notes/adwi-capability-roadmap.md" \
     "notes/adwi-repair-logs/" "notes/system-inspections/" \
-    ".gitignore" "README.md" "BACKUP_MANIFEST.md" 2>/dev/null || true
+    ".gitignore" "README.md" "BACKUP_MANIFEST.md" \
+    "local-ai-stack/docker-compose.yml" \
+    "logs/" "obsidian-vault/" 2>/dev/null || true
 
 # Check if anything staged
 if ! git diff --cached --quiet; then

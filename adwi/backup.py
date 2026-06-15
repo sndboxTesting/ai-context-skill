@@ -364,9 +364,23 @@ def stage_safe_files() -> tuple[int, list[str]]:
     return len(staged), staged
 
 
+def _run_auto_readme(quiet: bool = True) -> None:
+    """Update README.md auto-sections before committing. Non-fatal."""
+    readme_script = WORKSPACE / "bin" / "auto-update-readme"
+    venv_py       = WORKSPACE / "adwi" / ".venv" / "bin" / "python3"
+    if not readme_script.exists():
+        return
+    py = str(venv_py) if venv_py.exists() else "python3"
+    args = [py, str(readme_script), "--quiet"] if quiet else [py, str(readme_script)]
+    try:
+        subprocess.run(args, cwd=str(WORKSPACE), timeout=60, capture_output=quiet)
+    except Exception:
+        pass  # never block backup for README update
+
+
 def do_backup(message: str = "") -> dict:
     """
-    Full backup flow: write files → stage → secret scan → commit → push.
+    Full backup flow: README update → write files → stage → secret scan → commit → push.
     Returns result dict {success, message, staged, commit_hash, pushed}.
     """
     result = {"success": False, "message": "", "staged": [], "commit_hash": "", "pushed": False}
@@ -376,6 +390,9 @@ def do_backup(message: str = "") -> dict:
     if not ok:
         result["message"] = msg; return result
     write_workspace_files()
+
+    # Auto-update README before staging
+    _run_auto_readme(quiet=True)
 
     # Stage safe files
     n, staged = stage_safe_files()

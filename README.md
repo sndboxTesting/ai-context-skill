@@ -34,14 +34,16 @@ Everything runs as persistent background services. You open a terminal, type `ad
 
 ### Hardware & Runtime
 
-| Item | Value |
+<!-- AUTO:MODELS -->
+| Constant | Model |
 |---|---|
-| Machine | Apple M4 Max, 64 GB unified RAM |
-| Primary model | `adwi:latest` (Qwen3 MoE 30.5B, Q4_K_M, 131K ctx) |
-| NLU classifier | `qwen3:0.6b` (intent routing) |
-| Vision model | `minicpm-v` |
-| Embedding model | `nomic-embed-text` (768-dim) |
-| Model runtime | Ollama (`http://127.0.0.1:11434`) |
+| `MODEL_EMBED` | `nomic-embed-text` |
+| `MODEL_FAST` | `llama3.1:8b` |
+| `MODEL_MAIN` | `adwi:latest` |
+| `MODEL_NLU_FALLBACK` | `qwen3:0.6b` |
+| `MODEL_VISION` | `minicpm-v:latest` |
+*Auto-updated: 2026-06-15*
+<!-- /AUTO:MODELS -->
 
 ---
 
@@ -573,3 +575,159 @@ See `notes/ADWI-START-HERE.md` for detailed first-time setup instructions.
 ---
 
 *Auto-backed up every 30 minutes by the `adwi-git-backup` LaunchAgent.*
+
+
+## Auto-Managed Reference
+
+### Docker Services
+
+<!-- AUTO:SERVICES -->
+| Service | Port | Status |
+|---|---|---|
+| open-webui | :3000 | ✓ running |
+| n8n | :5678 | ✓ running |
+| searxng | :8888 | ✓ running |
+*Auto-updated: 2026-06-15*
+<!-- /AUTO:SERVICES -->
+
+### Background Agents
+
+<!-- AUTO:AGENTS -->
+| Agent | Schedule |
+|---|---|
+| `adwi-git-backup` | every 30min |
+| `adwi-nightly` | 2:00 AM |
+| `caffeinate` | KeepAlive |
+| `obsidian-bridge` | KeepAlive |
+| `openwebui-knowledge-watcher` | KeepAlive |
+| `phoenix` | KeepAlive |
+| `qdrant` | on demand |
+*Auto-updated: 2026-06-15*
+<!-- /AUTO:AGENTS -->
+
+### CLI Commands
+
+<!-- AUTO:COMMANDS -->
+**85 registered commands.** Key groups:
+
+**backup**: `/backup-audit`  `/backup-disable`  `/backup-enable`  `/backup-log`  `/backup-now`  `/backup-status`
+
+**benchmark**: `/benchmark`
+
+**capabilities**: `/capabilities`  `capabilities`
+
+**capability**: `/capability-audit`  `/capability-status`
+
+**cleanup**: `/cleanup`
+
+**daily**: `/daily-improve`
+
+**disk**: `/disk`
+
+**doctor**: `/doctor`
+
+**duplicates**: `/duplicates`
+
+**eval**: `/eval-adwi`  `/eval-routing`
+
+**exa**: `/exa`  `/exa-search`
+
+**export**: `/export-training-example`
+
+**extract**: `/extract-ideas`
+
+**firecrawl**: `/firecrawl`
+
+**fix**: `/fix-error`
+
+**gemini**: `/gemini`
+
+**generate**: `/generate-image`
+
+**git**: `/git`
+
+**gmail**: `/gmail`  `/gmail-auth`  `/gmail-summary`
+
+**help**: `/help`
+
+**implement**: `/implement-idea`
+
+**inbox**: `/inbox`
+
+**inspect**: `/inspect-code`  `/inspect-system`
+
+**journal**: `/journal`
+
+**large**: `/large-files`
+
+**learn**: `/learn-from-last-error`
+
+**mcp**: `/mcp`  `/mcp-setup`
+
+**memory**: `/memory-context`  `/memory-recall`  `/memory-scan`  `/memory-stats`
+
+**mistakes**: `/mistakes`
+
+**model**: `/model-status`
+
+**models**: `/models`
+
+**nightly**: `/nightly-log`  `/nightly-run`  `/nightly-status`
+
+**obsidian**: `/obsidian-daily`  `/obsidian-read`  `/obsidian-search`  `/obsidian-write`
+
+**old**: `/old-files`
+
+**organize**: `/organize`
+
+**owui**: `/owui`
+
+**patch**: `/patch-adwi`
+
+**rag**: `/rag`  `/rag-index`
+
+**repair**: `/repair-adwi`
+
+**roadmap**: `/roadmap`
+
+**route**: `/route`
+
+**run**: `/run-python`  `/run-safe`
+
+**secrets**: `/secrets-status`
+
+**self**: `/self-heal`
+
+**status**: `/status`
+
+**sync**: `/sync-knowledge`
+
+**tavily**: `/tavily`
+
+**test**: `/test-adwi`
+
+**tool**: `/tool-roadmap`
+
+**trace**: `/trace-log`
+
+**training**: `/training-plan`
+
+**trusted**: `/trusted-roots`
+
+**updated**: `updated`
+
+**use**: `/use-cloud`  `/use-local`
+
+**version**: `version`
+
+**voice**: `/voice-brief`  `/voice-out`
+
+**watcher**: `/watcher-status`
+
+**web**: `/web-search`
+
+**what**: `/what-next`
+
+**workspace**: `workspace`
+*Auto-updated: 2026-06-15*
+<!-- /AUTO:COMMANDS -->

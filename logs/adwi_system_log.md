@@ -327,3 +327,11 @@
    Zero Trust → Networks → Tunnels → Create tunnel → name it "adwi-n8n" →
    Copy the token shown in step 2 of the connector setup →
    Paste here and I will write it to config/.env
+
+## [2026-06-15] Phase 7/8 Eval-Routing Results
+- Baseline (pre-Phase 6/7): 16/30 (53%)
+- After Phase 6 (chain-of-intent schema): ~same baseline
+- After Phase 7 initial (49 fixtures): 16/30 (53%)
+- After Phase 7 expanded + fix_error + image regex: 25/30 (83%)
+- After Phase 7 final (74 fixtures + _INTENT_SYSTEM clarifications): 28/30 (93%)
+- Remaining 2 failures: genuine semantic ambiguity (rag_search vs memory_recall, browse vs web_search)

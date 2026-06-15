@@ -27,4 +27,4 @@
 {"id": "r027", "input": "show my recent emails", "expected_intent": "gmail", "expected_command": "/gmail", "category": "communication"}
 {"id": "r028", "input": "what should I build next?", "expected_intent": "what_next", "expected_command": "/what-next", "category": "planning"}
 {"id": "r029", "input": "generate an image of a sunset over mountains", "expected_intent": "generate_image", "expected_command": "/generate-image", "category": "media"}
-{"id": "r030", "input": "backup my workspace to GitHub", "expected_intent": "backup", "expected_command": "/backup-now", "category": "backup"}
+{"id": "r030", "input": "backup my workspace to GitHub", "expected_intent": "backup_now", "expected_command": "/backup-now", "category": "backup"}

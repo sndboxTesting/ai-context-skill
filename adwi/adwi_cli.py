@@ -582,12 +582,25 @@ def extract_youtube_url(text):
     u = m.group(0)
     return u if u.startswith("http") else "https://" + u
 
+_IMG_PATH_RE = re.compile(
+    r"(?:^|[\s:'\"(])([~/][\w./-]+\.(?:png|jpg|jpeg|gif|bmp|webp|heic|avif|tiff?))\b",
+    re.I,
+)
+
 def extract_image_path(text):
-    """Detect if text IS an image file path."""
+    """Detect an image file path in text — works for bare paths and embedded paths."""
+    # Fast path: entire text is a path
     t = text.strip().strip("'\"")
     p = Path(t).expanduser()
     if p.suffix.lower() in IMAGE_EXTS and (p.exists() or p.is_absolute()):
         return str(p)
+    # Scan for embedded path in natural-language sentence
+    m = _IMG_PATH_RE.search(text)
+    if m:
+        candidate = m.group(1)
+        cp = Path(candidate).expanduser()
+        if cp.suffix.lower() in IMAGE_EXTS and (cp.exists() or cp.is_absolute() or candidate.startswith("~")):
+            return str(cp)
     return None
 
 # ── Config ────────────────────────────────────────────────────────────────────
@@ -722,7 +735,7 @@ _ALL_INTENTS = [
     # Nightly
     "nightly_status", "nightly_run",
     # Repair & eval
-    "patch_adwi", "inspect_code", "test_adwi", "eval_routing", "eval_adwi",
+    "fix_error", "patch_adwi", "inspect_code", "test_adwi", "eval_routing", "eval_adwi",
     "learn_from_error", "export_training",
     # Route / misc
     "route", "github_connected", "trusted_roots",
@@ -778,6 +791,14 @@ _INTENT_SYSTEM = (
     "   'generate_image' : generate/draw/create an image\n"
     "   'web_search'     : explicit request for internet/web search\n"
     "   'status'         : asks if services/systems are running or healthy\n"
+    "   'sync'           : sync knowledge base to Open WebUI or update knowledge\n"
+    "   'capabilities'   : user asks what adwi can do, list features, show help\n"
+    "   'daily_improve'  : run daily self-improvement routine or make adwi better\n"
+    "   'fix_error'      : user pastes a specific Python exception, traceback, or HTTP error string\n"
+    "                      (the message CONTAINS an actual error class or status code)\n"
+    "   'self_heal'      : user says adwi is broken or wants general repair WITHOUT pasting an error\n"
+    "   'backup_now'     : backup workspace to GitHub, push backup\n"
+    "   'image'          : analyze or describe an existing image file path\n"
     "   'chat'           : factual questions, general knowledge, hardware specs,\n"
     "                      anything not matching a more specific intent above\n"
     "4. arguments  — Object of typed parameter slots the tool will consume:\n"
@@ -4580,6 +4601,9 @@ def dispatch_natural(text: str):
         run_cmd("status", ["status-ai"])
     elif intent == "self_heal":
         run_cmd("self-heal", ["adwi-self-heal"], timeout=1200)
+    elif intent == "fix_error":
+        # User pasted a runtime error/traceback — route to cmd_fix_error
+        cmd_fix_error(args.get("query") or target or text)
     elif intent == "what_next":
         cmd_what_next()
     elif intent == "daily_improve":

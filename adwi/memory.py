@@ -521,6 +521,39 @@ NLU_SEED_FIXTURES: list[tuple[str, str, dict, str]] = [
     ("run this python snippet: print('hello')",          "run_code",     {},                                    "execute python code"),
     ("patch adwi — the nlu pipeline is broken",          "patch_adwi",   {"query": "nlu pipeline broken"},     "aider repair request"),
     ("evaluate adwi intent routing accuracy",            "eval_adwi",    {},                                    "eval / test run"),
+    # ── sync / capabilities / daily_improve ──────────────────────────────
+    ("sync my knowledge",                                "sync",         {},                                    "knowledge sync trigger"),
+    ("update open webui knowledge base",                 "sync",         {},                                    "sync phrased as update"),
+    ("what can you do?",                                 "capabilities", {},                                    "capability list request"),
+    ("show me your capabilities",                        "capabilities", {},                                    "capability list phrased as show"),
+    ("list all your features",                           "capabilities", {},                                    "feature list variant"),
+    ("make yourself better",                             "daily_improve",{},                                    "daily improve phrased colloquially"),
+    ("run your daily improvement routine",               "daily_improve",{},                                    "daily improve explicit"),
+    ("improve adwi today",                               "daily_improve",{},                                    "daily improve imperative"),
+    # ── fix_error / self-repair ───────────────────────────────────────────
+    ("I got a SyntaxError in adwi_cli.py line 42",      "fix_error",    {"query": "SyntaxError adwi_cli.py"},  "Python syntax error pasted"),
+    ("NameError: name 'CMD_GIT' is not defined",         "fix_error",    {"query": "NameError CMD_GIT"},        "Python NameError pasted"),
+    ("HTTP Error 400: Bad Request when calling cloud",   "fix_error",    {"query": "HTTP Error 400"},            "HTTP error string pasted"),
+    ("AttributeError on line 523 of reason_engine.py",  "fix_error",    {"query": "AttributeError reason_engine"}, "attribute error pasted"),
+    # ── image in sentence ────────────────────────────────────────────────
+    ("analyze my screenshot ~/Desktop/error.png",        "image",        {"path": "~/Desktop/error.png"},        "image path embedded in sentence"),
+    ("look at this image: /tmp/screenshot.png",          "image",        {"path": "/tmp/screenshot.png"},        "image path after colon"),
+    ("describe what's in /Users/MAC/Pictures/photo.jpg", "image",        {"path": "/Users/MAC/Pictures/photo.jpg"}, "full absolute image path"),
+    # ── backup ────────────────────────────────────────────────────────────
+    ("backup my workspace to GitHub",                    "backup_now",   {},                                    "backup phrased with GitHub"),
+    ("push a backup right now",                          "backup_now",   {},                                    "backup as push variant"),
+    # ── self_heal vs fix_error distinction ───────────────────────────────
+    ("something is broken, repair adwi",                 "self_heal",    {},                                    "self-heal — general repair, no specific error"),
+    ("adwi is acting weird, fix it",                     "self_heal",    {},                                    "vague broken state → self_heal not fix_error"),
+    # ── rag_search (notes about X) ────────────────────────────────────────
+    ("find notes about Ollama",                          "rag_search",   {"query": "Ollama"},                   "rag search phrased as find notes"),
+    ("search my notes for LangGraph",                    "rag_search",   {"query": "LangGraph"},                "rag search with 'my notes' phrasing"),
+    # ── browse (fetch page) ───────────────────────────────────────────────
+    ("fetch this page and summarize it",                 "browse",       {},                                    "browse phrased as fetch+summarize"),
+    ("go to https://openai.com and tell me what's there","browse",       {"url": "https://openai.com"},         "browse with 'go to' verb"),
+    # ── what_next ─────────────────────────────────────────────────────────
+    ("what should I build next?",                        "what_next",    {},                                    "roadmap query — what next"),
+    ("what's the next thing to add to adwi",             "what_next",    {},                                    "what_next — next feature query"),
     # ── chat fallback ─────────────────────────────────────────────────────
     ("what is the transformer attention mechanism",      "chat",         {},                                    "general knowledge question"),
     ("explain how LangGraph works",                      "chat",         {},                                    "explanation request — chat"),

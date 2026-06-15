@@ -50,6 +50,7 @@
     "/nightly-log",
     "/nightly-run",
     "/nightly-status",
+    "/notify",
     "/obsidian-daily",
     "/obsidian-read",
     "/obsidian-search",
@@ -142,5 +143,5 @@
     "MODEL_NLU_FALLBACK": "qwen3:0.6b"
   },
   "ts": "2026-06-15",
-  "_hash": "84dee321e47d8d98"
+  "_hash": "5de2ebef5e10a383"
 }

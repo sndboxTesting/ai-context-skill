@@ -4109,6 +4109,33 @@ def cmd_ha(query: str = "") -> None:
         cprint(f"  Error: {e}", RED)
 
 
+def cmd_notify(message: str = "", title: str = "Adwi") -> None:
+    """Push a notification to iPhone via HA. Usage: /notify <message>"""
+    if not HA_TOKEN:
+        adwi_say("HOME_ASSISTANT_TOKEN not set in config/.env")
+        return
+    if not message:
+        message = input(f"  {CYAN}Notification message:{RESET} ").strip()
+    if not message:
+        return
+    payload = json.dumps({
+        "message": message,
+        "title": title,
+        "data": {"push": {"sound": "default"}},
+    }).encode()
+    req = urllib.request.Request(
+        f"{HA_URL}/api/services/notify/mobile_app_the_suns_iphone",
+        data=payload,
+        headers={"Authorization": f"Bearer {HA_TOKEN}", "Content-Type": "application/json"},
+        method="POST",
+    )
+    try:
+        urllib.request.urlopen(req, timeout=8)
+        cprint(f"  ✓ Notification sent: {message}", GREEN)
+    except Exception as e:
+        cprint(f"  ✗ Failed: {e}", RED)
+
+
 def _alias_gemini(prompt: str = "") -> None:
     """Alias: /gemini — explicitly use Gemini cloud for a prompt."""
     adwi_head("Gemini cloud")
@@ -4536,6 +4563,8 @@ def handle(line: str) -> bool:
     elif line in ("/remote-status", "/remote", "/tailscale"): cmd_remote_status()
     elif line.startswith("/ha "): cmd_ha(line[4:].strip())
     elif line == "/ha": cmd_ha()
+    elif line.startswith("/notify "): cmd_notify(line[8:].strip())
+    elif line == "/notify": cmd_notify()
     # ── Aliases ──
     elif line.startswith("/gemini"): _alias_gemini(line[7:].strip())
     elif line.startswith("/owui"):   _alias_owui(line[5:].strip())
@@ -4720,6 +4749,11 @@ def main():
         if flag == "--classify":
             r = classify_intent(" ".join(sys.argv[2:]))
             print(json.dumps(r, indent=2)); return
+        # Slash command pass-through: adwi /notify "msg" or adwi /ha states
+        if flag.startswith("/"):
+            cmd_line = " ".join(sys.argv[1:])
+            handle(cmd_line)
+            return
 
     print_banner()
 

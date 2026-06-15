@@ -608,7 +608,7 @@ See `notes/ADWI-START-HERE.md` for detailed first-time setup instructions.
 ### CLI Commands
 
 <!-- AUTO:COMMANDS -->
-**86 registered commands.** Key groups:
+**87 registered commands.** Key groups:
 
 **backup**: `/backup-audit`  `/backup-disable`  `/backup-enable`  `/backup-log`  `/backup-now`  `/backup-status`
 
@@ -675,6 +675,8 @@ See `notes/ADWI-START-HERE.md` for detailed first-time setup instructions.
 **models**: `/models`
 
 **nightly**: `/nightly-log`  `/nightly-run`  `/nightly-status`
+
+**notify**: `/notify`
 
 **obsidian**: `/obsidian-daily`  `/obsidian-read`  `/obsidian-search`  `/obsidian-write`
 

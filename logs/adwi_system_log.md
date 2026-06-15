@@ -335,3 +335,9 @@
 - After Phase 7 expanded + fix_error + image regex: 25/30 (83%)
 - After Phase 7 final (74 fixtures + _INTENT_SYSTEM clarifications): 28/30 (93%)
 - Remaining 2 failures: genuine semantic ambiguity (rag_search vs memory_recall, browse vs web_search)
+
+## [2026-06-15 16:44:52] README auto-update
+bin/auto-update-readme --force ran before backup commit
+
+## [2026-06-15 16:44:53] Backup pushed
+Commit: b0562cc adwi backup 2026-06-15 16:44 · Branch: main

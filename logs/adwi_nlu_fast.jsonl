@@ -1,0 +1,88 @@
+{"ts": "2026-06-15T21:27:29Z", "text_prefix": "disk usage", "top1_score": 0.93, "top2_score": 0.92, "gap": 0.01, "outcome": "miss:ambiguous", "latency_ms": 0.14}
+{"ts": "2026-06-15T21:27:29Z", "text_prefix": "disk usage", "top1_score": 0.93, "top2_score": 0.89, "gap": 0.04, "outcome": "miss:ambiguous", "latency_ms": 0.02}
+{"ts": "2026-06-15T21:27:29Z", "text_prefix": "hello", "top1_score": null, "top2_score": null, "gap": null, "outcome": "error:embed_failed", "latency_ms": 0.01}
+{"ts": "2026-06-15T21:27:29Z", "text_prefix": "hello", "top1_score": null, "top2_score": null, "gap": null, "outcome": "error:embed_failed", "latency_ms": 0.01}
+{"ts": "2026-06-15T21:27:30Z", "text_prefix": "hello", "top1_score": null, "top2_score": null, "gap": null, "outcome": "error:qdrant_empty", "latency_ms": 326.89}
+{"ts": "2026-06-15T21:27:30Z", "text_prefix": "disk usage", "top1_score": 0.87, "top2_score": 0.5, "gap": 0.37, "outcome": "miss:low_score", "latency_ms": 0.06}
+{"ts": "2026-06-15T21:27:30Z", "text_prefix": "disk usage", "top1_score": 0.87, "top2_score": 0.78, "gap": 0.09, "outcome": "miss:low_score", "latency_ms": 0.06}
+{"ts": "2026-06-15T21:27:30Z", "text_prefix": "show disk usage", "top1_score": null, "top2_score": null, "gap": null, "outcome": "error:qdrant_empty", "latency_ms": 0.04}
+{"ts": "2026-06-15T21:27:30Z", "text_prefix": "show disk usage", "top1_score": null, "top2_score": null, "gap": null, "outcome": "error:qdrant_empty", "latency_ms": 0.03}
+{"ts": "2026-06-15T21:27:30Z", "text_prefix": "disk", "top1_score": 0.98, "top2_score": 0.4, "gap": 0.58, "outcome": "hit:disk_usage", "latency_ms": 0.03, "intent": "disk_usage", "confidence": 0.98}
+{"ts": "2026-06-15T21:27:30Z", "text_prefix": "disk", "top1_score": 0.98, "top2_score": 0.4, "gap": 0.58, "outcome": "hit:disk_usage", "latency_ms": 0.02, "intent": "disk_usage", "confidence": 0.98}
+{"ts": "2026-06-15T21:27:30Z", "text_prefix": "disk", "top1_score": 0.98, "top2_score": 0.4, "gap": 0.58, "outcome": "hit:disk_usage", "latency_ms": 0.02, "intent": "disk_usage", "confidence": 0.98}
+{"ts": "2026-06-15T21:27:30Z", "text_prefix": "disk", "top1_score": 0.98, "top2_score": 0.4, "gap": 0.58, "outcome": "hit:disk_usage", "latency_ms": 0.02, "intent": "disk_usage", "confidence": 0.98}
+{"ts": "2026-06-15T21:27:30Z", "text_prefix": "disk", "top1_score": 0.98, "top2_score": 0.4, "gap": 0.58, "outcome": "hit:disk_usage", "latency_ms": 0.02, "intent": "disk_usage", "confidence": 0.98}
+{"ts": "2026-06-15T21:27:30Z", "text_prefix": "x", "top1_score": null, "top2_score": null, "gap": null, "outcome": "error:qdrant_empty", "latency_ms": 0.02}
+{"ts": "2026-06-15T21:27:30Z", "text_prefix": "disk", "top1_score": 0.96, "top2_score": 0.83, "gap": 0.13, "outcome": "hit:disk_usage", "latency_ms": 0.03, "intent": "disk_usage", "confidence": 0.96}
+{"ts": "2026-06-15T21:27:30Z", "text_prefix": "disk", "top1_score": 0.96, "top2_score": 0.83, "gap": 0.13, "outcome": "hit:disk_usage", "latency_ms": 0.02, "intent": "disk_usage", "confidence": 0.96}
+{"ts": "2026-06-15T21:27:30Z", "text_prefix": "disk", "top1_score": 0.98, "top2_score": 0.0, "gap": null, "outcome": "hit:disk_usage", "latency_ms": 0.02, "intent": "disk_usage", "confidence": 0.98}
+{"ts": "2026-06-15T21:27:30Z", "text_prefix": "files over 500mb", "top1_score": 0.96, "top2_score": 0.83, "gap": 0.13, "outcome": "hit:disk_usage", "latency_ms": 0.02, "intent": "disk_usage", "confidence": 0.96}
+{"ts": "2026-06-15T21:27:30Z", "text_prefix": "disk space", "top1_score": 0.96, "top2_score": 0.83, "gap": 0.13, "outcome": "hit:disk_usage", "latency_ms": 0.02, "intent": "disk_usage", "confidence": 0.96}
+{"ts": "2026-06-15T21:27:30Z", "text_prefix": "disk space", "top1_score": 0.96, "top2_score": 0.83, "gap": 0.13, "outcome": "hit:disk_usage", "latency_ms": 0.03, "intent": "disk_usage", "confidence": 0.96}
+{"ts": "2026-06-15T21:27:30Z", "text_prefix": "search the web", "top1_score": 0.96, "top2_score": 0.83, "gap": 0.13, "outcome": "hit:web_search", "latency_ms": 0.03, "intent": "web_search", "confidence": 0.96}
+{"ts": "2026-06-15T21:27:30Z", "text_prefix": "what's eating my disk?", "top1_score": 0.96, "top2_score": 0.83, "gap": 0.13, "outcome": "hit:disk_usage", "latency_ms": 0.02, "intent": "disk_usage", "confidence": 0.96}
+{"ts": "2026-06-15T21:27:30Z", "text_prefix": "read file", "top1_score": 0.98, "top2_score": 0.4, "gap": 0.58, "outcome": "hit:test_intent", "latency_ms": 0.06, "intent": "test_intent", "confidence": 0.98}
+{"ts": "2026-06-15T21:27:30Z", "text_prefix": "read file", "top1_score": 0.98, "top2_score": 0.4, "gap": 0.58, "outcome": "hit:test_intent", "latency_ms": 0.03, "intent": "test_intent", "confidence": 0.98}
+{"ts": "2026-06-15T21:27:30Z", "text_prefix": "search ollama", "top1_score": 0.98, "top2_score": 0.4, "gap": 0.58, "outcome": "hit:test_intent", "latency_ms": 0.03, "intent": "test_intent", "confidence": 0.98}
+{"ts": "2026-06-15T21:27:30Z", "text_prefix": "fetch page", "top1_score": 0.98, "top2_score": 0.4, "gap": 0.58, "outcome": "hit:test_intent", "latency_ms": 0.02, "intent": "test_intent", "confidence": 0.98}
+{"ts": "2026-06-15T21:27:30Z", "text_prefix": "disk", "top1_score": 0.98, "top2_score": 0.4, "gap": 0.58, "outcome": "hit:test_intent", "latency_ms": 0.02, "intent": "test_intent", "confidence": 0.98}
+{"ts": "2026-06-15T21:27:30Z", "text_prefix": "disk", "top1_score": 0.98, "top2_score": 0.4, "gap": 0.58, "outcome": "hit:disk_usage", "latency_ms": 0.05, "intent": "disk_usage", "confidence": 0.98}
+{"ts": "2026-06-15T21:27:30Z", "text_prefix": "disk", "top1_score": 0.98, "top2_score": 0.4, "gap": 0.58, "outcome": "hit:disk_usage", "latency_ms": 0.04, "intent": "disk_usage", "confidence": 0.98}
+{"ts": "2026-06-15T21:27:30Z", "text_prefix": "disk", "top1_score": 0.98, "top2_score": 0.4, "gap": 0.58, "outcome": "hit:disk_usage", "latency_ms": 0.02, "intent": "disk_usage", "confidence": 0.98}
+{"ts": "2026-06-15T21:27:30Z", "text_prefix": "disk", "top1_score": 0.98, "top2_score": 0.4, "gap": 0.58, "outcome": "hit:disk_usage", "latency_ms": 0.03, "intent": "disk_usage", "confidence": 0.98}
+{"ts": "2026-06-15T21:27:30Z", "text_prefix": "disk", "top1_score": 0.98, "top2_score": 0.4, "gap": 0.58, "outcome": "hit:disk_usage", "latency_ms": 0.04, "intent": "disk_usage", "confidence": 0.98}
+{"ts": "2026-06-15T21:27:30Z", "text_prefix": "disk", "top1_score": 0.98, "top2_score": 0.4, "gap": 0.58, "outcome": "hit:disk_usage", "latency_ms": 0.03, "intent": "disk_usage", "confidence": 0.98}
+{"ts": "2026-06-15T21:27:30Z", "text_prefix": "disk", "top1_score": 0.98, "top2_score": 0.4, "gap": 0.58, "outcome": "hit:disk_usage", "latency_ms": 0.02, "intent": "disk_usage", "confidence": 0.98}
+{"ts": "2026-06-15T21:27:30Z", "text_prefix": "disk", "top1_score": 0.98, "top2_score": 0.4, "gap": 0.58, "outcome": "hit:disk_usage", "latency_ms": 0.02, "intent": "disk_usage", "confidence": 0.98}
+{"ts": "2026-06-15T21:27:30Z", "text_prefix": "disk", "top1_score": 0.98, "top2_score": 0.4, "gap": 0.58, "outcome": "hit:disk_usage", "latency_ms": 0.02, "intent": "disk_usage", "confidence": 0.98}
+{"ts": "2026-06-15T21:27:30Z", "text_prefix": "disk", "top1_score": 0.98, "top2_score": 0.4, "gap": 0.58, "outcome": "hit:disk_usage", "latency_ms": 0.02, "intent": "disk_usage", "confidence": 0.98}
+{"ts": "2026-06-15T21:27:30Z", "text_prefix": "disk", "top1_score": 0.98, "top2_score": 0.4, "gap": 0.58, "outcome": "hit:disk_usage", "latency_ms": 0.04, "intent": "disk_usage", "confidence": 0.98}
+{"ts": "2026-06-15T21:27:30Z", "text_prefix": "disk", "top1_score": 0.98, "top2_score": 0.4, "gap": 0.58, "outcome": "hit:disk_usage", "latency_ms": 0.02, "intent": "disk_usage", "confidence": 0.98}
+{"ts": "2026-06-15T21:27:30Z", "text_prefix": "disk", "top1_score": 0.98, "top2_score": 0.4, "gap": 0.58, "outcome": "hit:disk_usage", "latency_ms": 0.02, "intent": "disk_usage", "confidence": 0.98}
+{"ts": "2026-06-15T21:27:30Z", "text_prefix": "disk", "top1_score": 0.98, "top2_score": 0.4, "gap": 0.58, "outcome": "hit:disk_usage", "latency_ms": 0.02, "intent": "disk_usage", "confidence": 0.98}
+{"ts": "2026-06-15T21:27:30Z", "text_prefix": "disk", "top1_score": 0.98, "top2_score": 0.4, "gap": 0.58, "outcome": "hit:disk_usage", "latency_ms": 0.02, "intent": "disk_usage", "confidence": 0.98}
+{"ts": "2026-06-15T21:27:30Z", "text_prefix": "disk", "top1_score": 0.98, "top2_score": 0.4, "gap": 0.58, "outcome": "hit:disk_usage", "latency_ms": 0.02, "intent": "disk_usage", "confidence": 0.98}
+{"ts": "2026-06-15T21:27:34Z", "text_prefix": "disk usage", "top1_score": 0.93, "top2_score": 0.92, "gap": 0.01, "outcome": "miss:ambiguous", "latency_ms": 0.13}
+{"ts": "2026-06-15T21:27:34Z", "text_prefix": "disk usage", "top1_score": 0.93, "top2_score": 0.89, "gap": 0.04, "outcome": "miss:ambiguous", "latency_ms": 0.02}
+{"ts": "2026-06-15T21:27:34Z", "text_prefix": "hello", "top1_score": null, "top2_score": null, "gap": null, "outcome": "error:embed_failed", "latency_ms": 0.01}
+{"ts": "2026-06-15T21:27:34Z", "text_prefix": "hello", "top1_score": null, "top2_score": null, "gap": null, "outcome": "error:embed_failed", "latency_ms": 0.01}
+{"ts": "2026-06-15T21:27:34Z", "text_prefix": "hello", "top1_score": null, "top2_score": null, "gap": null, "outcome": "error:qdrant_empty", "latency_ms": 56.39}
+{"ts": "2026-06-15T21:27:34Z", "text_prefix": "disk usage", "top1_score": 0.87, "top2_score": 0.5, "gap": 0.37, "outcome": "miss:low_score", "latency_ms": 0.01}
+{"ts": "2026-06-15T21:27:34Z", "text_prefix": "disk usage", "top1_score": 0.87, "top2_score": 0.78, "gap": 0.09, "outcome": "miss:low_score", "latency_ms": 0.01}
+{"ts": "2026-06-15T21:27:34Z", "text_prefix": "show disk usage", "top1_score": null, "top2_score": null, "gap": null, "outcome": "error:qdrant_empty", "latency_ms": 0.01}
+{"ts": "2026-06-15T21:27:34Z", "text_prefix": "show disk usage", "top1_score": null, "top2_score": null, "gap": null, "outcome": "error:qdrant_empty", "latency_ms": 0.01}
+{"ts": "2026-06-15T21:27:34Z", "text_prefix": "disk", "top1_score": 0.98, "top2_score": 0.4, "gap": 0.58, "outcome": "hit:disk_usage", "latency_ms": 0.01, "intent": "disk_usage", "confidence": 0.98}
+{"ts": "2026-06-15T21:27:34Z", "text_prefix": "disk", "top1_score": 0.98, "top2_score": 0.4, "gap": 0.58, "outcome": "hit:disk_usage", "latency_ms": 0.01, "intent": "disk_usage", "confidence": 0.98}
+{"ts": "2026-06-15T21:27:34Z", "text_prefix": "disk", "top1_score": 0.98, "top2_score": 0.4, "gap": 0.58, "outcome": "hit:disk_usage", "latency_ms": 0.01, "intent": "disk_usage", "confidence": 0.98}
+{"ts": "2026-06-15T21:27:34Z", "text_prefix": "disk", "top1_score": 0.98, "top2_score": 0.4, "gap": 0.58, "outcome": "hit:disk_usage", "latency_ms": 0.01, "intent": "disk_usage", "confidence": 0.98}
+{"ts": "2026-06-15T21:27:34Z", "text_prefix": "disk", "top1_score": 0.98, "top2_score": 0.4, "gap": 0.58, "outcome": "hit:disk_usage", "latency_ms": 0.01, "intent": "disk_usage", "confidence": 0.98}
+{"ts": "2026-06-15T21:27:34Z", "text_prefix": "x", "top1_score": null, "top2_score": null, "gap": null, "outcome": "error:qdrant_empty", "latency_ms": 0.01}
+{"ts": "2026-06-15T21:27:34Z", "text_prefix": "disk", "top1_score": 0.96, "top2_score": 0.83, "gap": 0.13, "outcome": "hit:disk_usage", "latency_ms": 0.01, "intent": "disk_usage", "confidence": 0.96}
+{"ts": "2026-06-15T21:27:34Z", "text_prefix": "disk", "top1_score": 0.96, "top2_score": 0.83, "gap": 0.13, "outcome": "hit:disk_usage", "latency_ms": 0.01, "intent": "disk_usage", "confidence": 0.96}
+{"ts": "2026-06-15T21:27:34Z", "text_prefix": "disk", "top1_score": 0.98, "top2_score": 0.0, "gap": null, "outcome": "hit:disk_usage", "latency_ms": 0.01, "intent": "disk_usage", "confidence": 0.98}
+{"ts": "2026-06-15T21:27:34Z", "text_prefix": "files over 500mb", "top1_score": 0.96, "top2_score": 0.83, "gap": 0.13, "outcome": "hit:disk_usage", "latency_ms": 0.01, "intent": "disk_usage", "confidence": 0.96}
+{"ts": "2026-06-15T21:27:34Z", "text_prefix": "disk space", "top1_score": 0.96, "top2_score": 0.83, "gap": 0.13, "outcome": "hit:disk_usage", "latency_ms": 0.01, "intent": "disk_usage", "confidence": 0.96}
+{"ts": "2026-06-15T21:27:34Z", "text_prefix": "disk space", "top1_score": 0.96, "top2_score": 0.83, "gap": 0.13, "outcome": "hit:disk_usage", "latency_ms": 0.01, "intent": "disk_usage", "confidence": 0.96}
+{"ts": "2026-06-15T21:27:34Z", "text_prefix": "search the web", "top1_score": 0.96, "top2_score": 0.83, "gap": 0.13, "outcome": "hit:web_search", "latency_ms": 0.01, "intent": "web_search", "confidence": 0.96}
+{"ts": "2026-06-15T21:27:34Z", "text_prefix": "what's eating my disk?", "top1_score": 0.96, "top2_score": 0.83, "gap": 0.13, "outcome": "hit:disk_usage", "latency_ms": 0.01, "intent": "disk_usage", "confidence": 0.96}
+{"ts": "2026-06-15T21:27:34Z", "text_prefix": "read file", "top1_score": 0.98, "top2_score": 0.4, "gap": 0.58, "outcome": "hit:test_intent", "latency_ms": 0.01, "intent": "test_intent", "confidence": 0.98}
+{"ts": "2026-06-15T21:27:34Z", "text_prefix": "read file", "top1_score": 0.98, "top2_score": 0.4, "gap": 0.58, "outcome": "hit:test_intent", "latency_ms": 0.01, "intent": "test_intent", "confidence": 0.98}
+{"ts": "2026-06-15T21:27:34Z", "text_prefix": "search ollama", "top1_score": 0.98, "top2_score": 0.4, "gap": 0.58, "outcome": "hit:test_intent", "latency_ms": 0.01, "intent": "test_intent", "confidence": 0.98}
+{"ts": "2026-06-15T21:27:34Z", "text_prefix": "fetch page", "top1_score": 0.98, "top2_score": 0.4, "gap": 0.58, "outcome": "hit:test_intent", "latency_ms": 0.01, "intent": "test_intent", "confidence": 0.98}
+{"ts": "2026-06-15T21:27:34Z", "text_prefix": "disk", "top1_score": 0.98, "top2_score": 0.4, "gap": 0.58, "outcome": "hit:test_intent", "latency_ms": 0.01, "intent": "test_intent", "confidence": 0.98}
+{"ts": "2026-06-15T21:27:34Z", "text_prefix": "disk", "top1_score": 0.98, "top2_score": 0.4, "gap": 0.58, "outcome": "hit:disk_usage", "latency_ms": 0.02, "intent": "disk_usage", "confidence": 0.98}
+{"ts": "2026-06-15T21:27:34Z", "text_prefix": "disk", "top1_score": 0.98, "top2_score": 0.4, "gap": 0.58, "outcome": "hit:disk_usage", "latency_ms": 0.01, "intent": "disk_usage", "confidence": 0.98}
+{"ts": "2026-06-15T21:27:34Z", "text_prefix": "disk", "top1_score": 0.98, "top2_score": 0.4, "gap": 0.58, "outcome": "hit:disk_usage", "latency_ms": 0.02, "intent": "disk_usage", "confidence": 0.98}
+{"ts": "2026-06-15T21:27:34Z", "text_prefix": "disk", "top1_score": 0.98, "top2_score": 0.4, "gap": 0.58, "outcome": "hit:disk_usage", "latency_ms": 0.01, "intent": "disk_usage", "confidence": 0.98}
+{"ts": "2026-06-15T21:27:34Z", "text_prefix": "disk", "top1_score": 0.98, "top2_score": 0.4, "gap": 0.58, "outcome": "hit:disk_usage", "latency_ms": 0.01, "intent": "disk_usage", "confidence": 0.98}
+{"ts": "2026-06-15T21:27:34Z", "text_prefix": "disk", "top1_score": 0.98, "top2_score": 0.4, "gap": 0.58, "outcome": "hit:disk_usage", "latency_ms": 0.01, "intent": "disk_usage", "confidence": 0.98}
+{"ts": "2026-06-15T21:27:34Z", "text_prefix": "disk", "top1_score": 0.98, "top2_score": 0.4, "gap": 0.58, "outcome": "hit:disk_usage", "latency_ms": 0.01, "intent": "disk_usage", "confidence": 0.98}
+{"ts": "2026-06-15T21:27:34Z", "text_prefix": "disk", "top1_score": 0.98, "top2_score": 0.4, "gap": 0.58, "outcome": "hit:disk_usage", "latency_ms": 0.01, "intent": "disk_usage", "confidence": 0.98}
+{"ts": "2026-06-15T21:27:34Z", "text_prefix": "disk", "top1_score": 0.98, "top2_score": 0.4, "gap": 0.58, "outcome": "hit:disk_usage", "latency_ms": 0.01, "intent": "disk_usage", "confidence": 0.98}
+{"ts": "2026-06-15T21:27:34Z", "text_prefix": "disk", "top1_score": 0.98, "top2_score": 0.4, "gap": 0.58, "outcome": "hit:disk_usage", "latency_ms": 0.01, "intent": "disk_usage", "confidence": 0.98}
+{"ts": "2026-06-15T21:27:34Z", "text_prefix": "disk", "top1_score": 0.98, "top2_score": 0.4, "gap": 0.58, "outcome": "hit:disk_usage", "latency_ms": 0.01, "intent": "disk_usage", "confidence": 0.98}
+{"ts": "2026-06-15T21:27:34Z", "text_prefix": "disk", "top1_score": 0.98, "top2_score": 0.4, "gap": 0.58, "outcome": "hit:disk_usage", "latency_ms": 0.02, "intent": "disk_usage", "confidence": 0.98}
+{"ts": "2026-06-15T21:27:34Z", "text_prefix": "disk", "top1_score": 0.98, "top2_score": 0.4, "gap": 0.58, "outcome": "hit:disk_usage", "latency_ms": 0.01, "intent": "disk_usage", "confidence": 0.98}
+{"ts": "2026-06-15T21:27:34Z", "text_prefix": "disk", "top1_score": 0.98, "top2_score": 0.4, "gap": 0.58, "outcome": "hit:disk_usage", "latency_ms": 0.01, "intent": "disk_usage", "confidence": 0.98}
+{"ts": "2026-06-15T21:27:34Z", "text_prefix": "disk", "top1_score": 0.98, "top2_score": 0.4, "gap": 0.58, "outcome": "hit:disk_usage", "latency_ms": 0.01, "intent": "disk_usage", "confidence": 0.98}
+{"ts": "2026-06-15T21:27:34Z", "text_prefix": "disk", "top1_score": 0.98, "top2_score": 0.4, "gap": 0.58, "outcome": "hit:disk_usage", "latency_ms": 0.01, "intent": "disk_usage", "confidence": 0.98}

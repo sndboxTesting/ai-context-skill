@@ -457,6 +457,193 @@ class AdwiMemory:
         self.conn.close()
 
 
+# ── Phase 7: Qdrant-Driven Dynamic Few-Shot Routing ──────────────────────────
+
+QDRANT_URL     = "http://localhost:6333"
+NLU_COLLECTION = "nlu_fixtures"
+NLU_VECTOR_DIM = 768   # nomic-embed-text output dimension
+
+# 45 high-fidelity examples mapping colloquial phrasings to structured intents.
+# Each entry: (user_phrase, intent, arguments_dict, reasoning)
+NLU_SEED_FIXTURES: list[tuple[str, str, dict, str]] = [
+    # ── disk / files ──────────────────────────────────────────────────────
+    ("what's eating up my disk space",                   "disk_usage",   {},                                   "user wants storage breakdown"),
+    ("how much space do I have left",                    "disk_usage",   {},                                   "storage space question"),
+    ("show me files larger than 500mb",                  "large_files",  {"size_mb": 500},                     "explicit size threshold"),
+    ("what are the biggest files on my machine",         "large_files",  {"size_mb": 100},                     "large file scan without threshold"),
+    ("find files I haven't touched in a year",           "old_files",    {"days": 365},                        "age-based file search"),
+    ("list files older than 6 months",                   "old_files",    {"days": 180},                        "six-month age threshold"),
+    ("look for duplicate files in my downloads",         "duplicates",   {"path": "~/Downloads"},              "dedup scoped to folder"),
+    ("are there any duplicate photos",                   "duplicates",   {},                                   "dedup without path"),
+    ("suggest how to organize my desktop",               "organize",     {"path": "~/Desktop"},                "organization suggestion"),
+    ("what can I clean up in my documents folder",       "cleanup",      {"path": "~/Documents"},              "cleanup suggestion with path"),
+    ("read the file notes/adwi-roadmap.md",              "file_read",    {"path": "notes/adwi-roadmap.md"},    "explicit file path in read request"),
+    ("find files related to docker in my workspace",     "file_search",  {"query": "docker"},                  "keyword file search"),
+    ("list what's inside my SuneelWorkSpace",            "file_list",    {"path": "~/SuneelWorkSpace"},        "directory listing"),
+    # ── web / browsing ────────────────────────────────────────────────────
+    ("google what is langchain used for",                "web_search",   {"query": "what is langchain used for"}, "explicit web search request"),
+    ("search online for best local LLM setups",         "web_search",   {"query": "best local LLM setups"},   "search online phrasing"),
+    ("open https://grafana.com/docs",                   "browse",       {"url": "https://grafana.com/docs"},   "explicit URL browse"),
+    ("scrape the page at https://news.ycombinator.com", "firecrawl",    {"url": "https://news.ycombinator.com"}, "scrape request"),
+    ("use exa to find recent papers on RAG",             "exa_search",   {"query": "recent papers on RAG"},    "exa named explicitly"),
+    ("tavily search for Qdrant best practices",          "tavily_search",{"query": "Qdrant best practices"},   "tavily named explicitly"),
+    # ── media ─────────────────────────────────────────────────────────────
+    ("summarize this youtube video https://youtu.be/xyz","youtube",     {"url": "https://youtu.be/xyz"},        "youtube URL provided"),
+    ("what's in this image /tmp/screenshot.png",         "image",        {"path": "/tmp/screenshot.png"},       "image analysis with path"),
+    ("draw me a futuristic robot in neon colors",        "generate_image",{"description": "futuristic robot in neon colors"}, "image generation request"),
+    ("generate an illustration of a mountain sunrise",   "generate_image",{"description": "mountain sunrise"},  "image generation with subject"),
+    # ── system & services ─────────────────────────────────────────────────
+    ("are all my docker services running",               "status",       {},                                    "service health check"),
+    ("check if n8n and qdrant are up",                   "status",       {},                                    "named service check"),
+    ("run a health check on adwi",                       "doctor",       {},                                    "doctor / diagnostics"),
+    ("how fast is adwi right now",                       "benchmark",    {},                                    "performance benchmark"),
+    ("what should I build next in adwi",                 "what_next",    {},                                    "roadmap / next steps"),
+    ("run the daily improvement routine",                "daily_improve",{},                                    "daily improve trigger"),
+    ("fix adwi — it crashed on the last command",        "self_heal",    {},                                    "self-heal trigger"),
+    # ── models / routing ──────────────────────────────────────────────────
+    ("which model are you using right now",              "model_status", {},                                    "model routing query"),
+    ("switch to local model",                            "use_local",    {},                                    "force local backend"),
+    ("which tool should handle voice transcription",     "route",        {"query": "voice transcription"},      "semantic router query"),
+    # ── memory & knowledge ────────────────────────────────────────────────
+    ("what do you know about my obsidian setup",         "memory_recall",{"query": "obsidian setup"},          "personal memory recall"),
+    ("scan and update your memories",                    "memory_scan",  {},                                    "memory scan trigger"),
+    ("search my notes for anything about RAG pipelines", "obsidian_search",{"query": "RAG pipelines"},         "vault/notes search"),
+    ("read my obsidian note about grafana dashboards",   "obsidian_read",{"query": "grafana dashboards"},       "read specific obsidian note"),
+    ("write a note called 'adwi phase 7 complete'",      "obsidian_write",{"query": "adwi phase 7 complete"},  "write new note"),
+    ("open today's daily note",                          "obsidian_daily",{},                                   "obsidian daily note"),
+    # ── comms & git ───────────────────────────────────────────────────────
+    ("show me unread emails",                            "gmail",        {"query": "is:unread"},                "unread email check"),
+    ("emails from suneel about the project",             "gmail",        {"query": "from:suneel"},              "sender-filtered email"),
+    ("what changed in git today",                        "git_status",   {},                                    "git status check"),
+    ("backup my workspace to github now",                "backup_now",   {},                                    "immediate backup trigger"),
+    ("speak out the current system status",              "voice_out",    {"description": "current system status"}, "TTS request"),
+    # ── code / eval ───────────────────────────────────────────────────────
+    ("run this python snippet: print('hello')",          "run_code",     {},                                    "execute python code"),
+    ("patch adwi — the nlu pipeline is broken",          "patch_adwi",   {"query": "nlu pipeline broken"},     "aider repair request"),
+    ("evaluate adwi intent routing accuracy",            "eval_adwi",    {},                                    "eval / test run"),
+    # ── chat fallback ─────────────────────────────────────────────────────
+    ("what is the transformer attention mechanism",      "chat",         {},                                    "general knowledge question"),
+    ("explain how LangGraph works",                      "chat",         {},                                    "explanation request — chat"),
+]
+
+
+def _qdrant_request(method: str, path: str, body: dict | None = None, timeout: int = 8) -> dict | None:
+    """Thin wrapper for Qdrant REST calls using stdlib urllib."""
+    url = f"{QDRANT_URL}{path}"
+    data = json.dumps(body).encode() if body is not None else None
+    req = urllib.request.Request(
+        url, data=data, method=method,
+        headers={"Content-Type": "application/json"},
+    )
+    try:
+        with urllib.request.urlopen(req, timeout=timeout) as r:
+            return json.loads(r.read())
+    except urllib.error.HTTPError as e:
+        if e.code == 404:
+            return None
+        return None
+    except Exception:
+        return None
+
+
+def provision_nlu_fixtures(embed_fn=None) -> dict:
+    """
+    Ensure the nlu_fixtures Qdrant collection exists and is seeded.
+    embed_fn(text) -> list[float] — defaults to inline Ollama call.
+    Returns {"created": bool, "seeded": int, "already_existed": bool}.
+    """
+    def _default_embed(text: str) -> list | None:
+        payload = json.dumps({"model": EMBED_MODEL, "prompt": text[:4096]}).encode()
+        req = urllib.request.Request(
+            f"{OLLAMA_URL}/api/embeddings",
+            data=payload, method="POST",
+            headers={"Content-Type": "application/json"},
+        )
+        try:
+            with urllib.request.urlopen(req, timeout=15) as r:
+                return json.loads(r.read()).get("embedding")
+        except Exception:
+            return None
+
+    embed = embed_fn or _default_embed
+
+    # Check if collection already exists
+    existing = _qdrant_request("GET", f"/collections/{NLU_COLLECTION}")
+    already_existed = existing is not None and existing.get("status") == "ok"
+
+    if not already_existed:
+        _qdrant_request("PUT", f"/collections/{NLU_COLLECTION}", {
+            "vectors": {"size": NLU_VECTOR_DIM, "distance": "Cosine"},
+        })
+
+    # Count existing points to decide whether to seed
+    info = _qdrant_request("GET", f"/collections/{NLU_COLLECTION}")
+    n_existing = 0
+    if info:
+        n_existing = (info.get("result") or {}).get("points_count", 0)
+
+    if n_existing >= len(NLU_SEED_FIXTURES):
+        return {"created": not already_existed, "seeded": 0, "already_existed": already_existed}
+
+    # Upsert all seed fixtures (idempotent — deterministic IDs from fixture index)
+    points = []
+    for idx, (phrase, intent, arguments, reasoning) in enumerate(NLU_SEED_FIXTURES):
+        vec = embed(phrase)
+        if not vec or len(vec) != NLU_VECTOR_DIM:
+            continue
+        points.append({
+            "id": idx + 1,
+            "vector": vec,
+            "payload": {
+                "user_phrase": phrase,
+                "intent": intent,
+                "arguments": arguments,
+                "reasoning": reasoning,
+            },
+        })
+
+    if points:
+        _qdrant_request("PUT", f"/collections/{NLU_COLLECTION}/points", {"points": points})
+
+    return {"created": not already_existed, "seeded": len(points), "already_existed": already_existed}
+
+
+def query_nlu_fixtures(text: str, embed_fn=None, k: int = 3) -> list[dict]:
+    """
+    Embed `text`, query Qdrant nlu_fixtures for top-k semantic matches.
+    Returns list of payload dicts: {user_phrase, intent, arguments, reasoning}.
+    Falls back to [] on any error (never blocks the main NLU path).
+    """
+    def _default_embed(t: str) -> list | None:
+        payload = json.dumps({"model": EMBED_MODEL, "prompt": t[:4096]}).encode()
+        req = urllib.request.Request(
+            f"{OLLAMA_URL}/api/embeddings",
+            data=payload, method="POST",
+            headers={"Content-Type": "application/json"},
+        )
+        try:
+            with urllib.request.urlopen(req, timeout=10) as r:
+                return json.loads(r.read()).get("embedding")
+        except Exception:
+            return None
+
+    embed = embed_fn or _default_embed
+    vec = embed(text)
+    if not vec or len(vec) != NLU_VECTOR_DIM:
+        return []
+
+    result = _qdrant_request("POST", f"/collections/{NLU_COLLECTION}/points/search", {
+        "vector": vec,
+        "limit": k,
+        "with_payload": True,
+        "score_threshold": 0.5,
+    })
+    if not result:
+        return []
+    hits = (result.get("result") or [])
+    return [h["payload"] for h in hits if "payload" in h]
+
+
 # ── Open WebUI integration guide ─────────────────────────────────────────────
 # To inject memory context into Open WebUI prompts:
 #

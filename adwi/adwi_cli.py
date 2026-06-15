@@ -793,6 +793,54 @@ _INTENT_SYSTEM = (
     "Return valid JSON only — no markdown fences, no prose explanation."
 )
 
+# ── Phase 7: Qdrant few-shot retrieval helpers ───────────────────────────────
+
+_NLU_PROVISIONED = False   # module-level flag — provision once per process
+
+def _ensure_nlu_fixtures_provisioned() -> None:
+    """Provision the Qdrant nlu_fixtures collection on first NLU call."""
+    global _NLU_PROVISIONED
+    if _NLU_PROVISIONED:
+        return
+    _NLU_PROVISIONED = True  # set optimistically to avoid retry storms
+    try:
+        import importlib.util
+        spec = importlib.util.spec_from_file_location("adwi_memory", ADWI_DIR / "memory.py")
+        mod  = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(mod)
+        result = mod.provision_nlu_fixtures()
+        if result.get("seeded"):
+            pass  # silent — user doesn't need to see this
+    except Exception:
+        pass  # non-fatal: Qdrant may be temporarily down
+
+
+def _get_nlu_few_shots(text: str) -> str:
+    """
+    Query Qdrant nlu_fixtures for top-3 semantic matches and return a
+    Markdown few-shot block to inject into the classification system prompt.
+    Returns '' on any failure so the main NLU path is never blocked.
+    """
+    try:
+        import importlib.util
+        spec = importlib.util.spec_from_file_location("adwi_memory", ADWI_DIR / "memory.py")
+        mod  = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(mod)
+        hits = mod.query_nlu_fixtures(text, k=3)
+        if not hits:
+            return ""
+        lines = ["", "Relevant examples from NLU fixture store (ranked by semantic similarity):"]
+        for h in hits:
+            args_str = json.dumps(h.get("arguments", {})) if h.get("arguments") else "{}"
+            lines.append(
+                f'• "{h["user_phrase"]}" → intent: {h["intent"]}, arguments: {args_str}'
+            )
+        lines.append("")
+        return "\n".join(lines)
+    except Exception:
+        return ""
+
+
 def classify_intent(text: str) -> dict:
     """Classify user intent: regex pre-filter → llama3.1:8b with JSON schema enforcement."""
     import time as _time
@@ -808,10 +856,17 @@ def classify_intent(text: str) -> dict:
     pre = _regex_prefilter(text)
     if pre: return {"intent": pre, "target": None}
 
-    # 3. Structured LLM call with JSON schema enforcement
-    with _otel_span("classify_intent", {"input.text": text[:200], "model": MODEL_FAST}):
+    # 3. Structured LLM call with JSON schema enforcement + Phase 7 few-shot injection
+    _ensure_nlu_fixtures_provisioned()
+    few_shots = _get_nlu_few_shots(text)
+    _system_with_shots = _INTENT_SYSTEM + few_shots if few_shots else _INTENT_SYSTEM
+    with _otel_span("classify_intent", {
+        "input.text": text[:200],
+        "model": MODEL_FAST,
+        "nlu.few_shot_count": str(few_shots.count("•")) if few_shots else "0",
+    }):
         msgs = [
-            {"role": "system", "content": _INTENT_SYSTEM},
+            {"role": "system", "content": _system_with_shots},
             {"role": "user",   "content": text},
         ]
         req = _ollama_chat(

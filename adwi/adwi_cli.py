@@ -4378,10 +4378,28 @@ def cmd_what_next():
     log_action("what-next", result)
 
 # ── Slash command handler (for users who prefer explicit commands) ─────────────
+_SHELL_CMD_RE = re.compile(
+    r"^(export|cd|pwd|rm|mv|cp|mkdir|chmod|chown|sudo|brew|pip|npm|yarn|bash|zsh|curl|wget|killall|kill|unset|alias|which|printenv)\s",
+    re.I,
+)
+# `source` only looks like a shell command when followed by a path (/, ~, .) — not "source code"
+_SOURCE_CMD_RE = re.compile(r"^source\s+[/~.]", re.I)
+
 def handle(line: str) -> bool:
     line = line.strip()
     if not line: return True
     low = line.lower()
+
+    # Detect shell commands typed by mistake into the adwi prompt
+    if _SHELL_CMD_RE.match(line) or _SOURCE_CMD_RE.match(line):
+        cmd_word = line.split()[0]
+        adwi_say(
+            f"That looks like a shell command (`{cmd_word}`). "
+            f"Adwi can't run shell environment commands directly — "
+            f"please run it in your terminal instead.\n\n"
+            f"  $ {line}"
+        )
+        return True
 
     # Exit
     if line in ["/exit","/quit","/bye","exit","quit"]:

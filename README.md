@@ -21,7 +21,8 @@
 | [§5](#5-security--boundary-invariants) | Security & Boundary Invariants | Hard blocks, credential isolation |
 | [§6](#6-directory-structure) | Directory Structure | Annotated file tree |
 | [§7](#7-rollback--recovery) | Rollback & Recovery | Operational runbooks |
-| [§8](#8-architecture-implementation-phases) | Architecture Implementation Phases | Phase 1–8 status and key files |
+| [§8](#8-architecture-implementation-phases) | Architecture Implementation Phases | Phase 1–10 status and key files |
+| [§9](#9-simlab-operational-guide) | SimLab Operational Guide | Running the eval harness; improvement tiers; golden baseline |
 
 ---
 
@@ -630,7 +631,7 @@ subprocess.run(cmd) or python tempfile exec
 
 ### Hard-Blocked Filesystem Paths
 
-These are compile-time constants in `adwi_cli.py` and `reason_engine.py`.
+These are compile-time constants in `adwi_cli.py` and `reason_engine.py`, enforced by `PathValidator` (`adwi/path_validator.py`) using deny-first `.relative_to()` containment.
 Any access attempt is **rejected with no fallback** — no LLM call, no log.
 
 ```
@@ -671,12 +672,15 @@ config/.env                         API keys (Tavily, Exa, Firecrawl, HA, CF)
 | Invariant | Mechanism |
 |---|---|
 | API keys never appear in prompts | Loaded from `config/.env` as opaque env vars; passed as HTTP headers only |
-| No token printing | `redact()` strips known key patterns before any log write |
+| No token printing | `redact_attrs()` in `telemetry.py` strips sensitive keys before any OTel span or JSONL log write |
+| Path containment enforced | `PathValidator` (`path_validator.py`) blocks traversal via `.resolve().relative_to()` — not string prefix matching |
 | Memory DB never committed | `adwi/memory.db` gitignored; contains terminal history |
 | No credentials in traces | `notes/adwi-trace-logs/` written through `redact()` |
 | Nightly loop never auto-upgrades | Upgrade suggestions → `Pending User Approval` section only |
 | aider never touches secret files | Hard-block list validated before any file is passed to aider |
 | All mutations require gate | REVIEW-REQUIRED tier blocks: `git commit/push`, `rm -r`, `chmod`, `docker compose down` |
+| SimLab never touches production data | EvalSandbox redirects all I/O to `/tmp/adwi_sim_sandbox/`; ADWI_EVAL_OUTPUT_JSON env var inert in production |
+| SimLab Tier C never auto-applied | Safety-boundary failures queued for human review only; never patched automatically |
 
 ### Phase 3 Risk Classification
 
@@ -698,9 +702,12 @@ Enforced by `_classify_cli_risk()` (adwi_cli.py) and `classify_risk()` (reason_e
 SuneelWorkSpace/
 │
 ├── adwi/                              # Core AI brain
-│   ├── adwi_cli.py                    # 5,000+ lines · 103 commands · REPL entry point
+│   ├── adwi_cli.py                    # 5,100+ lines · 121 commands · REPL entry point
 │   ├── reason_engine.py               # LangGraph: Planner→Executor→Critic (822 lines)
-│   ├── memory.py                      # AdwiMemory: SQLite + nomic-embed cosine search
+│   ├── memory.py                      # AdwiMemory: SQLite + nomic-embed cosine search (89 NLU fixtures)
+│   ├── path_validator.py              # Deny-first path containment; hard-blocks credential dirs
+│   ├── telemetry.py                   # OTel tracing → Arize Phoenix; credential-safe redaction
+│   ├── nlu_fast_path.py               # Qdrant ≥0.88 bypass: skips llama3.1:8b (~5 ms vs 43 ms)
 │   ├── nightly.py                     # 10-step 2 AM maintenance loop
 │   ├── overnight_learn.py             # 7-hour knowledge indexer (1 AM via launchd)
 │   ├── repair.py                      # Self-repair utilities
@@ -710,6 +717,18 @@ SuneelWorkSpace/
 │   ├── Modelfile                      # Custom adwi:latest definition (qwen3:30b base)
 │   ├── capabilities.json              # Machine-readable capability registry
 │   ├── allowed-read-roots.txt         # Trusted filesystem roots
+│   ├── simlab/                        # Bounded eval & self-improvement harness (Phase 10)
+│   │   ├── schemas.py                 # Dataclasses + SHA-256[:16] failure fingerprinting
+│   │   ├── golden_baseline.jsonl      # 20 immutable scenarios — never auto-modified
+│   │   ├── idle_orchestrator.py       # Battery/thermal gates, lock, budget, session wiring
+│   │   ├── scenario_generator.py      # Templates + safety/adversarial cases + golden seeding
+│   │   ├── eval_runner.py             # Ephemeral /tmp sandbox + subprocess eval (45 s timeout)
+│   │   ├── grader.py                  # Intent/Safety/Latency/Content/Ambiguity composite
+│   │   ├── failure_store.py           # SQLite dedup (fingerprint → occurrence_count)
+│   │   ├── improvement_engine.py      # Tier A/B/C proposals; Tier C = human review only
+│   │   ├── verification.py            # Must score 100% golden before promotion; git rollback
+│   │   ├── reporter.py                # Markdown + JSON reports (logs/simlab/)
+│   │   └── tests/test_simlab.py       # 41 unit tests, 0 ResourceWarnings
 │   ├── .venv/                         # [gitignored] Python 3.14 virtualenv (uv)
 │   ├── memory.db                      # [gitignored] Semantic memory (380+ items)
 │   └── knowledge.db                   # [gitignored] Q&A pairs (1,565+) + chunks
@@ -853,6 +872,66 @@ python3 -m py_compile adwi/adwi_cli.py && echo "still compiles"
 All 10 phases verified on 2026-06-15. Each phase committed atomically as an independent transactional unit.
 *Auto-updated: 2026-06-15*
 <!-- /AUTO:PHASES -->
+
+---
+
+## §9 SimLab Operational Guide
+
+SimLab is a **bounded, offline, self-contained** evaluation harness. It never touches production data, never weakens security boundaries, and never applies changes that would reduce the golden baseline score below 100%.
+
+### How to run
+
+```bash
+# Canary run (20% of scenarios, ~5-10 min) — ideal for post-change spot check
+python3 -m adwi.simlab
+
+# Full run (all scenarios)
+python3 -m adwi.simlab --full --budget 60
+
+# Nightly mode (same as full, wired into nightly.py at 2 AM)
+python3 -m adwi.simlab --nightly
+```
+
+### Hardware gates (auto-enforced, cannot be bypassed)
+
+| Gate | Condition | Action |
+|---|---|---|
+| Battery | `pmset -g ps` shows "Battery Power" | Hard block — SimLab does not start |
+| Thermal | `loadavg[0] / cpu_count > 0.75` | Pause or abort session |
+| Lock file | `logs/simlab.lock` exists | Skip — another session is running |
+
+### Improvement tiers
+
+| Tier | Examples | Gate | Auto-applied? |
+|---|---|---|---|
+| A | Add NLU fixture, add eval case | None beyond golden check | Yes (immediate) |
+| B | Add regex pattern to `_REGEX_INTENTS` | **Must score 100% golden baseline** | Yes, after verification |
+| C | Any safety/security logic change | Human review required | **Never auto-applied** |
+
+### Golden baseline invariant
+
+`adwi/simlab/golden_baseline.jsonl` contains 20 immutable scenarios. **Any improvement proposal that causes a single golden failure is automatically rolled back.** For Tier B, rollback is `git checkout HEAD -- <file>`. The golden baseline file itself can only be modified by a human git commit.
+
+### Sandbox isolation
+
+Every eval subprocess runs with:
+- `ADWI_SANDBOX_MODE=1`
+- `ADWI_MEMORY_DB=/tmp/adwi_sim_sandbox/memory.db`
+- `ADWI_KNOWLEDGE_DB=/tmp/adwi_sim_sandbox/knowledge.db`
+- `ADWI_NLU_COLLECTION=test_nlu_fixtures`
+
+The sandbox directory is created fresh and torn down after each session. Production `memory.db` and `knowledge.db` are never read or written during eval.
+
+### Session artifacts
+
+After each run: `logs/simlab/simlab-{run_id}.md` and `.json`. The Markdown report includes pass/fail summary, top failure patterns, improvement decisions, slow prompts, and any items needing human review.
+
+### Validate SimLab itself
+
+```bash
+python3 adwi/simlab/tests/test_simlab.py -v
+# Expected: 41 tests, 0 errors, 0 failures, 0 ResourceWarnings
+```
 
 ---
 

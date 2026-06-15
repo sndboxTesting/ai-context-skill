@@ -338,6 +338,13 @@ _REGEX_INTENTS = [
     (re.compile(r"(check|show|read|open|get|fetch|look at).{0,20}(my )?(email|gmail|inbox|mail)\b", re.I), "gmail"),
     (re.compile(r"(any (new|unread) )?emails?\b", re.I), "gmail"),
     (re.compile(r"gmail\b", re.I), "gmail"),
+    # Memory ledger
+    (re.compile(r"(scan|index|update|build).{0,20}(my )?(memory|memories|ledger|context)", re.I), "memory_scan"),
+    (re.compile(r"(remember|recall|what do you know about|memory).{0,30}\?", re.I), "memory_recall"),
+    (re.compile(r"memory (stats|status|ledger|database|db)\b", re.I), "memory_stats"),
+    # Semantic router
+    (re.compile(r"route (this|the|my)?\s*(query|question|request|command)\b", re.I), "route"),
+    (re.compile(r"which tool (should|would|to) (handle|use for|run)\b", re.I), "route"),
 ]
 
 def _regex_prefilter(text: str):
@@ -3125,6 +3132,122 @@ def cmd_backup_audit() -> None:
             cprint(f"  {GREEN}✓ No secrets detected in staged files{RESET}", "")
 
 
+# ── Memory Layer commands ─────────────────────────────────────────────────────
+
+def _memory_mod():
+    """Lazy-load adwi/memory.py so adwi_cli.py stays independent of it."""
+    import importlib.util
+    spec = importlib.util.spec_from_file_location("adwi_memory", ADWI_DIR / "memory.py")
+    mod  = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(mod)
+    return mod
+
+
+def cmd_memory_scan() -> None:
+    """Index terminal history, git commits, and notes into the memory ledger."""
+    adwi_head("Memory scan — indexing workflow into semantic ledger")
+    activity_start("scan terminal + git + notes for memories", "Memory Scan")
+    try:
+        mod = _memory_mod()
+        mem = mod.AdwiMemory()
+        activity_step("scanning", "terminal history (~400 recent commands)")
+        t = mem.scan_terminal()
+        activity_step("scanning", "git commit log (last 60)")
+        g = mem.scan_git_commits()
+        activity_step("scanning", "notes/ markdown files")
+        n = mem.scan_notes()
+        s = mem.stats()
+        mem.close()
+        msg = f"+{t} terminal  +{g} git  +{n} notes — ledger total: {s['total']}"
+        activity_done(msg)
+        cprint(f"  ✓ {msg}", GREEN)
+        cprint(f"  DB: {mod.DB_PATH}", GRAY)
+    except Exception as e:
+        activity_error(str(e))
+        cprint(f"  ✗ Memory scan failed: {e}", RED)
+
+
+def cmd_memory_recall(query: str = "") -> None:
+    """Semantic search over the memory ledger."""
+    if not query:
+        query = input(f"  {CYAN}Recall query:{RESET} ").strip()
+    if not query:
+        return
+    adwi_head(f"Memory recall: {query[:60]}")
+    activity_start(f"recall: {query[:60]}", "Memory Recall")
+    try:
+        mod  = _memory_mod()
+        mem  = mod.AdwiMemory()
+        hits = mem.recall(query)
+        if not hits:
+            hits = mem.recall_keyword(query)
+        mem.close()
+        if not hits:
+            cprint("  No matching memories found in ledger", GRAY)
+            cprint("  Run /memory-scan first to index your workflow", GRAY)
+            activity_done("no matches")
+            return
+        for h in hits:
+            score = f"{h['score']:.2f}" if h["score"] > 0 else " kw"
+            cprint(f"  [{score}] {h['source']:8s} {h['ts'][:10]}  {h['content'][:130]}", CYAN)
+        activity_done(f"{len(hits)} memories recalled")
+    except Exception as e:
+        activity_error(str(e))
+        cprint(f"  ✗ {e}", RED)
+
+
+def cmd_memory_stats() -> None:
+    """Show memory ledger stats."""
+    adwi_head("Memory ledger")
+    try:
+        mod = _memory_mod()
+        mem = mod.AdwiMemory()
+        s   = mem.stats()
+        mem.close()
+        cprint(f"  Total:       {s['total']} memories", GREEN)
+        cprint(f"  Embeddings:  {s['with_embeddings']}", GRAY)
+        for src, cnt in sorted(s.get("by_source", {}).items()):
+            cprint(f"    {src:12s} {cnt}", GRAY)
+        cprint(f"  DB:          {mod.DB_PATH}", GRAY)
+    except Exception as e:
+        cprint(f"  ✗ {e}", RED)
+
+
+def cmd_memory_context(query: str = "") -> None:
+    """Show the memory context block that would be injected into a prompt."""
+    if not query:
+        query = input(f"  {CYAN}Query for context injection:{RESET} ").strip()
+    if not query:
+        return
+    try:
+        mod = _memory_mod()
+        mem = mod.AdwiMemory()
+        ctx = mem.format_context(query)
+        mem.close()
+        if ctx:
+            print(f"\n{GRAY}{ctx}{RESET}\n")
+        else:
+            cprint("  No relevant context found — run /memory-scan to build the ledger", GRAY)
+    except Exception as e:
+        cprint(f"  ✗ {e}", RED)
+
+
+# ── Semantic router command ────────────────────────────────────────────────────
+
+def cmd_route(query: str = "") -> None:
+    """Classify a query and route it to Aider/Playwright/Ollama."""
+    if not query:
+        query = input(f"  {CYAN}Route query:{RESET} ").strip()
+    if not query:
+        return
+    route_bin = BIN / "adwi-route"
+    if not route_bin.exists():
+        cprint("  adwi-route not found at bin/adwi-route", YELLOW)
+        return
+    import subprocess as _sp
+    _sp.run(["python3", str(route_bin), query], cwd=str(BASE))
+
+
 # ── Nightly improvement commands ──────────────────────────────────────────────
 
 def cmd_nightly_status() -> None:
@@ -3261,6 +3384,8 @@ def dispatch_natural(text: str):
         "run_code": "Run Python Code", "benchmark": "Benchmark",
         "gmail": "Gmail", "fix_error": "Fix Error / Self-Repair",
         "backup": "GitHub Backup",
+        "memory_scan": "Memory Scan", "memory_recall": "Memory Recall",
+        "memory_stats": "Memory Stats", "route": "Semantic Router",
     }
     if intent != "chat" and intent in _ACTION_LABELS:
         activity_start(text, _ACTION_LABELS[intent])
@@ -3355,6 +3480,16 @@ def dispatch_natural(text: str):
         cmd_run_python(code or text)
     elif intent == "benchmark":
         cmd_benchmark()
+    elif intent == "memory_scan":
+        cmd_memory_scan()
+    elif intent == "memory_recall":
+        q = target or re.sub(r"^(remember|recall|what do you know about)\s*", "", text, flags=re.I).strip()
+        cmd_memory_recall(q)
+    elif intent == "memory_stats":
+        cmd_memory_stats()
+    elif intent == "route":
+        q = target or re.sub(r"^(route|which tool).{0,30}?\s", "", text, flags=re.I).strip()
+        cmd_route(q)
     elif intent == "gmail":
         # Only treat the text as a search query if it looks like one (not a general question)
         is_question = bool(re.search(r"\b(is|are|how many|do i have|connected|working|latest|newest|recent)\b", text, re.I))
@@ -3533,6 +3668,16 @@ def handle(line: str) -> bool:
     elif line.startswith("/trace-log "):
         arg = line[11:].strip()
         cmd_trace_log(int(arg) if arg.isdigit() else 0)
+    # ── Memory Layer ──
+    elif line == "/memory-scan": cmd_memory_scan()
+    elif line == "/memory-stats": cmd_memory_stats()
+    elif line.startswith("/memory-recall "): cmd_memory_recall(line[15:].strip())
+    elif line == "/memory-recall": cmd_memory_recall()
+    elif line.startswith("/memory-context "): cmd_memory_context(line[16:].strip())
+    elif line == "/memory-context": cmd_memory_context()
+    # ── Semantic router ──
+    elif line.startswith("/route "): cmd_route(line[7:].strip())
+    elif line == "/route": cmd_route()
     # ── Nightly improvement ──
     elif line == "/nightly-status": cmd_nightly_status()
     elif line.startswith("/nightly-log"):

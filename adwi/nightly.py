@@ -456,12 +456,13 @@ def step_git_commit() -> dict:
 def step_write_report(data: dict) -> Path:
     NIGHTLY_LOG_DIR.mkdir(parents=True, exist_ok=True)
 
-    svc = data.get("services", {})
-    lr  = data.get("log_review", {})
-    ev  = data.get("evals", {})
-    cs  = data.get("cap_sync", {})
-    gc  = data.get("git_commit", {})
-    sk  = data.get("skill_suggestions", "[none]")
+    svc  = data.get("services", {})
+    lr   = data.get("log_review", {})
+    heal = data.get("aider_heal", {})
+    ev   = data.get("evals", {})
+    cs   = data.get("cap_sync", {})
+    gc   = data.get("git_commit", {})
+    sk   = data.get("skill_suggestions", "[none]")
 
     lines = [
         f"# Adwi Nightly Improvement — {DATE_STR} {TIME_STR}",
@@ -486,6 +487,20 @@ def step_write_report(data: dict) -> Path:
         sk,
         "```",
     ]
+
+    lines += ["", "## 3b. Aider Self-Healing"]
+    if heal.get("skipped_reason"):
+        lines.append(f"- Skipped: {heal['skipped_reason']}")
+    elif not heal.get("ran_tests"):
+        lines.append("- Not run (no result)")
+    else:
+        lines.append(f"- Tests before: {'✓ passing' if heal.get('tests_passed_before') else '✗ failing'}")
+        if not heal.get("tests_passed_before"):
+            lines.append(f"- Aider attempts: {heal.get('attempts', 0)}")
+            if heal.get("tests_passed_after"):
+                lines.append(f"- ✓ Fixed → branch: `{heal.get('branch')}`")
+            else:
+                lines.append(f"- ✗ Could not fix — report on Desktop: `{heal.get('report_path')}`")
 
     lines += [
         "",
@@ -533,7 +548,7 @@ def main():
     data["log_review"] = step_review_logs()
     _pr(f"  {data['log_review'].get('repair_count', 0)} repair logs reviewed")
 
-    _pr("[3/6] AI skill discovery...")
+    _pr("[3/7] AI skill discovery...")
     if _ollama_ok():
         data["skill_suggestions"] = step_skill_discovery(data["log_review"])
         _save_pending(data["skill_suggestions"])
@@ -542,12 +557,39 @@ def main():
         data["skill_suggestions"] = "[Ollama offline — skipped]"
         _pr("  ⚠ Ollama offline, skipping")
 
-    _pr("[4/6] Running evals...")
+    _pr("[3b/7] Aider self-healing (detect & fix test failures)...")
+    data["aider_heal"] = step_aider_heal()
+    ah = data["aider_heal"]
+    if ah.get("skipped_reason"):
+        _pr(f"  skipped: {ah['skipped_reason']}")
+    elif ah.get("tests_passed_after"):
+        _pr(f"  ✓ Fixed → {ah.get('branch')}")
+    elif not ah.get("tests_passed_before"):
+        _pr(f"  ✗ Could not auto-fix — check ~/Desktop for report")
+
+    _pr("[4/7] Running evals...")
     data["evals"] = step_evals()
     ev = data["evals"]
     _pr(f"  Syntax: {'OK' if ev.get('syntax_ok') else 'FAIL: ' + ev.get('syntax_error','')}")
 
-    _pr("[5/6] Capability sync...")
+    _pr("[5/7] Memory scan (terminal + git + notes)...")
+    try:
+        import importlib.util as _ilu
+        _spec = _ilu.spec_from_file_location("memory", ADWI_DIR / "memory.py")
+        _mod  = _ilu.module_from_spec(_spec)
+        _spec.loader.exec_module(_mod)
+        _mem  = _mod.AdwiMemory()
+        _t = _mem.scan_terminal(200)
+        _g = _mem.scan_git_commits(n=30)
+        _n = _mem.scan_notes(max_per_file=8)
+        _mem.close()
+        data["memory_scan"] = {"terminal": _t, "git": _g, "notes": _n}
+        _pr(f"  +{_t} terminal, +{_g} git, +{_n} notes")
+    except Exception as _e:
+        data["memory_scan"] = {"error": str(_e)}
+        _pr(f"  ⚠ memory scan: {_e}")
+
+    _pr("[6/7] Capability sync...")
     data["cap_sync"] = step_capability_sync()
     cs = data["cap_sync"]
     if "error" not in cs:
@@ -555,7 +597,7 @@ def main():
     else:
         _pr(f"  ⚠ {cs['error']}")
 
-    _pr("[6/6] Git commit + push...")
+    _pr("[7/7] Git commit + push...")
     data["git_commit"] = step_git_commit()
     gc = data["git_commit"]
     if gc.get("success"):

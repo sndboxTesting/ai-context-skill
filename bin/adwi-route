@@ -1,0 +1,302 @@
+#!/usr/bin/env python3
+"""
+adwi-route — fast semantic router for Suneel's local AI stack.
+
+Parses a natural-language query and dispatches it to the right tool
+without wasting heavy models on trivial tasks.
+
+Routing table:
+  code   → Aider CLI  (edit / fix / write / refactor source files)
+  web    → Playwright MCP via adwi /browse  (visit / scrape / screenshot)
+  fast   → qwen3:0.6b (trivial lookups, one-word answers, math)
+  query  → adwi:latest (reasoning, explanation, comparison, advice)
+
+Hardware constraint: NEVER route to 70B+ models — M4 Max sweet spot is 30B–35B.
+
+Usage:
+    adwi-route "fix the auth bug in api/users.py line 42"
+    adwi-route --dry-run "browse https://example.com"
+    echo "what is the difference between LSTM and Transformer?" | adwi-route
+    adwi-route --explain "refactor the payment module"   # show classification only
+"""
+
+import json
+import os
+import re
+import subprocess
+import sys
+import urllib.request
+from pathlib import Path
+
+HOME       = Path.home()
+WORKSPACE  = HOME / "SuneelWorkSpace"
+ADWI_DIR   = WORKSPACE / "adwi"
+BIN_DIR    = WORKSPACE / "bin"
+CLI_PY     = ADWI_DIR / "adwi_cli.py"
+AIDER_BIN  = HOME / ".local" / "bin" / "aider"
+OLLAMA_URL = "http://127.0.0.1:11434"
+
+MODEL_FAST = "qwen3:0.6b"          # 522MB — instant NLU classification
+MODEL_MAIN = "adwi:latest"         # 18GB Qwen3 MoE 30B — primary reasoning
+# NOTE: NEVER use 70B+ — causes SSD swap and freezes Open WebUI on M4 Max
+
+
+# ── Keyword scoring ─────────────────────────────────────────────────────────
+
+_CODE_SIGNALS = [
+    r"\b(fix|repair|debug|patch|refactor|rewrite|edit|update|implement|add|remove|delete"
+    r"|write a function|create a class|generate a script)\b",
+    r"\b(bug|error|exception|stacktrace|failing test|broken)\b.{0,60}"
+    r"\.(py|js|ts|go|rs|sh|java|cpp|c|rb|swift|kt)\b",
+    r"\.(py|js|ts|go|rs|sh|java|cpp|c|rb|swift|kt)\b.{0,40}"
+    r"\b(line \d+|function|class|method|import|module|variable)\b",
+    r"\baider\b",
+    r"\b(make it|change it|update the|fix the|modify the)\b.{0,40}"
+    r"\b(function|class|loop|condition|import|route|handler|endpoint)\b",
+]
+
+_WEB_SIGNALS = [
+    r"\b(browse|visit|open|fetch|navigate|go to|check out|scrape|crawl|screenshot)\b"
+    r".{0,40}(https?://|\.com|\.io|\.org|\.dev|\.net|site|page|webpage|url)\b",
+    r"https?://\S+",
+    r"\b(playwright|headless browser|web driver|selenium)\b",
+    r"\b(click|fill in|type into|submit form|search on|log into)\b"
+    r".{0,30}(website|page|form|button|field|modal)\b",
+]
+
+_FAST_SIGNALS = [
+    # Simple "what is X" — only matches very short, noun-only lookups (not comparisons/explanations)
+    r"^(what is|who is)\s+\w[\w\s]{0,25}[?.]?$",
+    r"^(define|spell|translate|synonym for|capital of|currency of|population of)\b",
+    r"^(yes|no|ok|sure|thanks|hello|hi|hey|bye|sorry)\b",
+    r"^(calc|calculate|compute)?\s*\d[\d\s\+\-\*/\^]+$",
+]
+
+
+def _score(text: str, patterns: list) -> int:
+    t = text.lower()
+    return sum(1 for p in patterns if re.search(p, t, re.I))
+
+
+def _classify_via_model(query: str) -> str:
+    """Ask qwen3:0.6b to break ties (~200ms, streaming off)."""
+    prompt = (
+        "Classify this query. Reply with ONLY one word: code / web / fast / query\n"
+        "  code  — editing, fixing, writing, or debugging source code files\n"
+        "  web   — browsing websites, scraping pages, navigating URLs\n"
+        "  fast  — trivial fact, one-word answer, greeting, simple math\n"
+        "  query — reasoning, explanation, comparison, advice, anything else\n\n"
+        f"Query: {query[:280]}\n"
+        "Answer:"
+    )
+    try:
+        payload = json.dumps({
+            "model": MODEL_FAST,
+            "prompt": prompt,
+            "stream": False,
+            "options": {"temperature": 0, "num_predict": 4},
+        }).encode()
+        req = urllib.request.Request(
+            f"{OLLAMA_URL}/api/generate",
+            data=payload, method="POST",
+            headers={"Content-Type": "application/json"},
+        )
+        with urllib.request.urlopen(req, timeout=10) as r:
+            raw = json.loads(r.read())["response"].strip().lower()
+            for cat in ("code", "web", "fast", "query"):
+                if cat in raw:
+                    return cat
+    except Exception:
+        pass
+    return "query"
+
+
+def classify(query: str, verbose: bool = False) -> str:
+    code_score = _score(query, _CODE_SIGNALS)
+    web_score  = _score(query, _WEB_SIGNALS)
+    fast_score = _score(query, _FAST_SIGNALS)
+
+    if verbose:
+        print(f"  scores: code={code_score}  web={web_score}  fast={fast_score}")
+
+    # Queries with many words are never "fast" (trivial)
+    word_count = len(query.split())
+
+    if code_score >= 2:
+        return "code"
+    if web_score >= 1:
+        return "web"
+    if fast_score >= 1 and word_count <= 8:
+        return "fast"
+    if code_score == 1 and web_score == 0:
+        return "code"
+    if fast_score == 0 and code_score == 0 and web_score == 0:
+        # Nothing matched keywords — use model only for truly ambiguous queries
+        if word_count >= 4:
+            cat = _classify_via_model(query)
+            if verbose:
+                print(f"  model fallback → {cat}")
+            return cat
+
+    return "query"
+
+
+# ── Executors ────────────────────────────────────────────────────────────────
+
+def _ollama_stream(prompt: str, model: str) -> None:
+    """Stream Ollama response directly to stdout."""
+    payload = json.dumps({
+        "model": model,
+        "prompt": prompt,
+        "stream": True,
+        "options": {"temperature": 0.7},
+    }).encode()
+    req = urllib.request.Request(
+        f"{OLLAMA_URL}/api/generate",
+        data=payload, method="POST",
+        headers={"Content-Type": "application/json"},
+    )
+    try:
+        with urllib.request.urlopen(req, timeout=180) as r:
+            print()
+            for raw_line in r:
+                chunk = json.loads(raw_line)
+                print(chunk.get("response", ""), end="", flush=True)
+                if chunk.get("done"):
+                    break
+            print("\n")
+    except Exception as e:
+        print(f"\n  ✗ Ollama error: {e}", file=sys.stderr)
+        sys.exit(1)
+
+
+def _resolve_files(query: str) -> list:
+    """Extract file paths from query text that actually exist on disk."""
+    candidates = re.findall(
+        r'([\w/\-\.]+\.(py|js|ts|go|rs|sh|java|cpp|c|rb|swift|kt|md))',
+        query, re.I,
+    )
+    found = []
+    for (fpath, _) in candidates:
+        p = Path(fpath).expanduser()
+        if not p.is_absolute():
+            p = WORKSPACE / fpath
+        if p.exists():
+            found.append(str(p))
+    return found[:8]  # never blow Aider's context with too many files
+
+
+def route_code(query: str, dry_run: bool = False) -> None:
+    if not AIDER_BIN.exists():
+        print(f"  ✗ Aider not found at {AIDER_BIN}", file=sys.stderr)
+        print("    Install: pip3 install aider-chat", file=sys.stderr)
+        sys.exit(1)
+
+    files = _resolve_files(query)
+    cmd = [
+        str(AIDER_BIN),
+        "--model", f"ollama/{MODEL_MAIN}",
+        "--message", query,
+    ] + files
+
+    label = f"{MODEL_MAIN}" + (f"  [{', '.join(Path(f).name for f in files)}]" if files else "")
+    print(f"  → Aider  {label}")
+    if dry_run:
+        return
+    env = {
+        **os.environ,
+        "OLLAMA_API_BASE": "http://127.0.0.1:11434",
+        "PATH": "/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin",
+    }
+    subprocess.run(cmd, env=env, cwd=str(WORKSPACE))
+
+
+def route_web(query: str, dry_run: bool = False) -> None:
+    url_m = re.search(r"https?://\S+", query, re.I)
+    url = url_m.group(0) if url_m else query
+    print(f"  → Playwright MCP  {url[:80]}")
+    if dry_run:
+        return
+    subprocess.run(
+        ["python3", str(CLI_PY)],
+        input=f"/browse {url}\n/exit\n",
+        text=True, cwd=str(WORKSPACE),
+    )
+
+
+def route_fast(query: str, dry_run: bool = False) -> None:
+    print(f"  → Ollama  [{MODEL_FAST}]  (fast path)")
+    if dry_run:
+        return
+    _ollama_stream(query, MODEL_FAST)
+
+
+def route_query(query: str, dry_run: bool = False) -> None:
+    # Inject memory context if memory.db exists
+    mem_db = ADWI_DIR / "memory.db"
+    enriched = query
+    if mem_db.exists():
+        try:
+            result = subprocess.run(
+                ["python3", str(ADWI_DIR / "memory.py"), "context", query],
+                capture_output=True, text=True, timeout=10, cwd=str(WORKSPACE),
+            )
+            ctx = result.stdout.strip()
+            if ctx:
+                enriched = f"{ctx}\n\nQuestion: {query}"
+        except Exception:
+            pass
+
+    print(f"  → Ollama  [{MODEL_MAIN}]")
+    if dry_run:
+        return
+    _ollama_stream(enriched, MODEL_MAIN)
+
+
+# ── Main ──────────────────────────────────────────────────────────────────────
+
+_LABELS = {
+    "code":  "CODE EDIT  (→ Aider)",
+    "web":   "WEB/BROWSE (→ Playwright)",
+    "fast":  "FAST QUERY (→ qwen3:0.6b)",
+    "query": "REASONING  (→ adwi:latest)",
+}
+
+
+def main():
+    raw_args = sys.argv[1:]
+    dry_run  = "--dry-run" in raw_args
+    explain  = "--explain" in raw_args
+    verbose  = "--verbose" in raw_args or "-v" in raw_args
+    flags    = {"--dry-run", "--explain", "--verbose", "-v"}
+    pos_args = [a for a in raw_args if a not in flags]
+
+    if pos_args:
+        query = " ".join(pos_args)
+    elif not sys.stdin.isatty():
+        query = sys.stdin.read().strip()
+    else:
+        print(__doc__)
+        sys.exit(0)
+
+    if not query:
+        sys.exit(0)
+
+    category = classify(query, verbose=verbose)
+    print(f"\n  [{_LABELS.get(category, category.upper())}]  {query[:90]}")
+
+    if explain:
+        return
+
+    if category == "code":
+        route_code(query, dry_run)
+    elif category == "web":
+        route_web(query, dry_run)
+    elif category == "fast":
+        route_fast(query, dry_run)
+    else:
+        route_query(query, dry_run)
+
+
+if __name__ == "__main__":
+    main()

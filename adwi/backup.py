@@ -345,7 +345,9 @@ def stage_safe_files() -> tuple[int, list[str]]:
         "notes/ADWI-START-HERE.md", "notes/START-HERE-SUNEEL-LOCAL-AI.md",
         "notes/AI-NOTES-INDEX.md", "notes/adwi-learning-journal.md",
         "notes/adwi-mistakes-and-fixes.md", "notes/adwi-capability-roadmap.md",
-        "notes/system-inspections/", "notes/git-backup-logs/",
+        "notes/adwi-repair-logs/", "notes/nightly-improvement-logs/",
+        "notes/adwi-trace-logs/", "notes/git-backup-logs/",
+        "notes/system-inspections/", "notes/adwi-pending-improvements.md",
         "local-ai-stack/docker-compose.yml",
         ".gitignore", "README.md", "BACKUP_MANIFEST.md",
     ]

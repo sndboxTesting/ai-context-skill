@@ -111,22 +111,26 @@ _STEP_ICONS = {
 }
 
 def activity_start(user_goal: str, selected_action: str) -> None:
-    """Begin a new activity: print intent header and reset trace accumulator."""
+    """Begin a new activity: print intent header and reset trace accumulator.
+    Idempotent — if a trace is already active (set by dispatch_natural before
+    calling the command), skip the header print to avoid duplication."""
     global _TRACE
+    already_active = bool(_TRACE)
     _TRACE = {
         "ts":             datetime.now().strftime("%Y%m%d-%H%M%S"),
-        "goal":           user_goal,
-        "action":         selected_action,
-        "steps":          [],
-        "files_inspected":[],
-        "files_changed":  [],
-        "commands":       [],
+        "goal":           _TRACE.get("goal", user_goal) if already_active else user_goal,
+        "action":         _TRACE.get("action", selected_action) if already_active else selected_action,
+        "steps":          _TRACE.get("steps", []) if already_active else [],
+        "files_inspected":_TRACE.get("files_inspected", []) if already_active else [],
+        "files_changed":  _TRACE.get("files_changed", []) if already_active else [],
+        "commands":       _TRACE.get("commands", []) if already_active else [],
         "result":         "",
         "error":          "",
         "logs":           [],
     }
-    cprint(f"\n  🧭 Understanding: {user_goal[:120]}", CYAN)
-    cprint(f"  🛠️  Action: {selected_action}", CYAN)
+    if not already_active:
+        cprint(f"\n  🧭 Understanding: {user_goal[:120]}", CYAN)
+        cprint(f"  🛠️  Action: {selected_action}", CYAN)
 
 def activity_step(label: str, message: str) -> None:
     """Print a labelled progress step and record it."""
@@ -312,6 +316,10 @@ _REGEX_INTENTS = [
     (re.compile(r"(in my notes|from my notes|check my notes).{0,30}(about|for|on)", re.I), "rag_search"),
     # Browse / fetch URL
     (re.compile(r"(browse|visit|open|fetch|go to|check out|navigate to).{0,15}(https?://|website|site|webpage|url|\.(com|io|org|dev|net))", re.I), "browse"),
+    # GitHub repo visibility — must come BEFORE git_status and github_connected
+    (re.compile(r"(make|set|change|convert).{0,20}(git.?repo|repo|repository).{0,20}(public|private|open source)", re.I), "github_visibility"),
+    (re.compile(r"(make|set).{0,15}(public|private).{0,15}(repo|repository|github)", re.I), "github_visibility"),
+    (re.compile(r"(repo|repository).{0,20}(visibility|public|private)", re.I), "github_visibility"),
     # GitHub connectivity — must come BEFORE git_status
     (re.compile(r"(is|are).{0,20}(github|git hub).{0,20}(connected|linked|set up|configured|working|authenticated|logged in)", re.I), "github_connected"),
     (re.compile(r"(is adwi|adwi).{0,20}(connected|linked).{0,20}(github|git)", re.I), "github_connected"),
@@ -1393,6 +1401,46 @@ def cmd_github_connected() -> None:
         cprint(f"\n  {GREEN}✓ Everything pushed — workspace is fully backed up{RESET}", "")
 
     activity_done("GitHub connection check complete")
+
+
+def cmd_github_visibility(target: str = "") -> None:
+    """Make the GitHub repo public or private using gh CLI (requires confirmation)."""
+    adwi_head("GitHub repo visibility")
+    # Determine intent: public or private
+    want_public = bool(re.search(r"\bpublic\b", target, re.I)) or \
+                  not bool(re.search(r"\bprivate\b", target, re.I))
+    visibility = "public" if want_public else "private"
+
+    # Get current repo name from remote
+    remote = run_shell(f"git -C '{BASE}' remote get-url origin 2>/dev/null").strip()
+    if not remote:
+        cprint("  No remote configured. Run /backup-enable first.", YELLOW); return
+    repo_name = re.sub(r".*github\.com[:/]", "", remote).rstrip(".git")
+
+    cprint(f"  Repo    : {repo_name}", GRAY)
+    cprint(f"  Current : private (assumed — created with --private flag)", GRAY)
+    cprint(f"  New     : {BOLD}{visibility}{RESET}", "")
+    if want_public:
+        cprint(f"\n  {YELLOW}⚠  Making a repo public exposes ALL its history and files.{RESET}", "")
+        cprint(f"  Verify secrets/ and .env files are NOT committed before proceeding.", GRAY)
+
+    ans = input(f"\n  {YELLOW}Change '{repo_name}' to {visibility}? (y/n):{RESET} ").strip().lower()
+    if ans not in ("y", "yes"):
+        cprint("  Cancelled.", GRAY); return
+
+    activity_step("running", f"gh repo edit --visibility {visibility}")
+    out = run_shell(f"/opt/homebrew/bin/gh repo edit {repo_name} --visibility {visibility} 2>&1")
+    if out.strip():
+        cprint(f"  {out}", GRAY)
+    # Verify
+    info = run_shell(f"/opt/homebrew/bin/gh repo view {repo_name} --json visibility -q '.visibility' 2>/dev/null").strip()
+    if info.lower() == visibility:
+        cprint(f"\n  {GREEN}✓ Repo is now {visibility.upper()}{RESET}", "")
+        if want_public:
+            cprint(f"  URL: https://github.com/{repo_name}", CYAN)
+    else:
+        cprint(f"\n  {YELLOW}⚠ Could not confirm — check: gh repo view {repo_name}{RESET}", "")
+    _flush_trace()
 
 
 # ── Git + repository management ────────────────────────────────────────────────
@@ -3207,6 +3255,7 @@ def dispatch_natural(text: str):
         "model_status": "Model Status", "use_local": "Switch to Local Model",
         "use_cloud": "Switch to Cloud Model", "capabilities": "Capabilities List",
         "rag_search": "Semantic Notes Search", "browse": "Browse URL",
+        "github_visibility": "GitHub Repo Visibility",
         "github_connected": "GitHub Connection Check",
         "git_status": "Git Status", "generate_image": "Generate Image",
         "run_code": "Run Python Code", "benchmark": "Benchmark",
@@ -3291,6 +3340,8 @@ def dispatch_natural(text: str):
     elif intent == "browse":
         url = target or text
         cmd_browse(url)
+    elif intent == "github_visibility":
+        cmd_github_visibility(text)
     elif intent == "github_connected":
         cmd_github_connected()
     elif intent == "git_status":
@@ -3348,6 +3399,10 @@ def handle(line: str) -> bool:
     # Exit
     if line in ["/exit","/quit","/bye","exit","quit"]:
         print(f"\n{CYAN}Adwi:{RESET} Bye, Suneel. 👋\n"); return False
+
+    # Clear screen
+    if line.lower() in ("clear", "/clear", "cls", "/cls"):
+        import subprocess as _sp; _sp.run("clear", shell=True); return True
 
     # Explicit slash commands (shortcuts for power users)
     if line == "/help": print(HELP); return True
@@ -3416,6 +3471,8 @@ def handle(line: str) -> bool:
     elif line.startswith("/run-python"): cmd_run_python(line[11:].strip())
     elif line.startswith("/run-bash "): cmd_run_bash(line[10:].strip())
     elif line in ("/github-status", "/github", "/gh-status"): cmd_github_connected()
+    elif line in ("/github-public", "/repo-public"): cmd_github_visibility("public")
+    elif line in ("/github-private", "/repo-private"): cmd_github_visibility("private")
     elif line.startswith("/git"): cmd_git(line[4:].strip())
     elif line.startswith("/generate-image "): cmd_generate_image(line[16:].strip())
     elif line == "/generate-image": cmd_generate_image(input(f"  {CYAN}Image prompt:{RESET} ").strip())

@@ -1,0 +1,87 @@
+{
+  "timestamp": "2026-06-15T02:01:03.159250",
+  "total": 30,
+  "passed": 17,
+  "failed": 13,
+  "skipped": 0,
+  "failures": [
+    {
+      "id": "r004",
+      "input": "something is broken, repair adwi",
+      "expected": "self_heal",
+      "got": "chat"
+    },
+    {
+      "id": "r006",
+      "input": "update open webui knowledge",
+      "expected": "sync",
+      "got": "open_webui_update"
+    },
+    {
+      "id": "r007",
+      "input": "what can you do?",
+      "expected": "capabilities",
+      "got": "general"
+    },
+    {
+      "id": "r009",
+      "input": "make yourself better",
+      "expected": "daily_improve",
+      "got": "self_improvement"
+    },
+    {
+      "id": "r010",
+      "input": "run your daily improvement routine",
+      "expected": "daily_improve",
+      "got": "run_code"
+    },
+    {
+      "id": "r013",
+      "input": "I got a SyntaxError in adwi_cli.py line 42",
+      "expected": "fix_error",
+      "got": "chat"
+    },
+    {
+      "id": "r014",
+      "input": "NameError: name 'CMD_GIT' is not defined",
+      "expected": "fix_error",
+      "got": "chat"
+    },
+    {
+      "id": "r015",
+      "input": "HTTP Error 400: Bad Request when calling cloud",
+      "expected": "fix_error",
+      "got": "chat"
+    },
+    {
+      "id": "r016",
+      "input": "analyze my screenshot ~/Desktop/error.png",
+      "expected": "image",
+      "got": "generate_image"
+    },
+    {
+      "id": "r017",
+      "input": "look at this image: /tmp/screenshot.png",
+      "expected": "image",
+      "got": "image_view"
+    },
+    {
+      "id": "r019",
+      "input": "find notes about Ollama",
+      "expected": "rag_search",
+      "got": "notes"
+    },
+    {
+      "id": "r021",
+      "input": "fetch this page and summarize it",
+      "expected": "browse",
+      "got": "fetch_page"
+    },
+    {
+      "id": "r028",
+      "input": "what should I build next?",
+      "expected": "what_next",
+      "got": "build_next"
+    }
+  ]
+}

@@ -24,6 +24,10 @@ DATE_STR = NOW.strftime("%Y-%m-%d")
 TIME_STR = NOW.strftime("%H:%M")
 LOG_PATH = NIGHTLY_LOG_DIR / f"nightly-{DATE_STR}.md"
 
+DESKTOP          = HOME / "Desktop"
+AIDER_BIN        = HOME / ".local" / "bin" / "aider"
+MAX_FIX_ATTEMPTS = 3
+
 _ANSI = re.compile(r'\x1B(?:[@-Z\\-_]|\[[0-?]*[ -/]*[@-~])')
 
 
@@ -189,6 +193,214 @@ def _save_pending(suggestions: str):
     existing = PENDING_FILE.read_text(encoding="utf-8") if PENDING_FILE.exists() else header
     entry = f"\n## {DATE_STR} {TIME_STR}\n```json\n{suggestions}\n```\n"
     PENDING_FILE.write_text(existing + entry, encoding="utf-8")
+
+
+# ── Step 3b: Aider Self-Healing ───────────────────────────────────────────────
+
+def _find_test_suite() -> tuple:
+    """Return (cmd_list, cwd) for the best test runner found in the workspace."""
+    # pytest: explicit evals directory
+    evals_dir = ADWI_DIR / "evals"
+    if evals_dir.exists() and any(evals_dir.glob("test_*.py")):
+        return (
+            ["python3", "-m", "pytest", str(evals_dir), "-x", "--tb=short", "-q"],
+            WORKSPACE,
+        )
+    # pytest: project-level markers
+    for marker in ("pytest.ini", "pyproject.toml", "setup.cfg"):
+        if (WORKSPACE / marker).exists():
+            return (
+                ["python3", "-m", "pytest", "-x", "--tb=short", "-q"],
+                WORKSPACE,
+            )
+    # npm/jest
+    if (WORKSPACE / "package.json").exists():
+        return (["npm", "test", "--", "--watchAll=false"], WORKSPACE)
+    return ([], WORKSPACE)
+
+
+def _run_tests(cmd: list, cwd: Path, timeout: int = 120) -> tuple:
+    """Return (passed: bool, output: str)."""
+    if not cmd:
+        return True, "no test suite"
+    env = {
+        **os.environ,
+        "PATH": "/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin",
+        "HOME": str(HOME),
+    }
+    try:
+        r = subprocess.run(
+            cmd, capture_output=True, text=True, timeout=timeout,
+            cwd=str(cwd), env=env,
+        )
+        return r.returncode == 0, (r.stdout + r.stderr).strip()
+    except subprocess.TimeoutExpired:
+        return False, "test suite timed out"
+    except Exception as e:
+        return False, str(e)
+
+
+def _extract_failing_files(output: str) -> list:
+    """Parse pytest/jest output for source files (not test files) that need fixing."""
+    files = set()
+    for m in re.finditer(r"([\w/\-\.]+\.py)(?:[::][\w\.]+)?(?::\d+)?", output):
+        p = WORKSPACE / m.group(1)
+        if p.exists() and "test_" not in p.name and p.name != "__init__.py":
+            files.add(p)
+    if not files:
+        if CLI_PY.exists():
+            files.add(CLI_PY)
+    return list(files)[:6]
+
+
+def _invoke_aider(error_output: str, files: list, attempt: int) -> tuple:
+    """Run Aider non-interactively on the failing files. Returns (ok: bool, log: str)."""
+    if not AIDER_BIN.exists():
+        return False, f"Aider not found at {AIDER_BIN}"
+
+    prompt = (
+        f"[Adwi nightly self-healing — attempt {attempt}/{MAX_FIX_ATTEMPTS}]\n\n"
+        f"Automated test suite failed. Exact error output:\n\n"
+        f"```\n{error_output[:3000]}\n```\n\n"
+        f"Fix the minimum number of lines needed to make the tests pass. "
+        f"Do not add new features, refactor beyond the failing code, or change "
+        f"any behaviour that currently passes. Apply changes directly to the files."
+    )
+    cmd = [
+        str(AIDER_BIN),
+        "--model", "ollama/adwi:latest",
+        "--no-git",        # nightly.py handles its own git operations
+        "--yes-always",    # never wait for confirmation
+        "--no-pretty",
+        "--no-stream",
+        "--message", prompt,
+    ] + [str(f) for f in files]
+
+    env = {
+        **os.environ,
+        "PATH": "/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin",
+        "HOME": str(HOME),
+        "OLLAMA_API_BASE": "http://127.0.0.1:11434",
+    }
+    try:
+        r = subprocess.run(
+            cmd, capture_output=True, text=True, timeout=600,
+            cwd=str(WORKSPACE), env=env,
+        )
+        return r.returncode == 0, (r.stdout + r.stderr)[-3000:]
+    except subprocess.TimeoutExpired:
+        return False, "Aider timed out after 10 minutes"
+    except Exception as e:
+        return False, str(e)
+
+
+def step_aider_heal() -> dict:
+    """
+    Pillar 1 autonomous self-healing:
+      1. Detect test suite
+      2. Run — if passing, return immediately (nothing to fix)
+      3. Invoke Aider up to MAX_FIX_ATTEMPTS times
+      4. If fixed: cut auto-fix/morning-review-YYYY-MM-DD branch, commit, push
+      5. If still failing after all attempts: rollback Aider changes, write
+         failure report to ~/Desktop/adwi-repair-report-YYYY-MM-DD.md
+    """
+    result = {
+        "skipped_reason": None,
+        "ran_tests": False,
+        "tests_passed_before": None,
+        "tests_passed_after": None,
+        "attempts": 0,
+        "branch": None,
+        "report_path": None,
+    }
+
+    cmd, cwd = _find_test_suite()
+    if not cmd:
+        result["skipped_reason"] = "no test suite found in workspace"
+        return result
+
+    result["ran_tests"] = True
+    passed_before, initial_output = _run_tests(cmd, cwd)
+    result["tests_passed_before"] = passed_before
+
+    if passed_before:
+        result["skipped_reason"] = "tests already passing — nothing to fix"
+        return result
+
+    _pr(f"  ⚠ Tests failing — invoking Aider ({MAX_FIX_ATTEMPTS} max attempts)...")
+
+    # Snapshot git HEAD so we can rollback if all attempts fail
+    rc, orig_head, _ = _run(["git", "rev-parse", "HEAD"], timeout=10)
+    _, current_branch, _ = _run(["git", "rev-parse", "--abbrev-ref", "HEAD"], timeout=10)
+
+    files = _extract_failing_files(initial_output)
+    error_log = initial_output
+    fixed = False
+
+    for attempt in range(1, MAX_FIX_ATTEMPTS + 1):
+        result["attempts"] = attempt
+        _pr(f"    Attempt {attempt}/{MAX_FIX_ATTEMPTS}: Aider on {len(files)} file(s)...")
+        _invoke_aider(error_log, files, attempt)
+        passed, new_output = _run_tests(cmd, cwd)
+        if passed:
+            fixed = True
+            break
+        error_log = new_output
+        files = _extract_failing_files(new_output) or files  # reuse previous if no new clues
+
+    result["tests_passed_after"] = fixed
+
+    if fixed:
+        branch = f"auto-fix/morning-review-{DATE_STR}"
+        _run(["git", "checkout", "-b", branch], timeout=15)
+        _run(["git", "add", "-A"], timeout=10)
+        _run(
+            ["git", "commit", "-m",
+             f"auto-fix: nightly self-healing — {DATE_STR} ({result['attempts']} attempt(s))"],
+            timeout=20,
+        )
+        _run(["git", "push", "-u", "origin", branch], timeout=60)
+        result["branch"] = branch
+        _pr(f"  ✓ Fixed and pushed → {branch}")
+
+    else:
+        # Roll back every file Aider touched
+        _run(["git", "checkout", "--", "."], timeout=15)
+        if current_branch and current_branch != "HEAD":
+            _run(["git", "checkout", current_branch], timeout=10)
+
+        DESKTOP.mkdir(parents=True, exist_ok=True)
+        report_path = DESKTOP / f"adwi-repair-report-{DATE_STR}.md"
+        lines = [
+            f"# Adwi Self-Healing Report — {DATE_STR} {TIME_STR}",
+            "",
+            "**Status: FAILED — manual intervention required**",
+            "",
+            f"Aider ran **{MAX_FIX_ATTEMPTS} attempts** and could not pass the test suite.",
+            "",
+            "## Initial Failures",
+            "```",
+            initial_output[:2000],
+            "```",
+            "",
+            "## Final State After Last Attempt",
+            "```",
+            error_log[:2000],
+            "```",
+            "",
+            "## Files Targeted",
+        ] + [f"- `{f}`" for f in files] + [
+            "",
+            "## Next Steps",
+            "1. Run `python3 -m pytest adwi/evals/ -v` to inspect failures manually",
+            "2. Check `notes/adwi-repair-logs/` for prior repair history",
+            "3. Review the files listed above for recent changes",
+        ]
+        report_path.write_text("\n".join(lines), encoding="utf-8")
+        result["report_path"] = str(report_path)
+        _pr(f"  ✗ Could not auto-fix — see: {report_path}")
+
+    return result
 
 
 # ── Step 4: Evals ─────────────────────────────────────────────────────────────

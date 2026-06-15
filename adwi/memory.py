@@ -1,0 +1,361 @@
+"""
+Adwi Memory Layer — local SQLite + Ollama embedding store.
+Persistent semantic ledger of terminal commands, git commits, and project notes.
+Exposed to Open WebUI via /memory-context injection into prompts.
+
+Usage (CLI):
+    python3 memory.py scan     — index terminal + git + notes
+    python3 memory.py recall <query>
+    python3 memory.py context <query>
+    python3 memory.py stats
+"""
+
+import hashlib
+import json
+import math
+import os
+import re
+import sqlite3
+import subprocess
+import sys
+import urllib.request
+from datetime import datetime
+from pathlib import Path
+from typing import Optional
+
+HOME        = Path.home()
+WORKSPACE   = HOME / "SuneelWorkSpace"
+ADWI_DIR    = WORKSPACE / "adwi"
+NOTES_DIR   = WORKSPACE / "notes"
+DB_PATH     = ADWI_DIR / "memory.db"
+OLLAMA_URL  = "http://127.0.0.1:11434"
+EMBED_MODEL = "nomic-embed-text"   # 274MB, already installed
+
+_SKIP_SOURCES = re.compile(
+    r"^(ls|cd|pwd|history|clear|exit|cat|echo|man|which|top|ps|df|du"
+    r"|brew\s+install|brew\s+upgrade|pip\s+install|pip3\s+install"
+    r"|git\s+(add|commit|push|pull|status|log|diff|fetch|checkout|merge)\b"
+    r"|python3?\s+-[cm]\s+\w)",
+    re.I,
+)
+_SKIP_SECRET = re.compile(
+    r"(password|passwd|token|secret|bearer|api.?key|private.?key|access.?key"
+    r"|auth.?token|credential)\s*[=:\s]",
+    re.I,
+)
+_SKIP_PATH_DUMP = re.compile(r"^/\S+$")   # bare absolute paths
+
+_SCHEMA = """
+CREATE TABLE IF NOT EXISTS memories (
+    id           INTEGER PRIMARY KEY AUTOINCREMENT,
+    ts           TEXT    NOT NULL,
+    source       TEXT    NOT NULL,
+    content      TEXT    NOT NULL,
+    content_hash TEXT    NOT NULL,
+    tags         TEXT    NOT NULL DEFAULT '[]',
+    embedding    TEXT
+);
+CREATE UNIQUE INDEX IF NOT EXISTS idx_hash   ON memories (content_hash);
+CREATE INDEX       IF NOT EXISTS idx_source  ON memories (source);
+CREATE INDEX       IF NOT EXISTS idx_ts      ON memories (ts);
+"""
+
+
+# ── Pure-Python vector math (no numpy) ──────────────────────────────────────
+
+def _sha256(text: str) -> str:
+    return hashlib.sha256(text.encode()).hexdigest()
+
+
+def _cosine(a: list, b: list) -> float:
+    if not a or not b or len(a) != len(b):
+        return 0.0
+    dot = sum(x * y for x, y in zip(a, b))
+    na  = math.sqrt(sum(x * x for x in a))
+    nb  = math.sqrt(sum(x * x for x in b))
+    return dot / (na * nb) if na and nb else 0.0
+
+
+# ── Core class ───────────────────────────────────────────────────────────────
+
+class AdwiMemory:
+
+    def __init__(self, db_path: Path = DB_PATH):
+        self.db_path = db_path
+        self.conn = sqlite3.connect(str(db_path), check_same_thread=False)
+        self.conn.execute("PRAGMA journal_mode=WAL")
+        self.conn.execute("PRAGMA synchronous=NORMAL")
+        self.conn.executescript(_SCHEMA)
+        self.conn.commit()
+
+    # ── Embedding ────────────────────────────────────────────────────────────
+
+    def _embed(self, text: str) -> Optional[list]:
+        try:
+            payload = json.dumps({
+                "model": EMBED_MODEL,
+                "prompt": text[:4096],
+            }).encode()
+            req = urllib.request.Request(
+                f"{OLLAMA_URL}/api/embeddings",
+                data=payload, method="POST",
+                headers={"Content-Type": "application/json"},
+            )
+            with urllib.request.urlopen(req, timeout=15) as r:
+                return json.loads(r.read()).get("embedding")
+        except Exception:
+            return None
+
+    # ── Write ─────────────────────────────────────────────────────────────────
+
+    def store(self, content: str, source: str, tags: list = None) -> bool:
+        """Insert one memory. Returns True if new, False if duplicate."""
+        content = content.strip()
+        if len(content) < 20:
+            return False
+        h = _sha256(content)
+        tags_json = json.dumps(tags or [])
+        ts = datetime.now().isoformat(timespec="seconds")
+        embedding = self._embed(content)
+        emb_json  = json.dumps(embedding) if embedding else None
+        try:
+            self.conn.execute(
+                "INSERT INTO memories (ts, source, content, content_hash, tags, embedding) "
+                "VALUES (?,?,?,?,?,?)",
+                (ts, source, content, h, tags_json, emb_json),
+            )
+            self.conn.commit()
+            return True
+        except sqlite3.IntegrityError:
+            return False  # already stored
+
+    # ── Read ──────────────────────────────────────────────────────────────────
+
+    def recall(self, query: str, k: int = 5, threshold: float = 0.25) -> list:
+        """Semantic vector search. Falls back to keyword if embeddings unavailable."""
+        q_emb = self._embed(query)
+        if not q_emb:
+            return self.recall_keyword(query, k=k)
+
+        rows = self.conn.execute(
+            "SELECT id, ts, source, content, tags, embedding FROM memories "
+            "WHERE embedding IS NOT NULL"
+        ).fetchall()
+
+        scored = []
+        for row in rows:
+            try:
+                emb = json.loads(row[5])
+            except Exception:
+                continue
+            sim = _cosine(q_emb, emb)
+            if sim >= threshold:
+                scored.append({
+                    "id": row[0], "ts": row[1], "source": row[2],
+                    "content": row[3], "tags": json.loads(row[4]),
+                    "score": round(sim, 4),
+                })
+
+        scored.sort(key=lambda x: x["score"], reverse=True)
+        return scored[:k]
+
+    def recall_keyword(self, query: str, k: int = 10) -> list:
+        """BM25-lite keyword fallback for when embeddings are cold."""
+        words = [w.lower() for w in re.split(r'\W+', query) if len(w) > 3]
+        if not words:
+            return []
+        clause = " OR ".join(f"LOWER(content) LIKE ?" for _ in words)
+        params = [f"%{w}%" for w in words] + [k]
+        rows = self.conn.execute(
+            f"SELECT id, ts, source, content, tags "
+            f"FROM memories WHERE {clause} ORDER BY ts DESC LIMIT ?",
+            params,
+        ).fetchall()
+        return [{
+            "id": r[0], "ts": r[1], "source": r[2],
+            "content": r[3], "tags": json.loads(r[4]), "score": 0.0,
+        } for r in rows]
+
+    def format_context(self, query: str, k: int = 5) -> str:
+        """Return a compact block suitable for injecting into any prompt."""
+        hits = self.recall(query, k=k)
+        if not hits:
+            hits = self.recall_keyword(query, k=k)
+        if not hits:
+            return ""
+        lines = ["[Suneel's memory ledger — relevant context:]"]
+        for h in hits:
+            score_tag = f"{h['score']:.2f}" if h["score"] > 0 else "kw"
+            lines.append(f"- [{h['ts'][:10]}][{h['source']}/{score_tag}] {h['content'][:220]}")
+        return "\n".join(lines)
+
+    # ── Scanners ─────────────────────────────────────────────────────────────
+
+    def scan_terminal(self, n: int = 400) -> int:
+        """Parse zsh/bash history and store meaningful commands."""
+        for hist_file in [HOME / ".zsh_history", HOME / ".bash_history"]:
+            if hist_file.exists():
+                break
+        else:
+            return 0
+
+        raw = hist_file.read_text(encoding="utf-8", errors="ignore").splitlines()
+        cmds = []
+        for line in raw:
+            # zsh extended format: ": timestamp:duration;command"
+            if line.startswith(": ") and ";" in line:
+                cmds.append(line.split(";", 1)[1].strip())
+            else:
+                cmds.append(line.strip())
+
+        stored = 0
+        for cmd in cmds[-n:]:
+            if not cmd or len(cmd) < 12:
+                continue
+            if _SKIP_SOURCES.match(cmd):
+                continue
+            if _SKIP_SECRET.search(cmd):
+                continue
+            if _SKIP_PATH_DUMP.match(cmd):
+                continue
+            if self.store(f"Terminal: {cmd}", source="terminal", tags=["command"]):
+                stored += 1
+        return stored
+
+    def scan_git_commits(self, workspace: Path = WORKSPACE, n: int = 60) -> int:
+        """Store recent commit messages as developer-decision memories."""
+        try:
+            r = subprocess.run(
+                ["git", "log", f"-{n}", "--pretty=format:%s — %b", "--no-merges"],
+                capture_output=True, text=True, cwd=str(workspace), timeout=15,
+            )
+        except Exception:
+            return 0
+        if r.returncode != 0:
+            return 0
+        stored = 0
+        for line in r.stdout.splitlines():
+            line = line.strip(" —").strip()
+            if not line:
+                continue
+            if self.store(f"Git commit: {line[:400]}", source="git", tags=["commit"]):
+                stored += 1
+        return stored
+
+    def scan_notes(self, notes_dir: Path = NOTES_DIR, max_per_file: int = 15) -> int:
+        """Chunk markdown notes into paragraphs and store as memories."""
+        if not notes_dir.exists():
+            return 0
+        stored = 0
+        for md in sorted(notes_dir.rglob("*.md")):
+            if md.stat().st_size > 250_000:
+                continue
+            text = md.read_text(encoding="utf-8", errors="ignore")
+            # Split on H1/H2/H3 headings or double blank lines
+            chunks = re.split(r'\n#{1,3} |\n\n\n+', text)
+            count = 0
+            for chunk in chunks:
+                chunk = chunk.strip()
+                if len(chunk) < 50:
+                    continue
+                if self.store(chunk[:700], source="notes", tags=["notes", md.stem]):
+                    stored += 1
+                    count += 1
+                if count >= max_per_file:
+                    break
+        return stored
+
+    # ── Stats ─────────────────────────────────────────────────────────────────
+
+    def stats(self) -> dict:
+        total    = self.conn.execute("SELECT COUNT(*) FROM memories").fetchone()[0]
+        with_emb = self.conn.execute(
+            "SELECT COUNT(*) FROM memories WHERE embedding IS NOT NULL"
+        ).fetchone()[0]
+        by_src = dict(self.conn.execute(
+            "SELECT source, COUNT(*) FROM memories GROUP BY source"
+        ).fetchall())
+        return {"total": total, "with_embeddings": with_emb, "by_source": by_src}
+
+    def close(self):
+        self.conn.close()
+
+
+# ── Open WebUI integration guide ─────────────────────────────────────────────
+# To inject memory context into Open WebUI prompts:
+#
+#   1. Add a System Prompt prefix in Open WebUI Settings → Models → System Prompt:
+#      "Before answering, I will give you relevant context from Suneel's memory."
+#
+#   2. Use the /memory-context <query> command in adwi_cli.py to get the context
+#      block and paste it at the start of your Open WebUI session.
+#
+#   3. Automated injection via n8n:
+#      - Trigger: HTTP webhook from adwi_cli.py
+#      - Node: Run `python3 memory.py context "{{ $json.query }}"` via SSH/exec
+#      - Append output to the Open WebUI message payload as a system message
+#
+# ── CLI ───────────────────────────────────────────────────────────────────────
+
+def _main():
+    cmd   = sys.argv[1] if len(sys.argv) > 1 else "stats"
+    query = " ".join(sys.argv[2:])
+
+    mem = AdwiMemory()
+
+    if cmd == "scan":
+        print("Scanning terminal history...")
+        t = mem.scan_terminal()
+        print(f"  +{t} terminal memories")
+
+        print("Scanning git commits...")
+        g = mem.scan_git_commits()
+        print(f"  +{g} git memories")
+
+        print("Scanning notes...")
+        n = mem.scan_notes()
+        print(f"  +{n} note memories")
+
+        s = mem.stats()
+        print(f"\nLedger total: {s['total']} ({s['with_embeddings']} with embeddings)")
+        print(f"By source: {s['by_source']}")
+
+    elif cmd == "recall":
+        if not query:
+            print("Usage: python3 memory.py recall <query>")
+            sys.exit(1)
+        hits = mem.recall(query) or mem.recall_keyword(query)
+        if not hits:
+            print("No matches.")
+        for h in hits:
+            score = f"{h['score']:.3f}" if h["score"] > 0 else " kw "
+            print(f"\n[{score}] {h['source']:8s} {h['ts'][:10]}")
+            print(f"  {h['content'][:240]}")
+
+    elif cmd == "context":
+        if not query:
+            print("Usage: python3 memory.py context <query>")
+            sys.exit(1)
+        ctx = mem.format_context(query)
+        print(ctx if ctx else "No relevant context found.")
+
+    elif cmd == "store":
+        if not query:
+            print("Usage: python3 memory.py store <content>")
+            sys.exit(1)
+        ok = mem.store(query, source="manual", tags=["manual"])
+        print("Stored." if ok else "Duplicate — already in ledger.")
+
+    elif cmd == "stats":
+        s = mem.stats()
+        print(json.dumps(s, indent=2))
+
+    else:
+        print(f"Unknown command: {cmd}")
+        print("Commands: scan | recall <q> | context <q> | store <text> | stats")
+
+    mem.close()
+
+
+if __name__ == "__main__":
+    _main()

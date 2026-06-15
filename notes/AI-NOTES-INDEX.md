@@ -1,6 +1,6 @@
 # Suneel AI Notes Index
 
-Generated: Sun Jun 14 17:43:20 CDT 2026
+Generated: Mon Jun 15 13:11:20 CDT 2026
 
 Notes folder: `/Users/MAC/SuneelWorkSpace/notes`
 
@@ -36,6 +36,60 @@ Notes folder: `/Users/MAC/SuneelWorkSpace/notes`
   - File: `adwi-action-logs/20260614-095528-92276-model-status.md`
 - **Adwi Action Log**
   - File: `adwi-action-logs/20260614-095623-92276-status.md`
+- **Adwi Log: duplicates**
+  - File: `adwi-action-logs/20260614-214806-81412-duplicates.md`
+- **Adwi Log: test-adwi**
+  - File: `adwi-action-logs/20260614-232529-69398-test-adwi.md`
+- **Adwi Log: status**
+  - File: `adwi-action-logs/20260614-232529-69405-status.md`
+- **Adwi Log: repair-adwi**
+  - File: `adwi-action-logs/20260614-232648-71029-repair-adwi.md`
+- **Adwi Log: status**
+  - File: `adwi-action-logs/20260614-232648-71038-status.md`
+- **Adwi Log: capability-audit**
+  - File: `adwi-action-logs/20260614-232649-71329-capability-audit.md`
+- **Adwi Log: run-safe-py-compile**
+  - File: `adwi-action-logs/20260614-232728-72107-run-safe-py-compile.md`
+- **Adwi Log: status**
+  - File: `adwi-action-logs/20260615-001346-20794-status.md`
+- **Adwi Log: status**
+  - File: `adwi-action-logs/20260615-001409-21526-status.md`
+- **Adwi Log: eval-routing**
+  - File: `adwi-action-logs/20260615-020103-32756-eval-routing.md`
+- **Adwi Log: disk-usage**
+  - File: `adwi-action-logs/20260615-122427-77282-disk-usage.md`
+- **Adwi Log: disk-usage**
+  - File: `adwi-action-logs/20260615-122449-77282-disk-usage.md`
+- **Adwi Log: status**
+  - File: `adwi-action-logs/20260615-122623-80476-status.md`
+- **Adwi Capability Roadmap**
+  - File: `adwi-capability-roadmap.md`
+- **Adwi Learning Journal**
+  - File: `adwi-learning-journal.md`
+- **Adwi Mistakes and Fixes**
+  - File: `adwi-mistakes-and-fixes.md`
+- **Adwi Pending Improvements**
+  - File: `adwi-pending-improvements.md`
+- **Adwi Repair Log — FAILED**
+  - File: `adwi-repair-logs/20260614-232601-fix-error.md`
+- **Adwi Activity Trace**
+  - File: `adwi-trace-logs/20260615-001408-stack-status-check-trace.md`
+- **Adwi Activity Trace**
+  - File: `adwi-trace-logs/20260615-002305-github-connection-check-trace.md`
+- **Adwi Activity Trace**
+  - File: `adwi-trace-logs/20260615-002355-github-connection-check-trace.md`
+- **Adwi Activity Trace**
+  - File: `adwi-trace-logs/20260615-002422-git-status-trace.md`
+- **Adwi Activity Trace**
+  - File: `adwi-trace-logs/20260615-002441-git-status-trace.md`
+- **Adwi Activity Trace**
+  - File: `adwi-trace-logs/20260615-002521-git-status-trace.md`
+- **Adwi Activity Trace**
+  - File: `adwi-trace-logs/20260615-004053-browse-url-trace.md`
+- **Adwi Activity Trace**
+  - File: `adwi-trace-logs/20260615-122400-disk-usage-analysis-trace.md`
+- **Adwi Activity Trace**
+  - File: `adwi-trace-logs/20260615-122435-disk-usage-analysis-trace.md`
 - **Command Output Clipboard Log**
   - File: `clipboard-command-logs/20260613-230458-command-output.md`
 - **Command Output Clipboard Log**
@@ -78,6 +132,62 @@ Notes folder: `/Users/MAC/SuneelWorkSpace/notes`
   - File: `daily-status/20260613-211505-ai-status.md`
 - **Daily AI Status Report**
   - File: `daily-status/20260614-174319-ai-status.md`
+- **Daily AI Status Report**
+  - File: `daily-status/20260615-093352-ai-status.md`
+- **Daily AI Status Report**
+  - File: `daily-status/20260615-131119-ai-status.md`
+- **Adwi Auto-Backup — Mon Jun 15 00:13:48 CDT 2026**
+  - File: `git-backup-logs/20260615-001348-git-backup.md`
+- **Adwi Auto-Backup — Mon Jun 15 00:43:49 CDT 2026**
+  - File: `git-backup-logs/20260615-004349-git-backup.md`
+- **Adwi Auto-Backup — Mon Jun 15 01:13:50 CDT 2026**
+  - File: `git-backup-logs/20260615-011350-git-backup.md`
+- **Adwi Auto-Backup — Mon Jun 15 01:43:52 CDT 2026**
+  - File: `git-backup-logs/20260615-014352-git-backup.md`
+- **Adwi Auto-Backup — Mon Jun 15 02:13:54 CDT 2026**
+  - File: `git-backup-logs/20260615-021354-git-backup.md`
+- **Adwi Auto-Backup — Mon Jun 15 02:43:56 CDT 2026**
+  - File: `git-backup-logs/20260615-024356-git-backup.md`
+- **Adwi Auto-Backup — Mon Jun 15 03:13:59 CDT 2026**
+  - File: `git-backup-logs/20260615-031359-git-backup.md`
+- **Adwi Auto-Backup — Mon Jun 15 03:44:03 CDT 2026**
+  - File: `git-backup-logs/20260615-034403-git-backup.md`
+- **Adwi Auto-Backup — Mon Jun 15 04:14:07 CDT 2026**
+  - File: `git-backup-logs/20260615-041407-git-backup.md`
+- **Adwi Auto-Backup — Mon Jun 15 04:44:11 CDT 2026**
+  - File: `git-backup-logs/20260615-044411-git-backup.md`
+- **Adwi Auto-Backup — Mon Jun 15 05:14:16 CDT 2026**
+  - File: `git-backup-logs/20260615-051416-git-backup.md`
+- **Adwi Auto-Backup — Mon Jun 15 05:44:21 CDT 2026**
+  - File: `git-backup-logs/20260615-054421-git-backup.md`
+- **Adwi Auto-Backup — Mon Jun 15 06:14:26 CDT 2026**
+  - File: `git-backup-logs/20260615-061426-git-backup.md`
+- **Adwi Auto-Backup — Mon Jun 15 06:44:32 CDT 2026**
+  - File: `git-backup-logs/20260615-064432-git-backup.md`
+- **Adwi Auto-Backup — Mon Jun 15 07:14:38 CDT 2026**
+  - File: `git-backup-logs/20260615-071438-git-backup.md`
+- **Adwi Auto-Backup — Mon Jun 15 07:44:45 CDT 2026**
+  - File: `git-backup-logs/20260615-074445-git-backup.md`
+- **Adwi Auto-Backup — Mon Jun 15 08:14:51 CDT 2026**
+  - File: `git-backup-logs/20260615-081451-git-backup.md`
+- **Adwi Auto-Backup — Mon Jun 15 08:44:58 CDT 2026**
+  - File: `git-backup-logs/20260615-084458-git-backup.md`
+- **Adwi Auto-Backup — Mon Jun 15 09:15:05 CDT 2026**
+  - File: `git-backup-logs/20260615-091505-git-backup.md`
+- **Adwi Auto-Backup — Mon Jun 15 09:45:07 CDT 2026**
+  - File: `git-backup-logs/20260615-094507-git-backup.md`
+- **Adwi Auto-Backup — Mon Jun 15 10:15:08 CDT 2026**
+  - File: `git-backup-logs/20260615-101508-git-backup.md`
+- **Adwi Auto-Backup — Mon Jun 15 10:45:08 CDT 2026**
+  - File: `git-backup-logs/20260615-104508-git-backup.md`
+- **Adwi Auto-Backup — Mon Jun 15 11:15:10 CDT 2026**
+  - File: `git-backup-logs/20260615-111510-git-backup.md`
+- **Adwi Auto-Backup — Mon Jun 15 11:45:10 CDT 2026**
+  - File: `git-backup-logs/20260615-114510-git-backup.md`
+- **Adwi Auto-Backup — Mon Jun 15 12:15:12 CDT 2026**
+  - File: `git-backup-logs/20260615-121512-git-backup.md`
+- **Adwi Auto-Backup — Mon Jun 15 12:45:12 CDT 2026**
+  - File: `git-backup-logs/20260615-124512-git-backup.md`
 - **Suneel Local AI Learning Journal**
   - File: `local-ai-learning-journal.md`
 - **Auto AI Maintenance Log**
@@ -90,6 +200,12 @@ Notes folder: `/Users/MAC/SuneelWorkSpace/notes`
   - File: `maintenance-logs/20260613-195944-auto-ai-maintenance.md`
 - **Auto AI Maintenance Log**
   - File: `maintenance-logs/20260614-174318-auto-ai-maintenance.md`
+- **Auto AI Maintenance Log**
+  - File: `maintenance-logs/20260615-093351-auto-ai-maintenance.md`
+- **Auto AI Maintenance Log**
+  - File: `maintenance-logs/20260615-131118-auto-ai-maintenance.md`
+- **Adwi Nightly Improvement — 2026-06-15 02:00**
+  - File: `nightly-improvement-logs/nightly-2026-06-15.md`
 - **Open WebUI Knowledge Sync Log**
   - File: `open-webui-sync-logs/20260613-225453-openwebui-sync.md`
 - **Open WebUI Knowledge Sync Log**
@@ -102,6 +218,16 @@ Notes folder: `/Users/MAC/SuneelWorkSpace/notes`
   - File: `open-webui-sync-logs/20260613-231007-openwebui-sync.md`
 - **Open WebUI Knowledge Sync Log**
   - File: `open-webui-sync-logs/20260613-231554-openwebui-sync.md`
+- **Open WebUI Knowledge Sync Log**
+  - File: `open-webui-sync-logs/20260614-194735-openwebui-sync.md`
+- **Open WebUI Knowledge Sync Log**
+  - File: `open-webui-sync-logs/20260614-194747-openwebui-sync.md`
+- **Open WebUI Knowledge Sync Log**
+  - File: `open-webui-sync-logs/20260614-194809-openwebui-sync.md`
+- **Open WebUI Knowledge Sync Log**
+  - File: `open-webui-sync-logs/20260614-200527-openwebui-sync.md`
+- **Open WebUI Knowledge Sync Log**
+  - File: `open-webui-sync-logs/20260614-204313-openwebui-sync.md`
 - **Reliable Web Research Prompt**
   - File: `reliable-web-research-prompt.md`
 - **Adwi Self-Heal Log**

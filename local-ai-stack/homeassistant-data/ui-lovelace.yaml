@@ -1,0 +1,108 @@
+title: Adwi Home
+views:
+  - title: Adwi
+    icon: mdi:robot
+    path: default_view
+    cards:
+      # ── Status bar ───────────────────────────────────────────────────────────
+      - type: horizontal-stack
+        cards:
+          - type: entity
+            entity: person.suneel_kumar_bikkasani
+            name: Suneel
+            icon: mdi:account
+          - type: entity
+            entity: device_tracker.the_suns_iphone
+            name: iPhone
+            icon: mdi:cellphone
+          - type: entity
+            entity: weather.forecast_home
+            name: Weather
+
+      # ── Adwi quick-action buttons ────────────────────────────────────────────
+      - type: markdown
+        content: "## Adwi Commands"
+
+      - type: grid
+        columns: 2
+        square: false
+        cards:
+          - type: button
+            name: Morning Brief
+            icon: mdi:weather-sunny
+            tap_action:
+              action: call-service
+              service: notify.mobile_app_the_suns_iphone
+              service_data:
+                title: "Adwi Morning Brief"
+                message: "Good morning! Run /what-next in adwi for today's priorities."
+                data:
+                  push:
+                    sound: default
+
+          - type: button
+            name: Trigger Backup
+            icon: mdi:cloud-upload
+            tap_action:
+              action: call-service
+              service: rest_command.adwi_backup
+            hold_action:
+              action: call-service
+              service: notify.mobile_app_the_suns_iphone
+              service_data:
+                title: "Adwi"
+                message: "Backup command sent to n8n"
+
+          - type: button
+            name: Nightly Learning
+            icon: mdi:brain
+            tap_action:
+              action: call-service
+              service: rest_command.adwi_nightly
+
+          - type: button
+            name: System Status
+            icon: mdi:monitor-dashboard
+            tap_action:
+              action: call-service
+              service: notify.mobile_app_the_suns_iphone
+              service_data:
+                title: "Adwi Status"
+                message: "Mac Tailscale: 100.110.47.128 | HA: online | Run /status in adwi for full report"
+                data:
+                  push:
+                    sound: default
+
+          - type: button
+            name: Open n8n
+            icon: mdi:workflow
+            tap_action:
+              action: url
+              url_path: "http://100.110.47.128:5678"
+
+          - type: button
+            name: Open Adwi Logs
+            icon: mdi:file-document
+            tap_action:
+              action: url
+              url_path: "http://100.110.47.128:8123"
+
+      # ── Sun / time context ───────────────────────────────────────────────────
+      - type: horizontal-stack
+        cards:
+          - type: entity
+            entity: sensor.sun_next_rising
+            name: Sunrise
+            icon: mdi:weather-sunset-up
+          - type: entity
+            entity: sensor.sun_next_setting
+            name: Sunset
+            icon: mdi:weather-sunset-down
+          - type: entity
+            entity: sensor.sun_next_noon
+            name: Solar Noon
+
+      # ── Quick notes ──────────────────────────────────────────────────────────
+      - type: todo-list
+        entity: todo.shopping_list
+        title: "Quick Notes / To-Do"

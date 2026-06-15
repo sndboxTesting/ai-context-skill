@@ -7,6 +7,9 @@ from datetime import datetime
 HOME = os.path.expanduser("~")
 BIN = os.path.join(HOME, "SuneelWorkSpace", "bin")
 
+VENV_PY = os.path.join(HOME, "SuneelWorkSpace", "adwi", ".venv", "bin", "python3")
+ADWI_CLI = os.path.join(HOME, "SuneelWorkSpace", "adwi", "adwi_cli.py")
+
 ALLOWED_COMMANDS = {
     "/status-ai":              [os.path.join(BIN, "status-ai")],
     "/daily-ai-status-report": [os.path.join(BIN, "daily-ai-status-report")],
@@ -16,6 +19,12 @@ ALLOWED_COMMANDS = {
     "/rag-index":              [os.path.join(BIN, "rag-index")],
     "/git-status-workspace":   [os.path.join(BIN, "git-status-workspace")],
     "/benchmark-adwi":         [os.path.join(BIN, "benchmark-adwi")],
+    # ── Adwi pillar commands (called by n8n + HA dashboard) ──────────────────
+    "/adwi-backup":            [VENV_PY, ADWI_CLI, "/backup-now"],
+    "/adwi-nightly":           [VENV_PY, ADWI_CLI, "/nightly-run"],
+    "/adwi-brief":             [VENV_PY, ADWI_CLI, "/what-next"],
+    "/adwi-status":            [VENV_PY, ADWI_CLI, "/status"],
+    "/adwi-doctor":            [VENV_PY, ADWI_CLI, "/doctor"],
 }
 
 class Handler(BaseHTTPRequestHandler):

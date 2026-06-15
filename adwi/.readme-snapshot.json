@@ -29,6 +29,7 @@
     "/gmail",
     "/gmail-auth",
     "/gmail-summary",
+    "/ha",
     "/help",
     "/implement-idea",
     "/inbox",
@@ -100,7 +101,7 @@
     [
       "searxng",
       "8888",
-      "Up 47 hours"
+      "Up 2 days"
     ]
   ],
   "launchagents": [
@@ -141,5 +142,5 @@
     "MODEL_NLU_FALLBACK": "qwen3:0.6b"
   },
   "ts": "2026-06-15",
-  "_hash": "591dfe2e0ee6f98f"
+  "_hash": "84dee321e47d8d98"
 }

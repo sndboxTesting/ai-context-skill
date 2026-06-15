@@ -156,6 +156,10 @@ OBSIDIAN_BRIDGE  = os.environ.get("OBSIDIAN_BRIDGE_URL",  OBSIDIAN_BRIDGE)
 TAVILY_API_KEY    = os.environ.get("TAVILY_API_KEY",    "")
 FIRECRAWL_API_KEY = os.environ.get("FIRECRAWL_API_KEY", "")
 EXA_API_KEY       = os.environ.get("EXA_API_KEY",       "")
+# Pillar B — remote access
+HA_URL            = os.environ.get("HOME_ASSISTANT_URL",  "http://127.0.0.1:8123")
+HA_TOKEN          = os.environ.get("HOME_ASSISTANT_TOKEN", "")
+TAILSCALE_IP      = os.environ.get("TAILSCALE_IP",         "")
 
 if not ROUTING_FILE.exists():
     ROUTING_FILE.write_text(
@@ -4005,6 +4009,106 @@ def cmd_voice_brief() -> None:
 
 
 # ── Aliases for preserved commands (/gemini, /owui) ──────────────────────────
+# ── Pillar B: Remote access + Home Assistant ──────────────────────────────────
+def cmd_remote_status() -> None:
+    """Show Tailscale, cloudflared, and Home Assistant connectivity."""
+    adwi_head("Remote Access Status")
+
+    # Tailscale
+    try:
+        import json as _json
+        r = subprocess.run(["tailscale", "status", "--json"],
+                          capture_output=True, text=True, timeout=5)
+        ts = _json.loads(r.stdout)
+        my_ip = ts.get("TailscaleIPs", ["—"])[0]
+        peers = len(ts.get("Peer", {}))
+        cprint(f"  ✓ Tailscale:         {my_ip}  ({peers} peers)", GREEN)
+    except Exception:
+        cprint(f"  ✗ Tailscale:         not connected", YELLOW)
+
+    # Cloudflared
+    cf_status = subprocess.run(
+        ["docker", "ps", "--filter", "name=suneel-cloudflared", "--format", "{{.Status}}"],
+        capture_output=True, text=True, timeout=5,
+    ).stdout.strip()
+    if cf_status and "Up" in cf_status:
+        cprint(f"  ✓ Cloudflare Tunnel: {cf_status}", GREEN)
+    else:
+        cprint(f"  ✗ Cloudflare Tunnel: not running", YELLOW)
+
+    # Home Assistant
+    if HA_TOKEN:
+        try:
+            req = urllib.request.Request(
+                f"{HA_URL}/api/",
+                headers={"Authorization": f"Bearer {HA_TOKEN}", "Content-Type": "application/json"},
+            )
+            with urllib.request.urlopen(req, timeout=5) as r:
+                data = json.load(r)
+            cprint(f"  ✓ Home Assistant:    {HA_URL} — {data.get('message', 'ok')}", GREEN)
+        except Exception as e:
+            cprint(f"  ✗ Home Assistant:    {HA_URL} — {e}", YELLOW)
+    else:
+        cprint(f"  ⚠ Home Assistant:    token not set (see iphone-control-plane.md)", YELLOW)
+
+    # Remote access URLs
+    if TAILSCALE_IP:
+        cprint(f"\n  Remote access (via Tailscale from iPhone):", CYAN, bold=True)
+        cprint(f"    Open WebUI:         http://{TAILSCALE_IP}:3000", GRAY)
+        cprint(f"    Home Assistant:     http://{TAILSCALE_IP}:8123", GRAY)
+        cprint(f"    n8n:                http://{TAILSCALE_IP}:5678", GRAY)
+        cprint(f"    Phoenix traces:     http://{TAILSCALE_IP}:6006", GRAY)
+
+
+def cmd_ha(query: str = "") -> None:
+    """Query Home Assistant API. Usage: /ha <entity_id|state|services>"""
+    if not HA_TOKEN:
+        adwi_say("Home Assistant token not set. Add HOME_ASSISTANT_TOKEN to config/.env\n"
+                 "Get it from: http://localhost:8123 → Profile → Security → Long-Lived Access Tokens")
+        return
+    if not query:
+        query = "states"
+
+    # Map friendly queries to HA API endpoints
+    endpoint_map = {
+        "state": "states",
+        "states": "states",
+        "services": "services",
+        "config": "config",
+        "events": "events",
+        "history": "history/period",
+        "logbook": "logbook",
+        "status": "config",
+    }
+    ep = endpoint_map.get(query.lower(), f"states/{query}")
+    url = f"{HA_URL}/api/{ep}"
+
+    adwi_head(f"Home Assistant — {ep}")
+    try:
+        req = urllib.request.Request(
+            url,
+            headers={"Authorization": f"Bearer {HA_TOKEN}", "Content-Type": "application/json"},
+        )
+        with urllib.request.urlopen(req, timeout=10) as r:
+            data = json.load(r)
+        if isinstance(data, list):
+            cprint(f"  {len(data)} entities", CYAN)
+            for item in data[:20]:
+                if isinstance(item, dict):
+                    eid   = item.get("entity_id", "")
+                    state = item.get("state", "")
+                    name  = item.get("attributes", {}).get("friendly_name", eid)
+                    cprint(f"  {name:<30} {state}", GRAY)
+            if len(data) > 20:
+                cprint(f"  … and {len(data)-20} more", GRAY)
+        else:
+            adwi_say(json.dumps(data, indent=2)[:1000])
+    except urllib.error.HTTPError as e:
+        cprint(f"  HA API error: {e.code} {e.reason}", RED)
+    except Exception as e:
+        cprint(f"  Error: {e}", RED)
+
+
 def _alias_gemini(prompt: str = "") -> None:
     """Alias: /gemini — explicitly use Gemini cloud for a prompt."""
     adwi_head("Gemini cloud")
@@ -4428,6 +4532,10 @@ def handle(line: str) -> bool:
     elif line.startswith("/voice-out "): cmd_voice_out(line[11:].strip())
     elif line == "/voice-out": cmd_voice_out()
     elif line == "/voice-brief": cmd_voice_brief()
+    # ── Pillar B: Remote / HA ──
+    elif line in ("/remote-status", "/remote", "/tailscale"): cmd_remote_status()
+    elif line.startswith("/ha "): cmd_ha(line[4:].strip())
+    elif line == "/ha": cmd_ha()
     # ── Aliases ──
     elif line.startswith("/gemini"): _alias_gemini(line[7:].strip())
     elif line.startswith("/owui"):   _alias_owui(line[5:].strip())

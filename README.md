@@ -608,7 +608,7 @@ See `notes/ADWI-START-HERE.md` for detailed first-time setup instructions.
 ### CLI Commands
 
 <!-- AUTO:COMMANDS -->
-**85 registered commands.** Key groups:
+**86 registered commands.** Key groups:
 
 **backup**: `/backup-audit`  `/backup-disable`  `/backup-enable`  `/backup-log`  `/backup-now`  `/backup-status`
 
@@ -647,6 +647,8 @@ See `notes/ADWI-START-HERE.md` for detailed first-time setup instructions.
 **git**: `/git`
 
 **gmail**: `/gmail`  `/gmail-auth`  `/gmail-summary`
+
+**ha**: `/ha`
 
 **help**: `/help`
 

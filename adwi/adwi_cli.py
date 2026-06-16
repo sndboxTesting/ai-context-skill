@@ -539,6 +539,13 @@ _REGEX_INTENTS = [
     (re.compile(r"\bdedupe\b.{0,30}(workspace|folder|files?|photos?)?\b", re.I), "duplicates"),
     (re.compile(r"\bdup(l?i?k|l?ic|l?ik)at", re.I), "duplicates"),
 
+    # FIX-CLEAN-004: "clean up downloads/cache/trash" → cleanup BEFORE organize steals "clean up…folder"
+    (re.compile(r"\bclean\s*up\b.{0,40}(my\s+)?(download|desktop|cache|temp|trash|junk)\b", re.I), "cleanup"),
+    (re.compile(r"\bremove\b.{0,20}\b(unneeded|unnecessary|useless|unwanted|redundant)\b", re.I), "cleanup"),
+    (re.compile(r"\b(suggest|find|show)\b.{0,20}\bthings?\b.{0,25}\b(i\s+(can|could|should)\s+)?(remove|delete|trash|get\s+rid\s+of)\b", re.I), "cleanup"),
+    # FIX-NOTES-001: "find/search notes about X" → obsidian_search BEFORE rag_search swallows it
+    (re.compile(r"\b(find|search)\s+(for\s+)?notes?\b.{0,20}\b(about|on|regarding)\b", re.I), "obsidian_search"),
+    (re.compile(r"\bsearch\s+(for\s+)?notes?\s+for\b", re.I), "obsidian_search"),
     # ── Organize ─────────────────────────────────────────────────────────────────
     (re.compile(r"(organiz|tidy|restructure|better structure|sort out|clean up).{0,30}(folder|file|download|desktop|document)", re.I), "organize"),
     # FIX-ORG-002: sort/arrange/structure synonyms — BEFORE file_search
@@ -579,6 +586,9 @@ _REGEX_INTENTS = [
     (re.compile(r"\bread\b.{0,25}\.(py|js|ts|md|yaml|yml|json|txt|sh|toml|cfg|gitignore)\b", re.I), "file_read"),
     (re.compile(r"\bread\b.{0,20}(the file\b|file contents?\b|contents? of)\b", re.I), "file_read"),
     (re.compile(r"\b(show|display|cat)\b.{0,20}(contents? of|the file\b)\b", re.I), "file_read"),
+    # FIX-FR-001: "cat memory.py", "read the config file"
+    (re.compile(r"\bcat\b.{0,25}\.(py|js|ts|md|yaml|yml|json|txt|sh|toml|cfg)\b", re.I), "file_read"),
+    (re.compile(r"\bread\b.{0,30}\b(the\s+)?(main|config|configuration|settings?)\s+(python\s+)?(file|script)\b", re.I), "file_read"),
 
     # ── Doctor — BEFORE status (Bug 3 companion: deep check beats shallow) ───────
     (re.compile(r"\b(run doctor|doctor mode)\b", re.I), "doctor"),
@@ -601,8 +611,10 @@ _REGEX_INTENTS = [
     (re.compile(r"\badwi\b.{0,5}(self\s+repair|self.?fix)\b", re.I), "self_heal"),
 
     # ── Status (Bug 1: word boundaries stop substring false positives) ────────────
-    # \b prevents "is" matching in "list", "down" matching in "downloads", etc.
-    (re.compile(r"\b(is|are)\b.{0,30}\b(running|working|up|down|online|healthy|alive)\b", re.I), "status"),
+    # FIX-STATUS-002: "anything down", "is X available" patterns
+    (re.compile(r"\b(anything|something)\b.{0,15}\b(down|broken|offline|unavailable|not\s+responding)\b", re.I), "status"),
+    (re.compile(r"\b(is|are)\b.{0,20}\b(ollama|docker|adwi|n8n|redis|api|server|service|stack)\b.{0,15}\b(available|up|running|reachable|responding)\b", re.I), "status"),
+    (re.compile(r"\b(is|are)\b.{0,30}\b(running|working|up|down|online|healthy|alive|available)\b", re.I), "status"),
     (re.compile(r"(check|verify).{0,20}(setup|stack|services|system)", re.I), "status"),
 
     # ── What next ────────────────────────────────────────────────────────────────
@@ -612,6 +624,10 @@ _REGEX_INTENTS = [
     (re.compile(r"\b(adwi|local.?ai|my.?ai).{0,30}(improvement|enhancement|feature|idea|roadmap)\b", re.I), "what_next"),
     (re.compile(r"\bnext.{0,20}(feature|capability|improvement).{0,20}(adwi|ai|local|stack)\b", re.I), "what_next"),
 
+    # FIX-WHAT-002: advisory improvement questions → what_next BEFORE daily_improve
+    (re.compile(r"\b(how|what)\b.{0,15}\b(should|can|could|would)\b.{0,20}\b(improv|refactor|enhanc|optimiz)\b.{0,20}\badwi\b", re.I), "what_next"),
+    (re.compile(r"\bwhat\b.{0,15}\b(code\s+changes?|improvements?|refactors?)\b.{0,20}\b(adwi|better|make)\b", re.I), "what_next"),
+    (re.compile(r"\bgenerate\b.{0,20}\b(todo|to.?do|task)\s+(list|items?)\b.{0,20}\badwi\b", re.I), "what_next"),
     # ── Daily improve — NHR-006: no regex existed; LLM was routing to status/chat ─
     (re.compile(r"\b(daily.?improv|daily.?enhanc|daily.?routine)\b", re.I), "daily_improve"),
     (re.compile(r"\brun.{0,10}daily.{0,10}(improve|maintenance|self.?improve)\b", re.I), "daily_improve"),
@@ -628,10 +644,17 @@ _REGEX_INTENTS = [
     # FIX-WEB-001: "look up X guide/version/performance" patterns — BEFORE model_status
     (re.compile(r"\blook\s+up\b.{0,40}(version|guide|tutorial|how[\s-]to|docs?|documentation|performance|benchmark|comparison|ranking|list)\b", re.I), "web_search"),
     (re.compile(r"\bfind\b.{0,20}(the\s+)?(current|latest)\b.{0,20}\bversion\b.{0,30}\b(llama|ollama|qwen|mistral|phi|gemma|python|node)\b", re.I), "web_search"),
+    # FIX-WEB-002: "search for the latest X" / "search for information about X"
+    (re.compile(r"\bsearch\s+(for\s+)?(the\s+)?(latest|current|recent|newest)\b", re.I), "web_search"),
+    (re.compile(r"\bsearch\s+for\b.{0,30}\b(information|info|details?|news|updates?|tutorial|guide|docs?)\b", re.I), "web_search"),
 
     # ── Obsidian daily — BEFORE obsidian_search (Bug 4: daily-note guard) ────────
     (re.compile(r"\b(daily.?note|today.{0,5}note|obsidian.{0,5}daily)\b", re.I), "obsidian_daily"),
     (re.compile(r"\bopen\b.{0,15}\btoday.{0,5}\bnote\b", re.I), "obsidian_daily"),
+    # FIX-OBS-002: entry/log/journal synonyms + "dailly" typo
+    (re.compile(r"\b(show|read|open)\b.{0,15}\bmy\s+daily\s+(log|note|journal|entry|notes?)\b", re.I), "obsidian_daily"),
+    (re.compile(r"\btoday.{0,5}\b(obsidian\s+)?(entry|journal|log)\b", re.I), "obsidian_daily"),
+    (re.compile(r"\bda[il]{2,4}y\s+(note|entry|journal|log)\b", re.I), "obsidian_daily"),
 
     # ── Obsidian vault ───────────────────────────────────────────────────────────
     (re.compile(r"(obsidian|vault|my notes?).{0,20}(search|find|look up|what do i have)", re.I), "obsidian_search"),
@@ -648,6 +671,11 @@ _REGEX_INTENTS = [
     (re.compile(r"(browse|visit|open|fetch|go to|check out|navigate to).{0,15}(https?://|website|site|webpage|url|\.(com|io|org|dev|net))", re.I), "browse"),
 
     # ── Nightly maintenance ──────────────────────────────────────────────────────
+    # FIX-NIGHT-001: "generate a summary of logs" / bare "nightly" / "last thing that ran"
+    (re.compile(r"\bgenerate\b.{0,20}\b(summary|report|digest)\b.{0,20}\b(log|nightly|daily|adwi)\b", re.I), "nightly_status"),
+    (re.compile(r"\bgenerate\b.{0,15}\bmy\s+daily\s+report\b", re.I), "nightly_status"),
+    (re.compile(r"^nightly\s*$", re.I), "nightly_status"),
+    (re.compile(r"\bwhat.{0,10}last.{0,10}(ran|run|executed|triggered)\b", re.I), "nightly_status"),
     (re.compile(r"\b(nightly|night.?run)\b.{0,20}(status|log|report|last run|results?)\b", re.I), "nightly_status"),
     (re.compile(r"\b(when.{0,10}(did.{0,10})?nightly|last.{0,10}nightly|show.{0,10}nightly)\b", re.I), "nightly_status"),
     (re.compile(r"\bnightly.{0,10}log\b", re.I), "nightly_status"),
@@ -690,7 +718,11 @@ _REGEX_INTENTS = [
     (re.compile(r"\[Errno\s+\d+\]", re.I), "fix_error"),
 
     # ── Eval / test ──────────────────────────────────────────────────────────────
-    (re.compile(r"\b(run|start|trigger).{0,15}(routing.?tests?|eval.?routing|routing eval)\b", re.I), "eval_routing"),
+    # FIX-EVAL-003: routing eval patterns BEFORE test_adwi; "trigger routing evaluation" fix
+    (re.compile(r"\b(test|check|evaluate|verify)\b.{0,15}\b(adwi\s+)?routing\b", re.I), "eval_routing"),
+    (re.compile(r"\b(run|start|trigger|evaluate)\b.{0,20}\brouting\s+(eval(uation)?|tests?)\b", re.I), "eval_routing"),
+    (re.compile(r"\badwi\b.{0,10}\beval\b.{0,10}\brouting\b", re.I), "eval_routing"),
+    (re.compile(r"\b(run|start|trigger).{0,15}(routing.?tests?|eval.?routing|routing\s+eval(uation)?)\b", re.I), "eval_routing"),
     (re.compile(r"\b(run|start).{0,15}\b(adwi.?eval|eval.?adwi)\b", re.I), "eval_adwi"),
     (re.compile(r"\bevaluate\b.{0,10}\badwi\b", re.I), "eval_adwi"),
     # FIX-EVAL-002: "eval adwi pls", "start evaluation", "run eval" patterns
@@ -726,13 +758,22 @@ _REGEX_INTENTS = [
     (re.compile(r"(generate|create|draw|make|design).{0,20}(an? )?(image|picture|photo|illustration|artwork)", re.I), "generate_image"),
 
     # ── Code execution ───────────────────────────────────────────────────────────
-    (re.compile(r"(run|execute|test).{0,15}(this |the )?(python|code|script)\b", re.I), "run_code"),
+    # FIX-PATCH-002: "run code improvement" / "self-improve adwi" → patch_adwi BEFORE run_code steals them
+    (re.compile(r"\b(self.?improv|auto.?improv)\b.{0,20}\badwi\b", re.I), "patch_adwi"),
+    (re.compile(r"\b(run|execute)\b.{0,15}\b(self.?improv|autonomous\s+(code\s+)?improv)\b", re.I), "patch_adwi"),
+    (re.compile(r"\b(run|execute)\b.{0,15}\bcode\s+(improv|enhanc|fix)\b", re.I), "patch_adwi"),
+    # run_code: added \b around "test" to prevent "latest" ⊇ "test" false positive (FIX-RC-001)
+    (re.compile(r"\b(run|execute|test)\b.{0,15}(this |the )?(python|code|script)\b", re.I), "run_code"),
 
     # ── Benchmark ────────────────────────────────────────────────────────────────
     (re.compile(r"(benchmark|speed.?test|how fast|tokens? per second).{0,20}(adwi|model|local|ollama)\b", re.I), "benchmark"),
 
     # ── Gmail ────────────────────────────────────────────────────────────────────
-    (re.compile(r"(check|show|read|open|get|fetch|look at).{0,20}(my )?(email|gmail|inbox|mail)\b", re.I), "gmail"),
+    # FIX-GMAIL-002: typos (gmial, emil), "messages" synonym, "inbox check" word-order
+    (re.compile(r"\b(do\s+i\s+have\s+any|any\s+(new|unread)?\s*)(emails?|messages?|mail)\b", re.I), "gmail"),
+    (re.compile(r"\binbox\b.{0,15}\b(check|status|new|unread|count|messages?)\b", re.I), "gmail"),
+    (re.compile(r"\b(gm[i]?al|emial)\b", re.I), "gmail"),
+    (re.compile(r"(check|show|read|open|get|fetch|look at).{0,20}(my )?(email|gmail|inbox|mail|emial|emil)\b", re.I), "gmail"),
     (re.compile(r"(any (new|unread) )?emails?\b", re.I), "gmail"),
     (re.compile(r"gmail\b", re.I), "gmail"),
 
@@ -746,8 +787,15 @@ _REGEX_INTENTS = [
     (re.compile(r"(what do you (remember|know|recall)|do you remember|tell me what you know).{0,40}(about|regarding)\b", re.I), "memory_recall"),
     (re.compile(r"(remember|recall|what do you know about|memory).{0,30}\?", re.I), "memory_recall"),
     (re.compile(r"memory (stats|status|ledger|database|db)\b", re.I), "memory_stats"),
-    # NHR-009: additional synonyms — "memory statistics/metrics/entries" was going to memory_context
+    # NHR-009: additional synonyms — "memory statistics/metrics/entries"
     (re.compile(r"memory\s+(statistics|metrics|size|count|entries|records)\b", re.I), "memory_stats"),
+    # FIX-MEMST-001: "how many X in memory" / "entries in memory"
+    (re.compile(r"\bhow\s+many\b.{0,20}\b(things?|entries?|items?|records?)\b.{0,20}\bin\s+(your\s+|adwi.s\s+)?memory\b", re.I), "memory_stats"),
+    (re.compile(r"\b(entries?|items?|records?)\s+in\s+(your\s+|my\s+|adwi.s\s+)?memory\b", re.I), "memory_stats"),
+    (re.compile(r"\bmemry\s+(stats?|status|count|size)\b", re.I), "memory_stats"),
+    # FIX-MEMCTX-001: show/what context → memory_context (NO regex existed before)
+    (re.compile(r"\b(show|display|what.{0,10}(is|do\s+you\s+have))\b.{0,20}\b(session\s+)?context\b", re.I), "memory_context"),
+    (re.compile(r"\bcontext\b.{0,20}\b(summary|dump|snapshot|right\s+now|currently)\b", re.I), "memory_context"),
 
     # ── Semantic router ──────────────────────────────────────────────────────────
     (re.compile(r"route (this|the|my)?\s*(query|question|request|command)\b", re.I), "route"),
@@ -979,13 +1027,16 @@ _INTENT_SYSTEM = (
     "                      NEVER for explanations, comparisons, or code/model concepts.\n"
     "                      'generation' as a software concept (code generation, token generation,\n"
     "                      model generation) is NOT this intent.\n"
-    "                      If the prompt starts with 'explain', 'what is', 'difference between',\n"
-    "                      'compare', 'how does', 'show me everything', or asks about models/APIs\n"
-    "                      → use 'chat' instead. Only use this for 'draw/create/generate an image'.\n"
+    "                      NEVER for: 'generate a summary', 'generate a report', 'generate a plan',\n"
+    "                      'generate a list', 'generate a todo list', 'generate code', 'generate ideas'\n"
+    "                      → those are 'nightly_status', 'what_next', 'run_code', or 'chat'.\n"
+    "                      ONLY use when prompt explicitly asks for an image/picture/photo/drawing.\n"
     "   'web_search'     : explicit request for internet/web search\n"
     "   'status'         : asks if services/systems are running or healthy (shallow check)\n"
     "   'doctor'         : deep full-system health check and diagnostic — MORE thorough than 'status'.\n"
-    "                      'run doctor', 'full health check', 'deep diagnostic', 'thorough check'.\n"
+    "                      REQUIRES explicit depth keyword: 'run doctor', 'full health check',\n"
+    "                      'deep diagnostic', 'thorough check', 'complete health check'.\n"
+    "                      'stack health check' or bare 'health check' alone → use 'status'.\n"
     "   'sync'           : sync the adwi knowledge base to Open WebUI — ONLY when user says 'sync'\n"
     "                      or 'update knowledge base'. NOT for general 'manage' or 'update' requests.\n"
     "   'capabilities'   : user EXPLICITLY asks what ADWI/YOU can do — must mention 'you', 'adwi',\n"
@@ -1001,6 +1052,9 @@ _INTENT_SYSTEM = (
     "   'what_next'      : user asks for AI-suggested next improvements or features to build.\n"
     "                      'what should I build next', 'suggest adwi improvements',\n"
     "                      'adwi roadmap', 'next feature ideas'. Advisory, not action.\n"
+    "                      ALSO: 'how should I improve adwi', 'what code changes would make adwi better',\n"
+    "                      'what should I refactor in adwi', 'generate a todo list for adwi' → what_next.\n"
+    "                      NOT 'patch_adwi' (aider code changes). NOT 'daily_improve' (runs routine).\n"
     "   'inspect_code'   : read and explain an adwi source file. User says 'inspect', 'review',\n"
     "                      'look at' or 'find bugs in' adwi source code or a specific .py file.\n"
     "                      'code review adwi', 'inspect adwi_cli.py', 'find bugs in adwi'.\n"
@@ -1057,7 +1111,8 @@ _INTENT_SYSTEM = (
     "   'trusted_roots'  : show which file paths / directories Adwi is allowed to read or write.\n"
     "                      'show trusted roots', 'what paths can adwi read', 'allowed directories'.\n"
     "   'memory_context' : show the current session memory/context summary.\n"
-    "                      'show memory context', 'what is in my memory context'.\n"
+    "                      'show context', 'show my context', 'what context do you have',\n"
+    "                      'current session context', 'context summary', 'show me the context'.\n"
     "   'benchmark'      : run an actual timed speed/performance test on local models.\n"
     "                      ONLY when the user explicitly wants a measurement: 'benchmark adwi',\n"
     "                      'run a speed test', 'how many tokens per second', 'time the model'.\n"

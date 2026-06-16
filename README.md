@@ -962,6 +962,7 @@ bin/adwi
 ## §10 NLU Eval Status & Repair Backlog
 
 > **Last evaluated:** 2026-06-16 · 1,881 unique scenarios · 10 NHR fixes + session-2 + session-3 patches applied
+> **Session-4 hardening** (2026-06-16): 8 false-positive fixes from code review — no new eval run yet; pass rate expected ≥ 89.0%
 >
 > Full report: `logs/simeval/MASTER_REPORT_v2.md`
 > Machine-readable backlog: `logs/simeval/fix_backlog_v2.json`
@@ -998,6 +999,16 @@ bin/adwi
 **Session-2 patches** (2026-06-16): FIX-LF-001, FIX-OLD-001, FIX-DUP-001, FIX-ORG-002, FIX-CLEANUP-003, FIX-HEAL-001, FIX-BROWSE-001, FIX-WEB-001, FIX-ERR-002, FIX-EVAL-002, FIX-TEST-002, FIX-MEMSCAN-002, FIX-BENCH-001 — all ✅ Applied.
 
 **Session-3 patches** (2026-06-16): FIX-CLEAN-004, FIX-NOTES-001, FIX-STATUS-002, FIX-WHAT-002, FIX-WEB-002, FIX-OBS-002, FIX-NIGHT-001, FIX-EVAL-003, FIX-PATCH-002, FIX-RC-001, FIX-GMAIL-002, FIX-MEMST-001, FIX-MEMCTX-001, FIX-FR-001, FIX-S3-001 through FIX-S3-009, plus 4 INTENT_SYSTEM clarifications — all ✅ Applied.
+
+**Session-4 code-review hardening** (2026-06-16): 8 false-positive fixes identified by post-session-3 senior code review — all ✅ Applied:
+- FIX-S3-002 gap tightened `.{0,30}` → `.{0,10}` (file_read: "show X in app.py" false positive)
+- FIX-S3-008 `different` removed from git_status alternation ("what is different between X and Y" false positive)
+- FIX-STATUS-002 broad `is X running/working/available` line removed (captured too many non-service queries)
+- FIX-NIGHT-001 `what last ran` tightened to require nightly/maintenance/cron context noun
+- FIX-S3-001 bare `tps` removed from benchmark (too short, collides with "transactions per second")
+- FIX-S3-006 bare `kb` removed from sync alternation (collides with "keyboard shortcuts")
+- FIX-MEMCTX-001 negative lookahead added to block "context window/length/limit/size" → memory_context
+- FIX-S3-004 duplicate `capabilites` entry removed from typo alternation
 
 See `docs/NLU_REPAIR_BACKLOG.md` for root causes, code diffs, and remaining failure analysis.
 

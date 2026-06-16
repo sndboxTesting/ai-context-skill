@@ -197,7 +197,7 @@ REGEX_INTENTS = [
     (re.compile(r"\bcat\b.{0,25}\.(py|js|ts|md|yaml|yml|json|txt|sh|toml|cfg)\b", re.I), "file_read"),
     (re.compile(r"\bread\b.{0,30}\b(the\s+)?(main|config|configuration|settings?)\s+(python\s+)?(file|script)\b", re.I), "file_read"),
     # FIX-S3-002: "show the nightly.py source", "show me adwi/__init__.py" → file_read not inspect_code
-    (re.compile(r"\b(show|display|print)\b.{0,30}\b\w+\.(py|js|ts|sh|md)\b", re.I), "file_read"),
+    (re.compile(r"\b(show|display|print)\b.{0,10}\b\w+\.(py|js|ts|sh|md)\b", re.I), "file_read"),
     (re.compile(r"\b(show|display)\b.{0,15}\b(adwi/|src/|logs?/)\b", re.I), "file_read"),
     (re.compile(r"\b(run doctor|doctor mode)\b", re.I), "doctor"),
     (re.compile(r"\b(full|deep|thorough|complete)\b.{0,15}\b(health.?check|diagnostic)\b", re.I), "doctor"),
@@ -216,7 +216,6 @@ REGEX_INTENTS = [
     # FIX-STATUS-002: "anything down", "is X available"
     (re.compile(r"\b(anything|something)\b.{0,15}\b(down|broken|offline|unavailable|not\s+responding)\b", re.I), "status"),
     (re.compile(r"\b(is|are)\b.{0,20}\b(ollama|docker|adwi|n8n|redis|api|server|service|stack)\b.{0,15}\b(available|up|running|reachable|responding)\b", re.I), "status"),
-    (re.compile(r"\b(is|are)\b.{0,30}\b(running|working|up|down|online|healthy|alive|available)\b", re.I), "status"),
     (re.compile(r"(check|verify).{0,20}(setup|stack|services|system)", re.I), "status"),
     (re.compile(r"(what|what.s).{0,20}(next|build|improve|add|create).{0,20}(adwi|setup|ai|local)", re.I), "what_next"),
     (re.compile(r"(suggest|recommend).{0,20}(next|improvement|feature|capability)", re.I), "what_next"),
@@ -261,7 +260,7 @@ REGEX_INTENTS = [
     (re.compile(r"\bgenerate\b.{0,20}\b(summary|report|digest)\b.{0,20}\b(logs?|nightly|daily|adwi)\b", re.I), "nightly_status"),
     (re.compile(r"\bgenerate\b.{0,15}\bmy\s+daily\s+report\b", re.I), "nightly_status"),
     (re.compile(r"^nightly\s*$", re.I), "nightly_status"),
-    (re.compile(r"\bwhat.{0,10}last.{0,10}(ran|run|executed|triggered)\b", re.I), "nightly_status"),
+    (re.compile(r"\bwhat.{0,10}last.{0,10}(ran|run|executed|triggered).{0,20}\b(nightly|maintenance|cron)\b", re.I), "nightly_status"),
     (re.compile(r"\b(nightly|night.?run)\b.{0,20}(status|log|report|last run|results?)\b", re.I), "nightly_status"),
     (re.compile(r"\b(when.{0,10}(did.{0,10})?nightly|last.{0,10}nightly|show.{0,10}nightly)\b", re.I), "nightly_status"),
     (re.compile(r"\bnightly.{0,10}log\b", re.I), "nightly_status"),
@@ -333,7 +332,7 @@ REGEX_INTENTS = [
     (re.compile(r"\brepo\b.{0,15}\b(clean|dirty|status|changes)\b", re.I), "git_status"),
     # FIX-S3-008: "what did I change", "what's modified", "show me what's changed"
     (re.compile(r"\bwhat\s+(did\s+i|have\s+i).{0,10}(change|modify|edit|commit)\b", re.I), "git_status"),
-    (re.compile(r"\bwhat.{0,5}(is|has|s)\s+(changed|modified|different|staged)\b", re.I), "git_status"),
+    (re.compile(r"\bwhat.{0,5}(is|has|s)\s+(changed|modified|staged)\b", re.I), "git_status"),
     (re.compile(r"\bshow\s+(me\s+)?(what.{0,5}changed|the\s+diff|changes?\s+since)\b", re.I), "git_status"),
     (re.compile(r"(generate|create|draw|make|design).{0,20}(an? )?(image|picture|photo|illustration|artwork)", re.I), "generate_image"),
     # FIX-PATCH-002: self-improve/code-improvement → patch_adwi BEFORE run_code
@@ -344,7 +343,7 @@ REGEX_INTENTS = [
     (re.compile(r"\b(run|execute|test)\b.{0,15}(this |the )?(python|code|script)\b", re.I), "run_code"),
     # FIX-S3-001: "how fast is llama3.1:8b", typo "bechmark", tokens/sec variants
     (re.compile(r"\bhow\s+fast\s+(is|does|was|are)\b.{0,30}\b(llama|qwen|mistral|phi|gemma|ollama|adwi|model|llm)\b", re.I), "benchmark"),
-    (re.compile(r"\b(tokens?[/_]s|tok[/_]s|t[/_]s|tps)\b", re.I), "benchmark"),
+    (re.compile(r"\b(tokens?[/_]s|tok[/_]s|t[/_]s)\b", re.I), "benchmark"),
     (re.compile(r"\b(inference|llm|model|ollama).{0,20}\b(throughput|latency\s+benchmark|speed\s+test)\b", re.I), "benchmark"),
     (re.compile(r"\b(bechmark|benchamrk|benchmarck)\b", re.I), "benchmark"),
     (re.compile(r"(benchmark|speed.?test|how fast|tokens? per second).{0,20}(adwi|model|local|ollama)\b", re.I), "benchmark"),
@@ -371,7 +370,7 @@ REGEX_INTENTS = [
     (re.compile(r"\b(entries?|items?|records?)\s+in\s+(your\s+|my\s+|adwi.s\s+)?memory\b", re.I), "memory_stats"),
     (re.compile(r"\bmemry\s+(stats?|status|count|size)\b", re.I), "memory_stats"),
     # FIX-MEMCTX-001: memory_context regex (was missing entirely)
-    (re.compile(r"\b(show|display|what.{0,10}(is|do\s+you\s+have))\b.{0,20}\b(session\s+)?context\b", re.I), "memory_context"),
+    (re.compile(r"\b(show|display|what.{0,10}(is|do\s+you\s+have))\b.{0,20}\b(session\s+)?context\b(?!\s+(window|length|limit|size))", re.I), "memory_context"),
     (re.compile(r"\bcontext\b.{0,20}\b(summary|dump|snapshot|right\s+now|currently)\b", re.I), "memory_context"),
     (re.compile(r"route (this|the|my)?\s*(query|question|request|command)\b", re.I), "route"),
     (re.compile(r"which tool (should|would|to) (handle|use for|run)\b", re.I), "route"),
@@ -379,14 +378,14 @@ REGEX_INTENTS = [
     # ── Capabilities ─────────────────────────────────────────────────────────────
     # FIX-S3-004: "adwi feature list", typos, colloquial "wut can u do"
     (re.compile(r"\badwi\b.{0,20}\b(feature\s+list|features|commands|abilities|capabilities)\b", re.I), "capabilities"),
-    (re.compile(r"\b(cpaabilit|capabilites|capabilty|capabilites|cabpabilities)\b", re.I), "capabilities"),
+    (re.compile(r"\b(cpaabilit|capabilites|capabilty|cabpabilities)\b", re.I), "capabilities"),
     (re.compile(r"\bwut\s+can\s+(u|you)\b.{0,15}(do|help|offer)\b", re.I), "capabilities"),
 
     # ── Sync knowledge base ──────────────────────────────────────────────────────
     # FIX-S3-006: "sync/update knowledge to Open WebUI", "push notes to webui"
     (re.compile(r"\b(sync|update|push)\b.{0,20}\b(knowledge|notes?)\b.{0,20}\b(open.?webui|openwebui|webui)\b", re.I), "sync"),
     (re.compile(r"\bopen.?webui\b.{0,20}\b(sync|update|push|add|knowledge)\b", re.I), "sync"),
-    (re.compile(r"\bsync\b.{0,15}\b(knowledge\s+base|kb|knowledge)\b", re.I), "sync"),
+    (re.compile(r"\bsync\b.{0,15}\b(knowledge\s+base|knowledge)\b", re.I), "sync"),
 ]
 
 def regex_prefilter(text: str):

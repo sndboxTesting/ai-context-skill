@@ -1,0 +1,555 @@
+{
+  "description": "Adwi intent routing ground truth \u2014 50 cases",
+  "providers": [
+    {
+      "id": "ollama:llama3.1:8b",
+      "config": {
+        "temperature": 0
+      }
+    }
+  ],
+  "prompts": [
+    "Classify this message and return JSON with intent and target: {{prompt}}"
+  ],
+  "tests": [
+    {
+      "vars": {
+        "prompt": "what is using my disk space"
+      },
+      "assert": [
+        {
+          "type": "contains",
+          "value": "\"intent\": \"disk_usage\""
+        }
+      ]
+    },
+    {
+      "vars": {
+        "prompt": "show me the biggest files on my mac"
+      },
+      "assert": [
+        {
+          "type": "contains",
+          "value": "\"intent\": \"large_files\""
+        }
+      ]
+    },
+    {
+      "vars": {
+        "prompt": "find files not accessed in a year"
+      },
+      "assert": [
+        {
+          "type": "contains",
+          "value": "\"intent\": \"old_files\""
+        }
+      ]
+    },
+    {
+      "vars": {
+        "prompt": "are there duplicate photos in my downloads"
+      },
+      "assert": [
+        {
+          "type": "contains",
+          "value": "\"intent\": \"duplicates\""
+        }
+      ]
+    },
+    {
+      "vars": {
+        "prompt": "how should I organize my projects folder"
+      },
+      "assert": [
+        {
+          "type": "contains",
+          "value": "\"intent\": \"organize\""
+        }
+      ]
+    },
+    {
+      "vars": {
+        "prompt": "what can I safely delete to free space"
+      },
+      "assert": [
+        {
+          "type": "contains",
+          "value": "\"intent\": \"cleanup\""
+        }
+      ]
+    },
+    {
+      "vars": {
+        "prompt": "read notes/profile.md"
+      },
+      "assert": [
+        {
+          "type": "contains",
+          "value": "\"intent\": \"file_read\""
+        }
+      ]
+    },
+    {
+      "vars": {
+        "prompt": "find all python files mentioning sqlite"
+      },
+      "assert": [
+        {
+          "type": "contains",
+          "value": "\"intent\": \"file_search\""
+        }
+      ]
+    },
+    {
+      "vars": {
+        "prompt": "list what's in my workspace adwi folder"
+      },
+      "assert": [
+        {
+          "type": "contains",
+          "value": "\"intent\": \"file_list\""
+        }
+      ]
+    },
+    {
+      "vars": {
+        "prompt": "search the web for Ollama latest release"
+      },
+      "assert": [
+        {
+          "type": "contains",
+          "value": "\"intent\": \"web_search\""
+        }
+      ]
+    },
+    {
+      "vars": {
+        "prompt": "search exa for LLM routing papers"
+      },
+      "assert": [
+        {
+          "type": "contains",
+          "value": "\"intent\": \"exa_search\""
+        }
+      ]
+    },
+    {
+      "vars": {
+        "prompt": "tavily search for n8n webhooks tutorial"
+      },
+      "assert": [
+        {
+          "type": "contains",
+          "value": "\"intent\": \"tavily_search\""
+        }
+      ]
+    },
+    {
+      "vars": {
+        "prompt": "scrape https://ollama.com/library and summarize"
+      },
+      "assert": [
+        {
+          "type": "contains",
+          "value": "\"intent\": \"firecrawl\""
+        }
+      ]
+    },
+    {
+      "vars": {
+        "prompt": "browse https://news.ycombinator.com top stories"
+      },
+      "assert": [
+        {
+          "type": "contains",
+          "value": "\"intent\": \"browse\""
+        }
+      ]
+    },
+    {
+      "vars": {
+        "prompt": "what do you remember about my AI setup"
+      },
+      "assert": [
+        {
+          "type": "contains",
+          "value": "\"intent\": \"memory_recall\""
+        }
+      ]
+    },
+    {
+      "vars": {
+        "prompt": "scan and update your memory from my notes"
+      },
+      "assert": [
+        {
+          "type": "contains",
+          "value": "\"intent\": \"memory_scan\""
+        }
+      ]
+    },
+    {
+      "vars": {
+        "prompt": "how many memories do you have"
+      },
+      "assert": [
+        {
+          "type": "contains",
+          "value": "\"intent\": \"memory_stats\""
+        }
+      ]
+    },
+    {
+      "vars": {
+        "prompt": "search my obsidian vault for automation notes"
+      },
+      "assert": [
+        {
+          "type": "contains",
+          "value": "\"intent\": \"obsidian_search\""
+        }
+      ]
+    },
+    {
+      "vars": {
+        "prompt": "read my obsidian daily note"
+      },
+      "assert": [
+        {
+          "type": "contains",
+          "value": "\"intent\": \"obsidian_daily\""
+        }
+      ]
+    },
+    {
+      "vars": {
+        "prompt": "are all my services running"
+      },
+      "assert": [
+        {
+          "type": "contains",
+          "value": "\"intent\": \"status\""
+        }
+      ]
+    },
+    {
+      "vars": {
+        "prompt": "fix adwi it's broken"
+      },
+      "assert": [
+        {
+          "type": "contains",
+          "value": "\"intent\": \"self_heal\""
+        }
+      ]
+    },
+    {
+      "vars": {
+        "prompt": "what should I build next"
+      },
+      "assert": [
+        {
+          "type": "contains",
+          "value": "\"intent\": \"what_next\""
+        }
+      ]
+    },
+    {
+      "vars": {
+        "prompt": "run the daily improvement routine"
+      },
+      "assert": [
+        {
+          "type": "contains",
+          "value": "\"intent\": \"daily_improve\""
+        }
+      ]
+    },
+    {
+      "vars": {
+        "prompt": "how fast is adwi in tokens per second"
+      },
+      "assert": [
+        {
+          "type": "contains",
+          "value": "\"intent\": \"benchmark\""
+        }
+      ]
+    },
+    {
+      "vars": {
+        "prompt": "run a quick python script to check disk"
+      },
+      "assert": [
+        {
+          "type": "contains",
+          "value": "\"intent\": \"run_code\""
+        }
+      ]
+    },
+    {
+      "vars": {
+        "prompt": "check adwi's full health"
+      },
+      "assert": [
+        {
+          "type": "contains",
+          "value": "\"intent\": \"doctor\""
+        }
+      ]
+    },
+    {
+      "vars": {
+        "prompt": "which model is currently active"
+      },
+      "assert": [
+        {
+          "type": "contains",
+          "value": "\"intent\": \"model_status\""
+        }
+      ]
+    },
+    {
+      "vars": {
+        "prompt": "switch to the local model"
+      },
+      "assert": [
+        {
+          "type": "contains",
+          "value": "\"intent\": \"use_local\""
+        }
+      ]
+    },
+    {
+      "vars": {
+        "prompt": "use cloud model for this"
+      },
+      "assert": [
+        {
+          "type": "contains",
+          "value": "\"intent\": \"use_cloud\""
+        }
+      ]
+    },
+    {
+      "vars": {
+        "prompt": "what can you do"
+      },
+      "assert": [
+        {
+          "type": "contains",
+          "value": "\"intent\": \"capabilities\""
+        }
+      ]
+    },
+    {
+      "vars": {
+        "prompt": "show git status"
+      },
+      "assert": [
+        {
+          "type": "contains",
+          "value": "\"intent\": \"git_status\""
+        }
+      ]
+    },
+    {
+      "vars": {
+        "prompt": "commit everything now"
+      },
+      "assert": [
+        {
+          "type": "contains",
+          "value": "\"intent\": \"backup_now\""
+        }
+      ]
+    },
+    {
+      "vars": {
+        "prompt": "when was the last backup"
+      },
+      "assert": [
+        {
+          "type": "contains",
+          "value": "\"intent\": \"backup_status\""
+        }
+      ]
+    },
+    {
+      "vars": {
+        "prompt": "https://youtu.be/dQw4w9WgXcQ"
+      },
+      "assert": [
+        {
+          "type": "contains",
+          "value": "\"intent\": \"youtube\""
+        }
+      ]
+    },
+    {
+      "vars": {
+        "prompt": "generate an image of a sunset"
+      },
+      "assert": [
+        {
+          "type": "contains",
+          "value": "\"intent\": \"generate_image\""
+        }
+      ]
+    },
+    {
+      "vars": {
+        "prompt": "check my gmail"
+      },
+      "assert": [
+        {
+          "type": "contains",
+          "value": "\"intent\": \"gmail\""
+        }
+      ]
+    },
+    {
+      "vars": {
+        "prompt": "show unread emails"
+      },
+      "assert": [
+        {
+          "type": "contains",
+          "value": "\"intent\": \"gmail\""
+        }
+      ]
+    },
+    {
+      "vars": {
+        "prompt": "run the nightly maintenance loop"
+      },
+      "assert": [
+        {
+          "type": "contains",
+          "value": "\"intent\": \"nightly_run\""
+        }
+      ]
+    },
+    {
+      "vars": {
+        "prompt": "what did the nightly loop do last night"
+      },
+      "assert": [
+        {
+          "type": "contains",
+          "value": "\"intent\": \"nightly_status\""
+        }
+      ]
+    },
+    {
+      "vars": {
+        "prompt": "listen to my voice command"
+      },
+      "assert": [
+        {
+          "type": "contains",
+          "value": "\"intent\": \"voice_in\""
+        }
+      ]
+    },
+    {
+      "vars": {
+        "prompt": "read the morning brief out loud"
+      },
+      "assert": [
+        {
+          "type": "contains",
+          "value": "\"intent\": \"voice_out\""
+        }
+      ]
+    },
+    {
+      "vars": {
+        "prompt": "what is the capital of France"
+      },
+      "assert": [
+        {
+          "type": "contains",
+          "value": "\"intent\": \"chat\""
+        }
+      ]
+    },
+    {
+      "vars": {
+        "prompt": "explain how transformers work"
+      },
+      "assert": [
+        {
+          "type": "contains",
+          "value": "\"intent\": \"chat\""
+        }
+      ]
+    },
+    {
+      "vars": {
+        "prompt": "tell me a joke"
+      },
+      "assert": [
+        {
+          "type": "contains",
+          "value": "\"intent\": \"chat\""
+        }
+      ]
+    },
+    {
+      "vars": {
+        "prompt": "how do I make pasta carbonara"
+      },
+      "assert": [
+        {
+          "type": "contains",
+          "value": "\"intent\": \"chat\""
+        }
+      ]
+    },
+    {
+      "vars": {
+        "prompt": "what's the weather like today"
+      },
+      "assert": [
+        {
+          "type": "contains",
+          "value": "\"intent\": \"chat\""
+        }
+      ]
+    },
+    {
+      "vars": {
+        "prompt": "who wrote hamlet"
+      },
+      "assert": [
+        {
+          "type": "contains",
+          "value": "\"intent\": \"chat\""
+        }
+      ]
+    },
+    {
+      "vars": {
+        "prompt": "translate hello to spanish"
+      },
+      "assert": [
+        {
+          "type": "contains",
+          "value": "\"intent\": \"chat\""
+        }
+      ]
+    },
+    {
+      "vars": {
+        "prompt": "what is 2 plus 2"
+      },
+      "assert": [
+        {
+          "type": "contains",
+          "value": "\"intent\": \"chat\""
+        }
+      ]
+    }
+  ]
+}

@@ -1,11 +1,16 @@
 """
-Gmail helper for Adwi — Phase 1: read/search/thread/category (no mutation).
+Gmail helper for Adwi — Phase 2: read/search/thread/category + archive/trash/mark-read.
 Uses OAuth2 with client credentials from secrets.local.env.
 Token stored in secrets/gmail-token.json (never printed).
-Scope: gmail.readonly — no sending, deleting, or modifying.
 
-Phase 2 scope expansion (when ready): gmail.modify for archive/trash/mark-read.
-Phase 3 scope expansion: gmail.compose + gmail.send for drafts/send.
+Scope: gmail.modify — read + archive + trash + mark-read/unread (no send/compose).
+
+Phase 2 scope change from readonly → modify:
+  The existing token (if any) has readonly scope and will be rejected.
+  Detection: get_service() checks token scopes and auto-prompts re-auth if needed.
+  User step: run /gmail-auth once to re-authorize with the new scope.
+
+Phase 3 scope expansion (when ready): gmail.compose + gmail.send for drafts/send.
 """
 import json
 import os
@@ -13,9 +18,8 @@ import base64
 from pathlib import Path
 
 SECRETS_DIR  = Path.home() / "SuneelWorkSpace" / "secrets"
-CREDS_CACHE  = Path.home() / "Downloads" / "credentials.json"
 TOKEN_FILE   = SECRETS_DIR / "gmail-token.json"
-SCOPES       = ["https://www.googleapis.com/auth/gmail.readonly"]
+SCOPES       = ["https://www.googleapis.com/auth/gmail.modify"]
 
 
 def _load_secrets() -> dict:
@@ -32,7 +36,7 @@ def _load_secrets() -> dict:
 
 
 def get_service():
-    """Return an authenticated Gmail service. Runs OAuth flow if needed."""
+    """Return an authenticated Gmail service. Re-runs OAuth if scope mismatch."""
     from google.oauth2.credentials import Credentials
     from google_auth_oauthlib.flow import InstalledAppFlow
     from google.auth.transport.requests import Request
@@ -42,27 +46,35 @@ def get_service():
 
     if TOKEN_FILE.exists():
         creds = Credentials.from_authorized_user_file(str(TOKEN_FILE), SCOPES)
+        # Detect scope mismatch (e.g. old readonly token, now need modify)
+        token_scopes = set(getattr(creds, "scopes", None) or [])
+        required_scopes = set(SCOPES)
+        if creds.valid and not required_scopes.issubset(token_scopes):
+            creds = None  # Force re-auth to pick up expanded scopes
 
     if not creds or not creds.valid:
         if creds and creds.expired and creds.refresh_token:
-            creds.refresh(Request())
-        else:
-            s = _load_secrets()
-            client_config = {
-                "installed": {
-                    "client_id":     s.get("GOOGLE_CLIENT_ID", ""),
-                    "client_secret": s.get("GOOGLE_CLIENT_SECRET", ""),
-                    "project_id":    s.get("GOOGLE_PROJECT_ID", ""),
-                    "auth_uri":      "https://accounts.google.com/o/oauth2/auth",
-                    "token_uri":     "https://oauth2.googleapis.com/token",
-                    "redirect_uris": ["http://localhost"],
-                }
-            }
-            if not client_config["installed"]["client_id"]:
-                raise RuntimeError("GOOGLE_CLIENT_ID not set in secrets.local.env")
-            flow = InstalledAppFlow.from_client_config(client_config, SCOPES)
-            creds = flow.run_local_server(port=0)
+            try:
+                creds.refresh(Request())
+            except Exception:
+                creds = None  # Refresh failed — full re-auth needed
 
+    if not creds or not creds.valid:
+        s = _load_secrets()
+        client_config = {
+            "installed": {
+                "client_id":     s.get("GOOGLE_CLIENT_ID", ""),
+                "client_secret": s.get("GOOGLE_CLIENT_SECRET", ""),
+                "project_id":    s.get("GOOGLE_PROJECT_ID", ""),
+                "auth_uri":      "https://accounts.google.com/o/oauth2/auth",
+                "token_uri":     "https://oauth2.googleapis.com/token",
+                "redirect_uris": ["http://localhost"],
+            }
+        }
+        if not client_config["installed"]["client_id"]:
+            raise RuntimeError("GOOGLE_CLIENT_ID not set in secrets.local.env")
+        flow = InstalledAppFlow.from_client_config(client_config, SCOPES)
+        creds = flow.run_local_server(port=0)
         TOKEN_FILE.write_text(creds.to_json())
         TOKEN_FILE.chmod(0o600)
 
@@ -141,7 +153,7 @@ def read_email(msg_id: str) -> dict:
 
 
 def get_thread(thread_id: str) -> dict:
-    """Load all messages in a thread. Returns subject, count, and list of message dicts."""
+    """Load all messages in a thread."""
     service = get_service()
     t = service.users().threads().get(userId="me", id=thread_id, format="full").execute()
     msgs = []
@@ -158,25 +170,13 @@ def get_thread(thread_id: str) -> dict:
             "snippet": msg.get("snippet", ""),
         })
     subject = msgs[0]["subject"] if msgs else "(no subject)"
-    return {
-        "thread_id": thread_id,
-        "subject":   subject,
-        "messages":  msgs,
-        "count":     len(msgs),
-    }
+    return {"thread_id": thread_id, "subject": subject, "messages": msgs, "count": len(msgs)}
 
 
 def list_category(category: str = "INBOX", max_results: int = 10) -> list:
-    """List emails by Gmail category label.
-    category: INBOX, SPAM, CATEGORY_PROMOTIONS, CATEGORY_SOCIAL,
-              CATEGORY_UPDATES, CATEGORY_FORUMS, UNREAD
-    """
+    """List emails by Gmail category label."""
     service = get_service()
-    params = {
-        "userId":    "me",
-        "maxResults": max_results * 2,
-        "labelIds":  [category],
-    }
+    params = {"userId": "me", "maxResults": max_results * 2, "labelIds": [category]}
     results = service.users().messages().list(**params).execute()
     messages = results.get("messages", [])
     emails = []
@@ -212,3 +212,49 @@ def get_label_counts() -> dict:
                 "unread": detail.get("messagesUnread", 0),
             }
     return counts
+
+
+# ── Phase 2: mutation helpers (require gmail.modify scope) ────────────────────
+
+def _batch_modify(msg_ids: list, add_labels: list = None, remove_labels: list = None) -> int:
+    """Apply a label modification to a batch of messages. Returns count processed."""
+    if not msg_ids:
+        return 0
+    service = get_service()
+    body = {}
+    if add_labels:    body["addLabelIds"] = add_labels
+    if remove_labels: body["removeLabelIds"] = remove_labels
+    # Gmail batchModify accepts up to 1000 IDs per call
+    for i in range(0, len(msg_ids), 1000):
+        service.users().messages().batchModify(
+            userId="me",
+            body={"ids": msg_ids[i:i+1000], **body}
+        ).execute()
+    return len(msg_ids)
+
+
+def archive_messages(msg_ids: list) -> int:
+    """Archive messages (remove INBOX label). Returns count modified."""
+    return _batch_modify(msg_ids, remove_labels=["INBOX"])
+
+
+def trash_messages(msg_ids: list) -> int:
+    """Move messages to Trash. Uses individual trash() calls for correct semantics."""
+    if not msg_ids:
+        return 0
+    service = get_service()
+    count = 0
+    for mid in msg_ids:
+        service.users().messages().trash(userId="me", id=mid).execute()
+        count += 1
+    return count
+
+
+def mark_read(msg_ids: list) -> int:
+    """Mark messages as read (remove UNREAD label). Returns count modified."""
+    return _batch_modify(msg_ids, remove_labels=["UNREAD"])
+
+
+def mark_unread(msg_ids: list) -> int:
+    """Mark messages as unread (add UNREAD label). Returns count modified."""
+    return _batch_modify(msg_ids, add_labels=["UNREAD"])

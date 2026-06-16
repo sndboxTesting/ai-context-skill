@@ -793,6 +793,25 @@ _REGEX_INTENTS = [
     (re.compile(r"\b(bechmark|benchamrk|benchmarck)\b", re.I), "benchmark"),
     (re.compile(r"(benchmark|speed.?test|how fast|tokens? per second).{0,20}(adwi|model|local|ollama)\b", re.I), "benchmark"),
 
+    # ── Gmail Phase 2: mutation intents — MUST precede gmail_open / gmail_list_category ──
+    # gmail_confirm — anchored bare inputs; dispatch checks _GMAIL_CTX["pending"] before acting
+    (re.compile(r"^confirm\s*$", re.I), "gmail_confirm"),
+    (re.compile(r"^yes,?\s+do\s+it\s*$", re.I), "gmail_confirm"),
+    # gmail_cancel — anchored
+    (re.compile(r"^cancel(?:\s+that)?\s*$", re.I), "gmail_cancel"),
+    (re.compile(r"^(?:never\s+mind|abort|stop\s+that)\s*$", re.I), "gmail_cancel"),
+    # gmail_mark_read — before mark_unread: "those unread emails as read" must route here
+    (re.compile(r"\bmark\b.{0,35}\b(?:as\s+)?read\b", re.I), "gmail_mark_read"),
+    # gmail_mark_unread
+    (re.compile(r"\bmark\b.{0,35}\b(?:as\s+)?unread\b", re.I), "gmail_mark_unread"),
+    # gmail_archive — MUST precede gmail_list_category (both share category/spam words)
+    (re.compile(r"\b(?:archive|move\s+to\s+archive)\b.{0,40}\b(?:emails?|mail|messages?|them|those|these|that|it|all|promos?|promotional|promotions?|newsletters?|social|updates?|forums?|spam)\b", re.I), "gmail_archive"),
+    (re.compile(r"\barchive\b.{0,20}\b(?:from|about|older\s+than)\b", re.I), "gmail_archive"),
+    # gmail_trash — MUST precede gmail_list_category
+    (re.compile(r"\b(?:trash|move\s+to\s+trash)\b.{0,40}\b(?:emails?|mail|messages?|them|those|these|that|it|all|promos?|promotional|promotions?|newsletters?|social|updates?|forums?|spam)\b", re.I), "gmail_trash"),
+    (re.compile(r"\btrash\b.{0,20}\b(?:from|about|older\s+than)\b", re.I), "gmail_trash"),
+    (re.compile(r"\bdelete\b.{0,30}\b(?:emails?|mail|messages?|them|those|these|that|promos?|spam)\b", re.I), "gmail_trash"),
+
     # ── Gmail open (search + open first result) — MUST precede gmail_read ────────
     # "open latest email from Amazon", "open the email about the budget"
     (re.compile(r"\b(open|read)\b.{0,20}\b(email|mail|message)\b.{0,30}\b(from|about|regarding|by)\b", re.I), "gmail_open"),
@@ -1034,6 +1053,8 @@ _ALL_INTENTS = [
     "git_status", "backup_now", "backup_status", "backup_log",
     # Comms — Gmail
     "gmail", "gmail_read", "gmail_open", "gmail_thread", "gmail_summarize", "gmail_list_category",
+    "gmail_archive", "gmail_trash", "gmail_mark_read", "gmail_mark_unread",
+    "gmail_confirm", "gmail_cancel",
     # n8n / automation
     "sync",
     # Nightly
@@ -1101,6 +1122,16 @@ _INTENT_SYSTEM = (
     "   'gmail_summarize': LLM-summarize the current email, thread, or a searched email\n"
     "                      e.g. 'summarize that', 'summarize the thread about budget'\n"
     "   'gmail_list_category': list emails in a Gmail category — promotions, spam, social, updates\n"
+    "   'gmail_archive'  : preview + queue archive for emails (removes from inbox); say 'confirm' to apply\n"
+    "                      e.g. 'archive those promotions', 'archive emails from Amazon'\n"
+    "   'gmail_trash'    : preview + queue move-to-trash; say 'confirm' to apply\n"
+    "                      e.g. 'trash spam older than a week', 'delete those social emails'\n"
+    "   'gmail_mark_read': preview + queue mark-as-read; say 'confirm' to apply\n"
+    "                      e.g. 'mark these as read', 'mark all promos read'\n"
+    "   'gmail_mark_unread': preview + queue mark-as-unread; say 'confirm' to apply\n"
+    "   'gmail_confirm'  : ONLY if there is a pending Gmail mutation action to execute\n"
+    "                      bare 'confirm', 'yes do it' — confirms archive/trash/mark-read\n"
+    "   'gmail_cancel'   : cancel a pending Gmail mutation — 'cancel', 'never mind'\n"
     "   'generate_image' : ONLY when creating a brand-new image/picture/artwork/visual output.\n"
     "                      NEVER for explanations, comparisons, or code/model concepts.\n"
     "                      'generation' as a software concept (code generation, token generation,\n"
@@ -3080,15 +3111,20 @@ def _gmail():
     return mod
 
 def cmd_gmail_auth() -> None:
-    """Run one-time OAuth2 browser flow to authorize Gmail access."""
+    """Run one-time OAuth2 browser flow to authorize Gmail (Phase 2: gmail.modify scope)."""
     adwi_head("Gmail authorization")
     cprint("  This will open your browser for Google OAuth2 sign-in.", CYAN)
-    cprint("  Scope: READ-ONLY — Adwi cannot send, delete, or modify emails.", GREEN)
+    cprint("  Scope: gmail.modify — read + archive / trash / mark-read (no send)", GREEN)
     ans = input(f"  {YELLOW}Proceed? (y/n){RESET} ").strip().lower()
     if ans not in ("y","yes"):
         cprint("  Cancelled.", GRAY); return
     try:
         gh = _gmail()
+        # Delete existing token so we always get a fresh flow with the current scope
+        token = HOME / "SuneelWorkSpace" / "secrets" / "gmail-token.json"
+        if token.exists():
+            token.unlink()
+            cprint("  Old token removed — re-authorizing with gmail.modify scope…", GRAY)
         gh.get_service()
         cprint("  ✓ Gmail authorized. Token saved to secrets/gmail-token.json", GREEN)
         cprint("  Run: /gmail  to see your inbox", GRAY)
@@ -3122,6 +3158,8 @@ def cmd_gmail(query: str = "", n: int = 10) -> None:
         _GMAIL_IDS.clear();     _GMAIL_IDS.extend(em["id"] for em in emails)
         _GMAIL_SUBJECTS.clear(); _GMAIL_SUBJECTS.extend(em["subject"] for em in emails)
         _GMAIL_CTX["thread_ids"] = [em.get("thread_id", "") for em in emails]
+        _GMAIL_CTX["candidates"] = list(emails)
+        _GMAIL_CTX["pending"]    = None  # clear any pending action from previous context
     except Exception as e:
         cprint(f"  Gmail error: {e}", RED)
         if "credentials" in str(e).lower() or "token" in str(e).lower():
@@ -3134,9 +3172,19 @@ _GMAIL_CTX: dict = {
     "current_email":  None,  # full email dict — set by cmd_gmail_read / cmd_gmail_open
     "current_thread": None,  # full thread dict — set by cmd_gmail_thread
     "thread_ids":     [],    # thread IDs parallel to _GMAIL_IDS
-    "candidates":     [],    # candidate set for bulk ops (Phase 2)
+    "candidates":     [],    # candidate email dicts from last list/category (Phase 2)
     "draft":          None,  # current draft (Phase 3)
+    "pending":        None,  # pending mutation (Phase 2): {action, ids, count, description}
 }
+
+_GMAIL_ACTION_PAST = {
+    "archive":     "archived",
+    "trash":       "moved to trash",
+    "mark_read":   "marked as read",
+    "mark_unread": "marked as unread",
+}
+
+_GMAIL_MAX_CANDIDATES = 25  # hard cap on mutation batch size
 
 _GMAIL_CATEGORY_MAP = {
     "promotions": "CATEGORY_PROMOTIONS", "promotion":  "CATEGORY_PROMOTIONS",
@@ -3287,7 +3335,9 @@ def cmd_gmail_list_category(name: str) -> None:
         _GMAIL_IDS.clear();     _GMAIL_IDS.extend(e["id"] for e in emails)
         _GMAIL_SUBJECTS.clear(); _GMAIL_SUBJECTS.extend(e["subject"] for e in emails)
         _GMAIL_CTX["thread_ids"] = [e.get("thread_id","") for e in emails]
-        print(f"  {GRAY}/gmail-read <n> to open · /gmail-summarize for summary{RESET}")
+        _GMAIL_CTX["candidates"] = list(emails)
+        _GMAIL_CTX["pending"]    = None  # clear any pending action from previous context
+        print(f"  {GRAY}/gmail-read <n> · /gmail-archive · /gmail-trash · /gmail-mark-read{RESET}")
     except Exception as e:
         cprint(f"  Gmail error: {e}", RED)
 
@@ -3341,6 +3391,185 @@ def cmd_gmail_summarize(query: str = "") -> None:
             cprint("  No email context. Open an email first, or say 'summarize email from X'.", YELLOW)
     except Exception as e:
         cprint(f"  Gmail error: {e}", RED)
+
+
+
+# ── Gmail Phase 2: preview → confirm mutation helpers ─────────────────────────
+
+def _gmail_time_to_query(text: str) -> str:
+    """Convert natural-language time phrases in text to a Gmail search modifier."""
+    t = text.lower()
+    m = re.search(r"older\s+than\s+(\d+)\s+(day|week|month)s?", t)
+    if m:
+        n, unit = int(m.group(1)), m.group(2)
+        if unit == "week":  n *= 7
+        elif unit == "month": n *= 30
+        return f"older_than:{n}d"
+    if re.search(r"older\s+than\s+a\s+week", t):  return "older_than:7d"
+    if re.search(r"older\s+than\s+a\s+month", t): return "older_than:30d"
+    if re.search(r"\byesterday\b", t):             return "after:yesterday before:today"
+    if re.search(r"\blast\s+week\b", t):           return "older_than:1d newer_than:7d"
+    if re.search(r"\bthis\s+week\b", t):           return "newer_than:7d"
+    if re.search(r"\bthis\s+month\b", t):          return "newer_than:30d"
+    if re.search(r"\btoday\b", t):                 return "newer_than:1d"
+    return ""
+
+
+def _gmail_resolve_candidates(text: str) -> tuple:
+    """
+    Resolve candidate emails for a bulk mutation from text + session context.
+    Priority: category keyword → from/about query → session candidates.
+    Returns (email_dict_list, description_str).
+    """
+    gh = _gmail()
+    cat_m   = re.search(r"\b(promotions?|promo|promos?|promotional|newsletters?|social|updates?|forums?|spam)\b", text, re.I)
+    from_m  = re.search(r"\bfrom\s+(\w[\w\s.@]{0,25}?)(?:\s+about|\s+older|\s+in\b|[?.,]|$)", text, re.I)
+    about_m = re.search(r"\babout\s+(.+?)(?:\s+from|\s+older|[?.,]|$)", text, re.I)
+    time_q  = _gmail_time_to_query(text)
+    ref_words = bool(re.search(r"\b(those|these|them|that|it|the\s+(?:ones?|emails?|messages?))\b", text, re.I))
+
+    if cat_m:
+        label = _GMAIL_CATEGORY_MAP.get(cat_m.group(1).lower(), "INBOX")
+        query = f"label:{label}"
+        if time_q:  query += f" {time_q}"
+        if from_m:  query += f" from:{from_m.group(1).strip()}"
+        emails = gh.list_emails(max_results=_GMAIL_MAX_CANDIDATES, query=query, inbox_only=False)
+        desc = f"{cat_m.group(1)}" + (f" {time_q}" if time_q else "")
+        return emails[:_GMAIL_MAX_CANDIDATES], desc
+
+    if from_m or about_m:
+        parts = []
+        if from_m:  parts.append(f"from:{from_m.group(1).strip()}")
+        if about_m: parts.append(about_m.group(1).strip())
+        if time_q:  parts.append(time_q)
+        q = " ".join(parts)
+        emails = gh.list_emails(max_results=_GMAIL_MAX_CANDIDATES, query=q, inbox_only=False)
+        return emails[:_GMAIL_MAX_CANDIDATES], q
+
+    if _GMAIL_CTX.get("candidates") and (ref_words or True):
+        cands = _GMAIL_CTX["candidates"]
+        return cands[:_GMAIL_MAX_CANDIDATES], "current selection"
+
+    if _GMAIL_IDS:
+        dicts = [{"id": mid, "subject": subj, "from": "", "date": ""}
+                 for mid, subj in zip(_GMAIL_IDS, _GMAIL_SUBJECTS)]
+        return dicts[:_GMAIL_MAX_CANDIDATES], "current selection"
+
+    return [], "no candidates — list emails first"
+
+
+def _gmail_show_preview(action: str, candidates: list, desc: str) -> None:
+    """Render a preview box for a pending Gmail mutation and set _GMAIL_CTX['pending']."""
+    count = len(candidates)
+    action_label = {
+        "archive":     "Archive",
+        "trash":       "Move to Trash",
+        "mark_read":   "Mark Read",
+        "mark_unread": "Mark Unread",
+    }.get(action, action.title())
+    W = 60
+    title = f"{action_label}  {count} email{'s' if count != 1 else ''}  —  {desc}"[:W-2]
+    cprint(f"\n  ┌{'─'*W}┐", GRAY)
+    cprint(f"  │  {BOLD}{title:<{W-2}}{RESET}│")
+    cprint(f"  ├{'─'*W}┤", GRAY)
+    for em in candidates[:5]:
+        subj = (em.get("subject") or "(no subject)")[:W-4]
+        cprint(f"  │  {DIM}{subj:<{W-4}}{RESET}│")
+    if count > 5:
+        more = f"… {count-5} more"
+        cprint(f"  │  {GRAY}{more:<{W-4}}{RESET}│")
+    cprint(f"  ├{'─'*W}┤", GRAY)
+    hint = "Type 'confirm' to apply · 'cancel' to abort"
+    cprint(f"  │  {YELLOW}{hint:<{W-2}}{RESET}│")
+    cprint(f"  └{'─'*W}┘\n", GRAY)
+    _GMAIL_CTX["pending"] = {
+        "action":      action,
+        "ids":         [e["id"] for e in candidates],
+        "count":       count,
+        "description": f"{action_label} {count} email{'s' if count != 1 else ''} — {desc}",
+    }
+
+
+def _cmd_gmail_mutate_preview(action: str, text: str) -> None:
+    """Shared logic: resolve candidates, show preview, set pending."""
+    token = HOME / "SuneelWorkSpace" / "secrets" / "gmail-token.json"
+    if not token.exists():
+        cprint("  Gmail not authorized — run /gmail-auth first", RED); return
+    action_labels = {"archive": "Archive", "trash": "Move to Trash",
+                     "mark_read": "Mark Read", "mark_unread": "Mark Unread"}
+    adwi_head(f"Gmail — {action_labels.get(action, action)}")
+    try:
+        candidates, desc = _gmail_resolve_candidates(text)
+        if not candidates:
+            cprint("  No emails found. List emails first or specify a category/sender.", YELLOW)
+            return
+        _gmail_show_preview(action, candidates, desc)
+    except Exception as e:
+        cprint(f"  Error: {e}", RED)
+
+
+def cmd_gmail_archive(text: str = "") -> None:
+    """Preview candidates for archive, then wait for 'confirm'."""
+    _cmd_gmail_mutate_preview("archive", text)
+
+
+def cmd_gmail_trash_emails(text: str = "") -> None:
+    """Preview candidates for trash, then wait for 'confirm'."""
+    _cmd_gmail_mutate_preview("trash", text)
+
+
+def cmd_gmail_mark_read(text: str = "") -> None:
+    """Preview candidates for mark-as-read, then wait for 'confirm'."""
+    _cmd_gmail_mutate_preview("mark_read", text)
+
+
+def cmd_gmail_mark_unread(text: str = "") -> None:
+    """Preview candidates for mark-as-unread, then wait for 'confirm'."""
+    _cmd_gmail_mutate_preview("mark_unread", text)
+
+
+def cmd_gmail_confirm() -> None:
+    """Execute the pending Gmail mutation after user says 'confirm'."""
+    pending = _GMAIL_CTX.get("pending")
+    if not pending:
+        cprint("  No pending Gmail action. Run archive/trash/mark-read first.", YELLOW)
+        return
+    action = pending["action"]
+    ids    = pending["ids"]
+    desc   = pending["description"]
+    adwi_head(f"Gmail — Executing: {desc}")
+    try:
+        gh = _gmail()
+        if action == "archive":
+            n = gh.archive_messages(ids)
+        elif action == "trash":
+            n = gh.trash_messages(ids)
+        elif action == "mark_read":
+            n = gh.mark_read(ids)
+        elif action == "mark_unread":
+            n = gh.mark_unread(ids)
+        else:
+            cprint(f"  Unknown action: {action}", RED); return
+        _GMAIL_CTX["pending"]    = None
+        _GMAIL_CTX["candidates"] = []
+        _GMAIL_IDS.clear()
+        _GMAIL_SUBJECTS.clear()
+        verb = _GMAIL_ACTION_PAST.get(action, "processed")
+        cprint(f"  ✓ Done — {n} email{'s' if n != 1 else ''} {verb}.", GREEN)
+    except Exception as e:
+        cprint(f"  Error during {action}: {e}", RED)
+        if "Insufficient" in str(e) or "scope" in str(e).lower() or "403" in str(e):
+            cprint("  Scope error — run /gmail-auth to re-authorize with gmail.modify scope.", YELLOW)
+
+
+def cmd_gmail_cancel() -> None:
+    """Cancel a pending Gmail mutation."""
+    pending = _GMAIL_CTX.get("pending")
+    if not pending:
+        cprint("  No pending Gmail action.", GRAY); return
+    desc = pending.get("description", "pending action")
+    _GMAIL_CTX["pending"] = None
+    cprint(f"  Cancelled: {desc}", GRAY)
 
 
 def cmd_gmail_summary(query: str = "") -> None:
@@ -5315,6 +5544,18 @@ def dispatch_natural(text: str):
     elif intent == "gmail_list_category":
         m = re.search(r"\b(promotions?|promo|promotional|newsletters?|social|updates?|forums?|spam)\b", text, re.I)
         cmd_gmail_list_category(m.group(1) if m else "promotions")
+    elif intent == "gmail_archive":
+        cmd_gmail_archive(text)
+    elif intent == "gmail_trash":
+        cmd_gmail_trash_emails(text)
+    elif intent == "gmail_mark_read":
+        cmd_gmail_mark_read(text)
+    elif intent == "gmail_mark_unread":
+        cmd_gmail_mark_unread(text)
+    elif intent == "gmail_confirm":
+        cmd_gmail_confirm()
+    elif intent == "gmail_cancel":
+        cmd_gmail_cancel()
     elif intent == "gmail_read":
         if re.search(r"\bthis\s+(email|mail|message)\b", text, re.I):
             frag = re.sub(r".*?\bthis\s+(email|mail|message)\s*", "", text, flags=re.I).strip()
@@ -5576,6 +5817,16 @@ def handle(line: str) -> bool:
     elif line == "/gmail-spam": cmd_gmail_list_category("spam")
     elif line == "/gmail-social": cmd_gmail_list_category("social")
     elif line.startswith("/gmail-category "): cmd_gmail_list_category(line[16:].strip())
+    elif line == "/gmail-archive": cmd_gmail_archive("")
+    elif line.startswith("/gmail-archive "): cmd_gmail_archive(line[15:].strip())
+    elif line == "/gmail-trash": cmd_gmail_trash_emails("")
+    elif line.startswith("/gmail-trash "): cmd_gmail_trash_emails(line[13:].strip())
+    elif line == "/gmail-mark-read": cmd_gmail_mark_read("")
+    elif line.startswith("/gmail-mark-read "): cmd_gmail_mark_read(line[17:].strip())
+    elif line == "/gmail-mark-unread": cmd_gmail_mark_unread("")
+    elif line.startswith("/gmail-mark-unread "): cmd_gmail_mark_unread(line[19:].strip())
+    elif line in ("/gmail-confirm", "/confirm"): cmd_gmail_confirm()
+    elif line == "/gmail-cancel": cmd_gmail_cancel()
     # ── Self-repair commands (confirm before patching) ──
     elif line.startswith("/fix-error"): cmd_fix_error(line[10:].strip())
     elif line == "/repair-adwi": cmd_repair_adwi()

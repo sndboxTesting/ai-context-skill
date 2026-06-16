@@ -2264,9 +2264,12 @@ def _obsidian_api(method: str, route: str, body: dict | None = None) -> dict:
     url = OBSIDIAN_BRIDGE + route
     try:
         data = json.dumps(body).encode("utf-8") if body else None
+        headers = {"Content-Type": "application/json"}
+        secret = os.environ.get("ADWI_LOCAL_SECRET", "")
+        if secret:
+            headers["X-Adwi-Secret"] = secret
         req  = urllib.request.Request(
-            url, data=data, method=method,
-            headers={"Content-Type": "application/json"},
+            url, data=data, method=method, headers=headers,
         )
         with urllib.request.urlopen(req, timeout=8) as r:
             return json.loads(r.read())

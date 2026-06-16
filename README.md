@@ -133,14 +133,14 @@ SYSTEM You are Adwi, a cautious local AI assistant. Never read secrets, never co
 <!-- AUTO:SERVICES -->
 | Service | Port | Status |
 |---|---|---|
-| open-webui | :3000 | ✓ running |
-| n8n | :5678 | ✓ running |
-| searxng | :8888 | ✓ running |
-| prometheus | :9090 | ✓ running |
-| loki | :3100 | ✓ running |
-| grafana | :4000 | ✓ running |
-| node-exporter | :9100 | ✓ running |
-| cadvisor | :9101 | ✓ running |
+| open-webui | :1 | ✓ running |
+| n8n | :1 | ✓ running |
+| searxng | :1 | ✓ running |
+| prometheus | :1 | ✓ running |
+| loki | :1 | ✓ running |
+| grafana | :1 | ✓ running |
+| node-exporter | :1 | ✓ running |
+| cadvisor | :1 | ✓ running |
 *Auto-updated: 2026-06-16*
 <!-- /AUTO:SERVICES -->
 

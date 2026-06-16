@@ -850,9 +850,13 @@ def step_obsidian_daily_note(data: dict) -> str | None:
     # Also try the bridge (non-fatal if not running)
     try:
         payload = json.dumps({"content": "\n".join(lines)}).encode("utf-8")
+        _headers = {"Content-Type": "application/json"}
+        _secret = os.environ.get("ADWI_LOCAL_SECRET", "")
+        if _secret:
+            _headers["X-Adwi-Secret"] = _secret
         req = urllib.request.Request(
             f"{OBSIDIAN_BRIDGE}/daily-note", data=payload, method="POST",
-            headers={"Content-Type": "application/json"},
+            headers=_headers,
         )
         urllib.request.urlopen(req, timeout=5)
     except Exception:

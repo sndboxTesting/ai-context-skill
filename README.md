@@ -961,59 +961,51 @@ bin/adwi
 
 ## §10 NLU Eval Status & Repair Backlog
 
-> **Last evaluated:** 2026-06-16 · 1,881 unique scenarios · all 10 NHR fixes applied and verified
+> **Last evaluated:** 2026-06-16 · 1,881 unique scenarios · 10 NHR fixes + 13 session-2 patches applied
 >
 > Full report: `logs/simeval/MASTER_REPORT_v2.md`
 > Machine-readable backlog: `logs/simeval/fix_backlog_v2.json`
 > Living repair list (human-readable, with results): `docs/NLU_REPAIR_BACKLOG.md`
 
-### Pass rates — before and after NHR fixes
+### Pass rates — full improvement history
 
-| Eval | Scenarios | Pre-NHR | Post-NHR | Gain |
-|------|-----------|---------|----------|------|
-| Large P1 (broad coverage) | 1,444 | 78.0% (1,126) | **83.7% (1,208)** | +5.7pp |
-| Large P2 (targeted weak families) | 446 | 68.6% (306) | **77.6% (346)** | +9.0pp |
-| **Combined (deduped)** | **1,881** | **75.8% (1,426)** | **82.1% (1,545)** | **+6.3pp** |
+| Eval | Scenarios | Pre-NHR | Post-NHR (session 1) | Post-session-2 | Total gain |
+|------|-----------|---------|----------------------|----------------|------------|
+| Large P1 (broad coverage) | 1,444 | 78.0% (1,126) | 83.7% (1,208) | **88.6% (1,279)** | +10.6pp |
+| Large P2 (targeted weak families) | 446 | 68.6% (306) | 77.6% (346) | **77.8% (347)** | +9.2pp |
+| **Combined (deduped)** | **1,881** | **75.8% (1,426)** | **82.1% (1,545)** | **86.0% (1,617)** | **+10.2pp** |
 
-### Category health (post-NHR)
+**Current baseline: 86.0% combined.** See `docs/NLU_REPAIR_BACKLOG.md` for full patch history.
+
+### Category health (post-session-2)
 
 | Category | Rate | Status |
 |----------|------|--------|
 | comms | 100% | ✅ Healthy |
 | model, file ops, voice, vault, git | 92–95% | ✅ Healthy |
-| security, system, repair | 87–90% | ✅ Good |
-| ambiguous, memory, media, meta | 80–84% | ✅ Good |
-| search, planning, disk | 74–80% | ⚠️ Watch |
-| chat | 66% | ⚠️ Benchmark/status bleed |
+| security, system, repair | 88–92% | ✅ Good |
+| ambiguous, memory, media, meta | 83–88% | ✅ Good |
+| search, planning, disk | 78–84% | ✅ Good |
+| chat | 70% | ⚠️ Benchmark/status bleed (10 remaining) |
 | safety (`__none__`) | 62% | ℹ️ Expected — blocked paths returning `__none__` is correct |
-| eval | 39% | ❌ High priority next |
+| cleanup | 85% | ⚠️ 15 failures remaining |
 
-### NHR-001 through NHR-010 — all applied 2026-06-16
+### All applied repair items
 
-| # | Item | Status | Applied |
-|---|------|--------|---------|
-| NHR-001 | `file_search` regex steals cleanup/duplicates/large_files | ✅ Applied | 2026-06-16 |
-| NHR-002 | Add `youtube` regex | ✅ Applied | 2026-06-16 |
-| NHR-003 | Add `patch_adwi` regex + INTENT_SYSTEM rule | ✅ Applied | 2026-06-16 |
-| NHR-004 | Generic `self_heal` patterns (→ doctor misfire) | ✅ Applied | 2026-06-16 |
-| NHR-005 | Disambiguate `obsidian_search` vs `memory_recall` | ✅ Applied | 2026-06-16 |
-| NHR-006 | Add `daily_improve` regex | ✅ Applied | 2026-06-16 |
-| NHR-007 | Expand `what_next` regex | ✅ Applied | 2026-06-16 |
-| NHR-008 | Add `inspect_code` regex | ✅ Applied | 2026-06-16 |
-| NHR-009 | Expand `memory_stats` regex | ✅ Applied | 2026-06-16 |
-| NHR-010 | `backup_now` vs `git_status` disambiguation | ✅ Applied | 2026-06-16 |
+**NHR-001 through NHR-010** (session 1, 2026-06-16): `file_search` ordering, `youtube`, `patch_adwi`, `self_heal`, obsidian disambiguation, `daily_improve`, `what_next`, `inspect_code`, `memory_stats`, `backup_now` — all ✅ Applied.
+
+**Session-2 patches** (2026-06-16): FIX-LF-001, FIX-OLD-001, FIX-DUP-001, FIX-ORG-002, FIX-CLEANUP-003, FIX-HEAL-001, FIX-BROWSE-001, FIX-WEB-001, FIX-ERR-002, FIX-EVAL-002, FIX-TEST-002, FIX-MEMSCAN-002, FIX-BENCH-001 — all ✅ Applied.
 
 See `docs/NLU_REPAIR_BACKLOG.md` for root causes, code diffs, and remaining failure analysis.
 
-### Next targets (NHR-011+)
+### Remaining targets
 
 | Family | Failures | Priority |
 |--------|----------|----------|
-| `chat` bleed (benchmark, status) | 76 | Medium — LLM-level, hard to regex-fix |
-| `cleanup` synonym gaps | 23 | High — more regex synonyms needed |
-| `organize` → `file_search`/`chat` | 14 | High — needs new intent or stronger anchor |
-| `eval` family (eval_adwi, routing, test_adwi) | 17 | High — overlapping surface area |
-| `fix_error` vs `status`/`patch_adwi` | 12 | Medium — traceback anchoring |
+| `chat` bleed (benchmark ~10, status ~8) | ~68 | Medium — INTENT_SYSTEM tuning |
+| `cleanup` synonym gaps | 15 | Medium — some residual |
+| `web_search` ambiguity | 11 | Medium — "search for X" context-dependent |
+| `organize` residual | 5 | Low — minimal remaining |
 
 ### Safety assessment
 

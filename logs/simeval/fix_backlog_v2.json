@@ -2,20 +2,20 @@
   {
     "id": "FIX-001",
     "title": "file_search regex too broad \u2014 swallows cleanup/duplicates/large_files",
-    "count": 20,
+    "count": 6,
     "evidence": [
       "find my heaviest files",
-      "find files exceeding 1 gigabyte",
-      "find archaic files",
-      "find long-abandoned files",
-      "find files that haven't been opened this year"
+      "remove unneeded files",
+      "find files I no longer need",
+      "can you help me delete stuff",
+      "what's the best way to structure these files"
     ],
     "root_cause": "`\\b(find|search for|locate|look for)\\b.{0,20}\\bfiles?\\b` matches 'find things to delete', 'find duplicate files', 'find large files'. The word 'files' appears in disk management prompts but should not trigger file_search.",
     "proposed_fix": "Add negative lookahead to file_search pattern: require file path context (extension, directory, 'in workspace', 'in /path') OR remove 'find' as standalone trigger. Alternative: add pre-guards for duplicate/cleanup intents BEFORE file_search in REGEX_INTENTS.",
     "affected_file": "adwi/adwi_cli.py \u2014 _REGEX_INTENTS file_search section",
     "effort": "low",
     "confidence": "high",
-    "impact": "~20 scenarios would flip to pass"
+    "impact": "~6 scenarios would flip to pass"
   },
   {
     "id": "FIX-003",
@@ -34,38 +34,20 @@
     "impact": "~3 scenarios would flip to pass"
   },
   {
-    "id": "FIX-004",
-    "title": "large_files \u2192 disk_usage regression for some prompts",
-    "count": 4,
-    "evidence": [
-      "what files take up the most room",
-      "top space consumers",
-      "which file is taking the most space",
-      "bulk space users"
-    ],
-    "root_cause": "Some large_files prompts contain 'disk' or 'space' keywords which trigger disk_usage regex. Example: 'what's the heaviest stuff on disk' \u2014 correctly routes to disk_usage, but 'heaviest files on disk' should route to large_files.",
-    "proposed_fix": "Add additional large_files pattern: `\\bfiles?\\b.{0,30}(heaviest|biggest|largest|most space).{0,20}(disk|drive|ssd)` \u2192 large_files BEFORE disk_usage patterns.",
-    "affected_file": "adwi/adwi_cli.py \u2014 _REGEX_INTENTS",
-    "effort": "low",
-    "confidence": "medium",
-    "impact": "~4 scenarios"
-  },
-  {
     "id": "FIX-005",
     "title": "organize \u2192 chat/file_search LLM miss",
-    "count": 11,
+    "count": 4,
     "evidence": [
       "what's the best way to structure these files",
-      "help me sort my files",
-      "suggest a folder structure",
       "how to structure my project folders",
-      "help me bring order to my files"
+      "how to organize dev projects",
+      "organize"
     ],
     "root_cause": "organize intent has no explicit rule in _INTENT_SYSTEM. LLM sees 'help me organize files' as advisory chat, and sometimes as file_search. The regex covers 'organiz/tidy/restructure' but not all advisory phrasing.",
     "proposed_fix": "Add to _INTENT_SYSTEM: 'organize: user wants help organizing, sorting, restructuring, or tidying their file/folder hierarchy. Different from cleanup (deletion) and file_search (finding files).'",
     "affected_file": "adwi/adwi_cli.py \u2014 _INTENT_SYSTEM",
     "effort": "low",
     "confidence": "medium",
-    "impact": "~11 scenarios"
+    "impact": "~4 scenarios"
   }
 ]

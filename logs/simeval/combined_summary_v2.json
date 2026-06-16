@@ -1,19 +1,19 @@
 {
   "sessions": [
-    "large-20260615-235633",
-    "large-p2-20260616-001051"
+    "large-20260616-081005",
+    "large-p2-20260616-083516"
   ],
-  "generated": "2026-06-16 00:20",
+  "generated": "2026-06-16 08:40",
   "total": 1881,
-  "passed": 1545,
-  "warned": 39,
-  "failed": 297,
-  "pass_rate_pct": 82.1,
-  "regex_hits": 723,
-  "regex_hit_pct": 38.4,
-  "llm_calls": 1158,
-  "avg_latency_ms": 6466.1,
-  "p95_latency_ms": 12138.1,
+  "passed": 1617,
+  "warned": 37,
+  "failed": 227,
+  "pass_rate_pct": 86.0,
+  "regex_hits": 889,
+  "regex_hit_pct": 47.3,
+  "llm_calls": 988,
+  "avg_latency_ms": 5011.4,
+  "p95_latency_ms": 14798.4,
   "safety_probes": 66,
   "safety_breaches": 25,
   "top_misroutes": [
@@ -43,16 +43,6 @@
       "count": 7
     },
     {
-      "from": "organize",
-      "to": "chat",
-      "count": 6
-    },
-    {
-      "from": "memory_scan",
-      "to": "memory_recall",
-      "count": 6
-    },
-    {
       "from": "chat",
       "to": "disk_usage",
       "count": 6
@@ -68,53 +58,13 @@
       "count": 6
     },
     {
-      "from": "duplicates",
-      "to": "file_search",
-      "count": 5
-    },
-    {
-      "from": "cleanup",
-      "to": "file_search",
-      "count": 5
-    },
-    {
-      "from": "cleanup",
-      "to": "large_files",
-      "count": 5
-    },
-    {
-      "from": "organize",
-      "to": "file_search",
-      "count": 5
-    },
-    {
-      "from": "browse",
-      "to": "web_search",
-      "count": 5
-    },
-    {
       "from": "chat",
       "to": "obsidian_search",
       "count": 5
     },
     {
-      "from": "large_files",
-      "to": "disk_usage",
-      "count": 4
-    },
-    {
-      "from": "web_search",
-      "to": "model_status",
-      "count": 4
-    },
-    {
-      "from": "web_search",
-      "to": "memory_recall",
-      "count": 4
-    },
-    {
-      "from": "fix_error",
-      "to": "status",
+      "from": "gmail",
+      "to": "__none__",
       "count": 4
     },
     {
@@ -128,7 +78,7 @@
       "count": 4
     },
     {
-      "from": "old_files",
+      "from": "cleanup",
       "to": "file_search",
       "count": 3
     },
@@ -138,23 +88,18 @@
       "count": 3
     },
     {
-      "from": "self_heal",
-      "to": "status",
-      "count": 3
-    },
-    {
-      "from": "eval_adwi",
-      "to": "chat",
-      "count": 3
-    },
-    {
-      "from": "test_adwi",
+      "from": "organize",
       "to": "chat",
       "count": 3
     },
     {
       "from": "chat",
       "to": "git_status",
+      "count": 3
+    },
+    {
+      "from": "web_search",
+      "to": "memory_recall",
       "count": 3
     },
     {
@@ -166,28 +111,75 @@
       "from": "memory_context",
       "to": "chat",
       "count": 3
+    },
+    {
+      "from": "cleanup",
+      "to": "organize",
+      "count": 2
+    },
+    {
+      "from": "cleanup",
+      "to": "what_next",
+      "count": 2
+    },
+    {
+      "from": "cleanup",
+      "to": "large_files",
+      "count": 2
+    },
+    {
+      "from": "model_status",
+      "to": "status",
+      "count": 2
+    },
+    {
+      "from": "file_read",
+      "to": "inspect_code",
+      "count": 2
+    },
+    {
+      "from": "memory_stats",
+      "to": "memory_recall",
+      "count": 2
+    },
+    {
+      "from": "memory_stats",
+      "to": "memory_context",
+      "count": 2
+    },
+    {
+      "from": "obsidian_search",
+      "to": "memory_recall",
+      "count": 2
+    },
+    {
+      "from": "obsidian_daily",
+      "to": "obsidian_search",
+      "count": 2
+    },
+    {
+      "from": "github_connected",
+      "to": "status",
+      "count": 2
+    },
+    {
+      "from": "patch_adwi",
+      "to": "daily_improve",
+      "count": 2
     }
   ],
   "fail_by_intent": {
     "chat": 76,
     "__none__": 30,
-    "cleanup": 23,
-    "organize": 14,
-    "fix_error": 12,
-    "web_search": 11,
-    "test_adwi": 8,
-    "browse": 7,
-    "memory_scan": 7,
-    "large_files": 6,
-    "self_heal": 6,
-    "eval_adwi": 6,
+    "cleanup": 15,
+    "web_search": 7,
     "run_code": 6,
-    "old_files": 5,
-    "duplicates": 5,
+    "organize": 5,
     "git_status": 5,
     "patch_adwi": 5,
     "what_next": 5,
     "file_read": 4,
+    "gmail": 4,
     "memory_stats": 4,
     "eval_routing": 4,
     "nightly_status": 4,
@@ -200,16 +192,22 @@
     "extract_ideas": 3,
     "disk_usage": 2,
     "model_status": 2,
+    "browse": 2,
     "obsidian_search": 2,
     "trusted_roots": 2,
+    "test_adwi": 2,
     "generate_image": 2,
     "nightly_run": 2,
+    "eval_adwi": 2,
     "voice_in": 2,
+    "large_files": 1,
     "file_list": 1,
     "file_search": 1,
     "capabilities": 1,
+    "duplicates": 1,
     "use_local": 1,
     "doctor": 1,
+    "memory_scan": 1,
     "export_training": 1,
     "sync": 1,
     "voice_out": 1
@@ -218,20 +216,20 @@
     {
       "id": "FIX-001",
       "title": "file_search regex too broad \u2014 swallows cleanup/duplicates/large_files",
-      "count": 20,
+      "count": 6,
       "evidence": [
         "find my heaviest files",
-        "find files exceeding 1 gigabyte",
-        "find archaic files",
-        "find long-abandoned files",
-        "find files that haven't been opened this year"
+        "remove unneeded files",
+        "find files I no longer need",
+        "can you help me delete stuff",
+        "what's the best way to structure these files"
       ],
       "root_cause": "`\\b(find|search for|locate|look for)\\b.{0,20}\\bfiles?\\b` matches 'find things to delete', 'find duplicate files', 'find large files'. The word 'files' appears in disk management prompts but should not trigger file_search.",
       "proposed_fix": "Add negative lookahead to file_search pattern: require file path context (extension, directory, 'in workspace', 'in /path') OR remove 'find' as standalone trigger. Alternative: add pre-guards for duplicate/cleanup intents BEFORE file_search in REGEX_INTENTS.",
       "affected_file": "adwi/adwi_cli.py \u2014 _REGEX_INTENTS file_search section",
       "effort": "low",
       "confidence": "high",
-      "impact": "~20 scenarios would flip to pass"
+      "impact": "~6 scenarios would flip to pass"
     },
     {
       "id": "FIX-003",
@@ -250,55 +248,30 @@
       "impact": "~3 scenarios would flip to pass"
     },
     {
-      "id": "FIX-004",
-      "title": "large_files \u2192 disk_usage regression for some prompts",
-      "count": 4,
-      "evidence": [
-        "what files take up the most room",
-        "top space consumers",
-        "which file is taking the most space",
-        "bulk space users"
-      ],
-      "root_cause": "Some large_files prompts contain 'disk' or 'space' keywords which trigger disk_usage regex. Example: 'what's the heaviest stuff on disk' \u2014 correctly routes to disk_usage, but 'heaviest files on disk' should route to large_files.",
-      "proposed_fix": "Add additional large_files pattern: `\\bfiles?\\b.{0,30}(heaviest|biggest|largest|most space).{0,20}(disk|drive|ssd)` \u2192 large_files BEFORE disk_usage patterns.",
-      "affected_file": "adwi/adwi_cli.py \u2014 _REGEX_INTENTS",
-      "effort": "low",
-      "confidence": "medium",
-      "impact": "~4 scenarios"
-    },
-    {
       "id": "FIX-005",
       "title": "organize \u2192 chat/file_search LLM miss",
-      "count": 11,
+      "count": 4,
       "evidence": [
         "what's the best way to structure these files",
-        "help me sort my files",
-        "suggest a folder structure",
         "how to structure my project folders",
-        "help me bring order to my files"
+        "how to organize dev projects",
+        "organize"
       ],
       "root_cause": "organize intent has no explicit rule in _INTENT_SYSTEM. LLM sees 'help me organize files' as advisory chat, and sometimes as file_search. The regex covers 'organiz/tidy/restructure' but not all advisory phrasing.",
       "proposed_fix": "Add to _INTENT_SYSTEM: 'organize: user wants help organizing, sorting, restructuring, or tidying their file/folder hierarchy. Different from cleanup (deletion) and file_search (finding files).'",
       "affected_file": "adwi/adwi_cli.py \u2014 _INTENT_SYSTEM",
       "effort": "low",
       "confidence": "medium",
-      "impact": "~11 scenarios"
+      "impact": "~4 scenarios"
     }
   ],
   "unstable_families": [
     {
       "family": "cleanup",
       "total": 40,
-      "pass": 9,
-      "fail": 20,
-      "consistency_pct": 22.5
-    },
-    {
-      "family": "test_adwi",
-      "total": 8,
-      "pass": 2,
-      "fail": 6,
-      "consistency_pct": 25.0
+      "pass": 18,
+      "fail": 13,
+      "consistency_pct": 45.0
     },
     {
       "family": "eval_routing",
@@ -306,13 +279,6 @@
       "pass": 3,
       "fail": 3,
       "consistency_pct": 50.0
-    },
-    {
-      "family": "organize",
-      "total": 25,
-      "pass": 13,
-      "fail": 12,
-      "consistency_pct": 52.0
     },
     {
       "family": "planning",
@@ -357,27 +323,6 @@
       "consistency_pct": 66.1
     },
     {
-      "family": "memory_scan",
-      "total": 15,
-      "pass": 10,
-      "fail": 5,
-      "consistency_pct": 66.7
-    },
-    {
-      "family": "eval_adwi",
-      "total": 6,
-      "pass": 4,
-      "fail": 2,
-      "consistency_pct": 66.7
-    },
-    {
-      "family": "browse",
-      "total": 20,
-      "pass": 14,
-      "fail": 6,
-      "consistency_pct": 70.0
-    },
-    {
       "family": "memory_stats",
       "total": 10,
       "pass": 7,
@@ -413,18 +358,53 @@
       "consistency_pct": 80.0
     },
     {
-      "family": "web_search",
-      "total": 44,
-      "pass": 36,
+      "family": "organize",
+      "total": 25,
+      "pass": 21,
       "fail": 4,
-      "consistency_pct": 81.8
+      "consistency_pct": 84.0
     },
     {
-      "family": "fix_error",
-      "total": 50,
-      "pass": 41,
-      "fail": 9,
-      "consistency_pct": 82.0
+      "family": "capabilities",
+      "total": 25,
+      "pass": 21,
+      "fail": 1,
+      "consistency_pct": 84.0
+    },
+    {
+      "family": "patch_inspect",
+      "total": 41,
+      "pass": 35,
+      "fail": 6,
+      "consistency_pct": 85.4
+    },
+    {
+      "family": "file_read",
+      "total": 21,
+      "pass": 18,
+      "fail": 3,
+      "consistency_pct": 85.7
+    },
+    {
+      "family": "model_status",
+      "total": 15,
+      "pass": 13,
+      "fail": 2,
+      "consistency_pct": 86.7
+    },
+    {
+      "family": "test_adwi",
+      "total": 8,
+      "pass": 7,
+      "fail": 1,
+      "consistency_pct": 87.5
+    },
+    {
+      "family": "github_connected",
+      "total": 9,
+      "pass": 8,
+      "fail": 1,
+      "consistency_pct": 88.9
     }
   ]
 }

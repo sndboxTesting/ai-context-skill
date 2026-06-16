@@ -32,15 +32,19 @@ Adwi is a local AI operating system running on an Apple Silicon Mac. It is not a
 
 ## Current NLU quality (as of 2026-06-16)
 
-| Eval | Scenarios | Pre-NHR | Post-NHR | Gain |
-|------|-----------|---------|----------|------|
-| Large eval P1 | 1,444 | 78.0% | **83.7%** | +5.7pp |
-| Large eval P2 (weak-family targeting) | 446 | 68.6% | **77.6%** | +9.0pp |
-| **Combined** | **1,881** | **75.8%** | **82.1%** | **+6.3pp** |
+| Eval | Scenarios | Pre-NHR | Post-NHR (session 1) | Post-session-2 | Total gain |
+|------|-----------|---------|----------------------|----------------|------------|
+| Large eval P1 | 1,444 | 78.0% | 83.7% | **88.6%** | +10.6pp |
+| Large eval P2 (weak-family targeting) | 446 | 68.6% | 77.6% | **77.8%** | +9.2pp |
+| **Combined** | **1,881** | **75.8%** | **82.1%** | **86.0%** | **+10.2pp** |
 
-**All 10 NHR items (NHR-001 through NHR-010) applied and verified 2026-06-16.**
+**All 10 NHR items (NHR-001 through NHR-010) applied 2026-06-16. 13 additional session-2 patches applied 2026-06-16.**
 
-Status in `docs/NLU_REPAIR_BACKLOG.md` shows `✅ Applied 2026-06-16` for all items. New baseline for future improvements is **82.1%**. Next targets: `eval` family (39%), `cleanup` synonyms, `organize` anchor.
+Session-2 applied 11 regex patch groups (FIX-LF-001, FIX-OLD-001, FIX-DUP-001, FIX-ORG-002, FIX-CLEANUP-003, FIX-HEAL-001, FIX-BROWSE-001, FIX-WEB-001, FIX-ERR-002, FIX-EVAL-002, FIX-TEST-002, FIX-MEMSCAN-002) and 1 INTENT_SYSTEM clarification (FIX-BENCH-001).
+
+**New baseline for future improvements: 86.0%.** Remaining targets: `chat→benchmark` bleed (~10 cases), `cleanup` (15 remaining), `web_search` (11 remaining), `organize` (5 remaining).
+
+Changes are synchronized across all 3 files: `adwi/adwi_cli.py`, `logs/simeval/run_large_eval.py`, `logs/simeval/run_large_eval_p2.py`.
 
 ---
 

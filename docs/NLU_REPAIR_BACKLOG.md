@@ -207,17 +207,43 @@ This is the authoritative living list of NLU repair items. When you apply a fix:
 
 ---
 
+## Post-NHR Session 2 — 2026-06-16 (11 regex patch groups)
+
+Applied after the overnight improvement loop (FIX-CLEAN-002 was the only successful automated patch).
+
+| Fix ID | Description | Status | Families | Measured |
+|--------|-------------|--------|----------|---------|
+| FIX-LF-001 | Space-consumer / size-threshold large_files patterns | ✅ Applied 2026-06-16 | large_files | +4 passes |
+| FIX-OLD-001 | archaic/abandoned/leftover old_files synonyms | ✅ Applied 2026-06-16 | old_files | +3 passes |
+| FIX-DUP-001 | repeated/dedupe/typo duplicates patterns | ✅ Applied 2026-06-16 | duplicates | +3 passes |
+| FIX-ORG-002 | sort/arrange/structure/typo organize synonyms | ✅ Applied 2026-06-16 | organize | +8 passes |
+| FIX-CLEANUP-003 | throw-away/deletion-suggestion/clear-out cleanup patterns | ✅ Applied 2026-06-16 | cleanup | +5 passes |
+| FIX-HEAL-001 | service-down-then-fix / repair-local-AI self_heal | ✅ Applied 2026-06-16 | self_heal | +3 passes |
+| FIX-BROWSE-001 | URL/domain visit patterns BEFORE web_search | ✅ Applied 2026-06-16 | browse | +4 passes |
+| FIX-WEB-001 | 'look up X' patterns BEFORE model_status | ✅ Applied 2026-06-16 | web_search | +2 passes |
+| FIX-ERR-002 | fix_error: Python exception+colon + HTTP error codes | ✅ Applied 2026-06-16 | fix_error | +8 passes |
+| FIX-EVAL-002 | eval_adwi: 'run eval' / 'start evaluation' patterns | ✅ Applied 2026-06-16 | eval_adwi | +3 passes |
+| FIX-TEST-002 | test_adwi: 'test adwi' / 'run tests' / 'test suite' | ✅ Applied 2026-06-16 | test_adwi | +4 passes |
+| FIX-MEMSCAN-002 | memory_scan: refresh/rebuild/rescan patterns | ✅ Applied 2026-06-16 | memory_scan | +5 passes |
+| FIX-BENCH-001 | benchmark INTENT_SYSTEM: distinguish test-run vs discussion | ✅ Applied 2026-06-16 | chat (false pos) | ~+10 passes |
+
+**Pre-session-2 baseline:** 82.1% combined (P1: 83.7% · P2: 77.6%)  
+**Post-session-2 measured:** 86.0% combined (P1: 88.6% · P2: 77.8%)  
+**Session-2 gain:** +3.9pp combined (+4.9pp P1 · +0.2pp P2)  
+**New baseline for future improvements: 86.0%**
+
+---
+
 ## Remaining High-Value Families (next targets)
 
 | Family | Failures | Notes |
 |--------|----------|-------|
-| `chat` | 76 | LLM-level disambiguation (benchmark, status, memory_recall bleed) |
-| `__none__` (safety) | 30 | Expected — blocked paths returning `__none__` is correct |
-| `cleanup` | 23 | Broader synonym coverage needed |
-| `organize` | 14 | New intent or map to file_search |
-| `fix_error` | 12 | Pasted tracebacks vs status vs patch_adwi edge cases |
-| `web_search` | 11 | Regex tightening for "look up" vs model_status |
-| `eval` | 17 | eval_adwi, eval_routing, test_adwi share similar surface area |
+| `chat` | ~68 | benchmark(10)/status/memory_recall LLM bleed — INTENT_SYSTEM tuning |
+| `__none__` (safety) | 30 | Expected — blocked paths returning `__none__` is correct behavior |
+| `cleanup` | 15 | Still some "clean up my downloads" → organize, "old stuff" → old_files |
+| `web_search` | 11 | Ambiguous "search for something" — needs more context |
+| `organize` | 5 | Residual "what's the best way to structure" ambiguity |
+| `run_code` | 6 | "run it" / "run the thing" too ambiguous to safely regex |
 
 ---
 
@@ -227,8 +253,8 @@ This is the authoritative living list of NLU repair items. When you apply a fix:
 2. Open `adwi/adwi_cli.py` and find `_REGEX_INTENTS` (line ~503).
 3. Apply the regex change. New patterns MUST be inserted BEFORE the intent they must beat.
 4. If an `_INTENT_SYSTEM` change is needed, find the system prompt (line ~865).
-5. Run: `python3 -m py_compile adwi/adwi_cli.py && echo OK`
-6. Run the eval: `python3 logs/simeval/run_large_eval.py --workers 5`
-7. Compare new pass rate to 82.1% (current post-NHR baseline).
-8. Update the status above to `✅ Applied YYYY-MM-DD` and record actual impact.
-9. Also run SimLab golden baseline: `python3 -m adwi.simlab` to confirm no regression.
+5. Sync the same change to `logs/simeval/run_large_eval.py` and `run_large_eval_p2.py`.
+6. Run: `python3 -m py_compile adwi/adwi_cli.py && echo OK`
+7. Run the eval: `python3 logs/simeval/run_large_eval.py --workers 5`
+8. Compare new pass rate to **86.0%** (current post-session-2 baseline).
+9. Update the status above to `✅ Applied YYYY-MM-DD` and record actual impact.

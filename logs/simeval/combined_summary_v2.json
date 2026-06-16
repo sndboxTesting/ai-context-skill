@@ -1,0 +1,455 @@
+{
+  "sessions": [
+    "large-20260615-214607",
+    "large-p2-20260615-222139"
+  ],
+  "generated": "2026-06-15 23:13",
+  "total": 1881,
+  "passed": 1426,
+  "warned": 37,
+  "failed": 418,
+  "pass_rate_pct": 75.8,
+  "regex_hits": 671,
+  "regex_hit_pct": 35.7,
+  "llm_calls": 1210,
+  "avg_latency_ms": 5810.1,
+  "p95_latency_ms": 10311.7,
+  "safety_probes": 66,
+  "safety_breaches": 24,
+  "top_misroutes": [
+    {
+      "from": "__none__",
+      "to": "file_read",
+      "count": 23
+    },
+    {
+      "from": "chat",
+      "to": "memory_recall",
+      "count": 15
+    },
+    {
+      "from": "self_heal",
+      "to": "doctor",
+      "count": 12
+    },
+    {
+      "from": "obsidian_search",
+      "to": "memory_recall",
+      "count": 12
+    },
+    {
+      "from": "chat",
+      "to": "status",
+      "count": 11
+    },
+    {
+      "from": "chat",
+      "to": "benchmark",
+      "count": 10
+    },
+    {
+      "from": "cleanup",
+      "to": "file_search",
+      "count": 9
+    },
+    {
+      "from": "youtube",
+      "to": "chat",
+      "count": 9
+    },
+    {
+      "from": "patch_adwi",
+      "to": "fix_error",
+      "count": 9
+    },
+    {
+      "from": "chat",
+      "to": "generate_image",
+      "count": 9
+    },
+    {
+      "from": "chat",
+      "to": "disk_usage",
+      "count": 8
+    },
+    {
+      "from": "chat",
+      "to": "model_status",
+      "count": 8
+    },
+    {
+      "from": "large_files",
+      "to": "disk_usage",
+      "count": 7
+    },
+    {
+      "from": "duplicates",
+      "to": "file_search",
+      "count": 7
+    },
+    {
+      "from": "organize",
+      "to": "chat",
+      "count": 7
+    },
+    {
+      "from": "what_next",
+      "to": "chat",
+      "count": 7
+    },
+    {
+      "from": "web_search",
+      "to": "model_status",
+      "count": 6
+    },
+    {
+      "from": "patch_adwi",
+      "to": "daily_improve",
+      "count": 6
+    },
+    {
+      "from": "large_files",
+      "to": "file_search",
+      "count": 5
+    },
+    {
+      "from": "browse",
+      "to": "web_search",
+      "count": 5
+    },
+    {
+      "from": "memory_stats",
+      "to": "memory_context",
+      "count": 5
+    },
+    {
+      "from": "obsidian_daily",
+      "to": "memory_recall",
+      "count": 5
+    },
+    {
+      "from": "patch_adwi",
+      "to": "chat",
+      "count": 5
+    },
+    {
+      "from": "chat",
+      "to": "fix_error",
+      "count": 5
+    },
+    {
+      "from": "cleanup",
+      "to": "chat",
+      "count": 4
+    },
+    {
+      "from": "cleanup",
+      "to": "large_files",
+      "count": 4
+    },
+    {
+      "from": "web_search",
+      "to": "memory_recall",
+      "count": 4
+    },
+    {
+      "from": "youtube",
+      "to": "web_search",
+      "count": 4
+    },
+    {
+      "from": "obsidian_search",
+      "to": "file_search",
+      "count": 4
+    },
+    {
+      "from": "backup_now",
+      "to": "git_status",
+      "count": 4
+    }
+  ],
+  "fail_by_intent": {
+    "chat": 81,
+    "patch_adwi": 33,
+    "__none__": 28,
+    "cleanup": 24,
+    "obsidian_search": 18,
+    "self_heal": 15,
+    "youtube": 15,
+    "organize": 14,
+    "what_next": 14,
+    "daily_improve": 13,
+    "large_files": 12,
+    "inspect_code": 12,
+    "web_search": 11,
+    "obsidian_daily": 9,
+    "backup_now": 8,
+    "test_adwi": 8,
+    "duplicates": 7,
+    "browse": 7,
+    "memory_scan": 7,
+    "memory_stats": 6,
+    "eval_adwi": 6,
+    "run_code": 6,
+    "git_status": 5,
+    "fix_error": 5,
+    "implement_idea": 5,
+    "rag_search": 4,
+    "eval_routing": 4,
+    "nightly_status": 4,
+    "memory_context": 4,
+    "old_files": 3,
+    "nightly_run": 3,
+    "file_search": 3,
+    "github_connected": 3,
+    "status": 2,
+    "model_status": 2,
+    "file_read": 2,
+    "generate_image": 2,
+    "extract_ideas": 2,
+    "voice_in": 2,
+    "disk_usage": 1,
+    "memory_recall": 1,
+    "use_local": 1,
+    "doctor": 1,
+    "export_training": 1,
+    "tool_roadmap": 1,
+    "trusted_roots": 1,
+    "sync": 1,
+    "voice_out": 1
+  },
+  "fix_candidates": [
+    {
+      "id": "FIX-001",
+      "title": "file_search regex too broad \u2014 swallows cleanup/duplicates/large_files",
+      "count": 27,
+      "evidence": [
+        "find my heaviest files",
+        "find fat files",
+        "find files exceeding 1 gigabyte",
+        "find oversized files",
+        "find archaic files"
+      ],
+      "root_cause": "`\\b(find|search for|locate|look for)\\b.{0,20}\\bfiles?\\b` matches 'find things to delete', 'find duplicate files', 'find large files'. The word 'files' appears in disk management prompts but should not trigger file_search.",
+      "proposed_fix": "Add negative lookahead to file_search pattern: require file path context (extension, directory, 'in workspace', 'in /path') OR remove 'find' as standalone trigger. Alternative: add pre-guards for duplicate/cleanup intents BEFORE file_search in REGEX_INTENTS.",
+      "affected_file": "adwi/adwi_cli.py \u2014 _REGEX_INTENTS file_search section",
+      "effort": "low",
+      "confidence": "high",
+      "impact": "~27 scenarios would flip to pass"
+    },
+    {
+      "id": "FIX-002",
+      "title": "youtube intent has no regex \u2014 all go to LLM, most fail",
+      "count": 15,
+      "evidence": [
+        "summarize this youtube video https://youtube.com/watch?v=abc123",
+        "watch https://www.youtube.com/watch?v=xyz789 and summarize",
+        "summarize youtube.com/watch?v=test456",
+        "youtube summary please",
+        "transcribe this youtube video https://youtu.be/abc"
+      ],
+      "root_cause": "No regex pattern for youtube in _REGEX_INTENTS. LLM classifies as chat or web_search.",
+      "proposed_fix": "Add regex: `(youtube|youtu\\.be|yt video|youtube video).{0,30}(summar|transcript|watch)` \u2192 youtube\nAnd: `(summar|transcri).{0,20}(youtube|youtu\\.be)` \u2192 youtube",
+      "affected_file": "adwi/adwi_cli.py \u2014 _REGEX_INTENTS",
+      "effort": "low",
+      "confidence": "high",
+      "impact": "~15 scenarios would flip to pass"
+    },
+    {
+      "id": "FIX-003",
+      "title": "obsidian_search/daily \u2192 memory_recall LLM confusion",
+      "count": 17,
+      "evidence": [
+        "look up in vault: python notes",
+        "find notes about adwi",
+        "look up obsidian notes on AI",
+        "find my obsidian notes about backups",
+        "search notes for n8n automation"
+      ],
+      "root_cause": "LLM sees 'search my notes', 'open my note', 'my daily note' and routes to memory_recall because _INTENT_SYSTEM description for memory_recall says 'what YOU remember about their setup'. Notes queries are semantically similar to memory queries.",
+      "proposed_fix": "Strengthen _INTENT_SYSTEM: add to obsidian_search rule: 'ALWAYS prefer obsidian_search over memory_recall when the prompt mentions obsidian, vault, or notes with a search action'. Also add: for memory_recall, explicitly say NOT for obsidian/vault/note search queries.",
+      "affected_file": "adwi/adwi_cli.py \u2014 _INTENT_SYSTEM",
+      "effort": "low",
+      "confidence": "medium",
+      "impact": "~17 scenarios would flip to pass"
+    },
+    {
+      "id": "FIX-004",
+      "title": "large_files \u2192 disk_usage regression for some prompts",
+      "count": 7,
+      "evidence": [
+        "what files take up the most room",
+        "size hogs on my disk",
+        "top space consumers",
+        "which file is taking the most space",
+        "heaviest downloads"
+      ],
+      "root_cause": "Some large_files prompts contain 'disk' or 'space' keywords which trigger disk_usage regex. Example: 'what's the heaviest stuff on disk' \u2014 correctly routes to disk_usage, but 'heaviest files on disk' should route to large_files.",
+      "proposed_fix": "Add additional large_files pattern: `\\bfiles?\\b.{0,30}(heaviest|biggest|largest|most space).{0,20}(disk|drive|ssd)` \u2192 large_files BEFORE disk_usage patterns.",
+      "affected_file": "adwi/adwi_cli.py \u2014 _REGEX_INTENTS",
+      "effort": "low",
+      "confidence": "medium",
+      "impact": "~7 scenarios"
+    },
+    {
+      "id": "FIX-005",
+      "title": "organize \u2192 chat/file_search LLM miss",
+      "count": 10,
+      "evidence": [
+        "help me sort my files",
+        "suggest a folder structure",
+        "help organize my workspace",
+        "how to structure my project folders",
+        "help me bring order to my files"
+      ],
+      "root_cause": "organize intent has no explicit rule in _INTENT_SYSTEM. LLM sees 'help me organize files' as advisory chat, and sometimes as file_search. The regex covers 'organiz/tidy/restructure' but not all advisory phrasing.",
+      "proposed_fix": "Add to _INTENT_SYSTEM: 'organize: user wants help organizing, sorting, restructuring, or tidying their file/folder hierarchy. Different from cleanup (deletion) and file_search (finding files).'",
+      "affected_file": "adwi/adwi_cli.py \u2014 _INTENT_SYSTEM",
+      "effort": "low",
+      "confidence": "medium",
+      "impact": "~10 scenarios"
+    }
+  ],
+  "unstable_families": [
+    {
+      "family": "youtube",
+      "total": 15,
+      "pass": 0,
+      "fail": 15,
+      "consistency_pct": 0.0
+    },
+    {
+      "family": "patch_adwi",
+      "total": 15,
+      "pass": 0,
+      "fail": 15,
+      "consistency_pct": 0.0
+    },
+    {
+      "family": "daily_improve",
+      "total": 13,
+      "pass": 0,
+      "fail": 13,
+      "consistency_pct": 0.0
+    },
+    {
+      "family": "cleanup",
+      "total": 40,
+      "pass": 7,
+      "fail": 20,
+      "consistency_pct": 17.5
+    },
+    {
+      "family": "test_adwi",
+      "total": 8,
+      "pass": 2,
+      "fail": 6,
+      "consistency_pct": 25.0
+    },
+    {
+      "family": "what_next",
+      "total": 20,
+      "pass": 8,
+      "fail": 12,
+      "consistency_pct": 40.0
+    },
+    {
+      "family": "planning",
+      "total": 14,
+      "pass": 6,
+      "fail": 8,
+      "consistency_pct": 42.9
+    },
+    {
+      "family": "patch_inspect",
+      "total": 41,
+      "pass": 18,
+      "fail": 23,
+      "consistency_pct": 43.9
+    },
+    {
+      "family": "memory_stats",
+      "total": 10,
+      "pass": 5,
+      "fail": 5,
+      "consistency_pct": 50.0
+    },
+    {
+      "family": "eval_routing",
+      "total": 6,
+      "pass": 3,
+      "fail": 3,
+      "consistency_pct": 50.0
+    },
+    {
+      "family": "organize",
+      "total": 25,
+      "pass": 13,
+      "fail": 12,
+      "consistency_pct": 52.0
+    },
+    {
+      "family": "minimal",
+      "total": 30,
+      "pass": 16,
+      "fail": 14,
+      "consistency_pct": 53.3
+    },
+    {
+      "family": "backup_now",
+      "total": 11,
+      "pass": 6,
+      "fail": 5,
+      "consistency_pct": 54.5
+    },
+    {
+      "family": "gen_image_boundary",
+      "total": 40,
+      "pass": 22,
+      "fail": 18,
+      "consistency_pct": 55.0
+    },
+    {
+      "family": "self_heal",
+      "total": 35,
+      "pass": 21,
+      "fail": 14,
+      "consistency_pct": 60.0
+    },
+    {
+      "family": "obsidian_search",
+      "total": 30,
+      "pass": 18,
+      "fail": 12,
+      "consistency_pct": 60.0
+    },
+    {
+      "family": "obsidian_daily",
+      "total": 20,
+      "pass": 12,
+      "fail": 8,
+      "consistency_pct": 60.0
+    },
+    {
+      "family": "memory_context",
+      "total": 10,
+      "pass": 6,
+      "fail": 4,
+      "consistency_pct": 60.0
+    },
+    {
+      "family": "chat",
+      "total": 109,
+      "pass": 68,
+      "fail": 29,
+      "consistency_pct": 62.4
+    },
+    {
+      "family": "chat_boundary",
+      "total": 60,
+      "pass": 39,
+      "fail": 21,
+      "consistency_pct": 65.0
+    }
+  ]
+}

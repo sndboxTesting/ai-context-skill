@@ -8,7 +8,7 @@ services:
     environment:
       - OLLAMA_BASE_URL=http://host.docker.internal:11434
       - WEBUI_AUTH=True
-      - ENABLE_SIGNUP=True
+      - ENABLE_SIGNUP=False
       - ADWI_LOCAL_SECRET=${ADWI_LOCAL_SECRET:-}
     extra_hosts:
       - "host.docker.internal:host-gateway"
@@ -120,7 +120,7 @@ services:
       - "127.0.0.1:4000:3000"  # :4000 — avoids collision with Open WebUI :3000
     environment:
       - GF_SECURITY_ADMIN_USER=suneel
-      - GF_SECURITY_ADMIN_PASSWORD=${GRAFANA_PASSWORD:-adwi-local}
+      - GF_SECURITY_ADMIN_PASSWORD=${GRAFANA_PASSWORD:?Set GRAFANA_PASSWORD in config/.env}
       - GF_USERS_ALLOW_SIGN_UP=false
       - GF_SERVER_ROOT_URL=http://localhost:4000
       - GF_ANALYTICS_REPORTING_ENABLED=false

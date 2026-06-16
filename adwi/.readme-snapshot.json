@@ -39,8 +39,13 @@
     "/github-status",
     "/gmail",
     "/gmail-auth",
+    "/gmail-promos",
     "/gmail-read",
+    "/gmail-social",
+    "/gmail-spam",
+    "/gmail-summarize",
     "/gmail-summary",
+    "/gmail-thread",
     "/ha",
     "/help",
     "/image <path>  or  /screenshot-analyze <path>",
@@ -202,5 +207,5 @@
     "MODEL_NLU_FALLBACK": "qwen3:0.6b"
   },
   "ts": "2026-06-16",
-  "_hash": "391d4b07f0ca5912"
+  "_hash": "4b90a55ab917f400"
 }

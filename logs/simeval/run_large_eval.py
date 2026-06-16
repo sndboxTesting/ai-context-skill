@@ -32,7 +32,8 @@ ALL_INTENTS = [
     "rag_search","memory_recall","memory_scan","memory_stats","memory_context",
     "browse","web_search","exa_search","tavily_search","firecrawl",
     "obsidian_search","obsidian_read","obsidian_write","obsidian_daily",
-    "git_status","backup_now","backup_status","backup_log","gmail","sync",
+    "git_status","backup_now","backup_status","backup_log",
+    "gmail","gmail_read","gmail_open","gmail_thread","gmail_summarize","gmail_list_category","sync",
     "nightly_status","nightly_run",
     "fix_error","patch_adwi","inspect_code","test_adwi","eval_routing","eval_adwi",
     "learn_from_error","export_training","route","github_connected","trusted_roots",
@@ -347,6 +348,27 @@ REGEX_INTENTS = [
     (re.compile(r"\b(inference|llm|model|ollama).{0,20}\b(throughput|latency\s+benchmark|speed\s+test)\b", re.I), "benchmark"),
     (re.compile(r"\b(bechmark|benchamrk|benchmarck)\b", re.I), "benchmark"),
     (re.compile(r"(benchmark|speed.?test|how fast|tokens? per second).{0,20}(adwi|model|local|ollama)\b", re.I), "benchmark"),
+    # gmail_open: search + open — MUST precede gmail_read
+    (re.compile(r"\b(open|read)\b.{0,20}\b(email|mail|message)\b.{0,30}\b(from|about|regarding|by)\b", re.I), "gmail_open"),
+    (re.compile(r"\b(open|read)\b.{0,15}\b(latest|newest|recent|last)\b.{0,25}\b(email|mail|message)\b.{0,30}\b(from|about)\b", re.I), "gmail_open"),
+    (re.compile(r"\b(find\s+and\s+open|search\s+and\s+open)\b.{0,30}\b(email|mail|message)\b", re.I), "gmail_open"),
+    # gmail_summarize-thread shortcut — MUST precede gmail_thread
+    (re.compile(r"\b(summarize|tldr)\b.{0,20}\b(thread|conversation)\b", re.I), "gmail_summarize"),
+    # gmail_thread
+    (re.compile(r"\b(show|open|read|get|view)\b.{0,20}\b(thread|conversation|email\s+chain|message\s+chain)\b", re.I), "gmail_thread"),
+    (re.compile(r"\bthread\b.{0,20}\b(about|from|with|on)\b", re.I), "gmail_thread"),
+    # gmail_summarize
+    (re.compile(r"\b(summarize|tldr|tl;dr|tl\.dr|give\s+me\s+a\s+summary)\b.{0,30}\b(this|that|the|an?)?\b.{0,10}\b(email|mail|message|thread|conversation)\b", re.I), "gmail_summarize"),
+    (re.compile(r"\b(summarize|tldr)\s+(that|this|it|the\s+thread)\b", re.I), "gmail_summarize"),
+    # gmail_list_category
+    (re.compile(r"\b(show|list|check|open|display)\b.{0,20}\b(promotions?|promo|promotional|newsletters?)\b", re.I), "gmail_list_category"),
+    (re.compile(r"\b(show|list|check|open|display)\b.{0,20}\bspam\b", re.I), "gmail_list_category"),
+    (re.compile(r"\b(show|list|check|open|display)\b.{0,20}\b(social|updates?|forums?)\b.{0,15}\b(emails?|mail|messages?)?\b", re.I), "gmail_list_category"),
+    # gmail_read: read a specific email — MUST precede generic gmail
+    (re.compile(r"^(open|read)\s+#?(\d{1,2})\s*$", re.I), "gmail_read"),
+    (re.compile(r"\b(read|open|show)\b.{0,20}\b(latest|newest|first|top|most\s+recent)\b.{0,20}\b(email|mail|message)\b", re.I), "gmail_read"),
+    (re.compile(r"\b(read|open|show)\b.{0,15}\b(email|mail|message)\b.{0,15}\b#?(\d{1,2})\b", re.I), "gmail_read"),
+    (re.compile(r"\b(read|open)\s+this\s+(email|mail|message)\b", re.I), "gmail_read"),
     # FIX-GMAIL-002: typos, "messages", reversed word order
     (re.compile(r"\b(do\s+i\s+have\s+any|any\s+(new|unread)?\s*)(emails?|messages?|mail)\b", re.I), "gmail"),
     (re.compile(r"\binbox\b.{0,15}\b(check|status|new|unread|count|messages?)\b", re.I), "gmail"),

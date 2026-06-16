@@ -1,8 +1,11 @@
 """
-Gmail read-only helper for Adwi.
+Gmail helper for Adwi — Phase 1: read/search/thread/category (no mutation).
 Uses OAuth2 with client credentials from secrets.local.env.
-Token is stored in secrets/gmail-token.json (never printed).
-Scope: read-only — no sending, deleting, or modifying.
+Token stored in secrets/gmail-token.json (never printed).
+Scope: gmail.readonly — no sending, deleting, or modifying.
+
+Phase 2 scope expansion (when ready): gmail.modify for archive/trash/mark-read.
+Phase 3 scope expansion: gmail.compose + gmail.send for drafts/send.
 """
 import json
 import os
@@ -44,7 +47,6 @@ def get_service():
         if creds and creds.expired and creds.refresh_token:
             creds.refresh(Request())
         else:
-            # Build a client config dict from secrets (avoids reading credentials.json directly)
             s = _load_secrets()
             client_config = {
                 "installed": {
@@ -67,14 +69,30 @@ def get_service():
     return build("gmail", "v1", credentials=creds)
 
 
+def _extract_body(payload: dict) -> str:
+    """Extract plain-text body from a Gmail message payload (recursive)."""
+    data = payload.get("body", {}).get("data", "")
+    if data:
+        return base64.urlsafe_b64decode(data).decode("utf-8", errors="replace")
+    for part in payload.get("parts", []):
+        if part.get("mimeType") == "text/plain":
+            d = part.get("body", {}).get("data", "")
+            if d:
+                return base64.urlsafe_b64decode(d).decode("utf-8", errors="replace")
+        if part.get("parts"):
+            result = _extract_body(part)
+            if result:
+                return result
+    return ""
+
+
 def list_emails(max_results=10, query="", inbox_only=True):
-    """List recent emails newest-first. Scoped to INBOX by default."""
+    """List recent emails newest-first. Returns dicts with thread_id included."""
     service = get_service()
-    params = {"userId": "me", "maxResults": max_results * 2}  # fetch extra to allow date-sort trim
+    params = {"userId": "me", "maxResults": max_results * 2}
     if inbox_only and not query:
         params["labelIds"] = ["INBOX"]
     if query:
-        # Scope search to INBOX unless the query already specifies a label
         if "label:" not in query and "in:" not in query:
             params["q"] = f"in:inbox {query}"
         else:
@@ -91,6 +109,7 @@ def list_emails(max_results=10, query="", inbox_only=True):
         headers = {h["name"]: h["value"] for h in detail.get("payload", {}).get("headers", [])}
         emails.append({
             "id":           msg["id"],
+            "thread_id":    detail.get("threadId", ""),
             "subject":      headers.get("Subject", "(no subject)"),
             "from":         headers.get("From", ""),
             "date":         headers.get("Date", ""),
@@ -98,41 +117,90 @@ def list_emails(max_results=10, query="", inbox_only=True):
             "internalDate": int(detail.get("internalDate", 0)),
         })
 
-    # Sort newest-first by Gmail's internalDate (milliseconds since epoch)
     emails.sort(key=lambda e: e["internalDate"], reverse=True)
     return emails[:max_results]
 
 
 def read_email(msg_id: str) -> dict:
-    """Read full text of an email by ID."""
+    """Read full text of an email by ID. Includes thread_id."""
     service = get_service()
     detail = service.users().messages().get(
         userId="me", id=msg_id, format="full"
     ).execute()
     headers = {h["name"]: h["value"] for h in detail.get("payload", {}).get("headers", [])}
-
-    # Extract body text
-    def get_body(payload):
-        if payload.get("body", {}).get("data"):
-            return base64.urlsafe_b64decode(payload["body"]["data"]).decode("utf-8", errors="replace")
-        for part in payload.get("parts", []):
-            if part.get("mimeType") == "text/plain":
-                data = part.get("body", {}).get("data", "")
-                if data:
-                    return base64.urlsafe_b64decode(data).decode("utf-8", errors="replace")
-        return detail.get("snippet", "")
-
+    body = _extract_body(detail.get("payload", {})) or detail.get("snippet", "")
     return {
-        "id":      msg_id,
-        "subject": headers.get("Subject", "(no subject)"),
-        "from":    headers.get("From", ""),
-        "date":    headers.get("Date", ""),
-        "body":    get_body(detail.get("payload", {}))[:5000],
+        "id":        msg_id,
+        "thread_id": detail.get("threadId", ""),
+        "subject":   headers.get("Subject", "(no subject)"),
+        "from":      headers.get("From", ""),
+        "to":        headers.get("To", ""),
+        "date":      headers.get("Date", ""),
+        "body":      body[:5000],
     }
 
 
+def get_thread(thread_id: str) -> dict:
+    """Load all messages in a thread. Returns subject, count, and list of message dicts."""
+    service = get_service()
+    t = service.users().threads().get(userId="me", id=thread_id, format="full").execute()
+    msgs = []
+    for msg in t.get("messages", []):
+        headers = {h["name"]: h["value"] for h in msg.get("payload", {}).get("headers", [])}
+        body = _extract_body(msg.get("payload", {})) or msg.get("snippet", "")
+        msgs.append({
+            "id":      msg["id"],
+            "from":    headers.get("From", ""),
+            "to":      headers.get("To", ""),
+            "date":    headers.get("Date", ""),
+            "subject": headers.get("Subject", ""),
+            "body":    body[:2000],
+            "snippet": msg.get("snippet", ""),
+        })
+    subject = msgs[0]["subject"] if msgs else "(no subject)"
+    return {
+        "thread_id": thread_id,
+        "subject":   subject,
+        "messages":  msgs,
+        "count":     len(msgs),
+    }
+
+
+def list_category(category: str = "INBOX", max_results: int = 10) -> list:
+    """List emails by Gmail category label.
+    category: INBOX, SPAM, CATEGORY_PROMOTIONS, CATEGORY_SOCIAL,
+              CATEGORY_UPDATES, CATEGORY_FORUMS, UNREAD
+    """
+    service = get_service()
+    params = {
+        "userId":    "me",
+        "maxResults": max_results * 2,
+        "labelIds":  [category],
+    }
+    results = service.users().messages().list(**params).execute()
+    messages = results.get("messages", [])
+    emails = []
+    for msg in messages:
+        detail = service.users().messages().get(
+            userId="me", id=msg["id"], format="metadata",
+            metadataHeaders=["Subject", "From", "Date"]
+        ).execute()
+        headers = {h["name"]: h["value"] for h in detail.get("payload", {}).get("headers", [])}
+        emails.append({
+            "id":           msg["id"],
+            "thread_id":    detail.get("threadId", ""),
+            "subject":      headers.get("Subject", "(no subject)"),
+            "from":         headers.get("From", ""),
+            "date":         headers.get("Date", ""),
+            "snippet":      detail.get("snippet", "")[:200],
+            "internalDate": int(detail.get("internalDate", 0)),
+        })
+    emails.sort(key=lambda e: e["internalDate"], reverse=True)
+    return emails[:max_results]
+
+
 def get_label_counts() -> dict:
-    """Get unread count for INBOX and a few labels."""
+    """Get message counts for INBOX, UNREAD, SENT, SPAM."""
     service = get_service()
     labels = service.users().labels().list(userId="me").execute().get("labels", [])
     counts = {}

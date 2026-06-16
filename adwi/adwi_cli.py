@@ -793,6 +793,40 @@ _REGEX_INTENTS = [
     (re.compile(r"\b(bechmark|benchamrk|benchmarck)\b", re.I), "benchmark"),
     (re.compile(r"(benchmark|speed.?test|how fast|tokens? per second).{0,20}(adwi|model|local|ollama)\b", re.I), "benchmark"),
 
+    # ── Gmail open (search + open first result) — MUST precede gmail_read ────────
+    # "open latest email from Amazon", "open the email about the budget"
+    (re.compile(r"\b(open|read)\b.{0,20}\b(email|mail|message)\b.{0,30}\b(from|about|regarding|by)\b", re.I), "gmail_open"),
+    (re.compile(r"\b(open|read)\b.{0,15}\b(latest|newest|recent|last)\b.{0,25}\b(email|mail|message)\b.{0,30}\b(from|about)\b", re.I), "gmail_open"),
+    (re.compile(r"\b(find\s+and\s+open|search\s+and\s+open)\b.{0,30}\b(email|mail|message)\b", re.I), "gmail_open"),
+
+    # ── Gmail summarize-thread shortcut — MUST precede gmail_thread ──────────────
+    # "summarize the thread about X" / "tldr the conversation"
+    (re.compile(r"\b(summarize|tldr)\b.{0,20}\b(thread|conversation)\b", re.I), "gmail_summarize"),
+
+    # ── Gmail thread — show full conversation ─────────────────────────────────
+    (re.compile(r"\b(show|open|read|get|view)\b.{0,20}\b(thread|conversation|email\s+chain|message\s+chain)\b", re.I), "gmail_thread"),
+    (re.compile(r"\bthread\b.{0,20}\b(about|from|with|on)\b", re.I), "gmail_thread"),
+
+    # ── Gmail summarize — MUST precede gmail_read (avoids "summarize" → gmail_read) ──
+    # "summarize this email", "summarize the thread about X", "tldr"
+    (re.compile(r"\b(summarize|tldr|tl;dr|tl\.dr|give\s+me\s+a\s+summary)\b.{0,30}\b(this|that|the|an?)?\b.{0,10}\b(email|mail|message|thread|conversation)\b", re.I), "gmail_summarize"),
+    (re.compile(r"\b(summarize|tldr)\s+(that|this|it|the\s+thread)\b", re.I), "gmail_summarize"),
+
+    # ── Gmail list category ────────────────────────────────────────────────────
+    (re.compile(r"\b(show|list|check|open|display)\b.{0,20}\b(promotions?|promo|promotional|newsletters?)\b", re.I), "gmail_list_category"),
+    (re.compile(r"\b(show|list|check|open|display)\b.{0,20}\bspam\b", re.I), "gmail_list_category"),
+    (re.compile(r"\b(show|list|check|open|display)\b.{0,20}\b(social|updates?|forums?)\b.{0,15}\b(emails?|mail|messages?)?\b", re.I), "gmail_list_category"),
+
+    # ── Gmail read (specific email) — MUST precede generic gmail ─────────────────
+    # "open 5", "read 3", "open #2" → bare number follow-up to inbox listing
+    (re.compile(r"^(open|read)\s+#?(\d{1,2})\s*$", re.I), "gmail_read"),
+    # "read/open the latest/newest/first email"
+    (re.compile(r"\b(read|open|show)\b.{0,20}\b(latest|newest|first|top|most\s+recent)\b.{0,20}\b(email|mail|message)\b", re.I), "gmail_read"),
+    # "open email 5", "read message 3", "open email number 2"
+    (re.compile(r"\b(read|open|show)\b.{0,15}\b(email|mail|message)\b.{0,15}\b#?(\d{1,2})\b", re.I), "gmail_read"),
+    # "open this email", "read this email [subject]"
+    (re.compile(r"\b(read|open)\s+this\s+(email|mail|message)\b", re.I), "gmail_read"),
+
     # ── Gmail ────────────────────────────────────────────────────────────────────
     # FIX-GMAIL-002: typos (gmial, emil), "messages" synonym, "inbox check" word-order
     (re.compile(r"\b(do\s+i\s+have\s+any|any\s+(new|unread)?\s*)(emails?|messages?|mail)\b", re.I), "gmail"),
@@ -998,8 +1032,8 @@ _ALL_INTENTS = [
     "obsidian_search", "obsidian_read", "obsidian_write", "obsidian_daily",
     # Git & backup
     "git_status", "backup_now", "backup_status", "backup_log",
-    # Comms
-    "gmail",
+    # Comms — Gmail
+    "gmail", "gmail_read", "gmail_open", "gmail_thread", "gmail_summarize", "gmail_list_category",
     # n8n / automation
     "sync",
     # Nightly
@@ -1059,7 +1093,14 @@ _INTENT_SYSTEM = (
     "   'disk_usage'     : storage/disk space questions ONLY (not RAM/CPU)\n"
     "   'large_files'    : find files exceeding a size threshold\n"
     "   'old_files'      : find files older than a time period\n"
-    "   'gmail'          : questions about email, inbox, messages\n"
+    "   'gmail'          : general email questions, list inbox, check unread, search messages\n"
+    "   'gmail_read'     : read a specific email by position number, 'latest', or 'this email'\n"
+    "   'gmail_open'     : search for email(s) and open the best match — requires from/about qualifier\n"
+    "                      e.g. 'open latest email from Amazon', 'open email about the budget'\n"
+    "   'gmail_thread'   : show/view a full email thread or conversation\n"
+    "   'gmail_summarize': LLM-summarize the current email, thread, or a searched email\n"
+    "                      e.g. 'summarize that', 'summarize the thread about budget'\n"
+    "   'gmail_list_category': list emails in a Gmail category — promotions, spam, social, updates\n"
     "   'generate_image' : ONLY when creating a brand-new image/picture/artwork/visual output.\n"
     "                      NEVER for explanations, comparisons, or code/model concepts.\n"
     "                      'generation' as a software concept (code generation, token generation,\n"
@@ -3078,15 +3119,35 @@ def cmd_gmail(query: str = "", n: int = 10) -> None:
             cprint(f"      {DIM}{em['snippet'][:90]}{RESET}", "")
             print()
         print(f"  {GRAY}Use /gmail-read <number> to read a full email{RESET}")
-        # Store IDs for /gmail-read
-        _GMAIL_IDS.clear()
-        _GMAIL_IDS.extend(em["id"] for em in emails)
+        _GMAIL_IDS.clear();     _GMAIL_IDS.extend(em["id"] for em in emails)
+        _GMAIL_SUBJECTS.clear(); _GMAIL_SUBJECTS.extend(em["subject"] for em in emails)
+        _GMAIL_CTX["thread_ids"] = [em.get("thread_id", "") for em in emails]
     except Exception as e:
         cprint(f"  Gmail error: {e}", RED)
         if "credentials" in str(e).lower() or "token" in str(e).lower():
             cprint("  Try: /gmail-auth  to re-authorize", GRAY)
 
-_GMAIL_IDS: list = []   # ephemeral id list for /gmail-read <n>
+_GMAIL_IDS: list = []       # ephemeral id list for /gmail-read <n>
+_GMAIL_SUBJECTS: list = []  # parallel subject list for "open this email [subject]" lookup
+
+_GMAIL_CTX: dict = {
+    "current_email":  None,  # full email dict — set by cmd_gmail_read / cmd_gmail_open
+    "current_thread": None,  # full thread dict — set by cmd_gmail_thread
+    "thread_ids":     [],    # thread IDs parallel to _GMAIL_IDS
+    "candidates":     [],    # candidate set for bulk ops (Phase 2)
+    "draft":          None,  # current draft (Phase 3)
+}
+
+_GMAIL_CATEGORY_MAP = {
+    "promotions": "CATEGORY_PROMOTIONS", "promotion":  "CATEGORY_PROMOTIONS",
+    "promo":      "CATEGORY_PROMOTIONS", "promos":     "CATEGORY_PROMOTIONS",
+    "promotional":"CATEGORY_PROMOTIONS", "newsletter": "CATEGORY_PROMOTIONS",
+    "newsletters":"CATEGORY_PROMOTIONS",
+    "social":     "CATEGORY_SOCIAL",    "socials":    "CATEGORY_SOCIAL",
+    "updates":    "CATEGORY_UPDATES",   "update":     "CATEGORY_UPDATES",
+    "forums":     "CATEGORY_FORUMS",    "forum":      "CATEGORY_FORUMS",
+    "spam":       "SPAM",
+}
 
 def cmd_gmail_read(ref: str) -> None:
     """Read a full email by its list number (from /gmail) or raw message ID."""
@@ -3104,6 +3165,7 @@ def cmd_gmail_read(ref: str) -> None:
         else:
             msg_id = ref
         em = gh.read_email(msg_id)
+        _GMAIL_CTX["current_email"] = em
         adwi_head(f"Email: {em['subject']}")
         cprint(f"  From: {em['from']}", CYAN)
         cprint(f"  Date: {em['date']}", GRAY)
@@ -3111,8 +3173,175 @@ def cmd_gmail_read(ref: str) -> None:
         print(em["body"][:3000])
         if len(em["body"]) > 3000:
             cprint(f"\n  … (truncated — full email is longer)", GRAY)
+        print(f"\n  {GRAY}Follow-ups: /gmail-thread · /gmail-summarize{RESET}")
     except Exception as e:
         cprint(f"  Error reading email: {e}", RED)
+
+def cmd_gmail_open(query: str) -> None:
+    """Search for emails matching query and open the most recent match."""
+    token = HOME / "SuneelWorkSpace" / "secrets" / "gmail-token.json"
+    if not token.exists():
+        cprint("  Not authorized. Run: /gmail-auth", YELLOW); return
+    if not query.strip():
+        cmd_gmail_read("1"); return
+    try:
+        gh = _gmail()
+        emails = gh.list_emails(max_results=5, query=query)
+        if not emails:
+            cprint(f"  No emails found for: {query}", YELLOW); return
+        _GMAIL_IDS.clear();     _GMAIL_IDS.extend(e["id"] for e in emails)
+        _GMAIL_SUBJECTS.clear(); _GMAIL_SUBJECTS.extend(e["subject"] for e in emails)
+        _GMAIL_CTX["thread_ids"] = [e.get("thread_id", "") for e in emails]
+        if len(emails) > 1:
+            cprint(f"  Found {len(emails)} matches — opening most recent", GRAY)
+        em = gh.read_email(emails[0]["id"])
+        _GMAIL_CTX["current_email"] = em
+        adwi_head(f"Email: {em['subject']}")
+        cprint(f"  From: {em['from']}", CYAN)
+        cprint(f"  Date: {em['date']}", GRAY)
+        print()
+        print(em["body"][:3000])
+        if len(em["body"]) > 3000:
+            cprint(f"\n  … (truncated)", GRAY)
+        if len(emails) > 1:
+            print(f"\n  {GRAY}{len(emails)-1} more match(es) · /gmail-thread for conversation · /gmail-summarize{RESET}")
+        else:
+            print(f"\n  {GRAY}Follow-ups: /gmail-thread · /gmail-summarize{RESET}")
+    except Exception as e:
+        cprint(f"  Gmail error: {e}", RED)
+
+
+def _display_thread(thread: dict) -> None:
+    """Render a thread with condensed per-message display."""
+    adwi_head(f"Thread ({thread['count']} messages): {thread['subject'][:55]}")
+    for i, msg in enumerate(thread["messages"], 1):
+        sender = msg["from"].split("<")[0].strip()[:35]
+        cprint(f"\n  {'─'*58}", GRAY)
+        cprint(f"  {i}. {BOLD}{sender}{RESET}  {GRAY}{msg['date'][:16]}{RESET}", "")
+        print()
+        for line in msg["body"][:500].splitlines()[:12]:
+            print(f"     {line}")
+        if len(msg["body"]) > 500:
+            cprint(f"     … (truncated)", GRAY)
+    cprint(f"\n  {'─'*58}", GRAY)
+    print(f"  {GRAY}/gmail-summarize  to summarize this thread{RESET}")
+
+
+def cmd_gmail_thread(query: str = "") -> None:
+    """Load and display the full thread for the current email or a search query."""
+    token = HOME / "SuneelWorkSpace" / "secrets" / "gmail-token.json"
+    if not token.exists():
+        cprint("  Not authorized. Run: /gmail-auth", YELLOW); return
+    try:
+        gh = _gmail()
+        thread_id = None
+
+        if query.strip():
+            emails = gh.list_emails(max_results=3, query=query)
+            if emails:
+                thread_id = emails[0].get("thread_id")
+                if not thread_id:
+                    em = gh.read_email(emails[0]["id"])
+                    thread_id = em.get("thread_id")
+            if not thread_id:
+                cprint(f"  No emails found for: {query}", YELLOW); return
+        elif _GMAIL_CTX.get("current_email"):
+            thread_id = _GMAIL_CTX["current_email"].get("thread_id")
+        elif _GMAIL_CTX.get("current_thread"):
+            _display_thread(_GMAIL_CTX["current_thread"]); return
+        elif _GMAIL_IDS:
+            em = gh.read_email(_GMAIL_IDS[0])
+            _GMAIL_CTX["current_email"] = em
+            thread_id = em.get("thread_id")
+
+        if not thread_id:
+            cprint("  No thread context. Open an email first, or specify a search query.", YELLOW); return
+
+        thread = gh.get_thread(thread_id)
+        _GMAIL_CTX["current_thread"] = thread
+        _display_thread(thread)
+    except Exception as e:
+        cprint(f"  Gmail error: {e}", RED)
+
+
+def cmd_gmail_list_category(name: str) -> None:
+    """List emails in a Gmail category: promotions, spam, social, updates, forums."""
+    token = HOME / "SuneelWorkSpace" / "secrets" / "gmail-token.json"
+    if not token.exists():
+        cprint("  Not authorized. Run: /gmail-auth", YELLOW); return
+    label = _GMAIL_CATEGORY_MAP.get(name.lower().strip(), name.upper())
+    adwi_head(f"Gmail — {name.lower()}")
+    try:
+        gh = _gmail()
+        emails = gh.list_category(category=label, max_results=10)
+        if not emails:
+            cprint(f"  No emails in {name}.", GRAY); return
+        cprint(f"  {len(emails)} in {label}", GRAY)
+        print()
+        for i, em in enumerate(emails, 1):
+            sender = em["from"].split("<")[0].strip()[:30]
+            cprint(f"  {i:>2}. {BOLD}{em['subject'][:55]}{RESET}", "")
+            cprint(f"      {GRAY}From: {sender:<30}  {em['date'][:16]}{RESET}", "")
+            cprint(f"      {DIM}{em['snippet'][:90]}{RESET}", "")
+            print()
+        _GMAIL_IDS.clear();     _GMAIL_IDS.extend(e["id"] for e in emails)
+        _GMAIL_SUBJECTS.clear(); _GMAIL_SUBJECTS.extend(e["subject"] for e in emails)
+        _GMAIL_CTX["thread_ids"] = [e.get("thread_id","") for e in emails]
+        print(f"  {GRAY}/gmail-read <n> to open · /gmail-summarize for summary{RESET}")
+    except Exception as e:
+        cprint(f"  Gmail error: {e}", RED)
+
+
+def cmd_gmail_summarize(query: str = "") -> None:
+    """LLM-summarize the current email or thread; or search then summarize."""
+    token = HOME / "SuneelWorkSpace" / "secrets" / "gmail-token.json"
+    if not token.exists():
+        cprint("  Not authorized. Run: /gmail-auth", YELLOW); return
+    try:
+        gh = _gmail()
+        want_thread = bool(re.search(r"\bthread|conversation\b", query, re.I))
+
+        # Build a clean search string by stripping meta-words
+        _meta = r"\b(summarize|summary|tldr|tl;dr|thread|conversation|email|message|this|that|it|the|of|a|an)\b"
+        clean_q = re.sub(_meta, "", query, flags=re.I).strip(" ,.-")
+
+        # If a search term is given, fetch the email/thread first
+        if clean_q:
+            emails = gh.list_emails(max_results=3, query=clean_q)
+            if not emails:
+                cprint(f"  No emails found for: {clean_q}", YELLOW); return
+            em = gh.read_email(emails[0]["id"])
+            _GMAIL_CTX["current_email"] = em
+            if want_thread and em.get("thread_id"):
+                _GMAIL_CTX["current_thread"] = gh.get_thread(em["thread_id"])
+
+        # Summarize thread if available and wanted
+        if want_thread and _GMAIL_CTX.get("current_thread"):
+            thread = _GMAIL_CTX["current_thread"]
+            msgs_text = "\n\n---\n\n".join(
+                f"From: {m['from']}\nDate: {m['date']}\n\n{m['body'][:700]}"
+                for m in thread["messages"]
+            )
+            adwi_head(f"Thread summary: {thread['subject'][:55]}")
+            stream_local(
+                f"Summarize this email thread:\nSubject: {thread['subject']}\n\n{msgs_text}\n\n"
+                "Who said what, key decisions, action items. Concise.",
+                system="You are Adwi summarizing an email thread for Suneel. Be practical and brief."
+            )
+        elif _GMAIL_CTX.get("current_email"):
+            em = _GMAIL_CTX["current_email"]
+            adwi_head(f"Email summary: {em.get('subject','')[:55]}")
+            stream_local(
+                f"Summarize this email:\nFrom: {em.get('from','')}\nSubject: {em.get('subject','')}\n"
+                f"Date: {em.get('date','')}\n\n{em.get('body','')[:3000]}\n\n"
+                "Key points and any action needed. 3-4 sentences.",
+                system="You are Adwi summarizing an email for Suneel. Be concise and practical."
+            )
+        else:
+            cprint("  No email context. Open an email first, or say 'summarize email from X'.", YELLOW)
+    except Exception as e:
+        cprint(f"  Gmail error: {e}", RED)
+
 
 def cmd_gmail_summary(query: str = "") -> None:
     """Fetch recent emails and ask Adwi to summarize them."""
@@ -5049,27 +5278,87 @@ def dispatch_natural(text: str):
         q = (args.get("query") or target or
              re.sub(r"^(route|which tool).{0,30}?\s", "", text, flags=re.I).strip())
         cmd_route(q)
+    elif intent == "gmail_open":
+        from_m  = re.search(r"\bfrom\s+(\w[\w\s.@]{0,30}?)(?:\s+about|\s+today|\s+yesterday|[?.]|$)", text, re.I)
+        about_m = re.search(r"\babout\s+(.+?)(?:\s+from|\s+today|\s+yesterday|[?.]|$)", text, re.I)
+        time_m  = re.search(r"\b(today|yesterday|this week|last week|this month)\b", text, re.I)
+        parts = []
+        if from_m:  parts.append(f"from:{from_m.group(1).strip()}")
+        if about_m: parts.append(about_m.group(1).strip())
+        if time_m:
+            t = time_m.group(1).lower()
+            if t == "today":               parts.append("newer_than:1d")
+            elif t == "yesterday":         parts.append("after:yesterday before:today")
+            elif "week" in t:              parts.append("newer_than:7d")
+            elif t == "this month":        parts.append("newer_than:30d")
+        query_str = " ".join(parts) or (args.get("query") or "")
+        cmd_gmail_open(query_str)
+    elif intent == "gmail_thread":
+        about_m = re.search(r"\babout\s+(.+?)(?:\s+from|\s+today|[?.]|$)", text, re.I)
+        from_m  = re.search(r"\bfrom\s+(\w[\w\s]{0,20}?)(?:\s+about|[?.]|$)", text, re.I)
+        if about_m:      cmd_gmail_thread(about_m.group(1).strip())
+        elif from_m:     cmd_gmail_thread(f"from:{from_m.group(1).strip()}")
+        else:            cmd_gmail_thread()
+    elif intent == "gmail_summarize":
+        want_thread = bool(re.search(r"\bthread|conversation\b", text, re.I))
+        _meta = r"\b(summarize|tldr|tl;dr|summary|thread|conversation|of|a|an|the|my)\b"
+        clean = re.sub(_meta, "", text, flags=re.I).strip(" ,.-")
+        # Strip action words that aren't content
+        clean = re.sub(r"\b(email|mail|message|this|that|it)\b", "", clean, flags=re.I).strip(" ,.-")
+        # Preserve "from:X" and "about:X" qualifiers
+        from_m  = re.search(r"\bfrom\s+(\w[\w\s.]{0,25}?)(?:\s+about|[?.]|$)", text, re.I)
+        about_m = re.search(r"\babout\s+(.+?)(?:\s+from|[?.]|$)", text, re.I)
+        if from_m:       cmd_gmail_summarize(f"from:{from_m.group(1).strip()}" + (" thread" if want_thread else ""))
+        elif about_m:    cmd_gmail_summarize(about_m.group(1).strip() + (" thread" if want_thread else ""))
+        elif clean:      cmd_gmail_summarize(clean + (" thread" if want_thread else ""))
+        else:            cmd_gmail_summarize("thread" if want_thread else "")
+    elif intent == "gmail_list_category":
+        m = re.search(r"\b(promotions?|promo|promotional|newsletters?|social|updates?|forums?|spam)\b", text, re.I)
+        cmd_gmail_list_category(m.group(1) if m else "promotions")
+    elif intent == "gmail_read":
+        if re.search(r"\bthis\s+(email|mail|message)\b", text, re.I):
+            frag = re.sub(r".*?\bthis\s+(email|mail|message)\s*", "", text, flags=re.I).strip()
+            if frag and _GMAIL_SUBJECTS:
+                for idx, subj in enumerate(_GMAIL_SUBJECTS):
+                    if frag[:30].lower() in subj.lower():
+                        cmd_gmail_read(str(idx + 1)); break
+                else:
+                    cmd_gmail_read("1")
+            else:
+                cmd_gmail_read("1")
+        else:
+            m_num = re.search(r"\b#?(\d{1,2})\b", text)
+            if m_num:
+                cmd_gmail_read(m_num.group(1))
+            elif re.search(r"\b(latest|newest|first|top|most\s+recent)\b", text, re.I):
+                cmd_gmail_read("1")
+            else:
+                cmd_gmail_read("1")
     elif intent == "gmail":
         # Prefer structured query slot from LLM; fall back to text heuristics
         structured_q = args.get("query")
         if structured_q:
             cmd_gmail(query=structured_q)
         else:
-            is_question = bool(re.search(r"\b(is|are|how many|do i have|connected|working|latest|newest|recent)\b", text, re.I))
+            is_question = bool(re.search(r"\b(is|are|how many|do i have|connected|working)\b", text, re.I))
             from_match  = re.search(r"\bfrom\s+(\w[\w\s]{0,30}?)(?:\s+about|\s+today|\s+yesterday|[?.]|$)", text, re.I)
             about_match = re.search(r"\babout\s+(.+?)(?:\s+from|\s+today|\s+yesterday|[?.]|$)", text, re.I)
+            unread      = "unread" in text.lower()
+            today       = "today"     in text.lower()
+            yesterday   = "yesterday" in text.lower()
+            # Combine qualifiers: "unread emails from Rahul" → from + unread filter
             if from_match:
-                cmd_gmail(query=f"from:{from_match.group(1).strip()}")
+                q = f"from:{from_match.group(1).strip()}"
+                if unread: q = f"is:unread {q}"
+                cmd_gmail(query=q)
             elif about_match and not is_question:
-                cmd_gmail(query=about_match.group(1).strip())
-            elif "unread" in text.lower():
-                cmd_gmail(query="is:unread")
-            elif "today" in text.lower():
-                cmd_gmail(query="newer_than:1d")
-            elif "yesterday" in text.lower():
-                cmd_gmail(query="after:yesterday before:today")
-            else:
-                cmd_gmail()
+                q = about_match.group(1).strip()
+                if unread: q = f"is:unread {q}"
+                cmd_gmail(query=q)
+            elif unread:    cmd_gmail(query="is:unread")
+            elif today:     cmd_gmail(query="newer_than:1d")
+            elif yesterday: cmd_gmail(query="after:yesterday before:today")
+            else:           cmd_gmail()
     elif intent == "memory_context":
         q = (args.get("query") or target or
              re.sub(r"^(memory context|context for|show context)\s*", "", text, flags=re.I).strip())
@@ -5278,6 +5567,15 @@ def handle(line: str) -> bool:
     elif line.startswith("/gmail-read "): cmd_gmail_read(line[12:].strip())
     elif line == "/gmail-summary": cmd_gmail_summary()
     elif line.startswith("/gmail-summary "): cmd_gmail_summary(query=line[15:].strip())
+    elif line.startswith("/gmail-open "): cmd_gmail_open(line[12:].strip())
+    elif line == "/gmail-thread": cmd_gmail_thread()
+    elif line.startswith("/gmail-thread "): cmd_gmail_thread(line[14:].strip())
+    elif line == "/gmail-summarize": cmd_gmail_summarize()
+    elif line.startswith("/gmail-summarize "): cmd_gmail_summarize(line[17:].strip())
+    elif line == "/gmail-promos": cmd_gmail_list_category("promotions")
+    elif line == "/gmail-spam": cmd_gmail_list_category("spam")
+    elif line == "/gmail-social": cmd_gmail_list_category("social")
+    elif line.startswith("/gmail-category "): cmd_gmail_list_category(line[16:].strip())
     # ── Self-repair commands (confirm before patching) ──
     elif line.startswith("/fix-error"): cmd_fix_error(line[10:].strip())
     elif line == "/repair-adwi": cmd_repair_adwi()

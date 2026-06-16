@@ -28,6 +28,10 @@ SECRET_PATTERNS = [
     (re.compile(r"-----BEGIN\s+(RSA|EC|OPENSSH|PRIVATE)\s+PRIVATE\s+KEY-----"), "Private key"),
     (re.compile(r"GOOGLE_API_KEY\s*=\s*.{8,}"),           "Google API key"),
     (re.compile(r"client_secret.*:\s*['\"]?[A-Za-z0-9_-]{12,}", re.I), "OAuth client secret"),
+    (re.compile(r"tvly-[A-Za-z0-9_-]{20,}"),              "Tavily API key"),
+    (re.compile(r"exa-[A-Za-z0-9_-]{20,}"),               "Exa API key"),
+    (re.compile(r"fc-[A-Za-z0-9_-]{20,}"),                "Firecrawl API key"),
+    (re.compile(r"CLOUDFLARE_TUNNEL_TOKEN\s*=\s*.{8,}"),  "Cloudflare tunnel token"),
 ]
 
 # Always-blocked paths (never committed regardless of .gitignore)
@@ -551,7 +555,11 @@ fi
 
 # Quick secret scan on changed files
 if git status --short | grep -q "^[AM]"; then
-    if git diff --cached | grep -qE 'sk-[A-Za-z0-9]{20}|OPENWEBUI_API_KEY=|GITHUB_TOKEN=|gho_[A-Za-z0-9]{36}|-----BEGIN.*PRIVATE'; then
+    SECRET_PAT='sk-[A-Za-z0-9]{20,}|gho_[A-Za-z0-9]{36,}|-----BEGIN.*PRIVATE'
+    SECRET_PAT+='|OPENWEBUI_API_KEY=|GITHUB_TOKEN=|CLOUDFLARE_TUNNEL_TOKEN='
+    SECRET_PAT+='|tvly-[A-Za-z0-9]{20,}|exa-[A-Za-z0-9]{20,}|fc-[A-Za-z0-9]{20,}'
+    SECRET_PAT+='|eyJ[A-Za-z0-9_-]{20,}'
+    if git diff --cached | grep -qE "$SECRET_PAT"; then
         echo "SECRET SCAN FAILED — aborting auto-backup" >> "$LOG"
         exit 1
     fi

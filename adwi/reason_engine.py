@@ -34,6 +34,15 @@ ADWI_DIR    = WORKSPACE / "adwi"
 AIDER_BIN   = Path.home() / ".local" / "bin" / "aider"
 MAX_RETRIES = 3
 
+# Explicit allowlist for autonomous aider live-heal patching.
+# Security-boundary files (path_validator, backup, local-command-api,
+# obsidian-bridge, simlab, reason_engine itself) are intentionally excluded.
+_AIDER_PATCHABLE = frozenset({
+    str((ADWI_DIR / "adwi_cli.py").resolve()),
+    str((ADWI_DIR / "memory.py").resolve()),
+    str((ADWI_DIR / "nlu_fast_path.py").resolve()),
+})
+
 # ANSI
 _R = "\033[0m"; _B = "\033[1m"; _DIM = "\033[2m"
 _CY = "\033[36m"; _GR = "\033[32m"; _YL = "\033[33m"
@@ -405,8 +414,9 @@ def _live_heal(error_output: str, ledger: AchievementLedger) -> bool:
 
     # Identify files to patch
     files = _extract_error_files(error_output)
+    files = [f for f in files if str(f.resolve()) in _AIDER_PATCHABLE]
     if not files:
-        print(f"  {_GY}No workspace files identified in traceback — skipping aider.{_R}")
+        print(f"  {_GY}No patchable workspace files in traceback — skipping aider.{_R}")
         ledger.add_heal(error_output[:80], patched=False, tests_passed=None)
         return False
 
@@ -483,6 +493,7 @@ def _exec_file_read(path_str: str, ledger: AchievementLedger) -> tuple[bool, str
     blocked = [
         Path.home() / ".ssh", Path.home() / ".aws",
         WORKSPACE / "secrets", Path("/etc"), Path("/private"),
+        WORKSPACE / "config" / ".env",
     ]
     for b in blocked:
         try:

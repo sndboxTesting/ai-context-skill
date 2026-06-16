@@ -50,6 +50,15 @@ DESKTOP          = HOME / "Desktop"
 AIDER_BIN        = HOME / ".local" / "bin" / "aider"
 MAX_FIX_ATTEMPTS = 3
 
+# Explicit allowlist for autonomous aider patching.
+# Security-boundary files (path_validator, reason_engine, backup, local-command-api,
+# obsidian-bridge, simlab) are intentionally excluded.
+_AIDER_PATCHABLE = frozenset({
+    str(CLI_PY.resolve()),
+    str((ADWI_DIR / "memory.py").resolve()),
+    str((ADWI_DIR / "nlu_fast_path.py").resolve()),
+})
+
 _ANSI = re.compile(r'\x1B(?:[@-Z\\-_]|\[[0-?]*[ -/]*[@-~])')
 
 
@@ -436,6 +445,10 @@ def step_aider_heal() -> dict:
     orig_head = orig_head.strip()
 
     files = _extract_failing_files(initial_output)
+    files = [f for f in files if str(Path(f).resolve()) in _AIDER_PATCHABLE]
+    if not files:
+        result["skipped_reason"] = "no patchable files in test failure — aider skipped (boundary files excluded)"
+        return result
 
     # V2: snapshot BEFORE aider touches anything
     snapshot = _snapshot_files(files)
@@ -455,7 +468,8 @@ def step_aider_heal() -> dict:
             fixed = True
             break
         error_log = new_output
-        new_files = _extract_failing_files(new_output)
+        new_files = [f for f in _extract_failing_files(new_output)
+                     if str(Path(f).resolve()) in _AIDER_PATCHABLE]
         # Extend snapshot if Aider touched new files
         new_files_unseen = [f for f in new_files if str(f) not in snapshot]
         if new_files_unseen:
@@ -467,7 +481,7 @@ def step_aider_heal() -> dict:
     if fixed:
         branch = f"auto-fix/morning-review-{DATE_STR}"
         _run(["git", "checkout", "-b", branch], timeout=15)
-        _run(["git", "add", "-A"], timeout=10)
+        _run(["git", "add"] + list(snapshot.keys()), timeout=10)
         _run(
             ["git", "commit", "-m",
              f"auto-fix: nightly self-healing — {DATE_STR} ({result['attempts']} attempt(s))"],

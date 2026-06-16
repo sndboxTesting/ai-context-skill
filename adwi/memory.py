@@ -575,6 +575,16 @@ NLU_SEED_FIXTURES: list[tuple[str, str, dict, str]] = [
     ("explain what ollama does",                         "chat",         {},                                    "tool explanation → chat"),
     ("how does RAG work",                                "chat",         {},                                    "technical explanation → chat"),
     ("what is the best way to organise my notes",        "chat",         {},                                    "advice on notes organisation → chat"),
+    # ── Tier 3 fixtures from 2026-06-15 eval (added after regex fixes) ───────────
+    # Only LLM-facing phrases not now handled by _REGEX_INTENTS.
+    # Regex-handled phrases (largest/biggest files, doctor, self_heal, file ops) deferred.
+    ("files using the most space",                       "large_files",  {},                                    "no-size-keyword large_files query — LLM must reason about 'using space'"),
+    ("help me clean up my drive",                        "cleanup",       {},                                    "colloquial cleanup with 'drive' not 'disk'"),
+    ("suggest things I can remove",                      "cleanup",       {},                                    "cleanup as suggestion request"),
+    ("safe deletion candidates",                         "cleanup",       {},                                    "cleanup framed as 'safe to delete'"),
+    ("help me get rid of junk files",                    "cleanup",       {},                                    "cleanup with colloquial 'junk files' phrasing"),
+    ("what's the best way to structure these files",     "organize",      {},                                    "organize question framed as best-practice advice"),
+    ("clean up my downloads folder",                     "cleanup",       {"path": "~/Downloads"},               "scoped cleanup — downloads path"),
 ]
 
 

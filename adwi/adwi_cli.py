@@ -501,70 +501,156 @@ URL_RE = re.compile(r"https?://[^\s]+", re.I)
 
 # Regex pre-filters — catch common phrases the tiny model misclassifies
 _REGEX_INTENTS = [
-    # Disk / space — must come before file_list
-    (re.compile(r"(biggest|largest|heaviest|most space|taking up|using up|eating up).{0,40}(folder|file|directory|space|disk|storage)", re.I), "disk_usage"),
-    (re.compile(r"(disk|storage|space).{0,40}(usage|breakdown|breakdown|overview|used|free|full)", re.I), "disk_usage"),
-    (re.compile(r"(what|what.s|how much).{0,30}(space|room|storage|disk)", re.I),  "disk_usage"),
-    (re.compile(r"(free up|clean up).{0,20}(space|disk|storage|room)", re.I),       "cleanup"),
-    # Large files
-    (re.compile(r"(big(gest)?|large(st)?|heavy|huge|files? (over|bigger|larger|more than))", re.I), "large_files"),
-    # Old files
+    # ── Large files — BEFORE disk_usage (Bug 2: superset-ordering fix) ───────────
+    # "biggest/largest/heaviest files" must win over disk_usage's broader pattern
+    (re.compile(r"\b(big(gest)?|large(st)?|heavy|huge)\b.{0,30}\bfiles?\b", re.I), "large_files"),
+    (re.compile(r"\bfiles?\b.{0,20}(over|bigger than|larger than|more than)\s*\d", re.I), "large_files"),
+    (re.compile(r"\b(top \d+|find).{0,20}(big(gest)?|large(st)?|heavy).{0,20}files?\b", re.I), "large_files"),
+
+    # ── Disk / space (narrowed to disk/space/storage objects only) ───────────────
+    (re.compile(r"(biggest|largest|heaviest|most space|taking up|using up|eating up).{0,40}(disk|storage|space)\b", re.I), "disk_usage"),
+    (re.compile(r"(disk|storage|space).{0,40}(usage|breakdown|overview|used|free|full|analysis)", re.I), "disk_usage"),
+    (re.compile(r"(what|what.s|how much).{0,30}(space|room|storage|disk)", re.I), "disk_usage"),
+    (re.compile(r"\bcheck\b.{0,10}\b(my\s+)?(disk|storage|space)\b", re.I), "disk_usage"),
+    (re.compile(r"(free up|clean up).{0,20}(space|disk|storage|room)", re.I), "cleanup"),
+
+    # ── Old files ────────────────────────────────────────────────────────────────
     (re.compile(r"(old|haven.t (used|opened|touched)|stale|unused|not (used|opened|accessed)).{0,30}(file|folder|doc)", re.I), "old_files"),
     (re.compile(r"files?.{0,20}(not|never).{0,20}(used|opened).{0,20}(year|month|day)", re.I), "old_files"),
-    # Duplicates
-    (re.compile(r"(duplicate|identical|same file|copy|copies|redundant)", re.I),    "duplicates"),
-    # Organize
+    # File-first ordering: "files I haven't opened/used in a year"
+    (re.compile(r"\bfiles?\b.{0,30}(haven.t|not).{0,5}(opened|used|accessed|touched)\b", re.I), "old_files"),
+
+    # ── Duplicates ───────────────────────────────────────────────────────────────
+    (re.compile(r"(duplicate|identical|same file|copy|copies|redundant)", re.I), "duplicates"),
+
+    # ── Organize ─────────────────────────────────────────────────────────────────
     (re.compile(r"(organiz|tidy|restructure|better structure|sort out|clean up).{0,30}(folder|file|download|desktop|document)", re.I), "organize"),
-    # Cleanup suggestions
+
+    # ── Cleanup suggestions ──────────────────────────────────────────────────────
     (re.compile(r"(what|which).{0,20}(can|should|could|to).{0,20}(delete|remove|trash|clear|get rid)", re.I), "cleanup"),
-    (re.compile(r"(safe to delete|safely delete|safely remove)", re.I),             "cleanup"),
-    # Status
-    (re.compile(r"(is|are).{0,30}(running|working|up|down|online|healthy|alive)", re.I), "status"),
-    (re.compile(r"(check|verify).{0,20}(setup|stack|services|system)", re.I),       "status"),
-    # Self-heal
-    (re.compile(r"(fix|repair|restart|broken|not working|crashed|down).{0,20}(setup|stack|service|ollama|docker)", re.I), "self_heal"),
-    # What next
-    (re.compile(r"(what|what.s).{0,20}(next|build|improve|add|create).{0,20}(adwi|setup|ai|local)", re.I), "what_next"),
-    (re.compile(r"(suggest|recommend).{0,20}(next|improvement|feature|capability)", re.I), "what_next"),
-    # RAG / knowledge search
+    (re.compile(r"(safe to delete|safely delete|safely remove)", re.I), "cleanup"),
+
+    # ── RAG / knowledge search — BEFORE file_search (notes-specific guard) ───────
     (re.compile(r"(search|find|look up|recall|what do i know).{0,30}(my notes|my knowledge|local knowledge|knowledge base|from notes)", re.I), "rag_search"),
     (re.compile(r"(in my notes|from my notes|check my notes).{0,30}(about|for|on)", re.I), "rag_search"),
-    # Web search (SearXNG)
+
+    # ── File operations ──────────────────────────────────────────────────────────
+    # file_search before file_list; both before file_read
+    (re.compile(r"\b(find|search for|locate|look for)\b.{0,20}\bfiles?\b", re.I), "file_search"),
+    (re.compile(r"\bfind (all |every )?.{0,10}\.(py|js|ts|yaml|yml|json|txt|md|sh|toml)\b", re.I), "file_search"),
+    (re.compile(r"\bls\b", re.I), "file_list"),
+    (re.compile(r"\blist\s+(files?|dir(ectory)?|folder|content)\b", re.I), "file_list"),
+    (re.compile(r"\bwhat\s+files?\b.{0,20}(are in|in|inside)\b", re.I), "file_list"),
+    (re.compile(r"\bread\b.{0,25}\.(py|js|ts|md|yaml|yml|json|txt|sh|toml|cfg|gitignore)\b", re.I), "file_read"),
+    (re.compile(r"\bread\b.{0,20}(the file\b|file contents?\b|contents? of)\b", re.I), "file_read"),
+    (re.compile(r"\b(show|display|cat)\b.{0,20}(contents? of|the file\b)\b", re.I), "file_read"),
+
+    # ── Doctor — BEFORE status (Bug 3 companion: deep check beats shallow) ───────
+    (re.compile(r"\b(run doctor|doctor mode)\b", re.I), "doctor"),
+    (re.compile(r"\b(full|deep|thorough|complete)\b.{0,15}\b(health.?check|diagnostic)\b", re.I), "doctor"),
+    (re.compile(r"\brun\b.{0,15}\b(full\s+)?(diagnostic|health.?check)\b", re.I), "doctor"),
+
+    # ── Self-heal — BEFORE status (Bug 3: service-error superset fix) ────────────
+    # Pattern A: verb-first  — "fix/repair/broken/not working ... service"
+    (re.compile(r"(fix|repair|restart|broken|not working|isn.t working|crashed|down).{0,20}(setup|stack|service|ollama|docker)", re.I), "self_heal"),
+    # Pattern B: subject-first — "docker/ollama/adwi ... not working/broken"
+    (re.compile(r"(adwi|setup|stack|docker|ollama|service).{0,20}(not working|isn.t working|broken|crashed|crashing|failing)", re.I), "self_heal"),
+
+    # ── Status (Bug 1: word boundaries stop substring false positives) ────────────
+    # \b prevents "is" matching in "list", "down" matching in "downloads", etc.
+    (re.compile(r"\b(is|are)\b.{0,30}\b(running|working|up|down|online|healthy|alive)\b", re.I), "status"),
+    (re.compile(r"(check|verify).{0,20}(setup|stack|services|system)", re.I), "status"),
+
+    # ── What next ────────────────────────────────────────────────────────────────
+    (re.compile(r"(what|what.s).{0,20}(next|build|improve|add|create).{0,20}(adwi|setup|ai|local)", re.I), "what_next"),
+    (re.compile(r"(suggest|recommend).{0,20}(next|improvement|feature|capability)", re.I), "what_next"),
+
+    # ── Web search ───────────────────────────────────────────────────────────────
     (re.compile(r"(search the web|web search|google|search online|look up online|find online|search internet).{0,50}", re.I), "web_search"),
     (re.compile(r"(what('s| is) (the latest|new in|current).{0,30}(release|version|update|news|changelog))", re.I), "web_search"),
-    # Obsidian vault
+
+    # ── Obsidian daily — BEFORE obsidian_search (Bug 4: daily-note guard) ────────
+    (re.compile(r"\b(daily.?note|today.{0,5}note|obsidian.{0,5}daily)\b", re.I), "obsidian_daily"),
+    (re.compile(r"\bopen\b.{0,15}\btoday.{0,5}\bnote\b", re.I), "obsidian_daily"),
+
+    # ── Obsidian vault ───────────────────────────────────────────────────────────
     (re.compile(r"(obsidian|vault|my notes?).{0,20}(search|find|look up|what do i have)", re.I), "obsidian_search"),
     (re.compile(r"(open|read|show).{0,10}(obsidian|vault|note).{0,30}", re.I), "obsidian_search"),
-    # Browse / fetch URL
+    # Verb-first ordering: "search my obsidian vault / notes for ..."
+    (re.compile(r"\bsearch\b.{0,20}\b(obsidian|vault)\b", re.I), "obsidian_search"),
+
+    # ── Browse / fetch URL ───────────────────────────────────────────────────────
     (re.compile(r"(browse|visit|open|fetch|go to|check out|navigate to).{0,15}(https?://|website|site|webpage|url|\.(com|io|org|dev|net))", re.I), "browse"),
-    # GitHub repo visibility — must come BEFORE git_status and github_connected
+
+    # ── Nightly maintenance ──────────────────────────────────────────────────────
+    (re.compile(r"\b(nightly|night.?run)\b.{0,20}(status|log|report|last run|results?)\b", re.I), "nightly_status"),
+    (re.compile(r"\b(when.{0,10}(did.{0,10})?nightly|last.{0,10}nightly|show.{0,10}nightly)\b", re.I), "nightly_status"),
+    (re.compile(r"\bnightly.{0,10}log\b", re.I), "nightly_status"),
+    (re.compile(r"\b(run nightly|trigger nightly|nightly maintenance|run.{0,10}daily maintenance)\b", re.I), "nightly_run"),
+
+    # ── Model status / switching ─────────────────────────────────────────────────
+    (re.compile(r"\b(what|which)\b.{0,15}\bmodel\b.{0,20}\b(am i|are you|is active|running|using|current|loaded)\b", re.I), "model_status"),
+    (re.compile(r"\bmodel\b.{0,15}\b(status|active|current|running|loaded|info)\b", re.I), "model_status"),
+    (re.compile(r"\b(show|display)\b.{0,15}\bmodel\b.{0,20}\b(status|info|version)\b", re.I), "model_status"),
+    (re.compile(r"\b(switch|use|change)\b.{0,15}(to\s+)?(local model|local llm|local ai)\b", re.I), "use_local"),
+    (re.compile(r"\buse\b.{0,10}\b(qwen|llama|mistral|phi|gemma)\b", re.I), "use_local"),
+    (re.compile(r"\b(switch|change|use)\b.{0,15}(to\s+)?(cloud model|cloud api|cloud llm|gemini|openai)\b", re.I), "use_cloud"),
+    (re.compile(r"\bswitch to cloud\b", re.I), "use_cloud"),
+
+    # ── Voice I/O ────────────────────────────────────────────────────────────────
+    (re.compile(r"\b(voice input|voice mode|voice.{0,10}recording|start.{0,10}voice|listen.{0,10}voice)\b", re.I), "voice_in"),
+    (re.compile(r"\bstart.{0,15}(recording|listening)\b", re.I), "voice_in"),
+    (re.compile(r"\b(text.to.speech|tts\b|speak.{0,15}this|say.{0,20}(aloud|out loud)|read.{0,10}aloud|read.{0,10}this.{0,10}out)\b", re.I), "voice_out"),
+
+    # ── Backup status / log ──────────────────────────────────────────────────────
+    (re.compile(r"\b(backup.{0,10}(status|health|check|recent|current)|last.{0,10}backup|when.{0,15}(was.{0,5})?backup)\b", re.I), "backup_status"),
+    (re.compile(r"\bbackup.{0,15}(log|history|logs)\b", re.I), "backup_log"),
+
+    # ── Eval / test ──────────────────────────────────────────────────────────────
+    (re.compile(r"\b(run|start|trigger).{0,15}(routing.?tests?|eval.?routing|routing eval)\b", re.I), "eval_routing"),
+    (re.compile(r"\b(run|start).{0,15}\b(adwi.?eval|eval.?adwi)\b", re.I), "eval_adwi"),
+    (re.compile(r"\bevaluate\b.{0,10}\badwi\b", re.I), "eval_adwi"),
+    (re.compile(r"\b(run|execute).{0,15}(adwi.?tests?|test.?adwi)\b", re.I), "test_adwi"),
+
+    # ── GitHub repo visibility — BEFORE git_status and github_connected ───────────
     (re.compile(r"(make|set|change|convert).{0,20}(git.?repo|repo|repository).{0,20}(public|private|open source)", re.I), "github_visibility"),
     (re.compile(r"(make|set).{0,15}(public|private).{0,15}(repo|repository|github)", re.I), "github_visibility"),
     (re.compile(r"(repo|repository).{0,20}(visibility|public|private)", re.I), "github_visibility"),
-    # GitHub connectivity — must come BEFORE git_status
+
+    # ── GitHub connectivity — BEFORE git_status ───────────────────────────────────
     (re.compile(r"(is|are).{0,20}(github|git hub).{0,20}(connected|linked|set up|configured|working|authenticated|logged in)", re.I), "github_connected"),
     (re.compile(r"(is adwi|adwi).{0,20}(connected|linked).{0,20}(github|git)", re.I), "github_connected"),
     (re.compile(r"(github|git hub).{0,20}(account|auth|login|connection|access)", re.I), "github_connected"),
     (re.compile(r"(connected to|link(ed)? to|set up).{0,20}(github|git hub)", re.I), "github_connected"),
-    # Git
+
+    # ── Git status (Bug 7: broadened patterns) ────────────────────────────────────
     (re.compile(r"git\s+(status|diff|log|show|repos?)\b", re.I), "git_status"),
     (re.compile(r"(what (changed|committed)|show commits|latest commit|my repos?)\b", re.I), "git_status"),
-    # Image generation
+    (re.compile(r"\b(show|what|are|is)\b.{0,20}\b(recent commits?|unstaged|staged files?|uncommitted|current branch|repo clean)\b", re.I), "git_status"),
+    (re.compile(r"\b(what.{0,10}(last|did).{0,10}commit|current branch|git\s+(stat|branch))\b", re.I), "git_status"),
+    (re.compile(r"\brepo\b.{0,15}\b(clean|dirty|status|changes)\b", re.I), "git_status"),
+
+    # ── Image generation ─────────────────────────────────────────────────────────
     (re.compile(r"(generate|create|draw|make|design).{0,20}(an? )?(image|picture|photo|illustration|artwork)", re.I), "generate_image"),
-    # Code execution
+
+    # ── Code execution ───────────────────────────────────────────────────────────
     (re.compile(r"(run|execute|test).{0,15}(this |the )?(python|code|script)\b", re.I), "run_code"),
-    # Benchmark
+
+    # ── Benchmark ────────────────────────────────────────────────────────────────
     (re.compile(r"(benchmark|speed.?test|how fast|tokens? per second).{0,20}(adwi|model|local|ollama)\b", re.I), "benchmark"),
-    # Gmail
+
+    # ── Gmail ────────────────────────────────────────────────────────────────────
     (re.compile(r"(check|show|read|open|get|fetch|look at).{0,20}(my )?(email|gmail|inbox|mail)\b", re.I), "gmail"),
     (re.compile(r"(any (new|unread) )?emails?\b", re.I), "gmail"),
     (re.compile(r"gmail\b", re.I), "gmail"),
-    # Memory ledger
+
+    # ── Memory ledger ────────────────────────────────────────────────────────────
     (re.compile(r"(scan|index|update|build).{0,20}(my )?(memory|memories|ledger|context)", re.I), "memory_scan"),
     (re.compile(r"(what do you (remember|know|recall)|do you remember|tell me what you know).{0,40}(about|regarding)\b", re.I), "memory_recall"),
     (re.compile(r"(remember|recall|what do you know about|memory).{0,30}\?", re.I), "memory_recall"),
     (re.compile(r"memory (stats|status|ledger|database|db)\b", re.I), "memory_stats"),
-    # Semantic router
+
+    # ── Semantic router ──────────────────────────────────────────────────────────
     (re.compile(r"route (this|the|my)?\s*(query|question|request|command)\b", re.I), "route"),
     (re.compile(r"which tool (should|would|to) (handle|use for|run)\b", re.I), "route"),
 ]
@@ -788,20 +874,61 @@ _INTENT_SYSTEM = (
     "   'large_files'    : find files exceeding a size threshold\n"
     "   'old_files'      : find files older than a time period\n"
     "   'gmail'          : questions about email, inbox, messages\n"
-    "   'generate_image' : generate/draw/create an image\n"
+    "   'generate_image' : ONLY when creating a brand-new image/picture/artwork/visual output.\n"
+    "                      NEVER for explanations, comparisons, or code/model concepts.\n"
+    "                      'generation' as a software concept (code generation, token generation,\n"
+    "                      model generation) is NOT this intent.\n"
+    "                      If the prompt starts with 'explain', 'what is', 'difference between',\n"
+    "                      'compare', 'how does', 'show me everything', or asks about models/APIs\n"
+    "                      → use 'chat' instead. Only use this for 'draw/create/generate an image'.\n"
     "   'web_search'     : explicit request for internet/web search\n"
-    "   'status'         : asks if services/systems are running or healthy\n"
+    "   'status'         : asks if services/systems are running or healthy (shallow check)\n"
+    "   'doctor'         : deep full-system health check and diagnostic — MORE thorough than 'status'.\n"
+    "                      'run doctor', 'full health check', 'deep diagnostic', 'thorough check'.\n"
     "   'sync'           : sync the adwi knowledge base to Open WebUI — ONLY when user says 'sync'\n"
     "                      or 'update knowledge base'. NOT for general 'manage' or 'update' requests.\n"
     "   'capabilities'   : user EXPLICITLY asks what ADWI/YOU can do — must mention 'you', 'adwi',\n"
     "                      'your features', 'your commands', or 'show help'. Questions about\n"
     "                      alternatives, comparisons, recommendations, or subscriptions are NOT this.\n"
     "   'daily_improve'  : run daily self-improvement routine or make adwi better\n"
-    "   'fix_error'      : user pastes a specific Python exception, traceback, or HTTP error string\n"
-    "                      (the message CONTAINS an actual error class or status code)\n"
-    "   'self_heal'      : user says adwi is broken or wants general repair WITHOUT pasting an error\n"
+    "   'fix_error'      : user pastes an EXACT exception string containing an error class\n"
+    "                      (ModuleNotFoundError, TypeError, ValueError, AttributeError, KeyError,\n"
+    "                      RuntimeError, etc.) OR an HTTP status code (404, 500, 502).\n"
+    "                      The raw error text MUST be present in the message.\n"
+    "                      Vague 'why did this break' without error text → use 'self_heal' instead.\n"
+    "   'self_heal'      : user says adwi/service is broken or wants general repair WITHOUT pasting\n"
+    "                      an actual error message. 'fix my setup', 'adwi is broken', 'repair ollama'.\n"
     "   'backup_now'     : backup workspace to GitHub, push backup\n"
+    "   'backup_status'  : check when the last backup ran, backup health, recent backup git log.\n"
+    "   'backup_log'     : show the full backup history log file.\n"
     "   'image'          : analyze or describe an existing image file path\n"
+    "   'model_status'   : user asks what model Adwi is using, which model is loaded/active,\n"
+    "                      or asks to show model info. NOT a disk question.\n"
+    "   'use_local'      : switch to a local Ollama model (llama, qwen, mistral, phi, gemma, etc.).\n"
+    "                      'switch to local', 'use local model', 'use qwen', 'switch to llama'.\n"
+    "   'use_cloud'      : switch to a cloud API model (gemini, gpt, openai, claude, etc.).\n"
+    "                      'use gemini', 'switch to cloud', 'use gpt-4', 'cloud model'.\n"
+    "   'voice_in'       : activate voice/microphone input, start listening, speech-to-text.\n"
+    "                      'voice input', 'listen to me', 'start recording', 'voice mode'.\n"
+    "   'voice_out'      : text-to-speech output — read aloud, speak, TTS, say this out loud.\n"
+    "                      'text to speech', 'say this aloud', 'read this out loud', 'TTS'.\n"
+    "   'file_read'      : read and display the contents of a specific file path.\n"
+    "                      'read adwi_cli.py', 'show contents of README.md', 'cat this file'.\n"
+    "   'file_list'      : list files in a specific directory or path (like ls). NOT a search.\n"
+    "                      'ls downloads', 'list files in /tmp', 'what files are in my workspace'.\n"
+    "   'file_search'    : search the filesystem for files by name, extension, or pattern.\n"
+    "                      'find all .py files', 'search for config.yaml', 'locate requirements.txt'.\n"
+    "   'git_status'     : git repository queries — branches, commits, diffs, staged/unstaged\n"
+    "                      changes, recent history. Anything about the git state of the repo.\n"
+    "                      'show recent commits', 'are there uncommitted changes', 'current branch'.\n"
+    "   'nightly_status' : check when the nightly maintenance last ran and what it produced.\n"
+    "                      'nightly status', 'when did nightly last run', 'show nightly log'.\n"
+    "   'nightly_run'    : trigger / run the nightly maintenance routine now.\n"
+    "                      'run nightly', 'trigger nightly', 'run daily maintenance'.\n"
+    "   'trusted_roots'  : show which file paths / directories Adwi is allowed to read or write.\n"
+    "                      'show trusted roots', 'what paths can adwi read', 'allowed directories'.\n"
+    "   'memory_context' : show the current session memory/context summary.\n"
+    "                      'show memory context', 'what is in my memory context'.\n"
     "   'chat'           : DEFAULT for everything else — use this for:\n"
     "                      • advisory/recommendation questions ('what is the best...', 'should I...')\n"
     "                      • questions about tools, services, subscriptions NOT directly about adwi\n"

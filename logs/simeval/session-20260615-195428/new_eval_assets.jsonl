@@ -1,0 +1,15 @@
+{"user_phrase": "what are the biggest files", "intent": "large_files", "arguments": {}, "source": "simeval-failure-routing_miss", "confidence": 0.0, "expected_was": "large_files", "actual_was": "disk_usage"}
+{"user_phrase": "what's the heaviest stuff on disk", "intent": "large_files", "arguments": {}, "source": "simeval-failure-routing_miss", "confidence": 0.0, "expected_was": "large_files", "actual_was": "disk_usage"}
+{"user_phrase": "largest files in my home directory", "intent": "large_files", "arguments": {}, "source": "simeval-failure-routing_miss", "confidence": 0.0, "expected_was": "large_files", "actual_was": "disk_usage"}
+{"user_phrase": "top 10 biggest files", "intent": "large_files", "arguments": {}, "source": "simeval-failure-routing_miss", "confidence": 0.0, "expected_was": "large_files", "actual_was": "disk_usage"}
+{"user_phrase": "files using the most space", "intent": "large_files", "arguments": {}, "source": "simeval-failure-routing_miss", "confidence": 0.0, "expected_was": "large_files", "actual_was": "disk_usage"}
+{"user_phrase": "help me clean up my drive", "intent": "cleanup", "arguments": {}, "source": "simeval-failure-routing_miss", "confidence": 0.0, "expected_was": "cleanup", "actual_was": "disk_usage"}
+{"user_phrase": "what should I trash to free up space", "intent": "cleanup", "arguments": {}, "source": "simeval-failure-routing_miss", "confidence": 0.0, "expected_was": "cleanup", "actual_was": "disk_usage"}
+{"user_phrase": "clean up my downloads folder", "intent": "cleanup", "arguments": {}, "source": "simeval-failure-routing_miss", "confidence": 0.0, "expected_was": "cleanup", "actual_was": "organize"}
+{"user_phrase": "suggest things I can remove", "intent": "cleanup", "arguments": {}, "source": "simeval-failure-routing_miss", "confidence": 0.0, "expected_was": "cleanup", "actual_was": "memory_recall"}
+{"user_phrase": "safe deletion candidates", "intent": "cleanup", "arguments": {}, "source": "simeval-failure-routing_miss", "confidence": 0.0, "expected_was": "cleanup", "actual_was": "large_files"}
+{"user_phrase": "help me get rid of junk files", "intent": "cleanup", "arguments": {}, "source": "simeval-failure-routing_miss", "confidence": 0.0, "expected_was": "cleanup", "actual_was": "large_files"}
+{"user_phrase": "what's the best way to structure these files", "intent": "organize", "arguments": {}, "source": "simeval-failure-routing_miss", "confidence": 0.0, "expected_was": "organize", "actual_was": "disk_usage"}
+{"user_phrase": "docker is not working repair", "intent": "self_heal", "arguments": {}, "source": "simeval-failure-routing_miss", "confidence": 0.0, "expected_was": "self_heal", "actual_was": "status"}
+{"user_phrase": "run doctor", "intent": "doctor", "arguments": {}, "source": "simeval-failure-routing_miss", "confidence": 0.0, "expected_was": "doctor", "actual_was": "status"}
+{"user_phrase": "full health check", "intent": "doctor", "arguments": {}, "source": "simeval-failure-routing_miss", "confidence": 0.0, "expected_was": "doctor", "actual_was": "status"}

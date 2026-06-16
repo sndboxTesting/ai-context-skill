@@ -1,0 +1,26 @@
+{
+  "session_id": "session-20260615-195428",
+  "total": 502,
+  "passed": 310,
+  "warned": 22,
+  "failed": 170,
+  "errors": 0,
+  "pass_rate_pct": 61.8,
+  "regex_hits": 156,
+  "llm_calls": 346,
+  "avg_latency_ms": 1756.9,
+  "p95_latency_ms": 2048.2,
+  "failure_cluster_summary": {
+    "routing_miss": 167,
+    "weak_result": 11,
+    "chat_routed_to_generate_image": 4,
+    "chat_routed_to_old_files": 3,
+    "chat_routed_to_memory_recall": 3,
+    "chat_routed_to_web_search": 1,
+    "chat_routed_to_disk_usage": 1,
+    "chat_routed_to_large_files": 1,
+    "chat_routed_to_image": 1
+  },
+  "unstable_families": 15,
+  "new_fixtures_generated": 15
+}

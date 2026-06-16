@@ -1,0 +1,108 @@
+{
+  "llm_call_count": 346,
+  "regex_call_count": 156,
+  "avg_latency_ms": 986.6,
+  "p95_latency_ms": 1227.2,
+  "slowest_20": [
+    {
+      "prompt": "explain the difference between Qdrant and Chroma",
+      "latency_ms": 1741.2,
+      "intent": "large_files"
+    },
+    {
+      "prompt": "i want to know more about how to set up a proper n8n webhook to trigger adwi com",
+      "latency_ms": 1677.6,
+      "intent": "chat"
+    },
+    {
+      "prompt": "explain the difference between ollama and openai api",
+      "latency_ms": 1582.7,
+      "intent": "generate_image"
+    },
+    {
+      "prompt": "how fast is llama3.1:8b",
+      "latency_ms": 1303.8,
+      "intent": "chat"
+    },
+    {
+      "prompt": "what's new in python 3.14",
+      "latency_ms": 1296.8,
+      "intent": "web_search"
+    },
+    {
+      "prompt": "PermissionError: [Errno 13] Permission denied",
+      "latency_ms": 1294.6,
+      "intent": "fix_error"
+    },
+    {
+      "prompt": "how do I reduce latency in my LLM setup",
+      "latency_ms": 1290.4,
+      "intent": "chat"
+    },
+    {
+      "prompt": "design a logo for my project",
+      "latency_ms": 1285.6,
+      "intent": "generate_image"
+    },
+    {
+      "prompt": "TimeoutError from ollama API call",
+      "latency_ms": 1269.4,
+      "intent": "fix_error"
+    },
+    {
+      "prompt": "what features do you have",
+      "latency_ms": 1266.5,
+      "intent": "capabilities"
+    },
+    {
+      "prompt": "show nightly report",
+      "latency_ms": 1264.6,
+      "intent": "status"
+    },
+    {
+      "prompt": "what are the tradeoffs of local vs cloud AI",
+      "latency_ms": 1261.4,
+      "intent": "chat"
+    },
+    {
+      "prompt": "find files created in the last week",
+      "latency_ms": 1245.9,
+      "intent": "old_files"
+    },
+    {
+      "prompt": "show top 20 files by size",
+      "latency_ms": 1243.3,
+      "intent": "disk_usage"
+    },
+    {
+      "prompt": "HTTP 500 from localhost:11434",
+      "latency_ms": 1239.5,
+      "intent": "status"
+    },
+    {
+      "prompt": "my obsidian vault has gotten really messy with hundreds of notes and i'm not sur",
+      "latency_ms": 1233.8,
+      "intent": "memory_recall"
+    },
+    {
+      "prompt": "what can i manage",
+      "latency_ms": 1229.0,
+      "intent": "capabilities"
+    },
+    {
+      "prompt": "what is a webhook and how does it work",
+      "latency_ms": 1227.2,
+      "intent": "chat"
+    },
+    {
+      "prompt": "i've been having issues with docker taking too long to start and i'm wondering i",
+      "latency_ms": 1226.9,
+      "intent": "chat"
+    },
+    {
+      "prompt": "getting 404 not found from ollama API",
+      "latency_ms": 1220.9,
+      "intent": "image"
+    }
+  ]
+}

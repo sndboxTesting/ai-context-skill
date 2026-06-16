@@ -1,0 +1,8 @@
+[
+  {
+    "issue": "15 paraphrase families with inconsistent routing",
+    "authority_limit": "Adding many fixtures at once could destabilize other intents",
+    "suggested_action": "Review regression_report.json and add one fixture family at a time",
+    "priority": "MEDIUM"
+  }
+]

@@ -1,0 +1,726 @@
+{
+  "total_families": 22,
+  "unstable_families": 15,
+  "issues": [
+    {
+      "family": "cleanup_basic",
+      "intents_seen": [
+        "organize",
+        "memory_recall",
+        "cleanup",
+        "disk_usage",
+        "large_files"
+      ],
+      "examples": [
+        {
+          "prompt": "what can I safely delete",
+          "intent": "cleanup"
+        },
+        {
+          "prompt": "help me clean up my drive",
+          "intent": "disk_usage"
+        },
+        {
+          "prompt": "suggest things I can remove",
+          "intent": "memory_recall"
+        },
+        {
+          "prompt": "what should I trash to free up space",
+          "intent": "disk_usage"
+        },
+        {
+          "prompt": "clean up my downloads folder",
+          "intent": "organize"
+        },
+        {
+          "prompt": "what's safe to delete from desktop",
+          "intent": "cleanup"
+        },
+        {
+          "prompt": "safe deletion candidates",
+          "intent": "large_files"
+        },
+        {
+          "prompt": "help me get rid of junk files",
+          "intent": "large_files"
+        }
+      ],
+      "consistency_rate": 0.25
+    },
+    {
+      "family": "fix_error_basic",
+      "intents_seen": [
+        "image",
+        "generate_image",
+        "old_files",
+        "disk_usage",
+        "chat",
+        "fix_error"
+      ],
+      "examples": [
+        {
+          "prompt": "fix this error: ModuleNotFoundError: No module named 'requests'",
+          "intent": "disk_usage"
+        },
+        {
+          "prompt": "AttributeError: 'NoneType' object has no attribute 'split' - fix this",
+          "intent": "chat"
+        },
+        {
+          "prompt": "TypeError: unsupported operand type(s) for +: 'int' and 'str'",
+          "intent": "old_files"
+        },
+        {
+          "prompt": "help me fix: ConnectionRefusedError: [Errno 111] Connection refused",
+          "intent": "fix_error"
+        },
+        {
+          "prompt": "RuntimeError: CUDA out of memory \u2014 how do I fix this",
+          "intent": "fix_error"
+        },
+        {
+          "prompt": "getting 404 not found from ollama API",
+          "intent": "image"
+        },
+        {
+          "prompt": "KeyError: 'result' in line 42",
+          "intent": "generate_image"
+        },
+        {
+          "prompt": "ImportError: cannot import name 'AsyncClient' from 'httpx'",
+          "intent": "disk_usage"
+        }
+      ],
+      "consistency_rate": 0.25
+    },
+    {
+      "family": "large_files_basic",
+      "intents_seen": [
+        "large_files",
+        "disk_usage"
+      ],
+      "examples": [
+        {
+          "prompt": "find large files on my system",
+          "intent": "large_files"
+        },
+        {
+          "prompt": "what are the biggest files",
+          "intent": "disk_usage"
+        },
+        {
+          "prompt": "show files bigger than 1GB",
+          "intent": "large_files"
+        },
+        {
+          "prompt": "find files over 500mb",
+          "intent": "large_files"
+        },
+        {
+          "prompt": "what's the heaviest stuff on disk",
+          "intent": "disk_usage"
+        },
+        {
+          "prompt": "which files are huge",
+          "intent": "large_files"
+        },
+        {
+          "prompt": "find my fattest files",
+          "intent": "large_files"
+        },
+        {
+          "prompt": "largest files in my home directory",
+          "intent": "disk_usage"
+        },
+        {
+          "prompt": "files using the most space",
+          "intent": "disk_usage"
+        },
+        {
+          "prompt": "top 10 biggest files",
+          "intent": "disk_usage"
+        }
+      ],
+      "consistency_rate": 0.5
+    },
+    {
+      "family": "git_status_basic",
+      "intents_seen": [
+        "git_status",
+        "chat",
+        "disk_usage",
+        "memory_recall"
+      ],
+      "examples": [
+        {
+          "prompt": "git status",
+          "intent": "git_status"
+        },
+        {
+          "prompt": "what changed in the repo",
+          "intent": "git_status"
+        },
+        {
+          "prompt": "show recent commits",
+          "intent": "chat"
+        },
+        {
+          "prompt": "what did I last commit",
+          "intent": "memory_recall"
+        },
+        {
+          "prompt": "git log",
+          "intent": "git_status"
+        },
+        {
+          "prompt": "show me my repos",
+          "intent": "git_status"
+        },
+        {
+          "prompt": "what's the current branch",
+          "intent": "chat"
+        },
+        {
+          "prompt": "are there uncommitted changes",
+          "intent": "disk_usage"
+        },
+        {
+          "prompt": "git diff",
+          "intent": "git_status"
+        },
+        {
+          "prompt": "show changes since last commit",
+          "intent": "chat"
+        }
+      ],
+      "consistency_rate": 0.5
+    },
+    {
+      "family": "model_status",
+      "intents_seen": [
+        "generate_image",
+        "disk_usage",
+        "status"
+      ],
+      "examples": [
+        {
+          "prompt": "what model am I using",
+          "intent": "disk_usage"
+        },
+        {
+          "prompt": "which model is active",
+          "intent": "generate_image"
+        },
+        {
+          "prompt": "show model status",
+          "intent": "status"
+        },
+        {
+          "prompt": "what models are available",
+          "intent": "disk_usage"
+        }
+      ],
+      "consistency_rate": 0.5
+    },
+    {
+      "family": "obsidian_basic",
+      "intents_seen": [
+        "rag_search",
+        "memory_recall"
+      ],
+      "examples": [
+        {
+          "prompt": "search my obsidian vault for AI notes",
+          "intent": "memory_recall"
+        },
+        {
+          "prompt": "look in my notes for tailscale setup",
+          "intent": "rag_search"
+        },
+        {
+          "prompt": "search vault for n8n",
+          "intent": "memory_recall"
+        },
+        {
+          "prompt": "find my notes on docker",
+          "intent": "rag_search"
+        }
+      ],
+      "consistency_rate": 0.5
+    },
+    {
+      "family": "rag_basic",
+      "intents_seen": [
+        "rag_search",
+        "memory_recall"
+      ],
+      "examples": [
+        {
+          "prompt": "search my notes for docker setup",
+          "intent": "rag_search"
+        },
+        {
+          "prompt": "look in my knowledge base for n8n webhooks",
+          "intent": "memory_recall"
+        },
+        {
+          "prompt": "what do I know about home assistant",
+          "intent": "memory_recall"
+        },
+        {
+          "prompt": "find in my notes: obsidian sync",
+          "intent": "rag_search"
+        },
+        {
+          "prompt": "search local knowledge: tailscale setup",
+          "intent": "rag_search"
+        },
+        {
+          "prompt": "from my notes, what did I write about backups",
+          "intent": "rag_search"
+        },
+        {
+          "prompt": "check my notes on qdrant collections",
+          "intent": "rag_search"
+        },
+        {
+          "prompt": "in my knowledge base what's there about adwi",
+          "intent": "memory_recall"
+        }
+      ],
+      "consistency_rate": 0.625
+    },
+    {
+      "family": "backup_basic",
+      "intents_seen": [
+        "sync",
+        "backup_now"
+      ],
+      "examples": [
+        {
+          "prompt": "backup now",
+          "intent": "backup_now"
+        },
+        {
+          "prompt": "push my changes to github",
+          "intent": "backup_now"
+        },
+        {
+          "prompt": "save my work to github",
+          "intent": "backup_now"
+        },
+        {
+          "prompt": "commit and push everything",
+          "intent": "sync"
+        }
+      ],
+      "consistency_rate": 0.75
+    },
+    {
+      "family": "web_search_basic",
+      "intents_seen": [
+        "chat",
+        "web_search"
+      ],
+      "examples": [
+        {
+          "prompt": "search the web for python best practices",
+          "intent": "web_search"
+        },
+        {
+          "prompt": "look up the latest Ollama release",
+          "intent": "web_search"
+        },
+        {
+          "prompt": "google what is docker compose",
+          "intent": "web_search"
+        },
+        {
+          "prompt": "find online resources about llm fine tuning",
+          "intent": "web_search"
+        },
+        {
+          "prompt": "what's new in python 3.14",
+          "intent": "web_search"
+        },
+        {
+          "prompt": "search internet for qdrant documentation",
+          "intent": "web_search"
+        },
+        {
+          "prompt": "latest news about open source AI",
+          "intent": "chat"
+        },
+        {
+          "prompt": "look online for n8n webhook examples",
+          "intent": "web_search"
+        },
+        {
+          "prompt": "find me the current version of llama",
+          "intent": "chat"
+        }
+      ],
+      "consistency_rate": 0.7777777777777778
+    },
+    {
+      "family": "organize_basic",
+      "intents_seen": [
+        "organize",
+        "disk_usage"
+      ],
+      "examples": [
+        {
+          "prompt": "help me organize my downloads folder",
+          "intent": "organize"
+        },
+        {
+          "prompt": "suggest a better structure for my files",
+          "intent": "organize"
+        },
+        {
+          "prompt": "how should I organize my desktop",
+          "intent": "organize"
+        },
+        {
+          "prompt": "tidy up my documents directory",
+          "intent": "organize"
+        },
+        {
+          "prompt": "reorganize my project folders",
+          "intent": "organize"
+        },
+        {
+          "prompt": "what's the best way to structure these files",
+          "intent": "disk_usage"
+        }
+      ],
+      "consistency_rate": 0.8333333333333334
+    },
+    {
+      "family": "self_heal_basic",
+      "intents_seen": [
+        "self_heal",
+        "status"
+      ],
+      "examples": [
+        {
+          "prompt": "something is broken fix it",
+          "intent": "self_heal"
+        },
+        {
+          "prompt": "adwi repair yourself",
+          "intent": "self_heal"
+        },
+        {
+          "prompt": "my setup is broken",
+          "intent": "self_heal"
+        },
+        {
+          "prompt": "ollama crashed fix it",
+          "intent": "self_heal"
+        },
+        {
+          "prompt": "docker is not working repair",
+          "intent": "status"
+        },
+        {
+          "prompt": "run self-heal",
+          "intent": "self_heal"
+        },
+        {
+          "prompt": "fix your setup",
+          "intent": "self_heal"
+        }
+      ],
+      "consistency_rate": 0.8571428571428571
+    },
+    {
+      "family": "memory_recall_basic",
+      "intents_seen": [
+        "chat",
+        "memory_recall"
+      ],
+      "examples": [
+        {
+          "prompt": "what do you remember about my setup",
+          "intent": "memory_recall"
+        },
+        {
+          "prompt": "do you know anything about my docker config",
+          "intent": "memory_recall"
+        },
+        {
+          "prompt": "what do you recall about my obsidian vault",
+          "intent": "memory_recall"
+        },
+        {
+          "prompt": "tell me what you know about my ai stack",
+          "intent": "memory_recall"
+        },
+        {
+          "prompt": "what context do you have about my system",
+          "intent": "chat"
+        },
+        {
+          "prompt": "do you remember how I set up qdrant",
+          "intent": "memory_recall"
+        },
+        {
+          "prompt": "what's in your memory about my projects",
+          "intent": "memory_recall"
+        },
+        {
+          "prompt": "recall what you know about my workflows",
+          "intent": "memory_recall"
+        },
+        {
+          "prompt": "what have you learned about my codebase",
+          "intent": "memory_recall"
+        }
+      ],
+      "consistency_rate": 0.8888888888888888
+    },
+    {
+      "family": "capabilities_explicit",
+      "intents_seen": [
+        "capabilities",
+        "generate_image"
+      ],
+      "examples": [
+        {
+          "prompt": "what can you do adwi",
+          "intent": "capabilities"
+        },
+        {
+          "prompt": "show me what adwi is capable of",
+          "intent": "capabilities"
+        },
+        {
+          "prompt": "what are your features",
+          "intent": "capabilities"
+        },
+        {
+          "prompt": "list all your commands",
+          "intent": "capabilities"
+        },
+        {
+          "prompt": "what commands does adwi support",
+          "intent": "capabilities"
+        },
+        {
+          "prompt": "show help",
+          "intent": "capabilities"
+        },
+        {
+          "prompt": "adwi capabilities",
+          "intent": "capabilities"
+        },
+        {
+          "prompt": "what can adwi do for me",
+          "intent": "capabilities"
+        },
+        {
+          "prompt": "show me the command list",
+          "intent": "generate_image"
+        },
+        {
+          "prompt": "what features do you have",
+          "intent": "capabilities"
+        }
+      ],
+      "consistency_rate": 0.9
+    },
+    {
+      "family": "gmail_basic",
+      "intents_seen": [
+        "status",
+        "gmail"
+      ],
+      "examples": [
+        {
+          "prompt": "check my email",
+          "intent": "gmail"
+        },
+        {
+          "prompt": "any new emails",
+          "intent": "gmail"
+        },
+        {
+          "prompt": "how many unread emails do i have",
+          "intent": "gmail"
+        },
+        {
+          "prompt": "show my inbox",
+          "intent": "gmail"
+        },
+        {
+          "prompt": "read my gmail",
+          "intent": "gmail"
+        },
+        {
+          "prompt": "open gmail",
+          "intent": "gmail"
+        },
+        {
+          "prompt": "fetch my latest emails",
+          "intent": "gmail"
+        },
+        {
+          "prompt": "what's in my inbox",
+          "intent": "gmail"
+        },
+        {
+          "prompt": "show me recent emails",
+          "intent": "gmail"
+        },
+        {
+          "prompt": "do i have any messages",
+          "intent": "gmail"
+        },
+        {
+          "prompt": "gmial check",
+          "intent": "gmail"
+        },
+        {
+          "prompt": "check emil",
+          "intent": "status"
+        },
+        {
+          "prompt": "email please",
+          "intent": "gmail"
+        },
+        {
+          "prompt": "show inbox summary",
+          "intent": "gmail"
+        }
+      ],
+      "consistency_rate": 0.9285714285714286
+    },
+    {
+      "family": "chat_advisory",
+      "intents_seen": [
+        "generate_image",
+        "chat"
+      ],
+      "examples": [
+        {
+          "prompt": "what's the best way to back up a mac",
+          "intent": "chat"
+        },
+        {
+          "prompt": "should I use docker or podman",
+          "intent": "chat"
+        },
+        {
+          "prompt": "what is the difference between qdrant and pinecone",
+          "intent": "chat"
+        },
+        {
+          "prompt": "recommend a good note-taking app",
+          "intent": "chat"
+        },
+        {
+          "prompt": "explain how vector databases work",
+          "intent": "chat"
+        },
+        {
+          "prompt": "what's a good way to learn python",
+          "intent": "chat"
+        },
+        {
+          "prompt": "should I use postgres or sqlite for this",
+          "intent": "chat"
+        },
+        {
+          "prompt": "how do I set up tailscale",
+          "intent": "chat"
+        },
+        {
+          "prompt": "what's the best obsidian theme",
+          "intent": "chat"
+        },
+        {
+          "prompt": "is n8n better than zapier",
+          "intent": "chat"
+        },
+        {
+          "prompt": "how does home assistant work",
+          "intent": "chat"
+        },
+        {
+          "prompt": "what is RAG and why is it useful",
+          "intent": "chat"
+        },
+        {
+          "prompt": "explain ollama vs lm studio",
+          "intent": "chat"
+        },
+        {
+          "prompt": "what subscription should I cancel to save money",
+          "intent": "chat"
+        },
+        {
+          "prompt": "give me advice on managing subscriptions",
+          "intent": "chat"
+        },
+        {
+          "prompt": "which streaming service is worth keeping",
+          "intent": "chat"
+        },
+        {
+          "prompt": "best alternative to notion",
+          "intent": "chat"
+        },
+        {
+          "prompt": "what are good alternatives to obsidian",
+          "intent": "chat"
+        },
+        {
+          "prompt": "i need productivity advice",
+          "intent": "chat"
+        },
+        {
+          "prompt": "how can I be more organized",
+          "intent": "chat"
+        },
+        {
+          "prompt": "tips for managing a homelab",
+          "intent": "chat"
+        },
+        {
+          "prompt": "what do you think about nextcloud",
+          "intent": "chat"
+        },
+        {
+          "prompt": "is claude better than chatgpt",
+          "intent": "chat"
+        },
+        {
+          "prompt": "explain the difference between ollama and openai api",
+          "intent": "generate_image"
+        },
+        {
+          "prompt": "what model should I use for coding tasks",
+          "intent": "chat"
+        },
+        {
+          "prompt": "compare llama3 vs gemma",
+          "intent": "chat"
+        },
+        {
+          "prompt": "what are the best local LLMs right now",
+          "intent": "chat"
+        },
+        {
+          "prompt": "should I upgrade from 32gb to 64gb ram",
+          "intent": "chat"
+        },
+        {
+          "prompt": "how do I use n8n for automation",
+          "intent": "chat"
+        }
+      ],
+      "consistency_rate": 0.9655172413793104
+    }
+  ]
+}

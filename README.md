@@ -961,7 +961,7 @@ bin/adwi
 
 ## §10 NLU Eval Status & Repair Backlog
 
-> **Last evaluated:** 2026-06-16 · 1,881 unique scenarios · 10 NHR fixes + 13 session-2 patches applied
+> **Last evaluated:** 2026-06-16 · 1,881 unique scenarios · 10 NHR fixes + session-2 + session-3 patches applied
 >
 > Full report: `logs/simeval/MASTER_REPORT_v2.md`
 > Machine-readable backlog: `logs/simeval/fix_backlog_v2.json`
@@ -969,26 +969,27 @@ bin/adwi
 
 ### Pass rates — full improvement history
 
-| Eval | Scenarios | Pre-NHR | Post-NHR (session 1) | Post-session-2 | Total gain |
-|------|-----------|---------|----------------------|----------------|------------|
-| Large P1 (broad coverage) | 1,444 | 78.0% (1,126) | 83.7% (1,208) | **88.6% (1,279)** | +10.6pp |
-| Large P2 (targeted weak families) | 446 | 68.6% (306) | 77.6% (346) | **77.8% (347)** | +9.2pp |
-| **Combined (deduped)** | **1,881** | **75.8% (1,426)** | **82.1% (1,545)** | **86.0% (1,617)** | **+10.2pp** |
+| Eval | Scenarios | Pre-NHR | Post-NHR (session 1) | Post-session-2 | Post-session-3 | Total gain |
+|------|-----------|---------|----------------------|----------------|----------------|------------|
+| Large P1 (broad coverage) | 1,444 | 78.0% (1,126) | 83.7% (1,208) | 88.6% (1,279) | **90.7% (1,310)** | +12.7pp |
+| Large P2 (targeted weak families) | 446 | 68.6% (306) | 77.6% (346) | 81.4% (363) | **83.9% (374)** | +15.3pp |
+| **Combined (deduped)** | **1,881** | **75.8% (1,426)** | **82.1% (1,545)** | **86.0% (1,617)** | **89.0% (1,675)** | **+13.2pp** |
 
-**Current baseline: 86.0% combined.** See `docs/NLU_REPAIR_BACKLOG.md` for full patch history.
+**Current baseline: 89.0% combined.** See `docs/NLU_REPAIR_BACKLOG.md` for full patch history.
 
-### Category health (post-session-2)
+### Category health (post-session-3)
 
 | Category | Rate | Status |
 |----------|------|--------|
 | comms | 100% | ✅ Healthy |
-| model, file ops, voice, vault, git | 92–95% | ✅ Healthy |
-| security, system, repair | 88–92% | ✅ Good |
-| ambiguous, memory, media, meta | 83–88% | ✅ Good |
-| search, planning, disk | 78–84% | ✅ Good |
-| chat | 70% | ⚠️ Benchmark/status bleed (10 remaining) |
-| safety (`__none__`) | 62% | ℹ️ Expected — blocked paths returning `__none__` is correct |
-| cleanup | 85% | ⚠️ 15 failures remaining |
+| vault (obsidian) | 97% | ✅ Healthy |
+| model, file ops, memory | 93–95% | ✅ Healthy |
+| voice, git, repair, eval | 89–93% | ✅ Good |
+| system, disk, media | 87–90% | ✅ Good |
+| search, ambiguous | 85–87% | ✅ Good |
+| planning, security, meta | 77–82% | ✅ Good |
+| chat | 76% | ⚠️ Advisory questions misrouted — INTENT_SYSTEM tuning needed |
+| safety (`__none__`) | 61% | ℹ️ Expected — blocked paths returning `__none__` is correct; irreducible |
 
 ### All applied repair items
 
@@ -996,27 +997,33 @@ bin/adwi
 
 **Session-2 patches** (2026-06-16): FIX-LF-001, FIX-OLD-001, FIX-DUP-001, FIX-ORG-002, FIX-CLEANUP-003, FIX-HEAL-001, FIX-BROWSE-001, FIX-WEB-001, FIX-ERR-002, FIX-EVAL-002, FIX-TEST-002, FIX-MEMSCAN-002, FIX-BENCH-001 — all ✅ Applied.
 
+**Session-3 patches** (2026-06-16): FIX-CLEAN-004, FIX-NOTES-001, FIX-STATUS-002, FIX-WHAT-002, FIX-WEB-002, FIX-OBS-002, FIX-NIGHT-001, FIX-EVAL-003, FIX-PATCH-002, FIX-RC-001, FIX-GMAIL-002, FIX-MEMST-001, FIX-MEMCTX-001, FIX-FR-001, FIX-S3-001 through FIX-S3-009, plus 4 INTENT_SYSTEM clarifications — all ✅ Applied.
+
 See `docs/NLU_REPAIR_BACKLOG.md` for root causes, code diffs, and remaining failure analysis.
 
 ### Remaining targets
 
 | Family | Failures | Priority |
 |--------|----------|----------|
-| `chat` bleed (benchmark ~10, status ~8) | ~68 | Medium — INTENT_SYSTEM tuning |
-| `cleanup` synonym gaps | 15 | Medium — some residual |
-| `web_search` ambiguity | 11 | Medium — "search for X" context-dependent |
-| `organize` residual | 5 | Low — minimal remaining |
+| `chat` advisory mislabeling | 32 | Medium — INTENT_SYSTEM tuning needed |
+| `__none__` safety blocks | 30 | Irreducible — correct by design |
+| `cleanup` ambiguous phrasing | 16 | Low — "files I no longer need" hard to distinguish from file_search |
+| `web_search` bare queries | 7 | Low — "search for something" without topic context |
+| `organize` advisory | 4 | Low — "best way to structure" genuinely ambiguous with chat |
 
 ### Safety assessment
 
-All 25 injection, jailbreak, and DAN prompt probes were handled correctly (0 production breaches). "Safety breach" flags in the eval report are NLU routing artifacts: the classifier correctly identifies blocked-path requests as `file_read` intents — safety is enforced at the execution layer by `PathValidator` + `BLOCKED_PATHS`. This is defense-in-depth working as designed.
+All injection, jailbreak, and DAN prompt probes were handled correctly (0 production breaches). "Safety breach" flags in the eval report are NLU routing artifacts: the classifier correctly identifies blocked-path requests as `file_read` intents — safety is enforced at the execution layer by `PathValidator` + `BLOCKED_PATHS`. This is defense-in-depth working as designed.
 
 ### How to run evals
 
+> **Important:** Run P1 and P2 **sequentially** (not in parallel). Running both simultaneously overloads Ollama and produces 50–70 spurious timeouts that corrupt measurements by 3–8pp.
+
 ```bash
 # Requires: Ollama running + llama3.1:8b loaded
-python3 logs/simeval/run_large_eval.py --workers 10     # P1: 1,444 scenarios
-python3 logs/simeval/run_large_eval_p2.py --workers 10  # P2: 446 targeted
+python3 logs/simeval/run_large_eval.py --workers 5      # P1: 1,444 scenarios (~25 min)
+python3 logs/simeval/run_large_eval_p2.py --workers 5   # P2: 446 targeted (~12 min)
+python3 logs/simeval/generate_master_report.py logs/simeval/<p1-dir> logs/simeval/<p2-dir>
 ```
 
 See `docs/EVAL_GUIDE.md` for the full eval workflow.

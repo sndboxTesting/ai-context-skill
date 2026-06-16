@@ -961,53 +961,63 @@ bin/adwi
 
 ## §10 NLU Eval Status & Repair Backlog
 
-> **Last evaluated:** 2026-06-15 · 1,881 unique scenarios · unattended 1-hour session
+> **Last evaluated:** 2026-06-16 · 1,881 unique scenarios · all 10 NHR fixes applied and verified
 >
 > Full report: `logs/simeval/MASTER_REPORT_v2.md`
 > Machine-readable backlog: `logs/simeval/fix_backlog_v2.json`
-> Living repair list (human-readable, with code proposals): `docs/NLU_REPAIR_BACKLOG.md`
+> Living repair list (human-readable, with results): `docs/NLU_REPAIR_BACKLOG.md`
 
-### Current pass rates
+### Pass rates — before and after NHR fixes
 
-| Eval | Scenarios | Pass | Rate |
-|------|-----------|------|------|
-| Baseline (Phase A-F session) | 502 | 379 | 75.5% |
-| Large P1 (broad coverage) | 1,444 | 1,126 | 78.0% |
-| Large P2 (targeted weak families) | 446 | 306 | 68.6% |
-| **Combined (deduped)** | **1,881** | **1,426** | **75.8%** |
-| Projected after 10 NHR fixes | — | ~1,558 | **~83.1%** |
+| Eval | Scenarios | Pre-NHR | Post-NHR | Gain |
+|------|-----------|---------|----------|------|
+| Large P1 (broad coverage) | 1,444 | 78.0% (1,126) | **83.7% (1,208)** | +5.7pp |
+| Large P2 (targeted weak families) | 446 | 68.6% (306) | **77.6% (346)** | +9.0pp |
+| **Combined (deduped)** | **1,881** | **75.8% (1,426)** | **82.1% (1,545)** | **+6.3pp** |
 
-### Category health (combined)
+### Category health (post-NHR)
 
 | Category | Rate | Status |
 |----------|------|--------|
-| comms, model, security, file ops, voice | 93–100% | ✅ Healthy |
-| ambiguous, git, system | 82–87% | ✅ Good |
-| search, memory, repair | 74–79% | ⚠️ Watch |
-| disk | 71% | ⚠️ file_search regex over-reach |
-| chat, media, vault | 59–62% | ❌ Needs work |
-| planning, eval | 39–46% | ❌ High priority |
+| comms | 100% | ✅ Healthy |
+| model, file ops, voice, vault, git | 92–95% | ✅ Healthy |
+| security, system, repair | 87–90% | ✅ Good |
+| ambiguous, memory, media, meta | 80–84% | ✅ Good |
+| search, planning, disk | 74–80% | ⚠️ Watch |
+| chat | 66% | ⚠️ Benchmark/status bleed |
+| safety (`__none__`) | 62% | ℹ️ Expected — blocked paths returning `__none__` is correct |
+| eval | 39% | ❌ High priority next |
 
-### Top 10 repair items (open)
+### NHR-001 through NHR-010 — all applied 2026-06-16
 
-| # | Item | Estimated gain |
-|---|------|---------------|
-| NHR-001 | `file_search` regex steals cleanup/duplicates/large_files | +35 passes |
-| NHR-003 | Add `patch_adwi` regex + INTENT_SYSTEM rule | +20 passes |
-| NHR-002 | Add `youtube` regex (currently 0% consistency) | +15 passes |
-| NHR-004 | Generic `self_heal` patterns (→ doctor misfire) | +14 passes |
-| NHR-005 | Disambiguate `obsidian_search` vs `memory_recall` | +13 passes |
-| NHR-006 | Add `daily_improve` regex | +12 passes |
-| NHR-007 | Expand `what_next` regex | +12 passes |
-| NHR-008 | Add `inspect_code` regex | +10 passes |
-| NHR-009 | Expand `memory_stats` regex | +6 passes |
-| NHR-010 | `backup_now` vs `git_status` disambiguation | +5 passes |
+| # | Item | Status | Applied |
+|---|------|--------|---------|
+| NHR-001 | `file_search` regex steals cleanup/duplicates/large_files | ✅ Applied | 2026-06-16 |
+| NHR-002 | Add `youtube` regex | ✅ Applied | 2026-06-16 |
+| NHR-003 | Add `patch_adwi` regex + INTENT_SYSTEM rule | ✅ Applied | 2026-06-16 |
+| NHR-004 | Generic `self_heal` patterns (→ doctor misfire) | ✅ Applied | 2026-06-16 |
+| NHR-005 | Disambiguate `obsidian_search` vs `memory_recall` | ✅ Applied | 2026-06-16 |
+| NHR-006 | Add `daily_improve` regex | ✅ Applied | 2026-06-16 |
+| NHR-007 | Expand `what_next` regex | ✅ Applied | 2026-06-16 |
+| NHR-008 | Add `inspect_code` regex | ✅ Applied | 2026-06-16 |
+| NHR-009 | Expand `memory_stats` regex | ✅ Applied | 2026-06-16 |
+| NHR-010 | `backup_now` vs `git_status` disambiguation | ✅ Applied | 2026-06-16 |
 
-See `docs/NLU_REPAIR_BACKLOG.md` for exact code-level fix proposals for each item.
+See `docs/NLU_REPAIR_BACKLOG.md` for root causes, code diffs, and remaining failure analysis.
+
+### Next targets (NHR-011+)
+
+| Family | Failures | Priority |
+|--------|----------|----------|
+| `chat` bleed (benchmark, status) | 76 | Medium — LLM-level, hard to regex-fix |
+| `cleanup` synonym gaps | 23 | High — more regex synonyms needed |
+| `organize` → `file_search`/`chat` | 14 | High — needs new intent or stronger anchor |
+| `eval` family (eval_adwi, routing, test_adwi) | 17 | High — overlapping surface area |
+| `fix_error` vs `status`/`patch_adwi` | 12 | Medium — traceback anchoring |
 
 ### Safety assessment
 
-All 24 injection, jailbreak, and DAN prompt attacks were handled correctly (0 production breaches). 24 "safety breach" flags in the eval report are NLU routing artifacts: the classifier correctly identifies blocked-path requests as `file_read` intents — safety is enforced at the execution layer by `PathValidator` + `BLOCKED_PATHS`. This is defense-in-depth working as designed.
+All 25 injection, jailbreak, and DAN prompt probes were handled correctly (0 production breaches). "Safety breach" flags in the eval report are NLU routing artifacts: the classifier correctly identifies blocked-path requests as `file_read` intents — safety is enforced at the execution layer by `PathValidator` + `BLOCKED_PATHS`. This is defense-in-depth working as designed.
 
 ### How to run evals
 

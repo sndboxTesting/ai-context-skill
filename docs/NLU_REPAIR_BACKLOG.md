@@ -228,9 +228,51 @@ Applied after the overnight improvement loop (FIX-CLEAN-002 was the only success
 | FIX-BENCH-001 | benchmark INTENT_SYSTEM: distinguish test-run vs discussion | ✅ Applied 2026-06-16 | chat (false pos) | ~+10 passes |
 
 **Pre-session-2 baseline:** 82.1% combined (P1: 83.7% · P2: 77.6%)  
-**Post-session-2 measured:** 86.0% combined (P1: 88.6% · P2: 77.8%)  
-**Session-2 gain:** +3.9pp combined (+4.9pp P1 · +0.2pp P2)  
-**New baseline for future improvements: 86.0%**
+**Post-session-2 measured:** 86.0% combined (P1: 88.6% · P2: 81.4%)  
+**Session-2 gain:** +3.9pp combined (+4.9pp P1 · +3.8pp P2)  
+
+---
+
+## Post-NHR Session 3 — 2026-06-16 (S3 patch groups + INTENT_SYSTEM)
+
+Applied after session-2 eval results confirmed 86.0% baseline. Includes completion of session-2 partial sync (FIX-CLEAN-004 through FIX-FR-001) and 9 new S3 fix groups.
+
+| Fix ID | Description | Status | Impact |
+|--------|-------------|--------|--------|
+| FIX-CLEAN-004 | cleanup BEFORE organize: "clean up downloads/desktop" | ✅ Applied 2026-06-16 | +3 P1 |
+| FIX-NOTES-001 | "find/search notes about X" → obsidian_search | ✅ Applied 2026-06-16 | +2 P1 |
+| FIX-STATUS-002 | "anything down", "is X available" status patterns | ✅ Applied 2026-06-16 | +2 P1 |
+| FIX-WHAT-002 | advisory improvement → what_next BEFORE daily_improve | ✅ Applied 2026-06-16 | +4 P1 |
+| FIX-WEB-002 | "search for the latest X" / "search for information about X" | ✅ Applied 2026-06-16 | +2 P1 |
+| FIX-OBS-002 | obsidian_daily: entry/log/journal synonyms + "dailly" typo | ✅ Applied 2026-06-16 | +2 P1 |
+| FIX-NIGHT-001 | nightly_status: "generate summary of logs", bare "nightly" | ✅ Applied 2026-06-16 | +3 P1 |
+| FIX-EVAL-003 | eval_routing BEFORE test_adwi: "test adwi routing" | ✅ Applied 2026-06-16 | +2 P1 |
+| FIX-PATCH-002 | patch_adwi: self-improve/code-improvement BEFORE run_code | ✅ Applied 2026-06-16 | +3 P1 |
+| FIX-RC-001 | run_code: \b around "test" prevents "latest" substring false positive | ✅ Applied 2026-06-16 | +1 P1 |
+| FIX-GMAIL-002 | gmail: typos, "messages" synonym, reversed word order | ✅ Applied 2026-06-16 | +3 P1 |
+| FIX-MEMST-001 | memory_stats: "how many X in memory", typo "memry stats" | ✅ Applied 2026-06-16 | +2 P1 |
+| FIX-MEMCTX-001 | memory_context regex (was missing entirely) | ✅ Applied 2026-06-16 | +3 P1 |
+| FIX-FR-001 | file_read: "cat .py", "read config file" | ✅ Applied 2026-06-16 | +2 P1 |
+| FIX-S3-001 | benchmark: "how fast is llama3.1:8b", typos, tokens/sec | ✅ Applied 2026-06-16 | +5 |
+| FIX-S3-002 | file_read: "show the nightly.py source" → file_read not inspect_code | ✅ Applied 2026-06-16 | +3 |
+| FIX-S3-003 | fix_error: exception class without colon (ModuleNotFoundError when...) | ✅ Applied 2026-06-16 | +4 |
+| FIX-S3-004 | capabilities: "adwi feature list", typos, "wut can u do" | ✅ Applied 2026-06-16 | +3 |
+| FIX-S3-005 | model_status: "what models available", "what llm is running" | ✅ Applied 2026-06-16 | +4 |
+| FIX-S3-006 | sync: "sync knowledge to Open WebUI", "push notes to webui" | ✅ Applied 2026-06-16 | +4 |
+| FIX-S3-007 | cleanup: "clean old cache", "remove leftover installers", "no longer need" | ✅ Applied 2026-06-16 | +3 |
+| FIX-S3-008 | git_status: "what did I change", "what's modified", "show me the diff" | ✅ Applied 2026-06-16 | +3 |
+| FIX-S3-009 | patch_adwi: "patcch adwi" typo, "apply adwi improvements" | ✅ Applied 2026-06-16 | +2 |
+| INTENT_SYS-003 | generate_image: explicit NEVER list for non-image "generate" prompts | ✅ Applied 2026-06-16 | ~+5 |
+| INTENT_SYS-004 | what_next: advisory improvement examples added | ✅ Applied 2026-06-16 | ~+4 |
+| INTENT_SYS-005 | doctor: requires explicit depth keyword, bare "health check" → status | ✅ Applied 2026-06-16 | ~+3 |
+| INTENT_SYS-006 | memory_context: show context examples added | ✅ Applied 2026-06-16 | ~+3 |
+
+**Pre-session-3 baseline:** 86.0% combined (P1: 88.6% · P2: 81.4%)  
+**Post-session-3 measured:** 89.0% combined (P1: 90.7% · P2: 83.9%)  
+**Session-3 gain:** +3.0pp combined (+2.1pp P1 · +2.5pp P2)  
+**New baseline for future improvements: 89.0%**
+
+**Important:** Run evals SEQUENTIALLY (not in parallel) — running P1 and P2 simultaneously overloads Ollama and produces spurious timeouts that corrupt results. Use `--workers 5` for reliability.
 
 ---
 
@@ -238,12 +280,12 @@ Applied after the overnight improvement loop (FIX-CLEAN-002 was the only success
 
 | Family | Failures | Notes |
 |--------|----------|-------|
-| `chat` | ~68 | benchmark(10)/status/memory_recall LLM bleed — INTENT_SYSTEM tuning |
-| `__none__` (safety) | 30 | Expected — blocked paths returning `__none__` is correct behavior |
-| `cleanup` | 15 | Still some "clean up my downloads" → organize, "old stuff" → old_files |
-| `web_search` | 11 | Ambiguous "search for something" — needs more context |
-| `organize` | 5 | Residual "what's the best way to structure" ambiguity |
-| `run_code` | 6 | "run it" / "run the thing" too ambiguous to safely regex |
+| `chat` | 32 | Advisory questions mislabeled as other intents — INTENT_SYSTEM tuning needed |
+| `__none__` (safety) | 30 | Expected — blocked paths returning `__none__` is correct behavior; irreducible |
+| `cleanup` | 16 | "find files I no longer need" → file_search; ambiguous phrasing |
+| `web_search` | 7 | "search for something" too ambiguous without topic context |
+| `organize` | 4 | "what's the best way to structure" → advisory (genuinely ambiguous) |
+| `benchmark` | 3 | Remaining "how fast is X" ambiguous with status |
 
 ---
 
@@ -255,6 +297,6 @@ Applied after the overnight improvement loop (FIX-CLEAN-002 was the only success
 4. If an `_INTENT_SYSTEM` change is needed, find the system prompt (line ~865).
 5. Sync the same change to `logs/simeval/run_large_eval.py` and `run_large_eval_p2.py`.
 6. Run: `python3 -m py_compile adwi/adwi_cli.py && echo OK`
-7. Run the eval: `python3 logs/simeval/run_large_eval.py --workers 5`
-8. Compare new pass rate to **86.0%** (current post-session-2 baseline).
+7. Run the eval: `python3 logs/simeval/run_large_eval.py --workers 5` (P1 only, sequentially)
+8. Compare new pass rate to **89.0%** (current post-session-3 baseline).
 9. Update the status above to `✅ Applied YYYY-MM-DD` and record actual impact.

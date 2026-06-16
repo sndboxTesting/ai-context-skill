@@ -5,7 +5,7 @@
     "count": 2,
     "evidence": [
       "find my heaviest files",
-      "find files I no longer need"
+      "find dupkicates"
     ],
     "root_cause": "`\\b(find|search for|locate|look for)\\b.{0,20}\\bfiles?\\b` matches 'find things to delete', 'find duplicate files', 'find large files'. The word 'files' appears in disk management prompts but should not trigger file_search.",
     "proposed_fix": "Add negative lookahead to file_search pattern: require file path context (extension, directory, 'in workspace', 'in /path') OR remove 'find' as standalone trigger. Alternative: add pre-guards for duplicate/cleanup intents BEFORE file_search in REGEX_INTENTS.",
@@ -35,19 +35,19 @@
   {
     "id": "FIX-006",
     "title": "benchmark regex too narrow \u2014 misses 'how fast is my model'",
-    "count": 13,
+    "count": 7,
     "evidence": [
       "how fast is adwi responding",
       "how fast is llama3.1:8b",
-      "bechmark model",
       "my local AI model is responding much slower than usual what could be causing this and how do i benchmark it",
-      "how fast is llama3.1 on this machine"
+      "how fast is llama3.1 on this machine",
+      "what's my inference speed"
     ],
     "root_cause": "Current benchmark regex requires 'adwi|model|local|ollama' in the same phrase as 'benchmark|speed test|how fast|tokens per second'. Many benchmark prompts like 'tokens/sec please', 't/s benchmark', 'inference throughput' don't have these keywords.",
     "proposed_fix": "Add: `(tokens?/s|t/s|tok/s|throughput).{0,20}(model|llm|ollama|adwi)?` \u2192 benchmark\nAnd: `(inference|llm|model|ollama).{0,20}(speed|throughput|latency|benchmark)` \u2192 benchmark\nAnd: `how fast.{0,20}(llm|model|is adwi|is ollama)` \u2192 benchmark",
     "affected_file": "adwi/adwi_cli.py \u2014 _REGEX_INTENTS",
     "effort": "low",
     "confidence": "high",
-    "impact": "~13 scenarios"
+    "impact": "~7 scenarios"
   }
 ]

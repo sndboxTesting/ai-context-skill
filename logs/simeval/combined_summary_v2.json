@@ -1,19 +1,19 @@
 {
   "sessions": [
-    "large-20260616-092744",
-    "large-p2-20260616-093748"
+    "large-20260616-100928",
+    "large-p2-20260616-102054"
   ],
-  "generated": "2026-06-16 09:44",
+  "generated": "2026-06-16 10:26",
   "total": 1881,
-  "passed": 1632,
-  "warned": 32,
-  "failed": 217,
-  "pass_rate_pct": 86.8,
-  "regex_hits": 937,
-  "regex_hit_pct": 49.8,
-  "llm_calls": 901,
-  "avg_latency_ms": 5531.0,
-  "p95_latency_ms": 19160.7,
+  "passed": 1675,
+  "warned": 33,
+  "failed": 173,
+  "pass_rate_pct": 89.0,
+  "regex_hits": 975,
+  "regex_hit_pct": 51.8,
+  "llm_calls": 906,
+  "avg_latency_ms": 2568.2,
+  "p95_latency_ms": 6050.9,
   "safety_probes": 66,
   "safety_breaches": 26,
   "top_misroutes": [
@@ -38,32 +38,12 @@
       "count": 7
     },
     {
-      "from": "fix_error",
-      "to": "__none__",
-      "count": 7
-    },
-    {
       "from": "benchmark",
-      "to": "__none__",
-      "count": 7
-    },
-    {
-      "from": "sync",
-      "to": "__none__",
+      "to": "chat",
       "count": 6
     },
     {
-      "from": "cleanup",
-      "to": "large_files",
-      "count": 5
-    },
-    {
       "from": "organize",
-      "to": "chat",
-      "count": 5
-    },
-    {
-      "from": "benchmark",
       "to": "chat",
       "count": 5
     },
@@ -73,6 +53,11 @@
       "count": 5
     },
     {
+      "from": "cleanup",
+      "to": "large_files",
+      "count": 4
+    },
+    {
       "from": "chat",
       "to": "obsidian_search",
       "count": 4
@@ -80,11 +65,6 @@
     {
       "from": "chat",
       "to": "what_next",
-      "count": 4
-    },
-    {
-      "from": "capabilities",
-      "to": "__none__",
       "count": 4
     },
     {
@@ -98,13 +78,13 @@
       "count": 3
     },
     {
-      "from": "file_read",
-      "to": "inspect_code",
+      "from": "web_search",
+      "to": "memory_recall",
       "count": 3
     },
     {
-      "from": "web_search",
-      "to": "memory_recall",
+      "from": "github_connected",
+      "to": "status",
       "count": 3
     },
     {
@@ -123,13 +103,13 @@
       "count": 3
     },
     {
-      "from": "trusted_roots",
-      "to": "__none__",
-      "count": 3
-    },
-    {
       "from": "cleanup",
       "to": "old_files",
+      "count": 2
+    },
+    {
+      "from": "what_next",
+      "to": "capabilities",
       "count": 2
     },
     {
@@ -143,74 +123,92 @@
       "count": 2
     },
     {
-      "from": "git_status",
-      "to": "memory_recall",
-      "count": 2
-    },
-    {
-      "from": "github_connected",
-      "to": "status",
-      "count": 2
-    },
-    {
-      "from": "patch_adwi",
-      "to": "what_next",
-      "count": 2
-    },
-    {
       "from": "nightly_run",
       "to": "nightly_status",
       "count": 2
     },
     {
-      "from": "web_search",
-      "to": "__none__",
+      "from": "chat",
+      "to": "fix_error",
       "count": 2
+    },
+    {
+      "from": "model_status",
+      "to": "chat",
+      "count": 2
+    },
+    {
+      "from": "chat",
+      "to": "old_files",
+      "count": 2
+    },
+    {
+      "from": "eval_adwi",
+      "to": "chat",
+      "count": 2
+    },
+    {
+      "from": "inspect_code",
+      "to": "generate_image",
+      "count": 2
+    },
+    {
+      "from": "voice_in",
+      "to": "chat",
+      "count": 2
+    },
+    {
+      "from": "disk_usage",
+      "to": "status",
+      "count": 1
+    },
+    {
+      "from": "large_files",
+      "to": "file_search",
+      "count": 1
     }
   ],
   "fail_by_intent": {
-    "chat": 53,
-    "__none__": 29,
-    "benchmark": 13,
-    "fix_error": 11,
-    "cleanup": 10,
-    "git_status": 7,
-    "sync": 7,
-    "web_search": 6,
-    "status": 6,
+    "chat": 51,
+    "__none__": 31,
+    "cleanup": 8,
+    "benchmark": 7,
     "organize": 5,
     "model_status": 5,
-    "file_read": 5,
-    "capabilities": 5,
-    "patch_adwi": 4,
-    "trusted_roots": 4,
+    "status": 5,
+    "web_search": 4,
     "browse": 3,
     "memory_recall": 3,
+    "git_status": 3,
     "github_connected": 3,
+    "fix_error": 3,
     "run_code": 3,
-    "implement_idea": 3,
     "extract_ideas": 3,
-    "large_files": 2,
+    "implement_idea": 3,
+    "what_next": 2,
+    "file_read": 2,
+    "patch_adwi": 2,
     "test_adwi": 2,
     "nightly_run": 2,
-    "obsidian_search": 2,
     "eval_adwi": 2,
     "inspect_code": 2,
     "voice_in": 2,
     "disk_usage": 1,
+    "large_files": 1,
     "file_list": 1,
     "file_search": 1,
     "memory_stats": 1,
     "backup_now": 1,
     "backup_status": 1,
+    "capabilities": 1,
     "duplicates": 1,
-    "old_files": 1,
-    "rag_search": 1,
     "use_local": 1,
     "doctor": 1,
     "memory_scan": 1,
     "tool_roadmap": 1,
+    "trusted_roots": 1,
     "generate_image": 1,
+    "sync": 1,
     "voice_out": 1
   },
   "fix_candidates": [
@@ -220,7 +218,7 @@
       "count": 2,
       "evidence": [
         "find my heaviest files",
-        "find files I no longer need"
+        "find dupkicates"
       ],
       "root_cause": "`\\b(find|search for|locate|look for)\\b.{0,20}\\bfiles?\\b` matches 'find things to delete', 'find duplicate files', 'find large files'. The word 'files' appears in disk management prompts but should not trigger file_search.",
       "proposed_fix": "Add negative lookahead to file_search pattern: require file path context (extension, directory, 'in workspace', 'in /path') OR remove 'find' as standalone trigger. Alternative: add pre-guards for duplicate/cleanup intents BEFORE file_search in REGEX_INTENTS.",
@@ -250,30 +248,23 @@
     {
       "id": "FIX-006",
       "title": "benchmark regex too narrow \u2014 misses 'how fast is my model'",
-      "count": 13,
+      "count": 7,
       "evidence": [
         "how fast is adwi responding",
         "how fast is llama3.1:8b",
-        "bechmark model",
         "my local AI model is responding much slower than usual what could be causing this and how do i benchmark it",
-        "how fast is llama3.1 on this machine"
+        "how fast is llama3.1 on this machine",
+        "what's my inference speed"
       ],
       "root_cause": "Current benchmark regex requires 'adwi|model|local|ollama' in the same phrase as 'benchmark|speed test|how fast|tokens per second'. Many benchmark prompts like 'tokens/sec please', 't/s benchmark', 'inference throughput' don't have these keywords.",
       "proposed_fix": "Add: `(tokens?/s|t/s|tok/s|throughput).{0,20}(model|llm|ollama|adwi)?` \u2192 benchmark\nAnd: `(inference|llm|model|ollama).{0,20}(speed|throughput|latency|benchmark)` \u2192 benchmark\nAnd: `how fast.{0,20}(llm|model|is adwi|is ollama)` \u2192 benchmark",
       "affected_file": "adwi/adwi_cli.py \u2014 _REGEX_INTENTS",
       "effort": "low",
       "confidence": "high",
-      "impact": "~13 scenarios"
+      "impact": "~7 scenarios"
     }
   ],
   "unstable_families": [
-    {
-      "family": "sync",
-      "total": 10,
-      "pass": 4,
-      "fail": 6,
-      "consistency_pct": 40.0
-    },
     {
       "family": "planning",
       "total": 14,
@@ -291,29 +282,22 @@
     {
       "family": "cleanup",
       "total": 40,
-      "pass": 23,
-      "fail": 9,
-      "consistency_pct": 57.5
+      "pass": 25,
+      "fail": 7,
+      "consistency_pct": 62.5
     },
     {
-      "family": "benchmark_deep",
+      "family": "gen_image_boundary",
       "total": 40,
-      "pass": 25,
-      "fail": 15,
-      "consistency_pct": 62.5
+      "pass": 29,
+      "fail": 11,
+      "consistency_pct": 72.5
     },
     {
       "family": "chat_boundary",
       "total": 60,
       "pass": 45,
       "fail": 15,
-      "consistency_pct": 75.0
-    },
-    {
-      "family": "gen_image_boundary",
-      "total": 40,
-      "pass": 30,
-      "fail": 10,
       "consistency_pct": 75.0
     },
     {
@@ -324,11 +308,11 @@
       "consistency_pct": 76.1
     },
     {
-      "family": "file_read",
-      "total": 21,
-      "pass": 16,
-      "fail": 5,
-      "consistency_pct": 76.2
+      "family": "benchmark_deep",
+      "total": 40,
+      "pass": 31,
+      "fail": 9,
+      "consistency_pct": 77.5
     },
     {
       "family": "model_status",
@@ -345,25 +329,11 @@
       "consistency_pct": 84.0
     },
     {
-      "family": "capabilities",
-      "total": 25,
-      "pass": 21,
-      "fail": 1,
-      "consistency_pct": 84.0
-    },
-    {
       "family": "web_search",
       "total": 44,
       "pass": 38,
       "fail": 1,
       "consistency_pct": 86.4
-    },
-    {
-      "family": "patch_adwi",
-      "total": 15,
-      "pass": 13,
-      "fail": 2,
-      "consistency_pct": 86.7
     },
     {
       "family": "voice_style",
@@ -387,10 +357,10 @@
       "consistency_pct": 88.0
     },
     {
-      "family": "git_status",
-      "total": 50,
-      "pass": 44,
-      "fail": 6,
+      "family": "capabilities",
+      "total": 25,
+      "pass": 22,
+      "fail": 1,
       "consistency_pct": 88.0
     },
     {

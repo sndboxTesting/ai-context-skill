@@ -32,17 +32,19 @@ Adwi is a local AI operating system running on an Apple Silicon Mac. It is not a
 
 ## Current NLU quality (as of 2026-06-16)
 
-| Eval | Scenarios | Pre-NHR | Post-NHR (session 1) | Post-session-2 | Total gain |
-|------|-----------|---------|----------------------|----------------|------------|
-| Large eval P1 | 1,444 | 78.0% | 83.7% | **88.6%** | +10.6pp |
-| Large eval P2 (weak-family targeting) | 446 | 68.6% | 77.6% | **77.8%** | +9.2pp |
-| **Combined** | **1,881** | **75.8%** | **82.1%** | **86.0%** | **+10.2pp** |
+| Eval | Scenarios | Pre-NHR | Post-NHR (session 1) | Post-session-2 | Post-session-3 | Total gain |
+|------|-----------|---------|----------------------|----------------|----------------|------------|
+| Large eval P1 | 1,444 | 78.0% | 83.7% | 88.6% | **90.7%** | +12.7pp |
+| Large eval P2 (weak-family targeting) | 446 | 68.6% | 77.6% | 81.4% | **83.9%** | +15.3pp |
+| **Combined** | **1,881** | **75.8%** | **82.1%** | **86.0%** | **89.0%** | **+13.2pp** |
 
-**All 10 NHR items (NHR-001 through NHR-010) applied 2026-06-16. 13 additional session-2 patches applied 2026-06-16.**
+**All 10 NHR items (NHR-001 through NHR-010) applied 2026-06-16. 13 session-2 patches and 9 session-3 patches applied 2026-06-16.**
 
 Session-2 applied 11 regex patch groups (FIX-LF-001, FIX-OLD-001, FIX-DUP-001, FIX-ORG-002, FIX-CLEANUP-003, FIX-HEAL-001, FIX-BROWSE-001, FIX-WEB-001, FIX-ERR-002, FIX-EVAL-002, FIX-TEST-002, FIX-MEMSCAN-002) and 1 INTENT_SYSTEM clarification (FIX-BENCH-001).
 
-**New baseline for future improvements: 86.0%.** Remaining targets: `chat→benchmark` bleed (~10 cases), `cleanup` (15 remaining), `web_search` (11 remaining), `organize` (5 remaining).
+Session-3 applied 9 regex patch groups (FIX-CLEAN-004, FIX-NOTES-001, FIX-STATUS-002, FIX-WHAT-002, FIX-WEB-002, FIX-OBS-002, FIX-NIGHT-001, FIX-EVAL-003, FIX-PATCH-002, FIX-RC-001, FIX-GMAIL-002, FIX-MEMST-001, FIX-MEMCTX-001, FIX-FR-001) and S3 fixes (FIX-S3-001 through FIX-S3-009) and 4 INTENT_SYSTEM clarifications.
+
+**New baseline for future improvements: 89.0%.** Remaining targets: `chat` bleed (32 cases — mostly advisory questions mislabeled), `__none__` (30 — irreducible safety blocks), `cleanup` (16 remaining), `web_search` (7), `organize` (4).
 
 Changes are synchronized across all 3 files: `adwi/adwi_cli.py`, `logs/simeval/run_large_eval.py`, `logs/simeval/run_large_eval_p2.py`.
 

@@ -6,6 +6,8 @@ Safe read/execute operations only — no destructive or financial actions.
 import json
 import os
 import subprocess
+import sys
+import tempfile
 import urllib.request
 import urllib.error
 from pathlib import Path
@@ -18,17 +20,62 @@ except ImportError:
 WORKSPACE = Path.home() / "SuneelWorkSpace"
 SAFE_API  = "http://127.0.0.1:5055"
 
+def _load_workspace_env():
+    env_path = WORKSPACE / "config" / ".env"
+    if not env_path.exists():
+        return
+    for raw in env_path.read_text(encoding="utf-8").splitlines():
+        line = raw.strip()
+        if not line or line.startswith("#") or "=" not in line:
+            continue
+        k, _, v = line.partition("=")
+        k = k.strip(); v = v.strip().strip('"').strip("'")
+        if k and v:
+            os.environ.setdefault(k, v)
+
+_load_workspace_env()
+SECRET = os.environ.get("ADWI_LOCAL_SECRET", "")
+
 mcp = FastMCP("adwi-sandbox")
+
+sys.path.insert(0, str(WORKSPACE / "adwi"))
+from path_validator import PathValidator as _PathValidator  # noqa: E402
+
+_home = Path.home()
+_PATH_VALIDATOR = _PathValidator(
+    allowed_roots=[WORKSPACE, _home / "Desktop", _home / "Documents", _home / "Downloads"],
+    blocked_roots=[
+        WORKSPACE / "secrets",
+        WORKSPACE / "config" / ".env",  # contains API keys — not safe to expose via MCP
+        _home / ".ssh",
+        _home / ".gnupg",
+        _home / ".aws",
+        _home / ".kube",
+        _home / ".config" / "gcloud",
+        _home / ".npmrc",
+        _home / ".netrc",
+        _home / "Library" / "Keychains",
+        _home / "Library" / "Passwords",
+        Path("/etc"),
+        Path("/private"),
+        Path("/System"),
+        Path("/usr/lib"),
+    ],
+)
 
 
 def _safe_api(route: str, body: dict | None = None) -> str:
     url = f"{SAFE_API}{route}"
     try:
+        headers = {}
+        if SECRET:
+            headers["X-Adwi-Secret"] = SECRET
         if body:
             data = json.dumps(body).encode()
-            req = urllib.request.Request(url, data=data, headers={"Content-Type": "application/json"})
+            headers["Content-Type"] = "application/json"
+            req = urllib.request.Request(url, data=data, headers=headers)
         else:
-            req = urllib.request.Request(url)
+            req = urllib.request.Request(url, headers=headers)
         with urllib.request.urlopen(req, timeout=35) as r:
             return r.read().decode()
     except urllib.error.URLError:
@@ -37,16 +84,43 @@ def _safe_api(route: str, body: dict | None = None) -> str:
 
 @mcp.tool()
 def run_python(code: str) -> str:
-    """Execute Python code in Adwi's safe sandbox (30s timeout, no network)."""
-    result = _safe_api("/run-python", {"code": code})
-    return result or "No output"
+    """Execute Python code in a temporary file (30s timeout). Returns stdout + stderr + exit code."""
+    tmp = None
+    try:
+        with tempfile.NamedTemporaryFile(suffix=".py", mode="w", delete=False, encoding="utf-8") as f:
+            f.write(code)
+            tmp = f.name
+        r = subprocess.run(
+            [sys.executable, tmp],
+            capture_output=True, text=True, timeout=30,
+            cwd=str(WORKSPACE),
+            env={**os.environ, "PATH": "/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin"},
+        )
+        parts = []
+        if r.stdout:
+            parts.append(r.stdout.rstrip())
+        if r.stderr:
+            parts.append(f"[stderr]\n{r.stderr.rstrip()}")
+        parts.append(f"[exit {r.returncode}]")
+        return "\n".join(parts)
+    except subprocess.TimeoutExpired:
+        return "Error: timed out after 30s"
+    except Exception as e:
+        return f"Error: {e}"
+    finally:
+        if tmp:
+            Path(tmp).unlink(missing_ok=True)
 
 
 @mcp.tool()
 def run_bash(command: str) -> str:
     """Execute an allowed bash command via Adwi's safe command allowlist."""
-    result = _safe_api("/run-bash", {"command": command})
-    return result or "No output"
+    return (
+        "run_bash is not currently implemented in this MCP sandbox. "
+        "The adwi CLI (/run-bash) provides shell execution with risk classification "
+        "and interactive safety gates that are not portable to the MCP context. "
+        "Use the adwi CLI directly, or use the git_status / read_file / list_files tools for read-only operations."
+    )
 
 
 @mcp.tool()
@@ -92,10 +166,9 @@ def read_file(path: str) -> str:
     p = Path(path)
     if not p.is_absolute():
         p = WORKSPACE / path
-    # Safety: block secrets and SSH keys
-    blocked = [".ssh", "secrets/", ".env", "token.json", ".pem", ".key"]
-    if any(b in str(p) for b in blocked):
-        return "Access denied: this path contains sensitive files"
+    ok, reason = _PATH_VALIDATOR.check(p)
+    if not ok:
+        return f"Access denied: {reason}"
     if not p.exists():
         return f"File not found: {p}"
     if p.stat().st_size > 500_000:
@@ -109,6 +182,9 @@ def list_files(directory: str = "", pattern: str = "*") -> str:
     p = Path(directory) if directory else WORKSPACE
     if not p.is_absolute():
         p = WORKSPACE / directory
+    ok, reason = _PATH_VALIDATOR.check(p)
+    if not ok:
+        return f"Access denied: {reason}"
     if not p.exists():
         return f"Directory not found: {p}"
     items = sorted(p.glob(pattern))[:100]
@@ -131,6 +207,11 @@ def adwi_status() -> str:
         try:
             urllib.request.urlopen(url, timeout=2)
             lines.append(f"  ✓ {name} — {url}")
+        except urllib.error.HTTPError as e:
+            if e.code == 401:
+                lines.append(f"  ✓ {name} — {url} (auth required)")
+            else:
+                lines.append(f"  ✗ {name} — HTTP {e.code}")
         except Exception:
             lines.append(f"  ✗ {name} — offline")
     return "\n".join(lines)

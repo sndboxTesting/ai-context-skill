@@ -164,7 +164,8 @@ REGEX_INTENTS = [
     (re.compile(r"\bfree up\b.{0,20}(space|storage|disk|drive)\b", re.I), "cleanup"),
     (re.compile(r"\b(prune|purge|wipe|clear)\b.{0,20}(files?|folder|cache|temp|log)\b", re.I), "cleanup"),
     # FIX-CLEANUP-003: deletion-suggestion / throw-away / clear-out patterns
-    (re.compile(r"\b(throw|toss)\s*away\b.{0,30}(files?|stuff|things?|data)?\b", re.I), "cleanup"),
+    # FIX-STRESS-004a: require explicit file/stuff target so "throw away the draft" → gmail_cancel_draft
+    (re.compile(r"\b(throw|toss)\s*away\b.{0,30}\b(files?|stuff|things?|data)\b", re.I), "cleanup"),
     (re.compile(r"\b(deletion|removal)\s+(suggestions?|candidates?|ideas?|list)\b", re.I), "cleanup"),
     (re.compile(r"\b(find|show|list)\b.{0,20}\b(deletable|removable|unneeded|unnecessary)\s+(files?|things?|stuff)\b", re.I), "cleanup"),
     (re.compile(r"\bwhat\b.{0,15}\b(to|can|should)\s+(throw|trash|nuke|discard)\b", re.I), "cleanup"),
@@ -218,6 +219,8 @@ REGEX_INTENTS = [
     (re.compile(r"\brun.{0,10}daily.{0,10}(improve|maintenance|self.?improve)\b", re.I), "daily_improve"),
     # gmail Phase 15 early guards — MUST precede web_search and git_status
     (re.compile(r"\bwhat\s+changed\b.{0,30}\b(?:reply|thread|email|message|conversation)\b", re.I), "gmail_thread_intel"),
+    # FIX-STAGE3-001: "open/read/show the latest message" → gmail_read, not thread_intel
+    (re.compile(r"\b(?:open|read|show)\b.{0,10}\blatest\s+(?:message|email|mail)\b", re.I), "gmail_read"),
     (re.compile(r"\blatest\s+(?:reply|message|delta)\b", re.I), "gmail_thread_intel"),
     (re.compile(r"\blatest\s+update\b.{0,30}\b(?:thread|email|conversation|message)\b", re.I), "gmail_thread_intel"),
     # gmail Phase 17 early guard — "save tasks to daily note" must precede obsidian_daily
@@ -340,11 +343,15 @@ REGEX_INTENTS = [
     # gmail Phase 8: remove-attachment intent — MUST precede gmail_attach_file
     (re.compile(r"\b(?:remove|detach|drop)\b.{0,30}\battachment\b", re.I), "gmail_remove_attachment"),
     (re.compile(r"\bdetach\b.{0,30}\b(?:the\s+)?(?:pdf|file|document|spreadsheet|image|invoice|report|deck)\b", re.I), "gmail_remove_attachment"),
-    (re.compile(r"\b(?:remove|drop|delete)\b.{0,30}\b(?:the\s+)?(?:pdf|file|document|spreadsheet|image|invoice|report|deck)\b.{0,20}\bfrom\s+(?:the\s+)?(?:draft|email|message)\b", re.I), "gmail_remove_attachment"),
+    # FIX-STRESS-009a: "remove the attached document"
+    (re.compile(r"\b(?:remove|detach)\b.{0,30}\battached\b.{0,30}\b(?:pdf|file|document|spreadsheet|image|invoice|report|deck)\b", re.I), "gmail_remove_attachment"),
+    # FIX-STRESS-009b: allow "from this/that email"
+    (re.compile(r"\b(?:remove|drop|delete)\b.{0,30}\b(?:the\s+)?(?:pdf|file|document|spreadsheet|image|invoice|report|deck)\b.{0,20}\bfrom\s+(?:(?:the|this|that)\s+)?(?:draft|email|message)\b", re.I), "gmail_remove_attachment"),
     (re.compile(r"\bdraft\b.{0,20}\b(?:without|no\s+attachment|remove\s+the)\b", re.I), "gmail_remove_attachment"),
     # gmail Phase 7: attach-file intent — MUST precede gmail_rewrite_draft
     (re.compile(r"\battach\b.{0,50}\b(?:pdf|document|file|spreadsheet|invoice|report|deck|image|photo|attachment)\b", re.I), "gmail_attach_file"),
-    (re.compile(r"\b(?:add|include)\b.{0,20}\b(?:the\s+)?(?:pdf|spreadsheet|invoice|report|deck|image|attachment)\b.{0,30}\b(?:(?:to|in)\s+(?:(?:this|the)\s+)?(?:draft|email|message|reply))\b", re.I), "gmail_attach_file"),
+    # FIX-STRESS-009c: added presentation|document|file
+    (re.compile(r"\b(?:add|include)\b.{0,20}\b(?:the\s+)?(?:pdf|spreadsheet|invoice|report|deck|image|attachment|presentation|document|file)\b.{0,30}\b(?:(?:to|in)\s+(?:(?:this|the)\s+)?(?:draft|email|message|reply))\b", re.I), "gmail_attach_file"),
     (re.compile(r"\battach\b.{0,30}\b(?:that|the|saved)\b.{0,20}\battachment\b", re.I), "gmail_attach_file"),
     # gmail Phase 14: subject update — MUST precede Phase 4 rewrite
     (re.compile(r"\b(?:rewrite|update|change|improve|fix)\b.{0,20}\bsubject\b", re.I), "gmail_update_subject"),
@@ -353,6 +360,9 @@ REGEX_INTENTS = [
     (re.compile(r"\bsubject\b.{0,25}\b(?:is|feels?|seems?|sounds?)\b.{0,20}\b(?:weak|vague|unclear|bad|poor|generic|long|boring)\b", re.I), "gmail_update_subject"),
     (re.compile(r"\bgive\s+me\b.{0,20}\b(?:a\s+)?(?:better|clearer|different|new|good)\b.{0,10}\bsubject\b", re.I), "gmail_update_subject"),
     # gmail Phase 4: rewrite intent — MUST precede Phase 3 patterns
+    # FIX-STRESS-005: "rewrite the draft" and "rewrite to be warmer"
+    (re.compile(r"\brewrite\b.{0,25}\b(?:it|the\s+draft|the\s+reply|this|the\s+email)\b", re.I), "gmail_rewrite_draft"),
+    (re.compile(r"\brewrite\b.{0,30}\bto\s+(?:be|sound)\b", re.I), "gmail_rewrite_draft"),
     (re.compile(r"\b(?:make|rewrite|revise|edit)\b.{0,20}\b(?:it|the\s+draft|the\s+reply|this|the\s+email)\b.{0,40}\b(?:shorter|longer|brief(?:er)?|concis(?:e|er)|professional(?:ly)?|formal(?:ly)?|casual(?:ly)?|warm(?:er|ly)?|friendli(?:er)?|direct(?:ly)?|clear(?:er)?|natural(?:ly)?|informal(?:ly)?|polite(?:ly)?|robotic|engaging)\b", re.I), "gmail_rewrite_draft"),
     (re.compile(r"\bturn\s+(?:this|it)\b.{0,30}\binto\b.{0,30}\b(?:shorter|brief|concise|professional|update|summary|formal|casual|polite|warm|friendly|direct|natural)\b", re.I), "gmail_rewrite_draft"),
     (re.compile(r"\bwrite\b.{0,10}(?:a|an)\s+(?:shorter|briefer|more\s+(?:concise|direct|professional|formal|casual|friendly|polite|natural|warm))\b.{0,20}\b(?:version|draft|email|message|reply)?\b", re.I), "gmail_rewrite_draft"),
@@ -370,11 +380,18 @@ REGEX_INTENTS = [
     # gmail Phase 6: attachment intents
     (re.compile(r"\b(?:summarize|tldr|what.s\s+in|whats\s+in)\b.{0,30}\b(?:the\s+)?(?:attached\s+)?(?:attachment|pdf|document|invoice|receipt|spreadsheet)\b", re.I), "gmail_summarize_attachment"),
     (re.compile(r"\bwhat(?:'s|\s+is)\b.{0,30}\b(?:in\s+)?(?:the\s+)?(?:attached|attachment)\b", re.I), "gmail_summarize_attachment"),
+    # FIX-STRESS-009d: "what does the attached document say"
+    (re.compile(r"\bwhat\b.{0,30}\b(?:attached|attachment)\b.{0,30}\b(?:document|pdf|file|spreadsheet|invoice)?\b.{0,15}\bsay\b", re.I), "gmail_summarize_attachment"),
     (re.compile(r"\b(?:save|download|open)\b.{0,30}\b(?:the\s+)?(?:attached\s+)?(?:attachment|pdf|document|invoice|receipt|image|spreadsheet)\b", re.I), "gmail_save_attachment"),
     (re.compile(r"\b(?:save|download)\b.{0,25}\b(?:that|this|first|second|third)\b.{0,20}\b(?:attachment|file|pdf|document)\b", re.I), "gmail_save_attachment"),
+    # FIX-STAGE3-002: "which draft has the PDF attached" → list_drafts, not list_attachments
+    (re.compile(r"\bwhich\s+draft\b", re.I), "gmail_list_drafts"),
     (re.compile(r"\b(?:show|list|view|see)\b.{0,25}\battachment", re.I), "gmail_list_attachments"),
     (re.compile(r"\battachment.{0,25}\b(?:on|in|for|from)\b", re.I), "gmail_list_attachments"),
     (re.compile(r"\bany\s+attachments?\b", re.I), "gmail_list_attachments"),
+    # FIX-STRESS-009e: "any files attached", "what attachments are there"
+    (re.compile(r"\bany\b.{0,20}\bfiles?\b.{0,15}\battach", re.I), "gmail_list_attachments"),
+    (re.compile(r"\bwhat\b.{0,30}\battachments?\b.{0,20}\bthere\b", re.I), "gmail_list_attachments"),
     (re.compile(r"\b(?:what|which)\b.{0,20}\b(?:file|attachment|pdf|document).{0,15}\battach", re.I), "gmail_list_attachments"),
     # gmail Phase 12: multi-draft management — MUST precede Phase 3 patterns
     (re.compile(r"\b(?:list|show)\b.{0,5}\b(?:my\s+|all\s+)?drafts\b", re.I), "gmail_list_drafts"),
@@ -396,10 +413,14 @@ REGEX_INTENTS = [
     (re.compile(r"\b(?:save|add|put|write|export)\b.{0,30}\b(?:tasks?|items?|checklist|action\s+items?|todos?)\b.{0,40}\b(?:to|in(?:to)?)\b.{0,20}\b(?:obsidian|daily\s+note|my\s+notes?|my\s+list)\b", re.I), "gmail_tasks_save"),
     (re.compile(r"\b(?:save|add|put|export)\b.{0,20}\b(?:those?|these?|them)\b.{0,20}\b(?:tasks?|items?|checklist|action\s+items?|todos?)\b", re.I), "gmail_tasks_save"),
     (re.compile(r"\b(?:save|export)\b.{0,20}\b(?:the\s+)?(?:extracted\s+)?(?:tasks?|checklist|action\s+items?)\b", re.I), "gmail_tasks_save"),
-    (re.compile(r"\bturn\b.{0,30}\b(?:this|the|it)\b.{0,20}\b(?:email|thread|message)\b.{0,20}\binto?\b.{0,20}\b(?:tasks?|todo|checklist|action\s+items?)\b", re.I), "gmail_extract_tasks"),
+    # FIX-STRESS-011: "turn it into tasks" — pronoun alone without explicit email noun
+    (re.compile(r"\b(?:turn|convert)\b.{0,20}\b(?:it|this|that)\b.{0,20}\b(?:into?|to)\b.{0,20}\b(?:tasks?|todos?|checklist|action\s+items?)\b", re.I), "gmail_extract_tasks"),
+    (re.compile(r"\b(?:turn|convert)\b.{0,30}\b(?:this|the|it)\b.{0,20}\b(?:email|thread|message)\b.{0,20}\b(?:into?|to)\b.{0,20}\b(?:tasks?|todo|checklist|action\s+items?)\b", re.I), "gmail_extract_tasks"),
     (re.compile(r"\bextract\b.{0,30}\b(?:action\s+items?|tasks?|deadlines?|decisions?|asks?|due\s+dates?)\b", re.I), "gmail_extract_tasks"),
+    (re.compile(r"\bextract\b.{0,30}\bdates?\b.{0,30}\b(?:from|in)\b.{0,20}\b(?:this|the)\b.{0,20}\b(?:email|thread|message)\b", re.I), "gmail_extract_tasks"),
     (re.compile(r"\bwhat\s+(?:deadlines?|due\s+dates?|dates?)\b.{0,30}\b(?:are\s+(?:in|mentioned)|(?:mentioned|are)\s+(?:here|in\s+(?:this|the)))\b", re.I), "gmail_extract_tasks"),
-    (re.compile(r"\b(?:make|create|build)\b.{0,25}\b(?:a\s+)?(?:follow.?up\s+checklist|task\s+list)\b", re.I), "gmail_extract_tasks"),
+    (re.compile(r"\b(?:make|create|build|write|generate)\b.{0,25}\b(?:a\s+)?(?:follow.?up\s+checklist|task\s+list|todo(?:\s+|-)list|to.?do\s+list)\b", re.I), "gmail_extract_tasks"),
+    (re.compile(r"\b(?:make|create|build|write|generate)\b.{0,30}\b(?:a\s+)?checklist\b.{0,50}\b(?:from|for|of)\b.{0,20}\b(?:this|the)\b.{0,20}\b(?:email|thread|message)\b", re.I), "gmail_extract_tasks"),
     (re.compile(r"\bsummarize\b.{0,30}\b(?:this|the)\b.{0,20}\b(?:email|thread)\b.{0,30}\bas\b.{0,20}\b(?:tasks?|todos?|action\s+items?|a?\s*checklist)\b", re.I), "gmail_extract_tasks"),
     (re.compile(r"\bwhat\s+follow.?ups?\s+(?:should|do)\s+I\b", re.I), "gmail_extract_tasks"),
     # gmail Phase 11: follow-up reminders — MUST precede Phase 10 patterns
@@ -420,22 +441,28 @@ REGEX_INTENTS = [
     (re.compile(r"\b(?:don.t\s+send|stop\s+sending|unschedule)\b.{0,30}\b(?:that|it|the\s+(?:email|draft|message))\b", re.I), "gmail_cancel_scheduled_send"),
     (re.compile(r"\b(?:show|list|view|what|any)\b.{0,20}\b(?:my\s+)?scheduled\b.{0,20}\b(?:emails?|sends?|messages?|drafts?)\b", re.I), "gmail_list_scheduled"),
     (re.compile(r"\bscheduled\s+(?:emails?|sends?|messages?|drafts?)\b", re.I), "gmail_list_scheduled"),
-    (re.compile(r"\bwhat.{0,20}\b(?:is|are)\b.{0,15}\bscheduled\b", re.I), "gmail_list_scheduled"),
+    (re.compile(r"\bwhat.{0,20}\b(?:is|are|\'s)\b.{0,15}\bscheduled\b", re.I), "gmail_list_scheduled"),
+    (re.compile(r"\bwhat.s\s+scheduled\b", re.I), "gmail_list_scheduled"),
     (re.compile(r"\b(?:schedule|delay\s+send|send\s+later)\b.{0,40}\b(?:draft|email|message|this|it)\b", re.I), "gmail_schedule_send"),
-    (re.compile(r"\b(?:schedule|delay\s+send|send\s+later)\b", re.I), "gmail_schedule_send"),
+    # FIX-STRESS-001: removed bare \bschedule\b to stop FP on "on schedule"
+    (re.compile(r"\b(?:delay\s+send|send\s+later)\b", re.I), "gmail_schedule_send"),
     (re.compile(r"\bsend\b.{0,30}\b(?:tomorrow|tonight|morning|afternoon|evening|monday|tuesday|wednesday|thursday|friday|saturday|sunday|next\s+week|in\s+\d+\s+(?:hours?|minutes?))\b", re.I), "gmail_schedule_send"),
     (re.compile(r"\bsend\b.{0,20}\b(?:this|it|the\s+(?:draft|email|message))\b.{0,30}\b(?:tomorrow|tonight|morning|afternoon|evening|monday|tuesday|wednesday|thursday|friday|saturday|sunday)\b", re.I), "gmail_schedule_send"),
     (re.compile(r"\bsend\b.{0,30}at\s+\d{1,2}(?::\d{2})?\s*(?:am|pm)\b", re.I), "gmail_schedule_send"),
     (re.compile(r"\bschedule\b.{0,30}\b(?:this|it|the\s+(?:draft|email|message))\b", re.I), "gmail_schedule_send"),
     # gmail Phase 3: draft/send intents — MUST precede Phase 2 mutation patterns
     (re.compile(r"^send\s+(?:it|the\s+draft|that|this)\s*$", re.I), "gmail_send_draft"),
-    (re.compile(r"^(?:go\s+ahead\s+and\s+)?send(?:\s+it|\s+the\s+draft|\s+now)\s*$", re.I), "gmail_send_draft"),
+    # FIX-STRESS-003: allow "go ahead and send" without suffix
+    (re.compile(r"^(?:go\s+ahead\s+and\s+)?send(?:\s+it|\s+the\s+draft|\s+now)?\s*$", re.I), "gmail_send_draft"),
     (re.compile(r"\bsend\b.{0,20}\b(?:the\s+)?draft\b", re.I), "gmail_send_draft"),
     (re.compile(r"\bsend\b.{0,15}\b(?:the\s+)?(?:reply|response)\b", re.I), "gmail_send_draft"),
-    (re.compile(r"\bsend\b.{0,20}\b(?:the\s+)?(?:email|mail|message)\b", re.I), "gmail_send_draft"),
+    # FIX-STAGE3-003: "send an email to X" is compose; only "send the email/message" is send_draft
+    (re.compile(r"\bsend\b.{0,20}\bthe\s+(?:email|mail|message)\b", re.I), "gmail_send_draft"),
     (re.compile(r"\b(?:looks?\s+good|lgtm|approved?|good\s+to\s+go)\b.{0,25}\bsend\b", re.I), "gmail_send_draft"),
     (re.compile(r"\b(?:cancel|discard|delete|clear|abort)\b.{0,20}\b(?:the\s+)?draft\b", re.I), "gmail_cancel_draft"),
     (re.compile(r"\b(?:forget|throw\s+away)\b.{0,20}\b(?:the\s+)?draft\b", re.I), "gmail_cancel_draft"),
+    # FIX-STRESS-004: "don\'t want the draft"
+    (re.compile(r"\bdon.t\s+want\b.{0,20}\b(?:the\s+)?draft\b", re.I), "gmail_cancel_draft"),
     (re.compile(r"\b(?:show|display|view|preview|read)\b.{0,20}\b(?:the\s+|my\s+)?draft\b", re.I), "gmail_show_draft"),
     (re.compile(r"\bwhat(?:\s+does)?.{0,20}(?:the\s+)?draft\b", re.I), "gmail_show_draft"),
     # gmail Phase 16: filter/rule builder — MUST precede Phase 3
@@ -461,11 +488,16 @@ REGEX_INTENTS = [
     (re.compile(r"\bsummarize\b.{0,20}\blatest\b.{0,20}\b(?:reply|message|part|update)\b", re.I), "gmail_thread_intel"),
     (re.compile(r"\b(?:forward|fwd)\b.{0,25}\bto\b", re.I), "gmail_forward"),
     (re.compile(r"\b(?:forward|fwd)\b.{0,20}\b(?:this|it|the\s+(?:email|thread|message))\b", re.I), "gmail_forward"),
-    (re.compile(r"\bdraft\b.{0,20}\b(?:a\s+)?reply\b", re.I), "gmail_draft_reply"),
-    (re.compile(r"\breply\b.{0,30}\b(?:saying|that|with|to\s+(?:it|this|that|the\s+email|the\s+thread))\b", re.I), "gmail_draft_reply"),
+    # FIX-STRESS-002: extended for "draft a response", "write a reply", "reply to the latest"
+    (re.compile(r"\bdraft\b.{0,20}\b(?:a\s+)?(?:reply|response)\b", re.I), "gmail_draft_reply"),
+    (re.compile(r"\b(?:write|compose)\b.{0,15}\ba?\s*(?:reply|response)\b", re.I), "gmail_draft_reply"),
+    (re.compile(r"\breply\b.{0,30}\b(?:saying|that|with|to\s+(?:it|this|that|the\s+email|the\s+thread|the\s+latest))\b", re.I), "gmail_draft_reply"),
+    (re.compile(r"\breply\b.{0,30}\bto\s+(?:the\s+)?(?:latest|last|current)\b", re.I), "gmail_draft_reply"),
     (re.compile(r"\b(?:respond|write\s+back)\b.{0,30}\b(?:saying|that|to\s+(?:it|this|that))\b", re.I), "gmail_draft_reply"),
     (re.compile(r"\b(?:compose|write)\b.{0,20}\b(?:an?\s+)?(?:new\s+)?(?:email|mail|message)\b", re.I), "gmail_compose"),
     (re.compile(r"\bemail\b.{0,40}\b(?:saying|to\s+say|to\s+tell|that)\b", re.I), "gmail_compose"),
+    # FIX-STAGE3-003b: "send an email to X" is compose (send_draft requires "the" after FIX-STAGE3-003)
+    (re.compile(r"\bsend\b.{0,15}\ban?\s+(?:email|mail|message)\b", re.I), "gmail_compose"),
     # gmail Phase 2: mutation intents — MUST precede gmail_open / gmail_list_category
     (re.compile(r"^confirm\s*$", re.I), "gmail_confirm"),
     (re.compile(r"^yes,?\s+do\s+it\s*$", re.I), "gmail_confirm"),
@@ -477,16 +509,22 @@ REGEX_INTENTS = [
     (re.compile(r"^cancel(?:\s+that)?\s*$", re.I), "gmail_cancel"),
     (re.compile(r"^(?:never\s+mind|abort|stop\s+that)\s*$", re.I), "gmail_cancel"),
     (re.compile(r"\bmark\b.{0,35}\b(?:as\s+)?read\b", re.I), "gmail_mark_read"),
-    (re.compile(r"\bmark\b.{0,35}\b(?:as\s+)?unread\b", re.I), "gmail_mark_unread"),
+    # FIX-STRESS-007: added "flag" as synonym for "mark" in unread
+    (re.compile(r"\b(?:mark|flag)\b.{0,35}\b(?:as\s+)?unread\b", re.I), "gmail_mark_unread"),
     (re.compile(r"\b(?:archive|move\s+to\s+archive)\b.{0,40}\b(?:emails?|mail|messages?|them|those|these|that|it|all|promos?|promotional|promotions?|newsletters?|social|updates?|forums?|spam)\b", re.I), "gmail_archive"),
     (re.compile(r"\barchive\b.{0,20}\b(?:from|about|older\s+than)\b", re.I), "gmail_archive"),
+    # FIX-STRESS-006: "move [X] to archive"
+    (re.compile(r"\bmove\b.{0,30}\bto\s+archive\b", re.I), "gmail_archive"),
     (re.compile(r"\b(?:trash|move\s+to\s+trash)\b.{0,40}\b(?:emails?|mail|messages?|them|those|these|that|it|all|promos?|promotional|promotions?|newsletters?|social|updates?|forums?|spam)\b", re.I), "gmail_trash"),
     (re.compile(r"\btrash\b.{0,20}\b(?:from|about|older\s+than)\b", re.I), "gmail_trash"),
     (re.compile(r"\bdelete\b.{0,30}\b(?:emails?|mail|messages?|them|those|these|that|promos?|spam)\b", re.I), "gmail_trash"),
+    # FIX-STRESS-006: "move [X] to trash"
+    (re.compile(r"\bmove\b.{0,30}\bto\s+trash\b", re.I), "gmail_trash"),
     # gmail_triage — MUST precede gmail_open
     (re.compile(r"\b(?:what|which)\b.{0,20}\b(?:needs?|need\s+my)\b.{0,20}\breply\b", re.I), "gmail_triage"),
     (re.compile(r"\bwhat\s+(?:should|do)\s+I\s+(?:answer|respond|reply)\b", re.I), "gmail_triage"),
-    (re.compile(r"\b(?:which|what)\b.{0,15}\bemails?\b.{0,20}\b(?:urg(?:ent|ently)|important|need\s+attention)\b", re.I), "gmail_triage"),
+    # FIX-STRESS-008: extended to include "need action"
+    (re.compile(r"\b(?:which|what)\b.{0,15}\bemails?\b.{0,20}\b(?:urg(?:ent|ently)|important|need\s+(?:attention|action))\b", re.I), "gmail_triage"),
     (re.compile(r"\btriage\b.{0,20}\b(?:my\s+)?(?:inbox|email|mail)\b", re.I), "gmail_triage"),
     (re.compile(r"\b(?:inbox\s+triage|email\s+triage)\b", re.I), "gmail_triage"),
     (re.compile(r"\bwhat\b.{0,20}\b(?:needs?\s+(?:my\s+)?attention|action[-\s]?(?:needed|required|items?))\b", re.I), "gmail_triage"),
@@ -504,6 +542,7 @@ REGEX_INTENTS = [
     (re.compile(r"\b(show|open|read|get|view)\b.{0,20}\b(thread|conversation|email\s+chain|message\s+chain)\b", re.I), "gmail_thread"),
     (re.compile(r"\bthread\b.{0,20}\b(about|from|with|on)\b", re.I), "gmail_thread"),
     # gmail_summarize
+    (re.compile(r"^(?:tldr|tl;dr|tl\.dr)\s*$", re.I), "gmail_summarize"),
     (re.compile(r"\b(summarize|tldr|tl;dr|tl\.dr|give\s+me\s+a\s+summary)\b.{0,30}\b(this|that|the|an?)?\b.{0,10}\b(email|mail|message|thread|conversation)\b", re.I), "gmail_summarize"),
     (re.compile(r"\b(summarize|tldr)\s+(that|this|it|the\s+thread)\b", re.I), "gmail_summarize"),
     # gmail_list_category
@@ -519,7 +558,11 @@ REGEX_INTENTS = [
     (re.compile(r"\b(do\s+i\s+have\s+any|any\s+(new|unread)?\s*)(emails?|messages?|mail)\b", re.I), "gmail"),
     (re.compile(r"\binbox\b.{0,15}\b(check|status|new|unread|count|messages?)\b", re.I), "gmail"),
     (re.compile(r"\b(gm[i]?al|emial)\b", re.I), "gmail"),
-    (re.compile(r"(check|show|read|open|get|fetch|look at).{0,20}(my )?(email|gmail|inbox|mail|emial|emil)\b", re.I), "gmail"),
+    # FIX-STRESS-009: extended inbox listing variants
+    (re.compile(r"\bwhat.{0,10}in\s+(?:my\s+)?inbox\b", re.I), "gmail"),
+    (re.compile(r"(check|show|read|open|get|fetch|look\s+at|list).{0,20}(my )?(email|gmail|inbox|mail|messages?|emial|emil)\b", re.I), "gmail"),
+    (re.compile(r"\bhow\s+many\b.{0,20}\b(?:unread|emails?|messages?)\b", re.I), "gmail"),
+    (re.compile(r"\bshow\b.{0,15}\bme\b.{0,10}\bunread\b", re.I), "gmail"),
     (re.compile(r"(any (new|unread) )?emails?\b", re.I), "gmail"),
     (re.compile(r"gmail\b", re.I), "gmail"),
     (re.compile(r"(scan|index|update|build).{0,20}(my )?(memory|memories|ledger|context)", re.I), "memory_scan"),

@@ -40,6 +40,7 @@ ALL_INTENTS = [
     "gmail_list_attachments","gmail_save_attachment","gmail_summarize_attachment",
     "gmail_attach_file", "gmail_remove_attachment", "gmail_undo",
     "gmail_triage",
+    "gmail_schedule_send", "gmail_list_scheduled", "gmail_cancel_scheduled_send",
     "sync",
     "nightly_status","nightly_run",
     "fix_error","patch_adwi","inspect_code","test_adwi","eval_routing","eval_adwi",
@@ -381,6 +382,18 @@ REGEX_INTENTS = [
     (re.compile(r"\battachment.{0,25}\b(?:on|in|for|from)\b", re.I), "gmail_list_attachments"),
     (re.compile(r"\bany\s+attachments?\b", re.I), "gmail_list_attachments"),
     (re.compile(r"\b(?:what|which)\b.{0,20}\b(?:file|attachment|pdf|document).{0,15}\battach", re.I), "gmail_list_attachments"),
+    # gmail Phase 10: scheduled send — MUST precede gmail_send_draft
+    (re.compile(r"\b(?:schedule|delay\s+send|send\s+later)\b.{0,40}\b(?:draft|email|message|this|it)\b", re.I), "gmail_schedule_send"),
+    (re.compile(r"\b(?:schedule|delay\s+send|send\s+later)\b", re.I), "gmail_schedule_send"),
+    (re.compile(r"\bsend\b.{0,30}\b(?:tomorrow|tonight|morning|afternoon|evening|monday|tuesday|wednesday|thursday|friday|saturday|sunday|next\s+week|in\s+\d+\s+(?:hour|minute))\b", re.I), "gmail_schedule_send"),
+    (re.compile(r"\bsend\b.{0,20}\b(?:this|it|the\s+(?:draft|email|message))\b.{0,30}\b(?:tomorrow|tonight|morning|afternoon|evening|monday|tuesday|wednesday|thursday|friday|saturday|sunday|at\s+\d)\b", re.I), "gmail_schedule_send"),
+    (re.compile(r"\bschedule\b.{0,30}\b(?:this|it|the\s+(?:draft|email|message))\b", re.I), "gmail_schedule_send"),
+    (re.compile(r"\b(?:show|list|view|what|any)\b.{0,20}\b(?:my\s+)?scheduled\b.{0,20}\b(?:emails?|sends?|messages?|drafts?)\b", re.I), "gmail_list_scheduled"),
+    (re.compile(r"\bscheduled\s+(?:emails?|sends?|messages?|drafts?)\b", re.I), "gmail_list_scheduled"),
+    (re.compile(r"\bwhat.{0,20}\b(?:is|are)\b.{0,15}\bscheduled\b", re.I), "gmail_list_scheduled"),
+    (re.compile(r"\bcancel\b.{0,30}\bscheduled\b.{0,20}\b(?:send|email|message|draft)?\b", re.I), "gmail_cancel_scheduled_send"),
+    (re.compile(r"\b(?:don.t\s+send|stop\s+sending|unschedule)\b.{0,30}\b(?:that|it|the\s+(?:email|draft|message))\b", re.I), "gmail_cancel_scheduled_send"),
+    (re.compile(r"\bcancel\b.{0,20}\bthe\s+scheduled\b", re.I), "gmail_cancel_scheduled_send"),
     # gmail Phase 3: draft/send intents — MUST precede Phase 2 mutation patterns
     (re.compile(r"^send\s+(?:it|the\s+draft|that|this)\s*$", re.I), "gmail_send_draft"),
     (re.compile(r"^(?:go\s+ahead\s+and\s+)?send(?:\s+it|\s+the\s+draft|\s+now)\s*$", re.I), "gmail_send_draft"),
@@ -1174,6 +1187,28 @@ def build_corpus() -> list[dict]:
         "which threads am I waiting on","emails waiting on me",
     ]:
         add(p, "comms", "gmail_triage", "medium", fam="gmail_triage")
+
+    # ─────────────────────────────────────────────────────────────────────────
+    # GMAIL PHASE 10 — scheduled send (18 scenarios)
+    # ─────────────────────────────────────────────────────────────────────────
+    for p in [
+        "send this tomorrow morning","schedule for Monday at 9",
+        "send at 3 PM","send this at 3pm","send the draft tomorrow afternoon",
+        "schedule it for Friday at 8","send in 2 hours","delay send until tomorrow",
+        "schedule the email for next week","send this tomorrow",
+        "send the reply on Monday","schedule this for tonight",
+    ]:
+        add(p, "comms", "gmail_schedule_send", "medium", fam="gmail_schedule_send")
+
+    for p in [
+        "show scheduled emails","list scheduled sends","what emails are scheduled",
+    ]:
+        add(p, "comms", "gmail_list_scheduled", "easy", fam="gmail_list_scheduled")
+
+    for p in [
+        "cancel the scheduled send","cancel scheduled email","unschedule that",
+    ]:
+        add(p, "comms", "gmail_cancel_scheduled_send", "medium", fam="gmail_cancel_scheduled_send")
 
     # ─────────────────────────────────────────────────────────────────────────
     # WEB SEARCH  (45 scenarios)

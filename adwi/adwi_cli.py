@@ -15,7 +15,7 @@ import subprocess
 import sys
 import urllib.error
 import urllib.request
-from datetime import datetime
+from datetime import datetime, timedelta
 from pathlib import Path
 
 # Inject adwi venv so instructor/markitdown/faster-whisper are available
@@ -110,6 +110,10 @@ MODEL_VISION  = "minicpm-v:latest"     # 5.5GB — local vision
 MODEL_EMBED   = "nomic-embed-text"     # embeddings
 CLOUD_DEFAULT = "models/gemini-2.5-flash"
 MODEL_NLU_FALLBACK = "qwen3:0.6b"     # ultra-fast fallback if llama3.1:8b is cold
+
+# ── Session conversation history (multi-turn context for ask_adwi) ────────────
+_SESSION_HISTORY: list = []        # list of {role, content} for prior chat turns
+_SESSION_MAX_TURNS: int = 20       # max turns to keep (1 turn = 1 user + 1 assistant msg)
 
 # Paths that are NEVER readable even with full-home access
 HARD_BLOCKED = [
@@ -835,6 +839,22 @@ _REGEX_INTENTS = [
     (re.compile(r"\bany\s+attachments?\b", re.I), "gmail_list_attachments"),
     (re.compile(r"\b(?:what|which)\b.{0,20}\b(?:file|attachment|pdf|document).{0,15}\battach", re.I), "gmail_list_attachments"),
 
+    # ── Gmail Phase 10: scheduled send — MUST precede gmail_send_draft ────────────────────
+    # Requires temporal indicator: tomorrow/Monday/at/schedule/delay/later
+    (re.compile(r"\b(?:schedule|delay\s+send|send\s+later)\b.{0,40}\b(?:draft|email|message|this|it)\b", re.I), "gmail_schedule_send"),
+    (re.compile(r"\b(?:schedule|delay\s+send|send\s+later)\b", re.I), "gmail_schedule_send"),
+    (re.compile(r"\bsend\b.{0,30}\b(?:tomorrow|tonight|morning|afternoon|evening|monday|tuesday|wednesday|thursday|friday|saturday|sunday|next\s+week|in\s+\d+\s+(?:hour|minute))\b", re.I), "gmail_schedule_send"),
+    (re.compile(r"\bsend\b.{0,20}\b(?:this|it|the\s+(?:draft|email|message))\b.{0,30}\b(?:tomorrow|tonight|morning|afternoon|evening|monday|tuesday|wednesday|thursday|friday|saturday|sunday|at\s+\d)\b", re.I), "gmail_schedule_send"),
+    (re.compile(r"\bschedule\b.{0,30}\b(?:this|it|the\s+(?:draft|email|message))\b", re.I), "gmail_schedule_send"),
+    # gmail_list_scheduled — show pending scheduled emails
+    (re.compile(r"\b(?:show|list|view|what|any)\b.{0,20}\b(?:my\s+)?scheduled\b.{0,20}\b(?:emails?|sends?|messages?|drafts?)\b", re.I), "gmail_list_scheduled"),
+    (re.compile(r"\bscheduled\s+(?:emails?|sends?|messages?|drafts?)\b", re.I), "gmail_list_scheduled"),
+    (re.compile(r"\bwhat.{0,20}\b(?:is|are)\b.{0,15}\bscheduled\b", re.I), "gmail_list_scheduled"),
+    # gmail_cancel_scheduled_send — cancel a pending scheduled send
+    (re.compile(r"\bcancel\b.{0,30}\bscheduled\b.{0,20}\b(?:send|email|message|draft)?\b", re.I), "gmail_cancel_scheduled_send"),
+    (re.compile(r"\b(?:don.t\s+send|stop\s+sending|unschedule)\b.{0,30}\b(?:that|it|the\s+(?:email|draft|message))\b", re.I), "gmail_cancel_scheduled_send"),
+    (re.compile(r"\bcancel\b.{0,20}\bthe\s+scheduled\b", re.I), "gmail_cancel_scheduled_send"),
+
     # ── Gmail Phase 3: draft / send intents — MUST precede Phase 2 mutation patterns ──────
     # gmail_send_draft — anchored bare forms; also "send the draft" (requires "draft" word)
     (re.compile(r"^send\s+(?:it|the\s+draft|that|this)\s*$", re.I), "gmail_send_draft"),
@@ -1142,6 +1162,7 @@ _ALL_INTENTS = [
     "gmail_list_attachments", "gmail_save_attachment", "gmail_summarize_attachment",
     "gmail_attach_file", "gmail_remove_attachment",
     "gmail_triage",
+    "gmail_schedule_send", "gmail_list_scheduled", "gmail_cancel_scheduled_send",
     # n8n / automation
     "sync",
     # Nightly
@@ -1259,6 +1280,16 @@ _INTENT_SYSTEM = (
     "                      'emails waiting on me'. ALWAYS read-only — no mutations.\n"
     "                      Populates candidates for follow-up open/reply/archive after triage.\n"
     "                      NEVER use gmail_archive/gmail_trash for triage requests.\n"
+    "   'gmail_schedule_send': schedule the current draft for future delivery — REQUIRES explicit time phrase.\n"
+    "                      'send this tomorrow morning', 'schedule for Monday at 9', 'send at 3 PM',\n"
+    "                      'delay send until Friday', 'schedule it for next week', 'send in 2 hours'.\n"
+    "                      NEVER use when user wants immediate send (no time phrase) → use gmail_send_draft.\n"
+    "                      NEVER schedule without a draft in context.\n"
+    "   'gmail_list_scheduled': show pending Adwi-scheduled sends — 'show scheduled emails',\n"
+    "                      'what emails are scheduled', 'list scheduled sends', 'any scheduled messages'.\n"
+    "   'gmail_cancel_scheduled_send': cancel a pending scheduled send — 'cancel the scheduled send',\n"
+    "                      'cancel scheduled 1', 'unschedule that', 'don't send that', 'stop the scheduled email'.\n"
+    "                      NEVER use for canceling an immediate send (use gmail_cancel for pending mutations).\n"
     "   'generate_image' : ONLY when creating a brand-new image/picture/artwork/visual output.\n"
     "                      NEVER for explanations, comparisons, or code/model concepts.\n"
     "                      'generation' as a software concept (code generation, token generation,\n"
@@ -1522,18 +1553,21 @@ def classify_intent(text: str) -> dict:
     return {"intent": "chat", "target": None, "arguments": {}, "analysis": "", "confidence": 0.0}
 
 # ── Local streaming (adwi:latest) ─────────────────────────────────────────────
-def stream_local(prompt, system=None, model=None):
+def stream_local(prompt, system=None, model=None, messages=None):
     m = model or load_routing().get("ADWI_LOCAL_MODEL", MODEL_MAIN)
-    sys_msg = system or (
-        "You are Adwi, Suneel's local AI assistant running on his M4 Max Mac (131K context, 64GB RAM). "
-        "Your real capabilities include: web browsing (/browse), Gmail read-only (/gmail), "
-        "git repo inspection (/git), semantic notes search (/rag), code execution (/run-python), "
-        "image analysis (minicpm-v), YouTube summarization, disk analysis, and SearXNG web search. "
-        "You DO have internet access through these tools. "
-        "You are connected to GitHub via the gh CLI tool. "
-        "Be practical, concise, warm. Never reveal secrets or do destructive/financial actions."
-    )
-    msgs = [{"role":"system","content":sys_msg}, {"role":"user","content":"/no_think\n"+prompt}]
+    if messages is not None:
+        msgs = messages
+    else:
+        sys_msg = system or (
+            "You are Adwi, Suneel's local AI assistant running on his M4 Max Mac (131K context, 64GB RAM). "
+            "Your real capabilities include: web browsing (/browse), Gmail read-only (/gmail), "
+            "git repo inspection (/git), semantic notes search (/rag), code execution (/run-python), "
+            "image analysis (minicpm-v), YouTube summarization, disk analysis, and SearXNG web search. "
+            "You DO have internet access through these tools. "
+            "You are connected to GitHub via the gh CLI tool. "
+            "Be practical, concise, warm. Never reveal secrets or do destructive/financial actions."
+        )
+        msgs = [{"role":"system","content":sys_msg}, {"role":"user","content":"/no_think\n"+prompt}]
     req  = _ollama_chat(m, msgs, stream=True)
     print(f"\n{BOLD}{PURPLE}Adwi{RESET}  ", end="", flush=True)
     full, in_think = "", False
@@ -1633,13 +1667,36 @@ def call_cloud(prompt, messages=None, model=None) -> str:
 
 def ask_adwi(prompt):
     """Main entry point for chat — routes to cloud or local based on setting."""
+    global _SESSION_HISTORY
     r = load_routing()
-    if r.get("ADWI_CHAT_BACKEND","openwebui") == "openwebui":
-        result = call_cloud(prompt)
+
+    # Build system message
+    _SYS = (
+        "You are Adwi, Suneel's local AI assistant running on his M4 Max Mac (131K context, 64GB RAM). "
+        "Your real capabilities include: web browsing (/browse), Gmail read-only (/gmail), "
+        "git repo inspection (/git), semantic notes search (/rag), code execution (/run-python), "
+        "image analysis (minicpm-v), YouTube summarization, disk analysis, and SearXNG web search. "
+        "You DO have internet access through these tools. "
+        "You are connected to GitHub via the gh CLI tool. "
+        "Be practical, concise, warm. Never reveal secrets or do destructive/financial actions."
+    )
+
+    # Build messages list: system + recent history + current user turn
+    max_msgs = _SESSION_MAX_TURNS * 2  # each turn = 1 user + 1 assistant
+    prior = _SESSION_HISTORY[-max_msgs:] if _SESSION_HISTORY else []
+    msgs = [{"role": "system", "content": _SYS}] + prior + [{"role": "user", "content": "/no_think\n" + prompt}]
+
+    if r.get("ADWI_CHAT_BACKEND", "openwebui") == "openwebui":
+        result = call_cloud(prompt, messages=msgs)
         if result:   # empty string means stream_local already printed (400 fallback)
             adwi_say(result)
+            _SESSION_HISTORY.append({"role": "user",      "content": prompt})
+            _SESSION_HISTORY.append({"role": "assistant", "content": result})
     else:
-        stream_local(prompt)
+        result = stream_local(prompt, messages=msgs)
+        if result:
+            _SESSION_HISTORY.append({"role": "user",      "content": prompt})
+            _SESSION_HISTORY.append({"role": "assistant", "content": result})
 
 # ── Vision analysis (local minicpm-v, cloud fallback) ────────────────────────
 def analyze_image(path_str: str, save=False):
@@ -3323,6 +3380,7 @@ _GMAIL_CTX: dict = {
     "pending_attach":     None, # Phase 7: file disambiguation candidates [{path, filename, size}]
     "last_mutation":      None, # Phase 8: undo — {action, ids, count, description} of last confirmed op
     "triage_results":     None, # Phase 9: {reply_needed, action_needed, fyi, noise} id lists
+    "scheduled_send":     None, # Phase 10: {id, draft_id, to, subject, send_at_iso} or None
 }
 
 _GMAIL_ACTION_PAST = {
@@ -3332,8 +3390,9 @@ _GMAIL_ACTION_PAST = {
     "mark_unread": "marked as unread",
 }
 
-_GMAIL_MAX_CANDIDATES = 25  # hard cap on mutation batch size
-ATTACH_SAVE_DIR       = BASE / "gmail-attachments"  # Phase 6: bounded attachment save dir
+_GMAIL_MAX_CANDIDATES  = 25  # hard cap on mutation batch size
+ATTACH_SAVE_DIR        = BASE / "gmail-attachments"  # Phase 6: bounded attachment save dir
+SCHEDULED_SENDS_FILE   = BASE / "adwi" / "scheduled_sends.json"  # Phase 10: pending scheduled-send queue
 
 _GMAIL_CATEGORY_MAP = {
     "promotions": "CATEGORY_PROMOTIONS", "promotion":  "CATEGORY_PROMOTIONS",
@@ -3576,6 +3635,323 @@ def cmd_gmail_triage(text: str = "") -> None:
             f"  {YELLOW}{rn} needing reply · {an} needing action{RESET} — "
             f"use 'show reply-needed' to refilter.", ""
         )
+
+
+# ── Gmail Phase 10: scheduled send ─────────────────────────────────────────────
+
+_DAYS_OF_WEEK = {
+    "monday": 0, "tuesday": 1, "wednesday": 2, "thursday": 3,
+    "friday": 4, "saturday": 5, "sunday": 6,
+    "mon": 0, "tue": 1, "wed": 2, "thu": 3, "fri": 4, "sat": 5, "sun": 6,
+}
+
+_TIME_OF_DAY_DEFAULTS = {
+    "morning":   9,
+    "afternoon": 14,
+    "evening":   18,
+    "tonight":   21,
+    "night":     21,
+    "noon":      12,
+    "midday":    12,
+    "eod":       17,
+    "end of day":17,
+    "end-of-day":17,
+    "eow":       9,   # end of week → Friday 9 AM (special-cased below)
+}
+
+
+def _resolve_schedule_time(text: str) -> tuple:
+    """
+    Parse a natural-language schedule phrase into (datetime, human_label).
+    Returns (None, error_msg) if phrase is too ambiguous or cannot be resolved.
+
+    Supported patterns (case-insensitive):
+      in N minutes / in N hours
+      at HH:MM / at H PM / at H AM / at H (context-aware)
+      tonight / this morning / this afternoon / this evening
+      tomorrow [morning|afternoon|evening|at TIME]
+      [next] WEEKDAY [at TIME]
+      EOD / end of day / noon / midday
+    """
+    now  = datetime.now()
+    text_l = text.lower().strip()
+
+    def _apply_hm(base: datetime, h: int, m: int = 0) -> datetime:
+        return base.replace(hour=h, minute=m, second=0, microsecond=0)
+
+    # ── "in N minutes / hours" ────────────────────────────────────────────────
+    m = re.search(r"\bin\s+(\d+)\s+(minute|min|hour|hr)s?\b", text_l)
+    if m:
+        n, unit = int(m.group(1)), m.group(2)
+        delta = timedelta(hours=n) if unit.startswith("h") else timedelta(minutes=n)
+        dt = now + delta
+        label = f"{dt.strftime('%A, %B %d')} at {dt.strftime('%-I:%M %p')}"
+        return dt, label
+
+    # ── Explicit time "at H:MM PM" / "at H PM" / "at H" ──────────────────────
+    time_m = re.search(
+        r"\bat\s+(\d{1,2})(?::(\d{2}))?\s*(am|pm|AM|PM)?\b", text_l
+    )
+    parsed_hour, parsed_min = None, 0
+    if time_m:
+        parsed_hour = int(time_m.group(1))
+        parsed_min  = int(time_m.group(2)) if time_m.group(2) else 0
+        meridiem    = (time_m.group(3) or "").lower()
+        if meridiem == "pm" and parsed_hour < 12:
+            parsed_hour += 12
+        elif meridiem == "am" and parsed_hour == 12:
+            parsed_hour = 0
+        elif not meridiem:
+            # Ambiguous — if hour < 8, assume PM (e.g. "at 3" → 3 PM)
+            if parsed_hour < 8:
+                parsed_hour += 12
+
+    # ── "tonight" / "this evening" / "this morning" / "this afternoon" ────────
+    for phrase, default_h in [
+        ("tonight", 21), ("this evening", 18), ("this night", 21),
+        ("this morning", 9), ("this afternoon", 14),
+    ]:
+        if phrase in text_l:
+            h = parsed_hour if parsed_hour is not None else default_h
+            dt = _apply_hm(now, h, parsed_min)
+            if dt <= now:
+                dt += timedelta(days=1)
+            label = f"{dt.strftime('%A, %B %-d')} at {dt.strftime('%-I:%M %p')}"
+            return dt, label
+
+    # ── "today" ───────────────────────────────────────────────────────────────
+    if re.search(r"\btoday\b", text_l):
+        if parsed_hour is not None:
+            dt = _apply_hm(now, parsed_hour, parsed_min)
+            if dt <= now:
+                return None, "That time has already passed today — did you mean tomorrow?"
+            label = f"today at {dt.strftime('%-I:%M %p')}"
+            return dt, label
+        return None, "Please specify a time — e.g. 'today at 3 PM'."
+
+    # ── "tomorrow [morning|afternoon|time]" ───────────────────────────────────
+    if re.search(r"\btomorrow\b", text_l):
+        tomorrow = now + timedelta(days=1)
+        h = parsed_hour
+        if h is None:
+            for tod, dh in _TIME_OF_DAY_DEFAULTS.items():
+                if tod in text_l:
+                    h = dh; break
+        h = h if h is not None else 9   # default: tomorrow 9 AM
+        dt = _apply_hm(tomorrow, h, parsed_min)
+        label = f"{dt.strftime('%A, %B %-d')} at {dt.strftime('%-I:%M %p')}"
+        return dt, label
+
+    # ── "[next] WEEKDAY [at TIME]" ────────────────────────────────────────────
+    for day_name, day_num in _DAYS_OF_WEEK.items():
+        if re.search(rf"\b{day_name}\b", text_l):
+            today_num = now.weekday()
+            days_ahead = (day_num - today_num) % 7
+            if days_ahead == 0:
+                days_ahead = 7   # "Monday" when today is Monday → next Monday
+            target = now + timedelta(days=days_ahead)
+            h = parsed_hour
+            if h is None:
+                for tod, dh in _TIME_OF_DAY_DEFAULTS.items():
+                    if tod in text_l:
+                        h = dh; break
+            h = h if h is not None else 9
+            dt = _apply_hm(target, h, parsed_min)
+            label = f"{dt.strftime('%A, %B %-d')} at {dt.strftime('%-I:%M %p')}"
+            return dt, label
+
+    # ── Bare time-of-day (no date context) ────────────────────────────────────
+    for tod, dh in _TIME_OF_DAY_DEFAULTS.items():
+        if re.search(rf"\b{re.escape(tod)}\b", text_l):
+            h = parsed_hour if parsed_hour is not None else dh
+            dt = _apply_hm(now, h, parsed_min)
+            if dt <= now:
+                dt += timedelta(days=1)
+            label = f"{dt.strftime('%A, %B %-d')} at {dt.strftime('%-I:%M %p')}"
+            return dt, label
+
+    # ── Bare explicit time only ("at 3 PM") ───────────────────────────────────
+    if parsed_hour is not None:
+        dt = _apply_hm(now, parsed_hour, parsed_min)
+        if dt <= now:
+            dt += timedelta(days=1)
+        label = f"{dt.strftime('%A, %B %-d')} at {dt.strftime('%-I:%M %p')}"
+        return dt, label
+
+    return None, (
+        "I couldn't parse a send time from that. "
+        "Try: 'tomorrow morning', 'Monday at 9 AM', 'at 3 PM', 'in 2 hours'."
+    )
+
+
+def _load_scheduled_sends() -> list:
+    """Read the scheduled-sends queue file. Returns [] if missing or corrupt."""
+    try:
+        if SCHEDULED_SENDS_FILE.exists():
+            return json.loads(SCHEDULED_SENDS_FILE.read_text(encoding="utf-8"))
+    except (json.JSONDecodeError, OSError):
+        pass
+    return []
+
+
+def _save_scheduled_sends(entries: list) -> None:
+    """Write the scheduled-sends queue atomically."""
+    SCHEDULED_SENDS_FILE.parent.mkdir(parents=True, exist_ok=True)
+    tmp = SCHEDULED_SENDS_FILE.with_suffix(".json.tmp")
+    tmp.write_text(json.dumps(entries, indent=2, default=str), encoding="utf-8")
+    tmp.replace(SCHEDULED_SENDS_FILE)
+
+
+def cmd_gmail_schedule_send(text: str = "") -> None:
+    """
+    Phase 10: Schedule the current draft to be sent at a future time.
+    Shows a preview with the resolved timestamp, then confirms before scheduling.
+    """
+    token = HOME / "SuneelWorkSpace" / "secrets" / "gmail-token.json"
+    if not token.exists():
+        cprint("  Not authorized. Run: /gmail-auth", YELLOW); return
+
+    draft = _GMAIL_CTX.get("draft")
+    if not draft:
+        cprint("  No current draft to schedule. Create one first with 'compose' or 'reply saying …'.", YELLOW)
+        return
+
+    draft_id = draft.get("draft_id")
+    to       = draft.get("to", "")
+    subject  = draft.get("subject", "")
+    if not draft_id:
+        cprint("  Draft has no saved draft ID — cannot schedule. Try recreating the draft.", RED)
+        return
+
+    # ── Parse time from user text ─────────────────────────────────────────────
+    dt, label = _resolve_schedule_time(text)
+    if dt is None:
+        adwi_head("Gmail — Schedule Send")
+        cprint(f"  {YELLOW}{label}{RESET}", "")
+        return
+
+    if dt <= datetime.now():
+        adwi_head("Gmail — Schedule Send")
+        cprint(f"  {YELLOW}Resolved time is in the past ({label}). Please pick a future time.{RESET}", "")
+        return
+
+    # ── Preview ───────────────────────────────────────────────────────────────
+    adwi_head("Gmail — Schedule Send")
+    cprint(f"  To:       {to}", "")
+    cprint(f"  Subject:  {subject}", "")
+    cprint(f"  Send at:  {YELLOW}{label}{RESET}", "")
+    cprint(f"  Draft ID: {draft_id[:20]}…", GRAY)
+    cprint("", "")
+    ans = input(f"  {YELLOW}Schedule this send? (y/n){RESET} ").strip().lower()
+    if ans not in ("y", "yes"):
+        cprint("  Cancelled — draft still saved in Gmail.", GRAY)
+        return
+
+    # ── Persist to queue ──────────────────────────────────────────────────────
+    import hashlib as _hlib
+    uid = "ss_" + datetime.now().strftime("%Y%m%d_%H%M%S") + "_" + _hlib.md5(draft_id.encode()).hexdigest()[:4]
+    entry = {
+        "id":            uid,
+        "draft_id":      draft_id,
+        "to":            to,
+        "subject":       subject,
+        "send_at_iso":   dt.isoformat(timespec="seconds"),
+        "created_at_iso":datetime.now().isoformat(timespec="seconds"),
+        "status":        "pending",
+    }
+    entries = _load_scheduled_sends()
+    entries.append(entry)
+    _save_scheduled_sends(entries)
+
+    _GMAIL_CTX["scheduled_send"] = entry
+    cprint(f"\n  {GREEN}✓ Scheduled — '{subject[:40]}' will be sent {label}.{RESET}", "")
+    cprint(f"  {GRAY}ID: {uid}  ·  'show scheduled' to review  ·  'cancel scheduled send' to undo{RESET}", "")
+
+
+def cmd_gmail_list_scheduled() -> None:
+    """Phase 10: Show all Adwi-scheduled pending sends."""
+    entries = _load_scheduled_sends()
+    pending = [e for e in entries if e.get("status") == "pending"]
+    sent    = [e for e in entries if e.get("status") == "sent"]
+    failed  = [e for e in entries if e.get("status") == "failed"]
+
+    adwi_head("Gmail — Scheduled Sends")
+    if not entries:
+        cprint("  No scheduled sends on record.", GRAY)
+        return
+
+    if pending:
+        cprint(f"\n  {YELLOW}Pending ({len(pending)}){RESET}", "")
+        cprint("  " + "─" * 58, GRAY)
+        for i, e in enumerate(pending, 1):
+            try:
+                dt   = datetime.fromisoformat(e["send_at_iso"])
+                when = dt.strftime("%a %b %-d at %-I:%M %p")
+            except Exception:
+                when = e.get("send_at_iso", "?")
+            to_short = e.get("to", "?")[:35]
+            subj     = e.get("subject", "?")[:40]
+            cprint(f"  [{i}] {when:<25} To: {to_short}", "")
+            cprint(f"       {GRAY}{subj}  ·  id: {e.get('id','?')}{RESET}", "")
+
+    if sent:
+        cprint(f"\n  {GREEN}Sent ({len(sent)}){RESET}", "")
+        for e in sent[-3:]:   # show last 3
+            cprint(f"  ✓ {e.get('send_at_iso','?')[:16]}  {e.get('subject','?')[:40]}", GRAY)
+
+    if failed:
+        cprint(f"\n  {RED}Failed ({len(failed)}){RESET}", "")
+        for e in failed:
+            cprint(f"  ✗ {e.get('send_at_iso','?')[:16]}  {e.get('subject','?')[:40]}", RED)
+
+    if pending:
+        cprint(f"\n  {GRAY}'cancel scheduled send' to cancel  ·  runner checks every 2 min{RESET}", "")
+
+
+def cmd_gmail_cancel_scheduled_send(text: str = "") -> None:
+    """Phase 10: Cancel a pending scheduled send (by index, ID, or most recent)."""
+    entries  = _load_scheduled_sends()
+    pending  = [e for e in entries if e.get("status") == "pending"]
+
+    adwi_head("Gmail — Cancel Scheduled Send")
+    if not pending:
+        cprint("  No pending scheduled sends to cancel.", GRAY)
+        _GMAIL_CTX["scheduled_send"] = None
+        return
+
+    # Select: ordinal from text, or most recent if only one
+    target = None
+    m = re.search(r"\b([1-9])\b", text)
+    if m:
+        idx = int(m.group(1)) - 1
+        if 0 <= idx < len(pending):
+            target = pending[idx]
+        else:
+            cprint(f"  No pending send #{m.group(1)}.", YELLOW); return
+    elif len(pending) == 1:
+        target = pending[0]
+    else:
+        cprint(f"  {len(pending)} pending sends — say 'cancel scheduled send 1', 'cancel 2', etc.", YELLOW)
+        for i, e in enumerate(pending, 1):
+            cprint(f"  [{i}] {e.get('send_at_iso','?')[:16]}  {e.get('subject','?')[:40]}", "")
+        return
+
+    try:
+        dt   = datetime.fromisoformat(target["send_at_iso"])
+        when = dt.strftime("%a %b %-d at %-I:%M %p")
+    except Exception:
+        when = target.get("send_at_iso", "?")
+
+    cprint(f"  Cancelling: '{target.get('subject','?')[:50]}' scheduled for {when}", "")
+    ans = input(f"  {YELLOW}Confirm cancel? (y/n){RESET} ").strip().lower()
+    if ans not in ("y", "yes"):
+        cprint("  Kept.", GRAY); return
+
+    target["status"] = "cancelled"
+    _save_scheduled_sends(entries)
+    if (_GMAIL_CTX.get("scheduled_send") or {}).get("id") == target["id"]:
+        _GMAIL_CTX["scheduled_send"] = None
+    cprint(f"  {GREEN}✓ Cancelled — draft still exists in Gmail and can be sent manually.{RESET}", "")
 
 
 def cmd_gmail_read(ref: str) -> None:
@@ -6996,6 +7372,12 @@ def dispatch_natural(text: str):
         cmd_gmail_remove_attachment(text)
     elif intent == "gmail_triage":
         cmd_gmail_triage(text)
+    elif intent == "gmail_schedule_send":
+        cmd_gmail_schedule_send(text)
+    elif intent == "gmail_list_scheduled":
+        cmd_gmail_list_scheduled()
+    elif intent == "gmail_cancel_scheduled_send":
+        cmd_gmail_cancel_scheduled_send(text)
     elif intent == "gmail_list_attachments":
         cmd_gmail_list_attachments(text)
     elif intent == "gmail_save_attachment":
@@ -7123,6 +7505,7 @@ _SHELL_CMD_RE = re.compile(
 _SOURCE_CMD_RE = re.compile(r"^source\s+[/~.]", re.I)
 
 def handle(line: str) -> bool:
+    global _SESSION_MAX_TURNS
     line = line.strip()
     if not line: return True
     low = line.lower()
@@ -7155,6 +7538,36 @@ def handle(line: str) -> bool:
     # Clear screen
     if line.lower() in ("clear", "/clear", "cls", "/cls"):
         import subprocess as _sp; _sp.run("clear", shell=True); return True
+
+    # ── Session context management ────────────────────────────────────────────
+    if line in ("/clear-context", "/new-session", "/reset-context"):
+        _SESSION_HISTORY.clear()
+        cprint(f"  ✓ Session context cleared — starting fresh.", GREEN)
+        return True
+    if line == "/session-history":
+        if not _SESSION_HISTORY:
+            cprint("  No session history yet.", GRAY)
+        else:
+            cprint(f"\n  Session history — {len(_SESSION_HISTORY)//2} turn(s)  "
+                   f"(max {_SESSION_MAX_TURNS}):\n", CYAN)
+            for i, msg in enumerate(_SESSION_HISTORY):
+                role  = "You" if msg["role"] == "user" else "Adwi"
+                color = YELLOW if msg["role"] == "user" else CYAN
+                body  = msg["content"][:120].replace("/no_think\n", "")
+                dots  = "…" if len(msg["content"]) > 120 else ""
+                cprint(f"  {color}{role}:{RESET} {body}{dots}", "")
+        return True
+    if line.startswith("/context-size "):
+        try:
+            n = int(line.split()[1])
+            if 1 <= n <= 100:
+                _SESSION_MAX_TURNS = n
+                cprint(f"  ✓ Session context window set to {n} turns.", GREEN)
+            else:
+                cprint("  Out of range — use 1–100.", YELLOW)
+        except ValueError:
+            cprint("  Usage: /context-size <number>  (e.g. /context-size 20)", YELLOW)
+        return True
 
     # Explicit slash commands (shortcuts for power users)
     if line == "/help": print(HELP); return True
@@ -7309,6 +7722,10 @@ def handle(line: str) -> bool:
     elif line.startswith("/gmail-remove-attachment "): cmd_gmail_remove_attachment(line[25:].strip())
     elif line == "/gmail-triage": cmd_gmail_triage("")
     elif line.startswith("/gmail-triage "): cmd_gmail_triage(line[14:].strip())
+    elif line.startswith("/gmail-schedule "): cmd_gmail_schedule_send(line[16:].strip())
+    elif line == "/gmail-scheduled": cmd_gmail_list_scheduled()
+    elif line == "/gmail-cancel-scheduled": cmd_gmail_cancel_scheduled_send("")
+    elif line.startswith("/gmail-cancel-scheduled "): cmd_gmail_cancel_scheduled_send(line[24:].strip())
     # ── Self-repair commands (confirm before patching) ──
     elif line.startswith("/fix-error"): cmd_fix_error(line[10:].strip())
     elif line == "/repair-adwi": cmd_repair_adwi()

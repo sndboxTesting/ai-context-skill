@@ -88,6 +88,7 @@ mcp-servers/workspace.db
 adwi/memory.db
 adwi/knowledge.db
 adwi/rag-db/
+adwi/scheduled_sends.json
 bin/*.backup.*
 
 # ── Misc ─────────────────────────────────────────────────────────────

@@ -836,5 +836,103 @@ class TestGmailRoutingPhase9(unittest.TestCase):
         self.assertIn(result, ("gmail_triage", None))
 
 
+class TestGmailRoutingPhase10(unittest.TestCase):
+    """Phase 10: gmail_schedule_send / gmail_list_scheduled / gmail_cancel_scheduled_send routing."""
+
+    # ── schedule_send: explicit time phrases ─────────────────────────────────
+
+    def test_send_tomorrow_morning(self):
+        self.assertEqual(_classify("send this tomorrow morning"), "gmail_schedule_send")
+
+    def test_send_tomorrow_no_qualifier(self):
+        self.assertEqual(_classify("send this tomorrow"), "gmail_schedule_send")
+
+    def test_schedule_monday_at_nine(self):
+        self.assertEqual(_classify("schedule for Monday at 9"), "gmail_schedule_send")
+
+    def test_send_at_3pm(self):
+        self.assertEqual(_classify("send the draft at 3 PM"), "gmail_schedule_send")
+
+    def test_send_at_3pm_lowercase(self):
+        self.assertEqual(_classify("send this at 3pm"), "gmail_schedule_send")
+
+    def test_schedule_this_for_friday(self):
+        self.assertEqual(_classify("schedule it for Friday at 8"), "gmail_schedule_send")
+
+    def test_send_in_2_hours(self):
+        self.assertEqual(_classify("send in 2 hours"), "gmail_schedule_send")
+
+    def test_delay_send(self):
+        self.assertEqual(_classify("delay send until tomorrow"), "gmail_schedule_send")
+
+    def test_send_later(self):
+        self.assertEqual(_classify("send later"), "gmail_schedule_send")
+
+    def test_schedule_the_email(self):
+        self.assertEqual(_classify("schedule the email"), "gmail_schedule_send")
+
+    def test_send_tomorrow_afternoon(self):
+        self.assertEqual(_classify("send the draft tomorrow afternoon"), "gmail_schedule_send")
+
+    def test_send_next_week(self):
+        self.assertEqual(_classify("send this next week"), "gmail_schedule_send")
+
+    # ── Ordering guard: schedule beats send_draft ─────────────────────────────
+
+    def test_schedule_beats_send_draft_tomorrow(self):
+        result = _classify("send this tomorrow morning")
+        self.assertEqual(result, "gmail_schedule_send")
+        self.assertNotEqual(result, "gmail_send_draft")
+
+    def test_schedule_beats_send_draft_friday(self):
+        result = _classify("schedule for Friday")
+        self.assertEqual(result, "gmail_schedule_send")
+        self.assertNotEqual(result, "gmail_send_draft")
+
+    # ── Bare "send it" still goes to gmail_send_draft (no time phrase) ────────
+
+    def test_bare_send_it_not_scheduled(self):
+        result = _classify("send it")
+        self.assertEqual(result, "gmail_send_draft")
+        self.assertNotEqual(result, "gmail_schedule_send")
+
+    def test_lgtm_send_not_scheduled(self):
+        result = _classify("lgtm send it")
+        self.assertEqual(result, "gmail_send_draft")
+        self.assertNotEqual(result, "gmail_schedule_send")
+
+    # ── list_scheduled ────────────────────────────────────────────────────────
+
+    def test_show_scheduled_emails(self):
+        self.assertEqual(_classify("show scheduled emails"), "gmail_list_scheduled")
+
+    def test_list_scheduled_sends(self):
+        self.assertEqual(_classify("list scheduled sends"), "gmail_list_scheduled")
+
+    def test_what_emails_are_scheduled(self):
+        self.assertEqual(_classify("what emails are scheduled"), "gmail_list_scheduled")
+
+    # ── cancel_scheduled_send ─────────────────────────────────────────────────
+
+    def test_cancel_scheduled_send(self):
+        self.assertEqual(_classify("cancel the scheduled send"), "gmail_cancel_scheduled_send")
+
+    def test_cancel_scheduled_email(self):
+        self.assertEqual(_classify("cancel scheduled email"), "gmail_cancel_scheduled_send")
+
+    def test_unschedule_that(self):
+        self.assertEqual(_classify("unschedule that"), "gmail_cancel_scheduled_send")
+
+    def test_dont_send_that(self):
+        result = _classify("don't send that")
+        self.assertEqual(result, "gmail_cancel_scheduled_send")
+
+    def test_cancel_scheduled_beats_cancel(self):
+        # "cancel the scheduled send" must go to cancel_scheduled, not gmail_cancel
+        result = _classify("cancel the scheduled send")
+        self.assertEqual(result, "gmail_cancel_scheduled_send")
+        self.assertNotEqual(result, "gmail_cancel")
+
+
 if __name__ == "__main__":
     unittest.main(verbosity=2)

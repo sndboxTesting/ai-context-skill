@@ -85,14 +85,14 @@ SYSTEM You are Adwi, a cautious local AI assistant. Never read secrets, never co
 | 0 | Instant pre-checks | YouTube URL regex, image path regex (0 ms) |
 | 1 | Regex pre-filter | `_regex_prefilter()` — zero-latency for common phrases |
 | 2 | Few-shot injection | Qdrant `nlu_fixtures` top-3 semantic matches (96 fixtures, 768-dim Cosine) |
-| 3 | LLM classification | `llama3.1:8b` with JSON schema — `analysis`+`confidence`+`intent`+`arguments` (88 intent classes) |
+| 3 | LLM classification | `llama3.1:8b` with JSON schema — `analysis`+`confidence`+`intent`+`arguments` (91 intent classes) |
 | 4 | Argument dispatch | 29 typed slot reads: `path`, `query`, `url`, `size_mb`, `days`, `description` |
 | 5 | Fallback | `qwen3:0.6b` (80-token budget, no analysis block) |
 
 **Schema fields (Phase 6):**
 - `analysis` — dense one-sentence reasoning before intent selection
 - `confidence` — float 0.0–1.0
-- `intent` — one of 88 registered intent classes
+- `intent` — one of 91 registered intent classes
 - `arguments` — typed key-value slots fed straight into command handlers
 
 **Qdrant few-shot collection:** `nlu_fixtures` · 96 seed fixtures · scored at `score_threshold=0.5` · provisioned via `python3 adwi/memory.py provision-nlu`
@@ -152,6 +152,7 @@ All managed at `~/Library/LaunchAgents/com.suneel.*.plist`.
 |---|---|
 | `adwi-git-backup` | every 30min |
 | `adwi-nightly` | 2:00 AM |
+| `adwi-scheduled-send` | every 2min |
 | `caffeinate` | KeepAlive |
 | `obsidian-bridge` | KeepAlive |
 | `openwebui-knowledge-watcher` | KeepAlive |
@@ -209,7 +210,7 @@ Dashboard: http://localhost:4000 (user: suneel)
 ## §3 Deterministic Capability Grid
 
 <!-- AUTO:COMMANDS -->
-**148 registered commands.** Key groups:
+**154 registered commands.** Key groups:
 
 **add**: `/add-capability-plan <idea>`  `/add-root`
 **backup**: `/backup-audit`  `/backup-disable`  `/backup-enable`  `/backup-log`  `/backup-now`  `/backup-status`
@@ -219,6 +220,7 @@ Dashboard: http://localhost:4000 (user: suneel)
 **capabilities  or  /capability**: `/capabilities  or  /capability-status`
 **capability**: `/capability-audit`  `/capability-status`
 **cleanup**: `/cleanup`
+**clear**: `/clear-context`
 **cloud <prompt>  or just type**: `/cloud <prompt>  or just type`
 **cmd**: `/cmd`
 **confirm**: `/confirm`
@@ -237,7 +239,7 @@ Dashboard: http://localhost:4000 (user: suneel)
 **gh**: `/gh-status`
 **git**: `/git`
 **github**: `/github`  `/github-private`  `/github-public`  `/github-status`
-**gmail**: `/gmail`  `/gmail-add-bcc`  `/gmail-add-cc`  `/gmail-archive`  `/gmail-attach`  `/gmail-attachments`  `/gmail-auth`  `/gmail-cancel`  `/gmail-cancel-draft`  `/gmail-compose`  `/gmail-confirm`  `/gmail-draft-reply`  `/gmail-mark-read`  `/gmail-mark-unread`  `/gmail-promos`  `/gmail-read`  `/gmail-remove-attachment`  `/gmail-rewrite`  `/gmail-save-attachment`  `/gmail-send-draft`  `/gmail-show-draft`  `/gmail-social`  `/gmail-spam`  `/gmail-summarize`  `/gmail-summarize-attachment`  `/gmail-summary`  `/gmail-thread`  `/gmail-trash`  `/gmail-triage`  `/gmail-undo`
+**gmail**: `/gmail`  `/gmail-add-bcc`  `/gmail-add-cc`  `/gmail-archive`  `/gmail-attach`  `/gmail-attachments`  `/gmail-auth`  `/gmail-cancel`  `/gmail-cancel-draft`  `/gmail-cancel-scheduled`  `/gmail-compose`  `/gmail-confirm`  `/gmail-draft-reply`  `/gmail-mark-read`  `/gmail-mark-unread`  `/gmail-promos`  `/gmail-read`  `/gmail-remove-attachment`  `/gmail-rewrite`  `/gmail-save-attachment`  `/gmail-scheduled`  `/gmail-send-draft`  `/gmail-show-draft`  `/gmail-social`  `/gmail-spam`  `/gmail-summarize`  `/gmail-summarize-attachment`  `/gmail-summary`  `/gmail-thread`  `/gmail-trash`  `/gmail-triage`  `/gmail-undo`
 **ha**: `/ha`
 **help**: `/help`
 **image**: `/image-save`
@@ -256,6 +258,7 @@ Dashboard: http://localhost:4000 (user: suneel)
 **mistakes**: `/mistakes`
 **model**: `/model-status`
 **models**: `/models`
+**new**: `/new-session`
 **nightly**: `/nightly-log`  `/nightly-run`  `/nightly-status`
 **notify**: `/notify`
 **obsidian**: `/obsidian-daily`  `/obsidian-read`  `/obsidian-search`  `/obsidian-write`
@@ -269,6 +272,7 @@ Dashboard: http://localhost:4000 (user: suneel)
 **remote**: `/remote`  `/remote-status`
 **repair**: `/repair-adwi`
 **repo**: `/repo-private`  `/repo-public`
+**reset**: `/reset-context`
 **review**: `/review-plan <idea>`
 **roadmap**: `/roadmap`
 **route**: `/route`
@@ -278,6 +282,7 @@ Dashboard: http://localhost:4000 (user: suneel)
 **search <term>**: `/search <term>`
 **secrets**: `/secrets-status`
 **self**: `/self-heal`  `/self-heal  or  fix my setup`
+**session**: `/session-history`
 **set**: `/set-cloud-model`
 **status**: `/status`
 **status  or  check my setup**: `/status  or  check my setup`

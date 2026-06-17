@@ -3,9 +3,27 @@ import json
 import subprocess
 import os
 from datetime import datetime
+from pathlib import Path
 
 HOME = os.path.expanduser("~")
 BIN = os.path.join(HOME, "SuneelWorkSpace", "bin")
+
+def _load_env():
+    """Load config/.env into os.environ (setdefault — does not override shell env)."""
+    env_path = Path(HOME) / "SuneelWorkSpace" / "config" / ".env"
+    if not env_path.exists():
+        return
+    for raw in env_path.read_text(encoding="utf-8").splitlines():
+        line = raw.strip()
+        if not line or line.startswith("#") or "=" not in line:
+            continue
+        k, _, v = line.partition("=")
+        k = k.strip(); v = v.strip().strip('"').strip("'")
+        if k and v:
+            os.environ.setdefault(k, v)
+
+_load_env()
+SECRET = os.environ.get("ADWI_LOCAL_SECRET", "")
 
 VENV_PY = os.path.join(HOME, "SuneelWorkSpace", "adwi", ".venv", "bin", "python3")
 ADWI_CLI = os.path.join(HOME, "SuneelWorkSpace", "adwi", "adwi_cli.py")
@@ -36,7 +54,16 @@ class Handler(BaseHTTPRequestHandler):
         self.end_headers()
         self.wfile.write(body)
 
+    def _check_auth(self) -> bool:
+        if not SECRET:
+            return True
+        return self.headers.get("X-Adwi-Secret") == SECRET
+
     def do_GET(self):
+        if not self._check_auth():
+            self._send_json(401, {"error": "Unauthorized — X-Adwi-Secret header required"})
+            return
+
         if self.path == "/":
             self._send_json(200, {
                 "name": "Suneel Safe Local Command API",
@@ -86,5 +113,9 @@ class Handler(BaseHTTPRequestHandler):
 if __name__ == "__main__":
     host = "127.0.0.1"
     port = 5055
+    if not SECRET:
+        print("[WARNING] ADWI_LOCAL_SECRET is not set — API is unauthenticated. Set it in config/.env to enforce auth.")
+    else:
+        print(f"[INFO] Auth enabled — X-Adwi-Secret header required for all routes.")
     print(f"Suneel Safe Local Command API running at http://{host}:{port}")
     ThreadingHTTPServer((host, port), Handler).serve_forever()

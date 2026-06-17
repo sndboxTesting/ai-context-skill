@@ -37,7 +37,15 @@
       "parameters": {
         "method": "GET",
         "url": "http://host.docker.internal:5055/adwi-self-heal",
-        "sendHeaders": false,
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "X-Adwi-Secret",
+              "value": "={{ $env.ADWI_LOCAL_SECRET }}"
+            }
+          ]
+        },
         "sendBody": false,
         "options": {}
       },

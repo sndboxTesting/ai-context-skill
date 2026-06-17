@@ -57,6 +57,8 @@ def check_http(url: str, timeout: int = 5) -> bool:
     try:
         urllib.request.urlopen(url, timeout=timeout)
         return True
+    except urllib.error.HTTPError as e:
+        return e.code == 401  # service is up, just requires auth
     except Exception:
         return False
 

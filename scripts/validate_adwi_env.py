@@ -127,7 +127,7 @@ def chk_env_file() -> tuple[str, str]:
         if line and not line.startswith("#") and "=" in line:
             k, _, v = line.partition("=")
             keys[k.strip()] = v.strip()
-    wanted = ["TAVILY_API_KEY", "EXA_API_KEY", "FIRECRAWL_API_KEY", "HA_TOKEN"]
+    wanted = ["TAVILY_API_KEY", "EXA_API_KEY", "FIRECRAWL_API_KEY", "HOME_ASSISTANT_TOKEN"]
     missing = [k for k in wanted if not keys.get(k) or keys[k].startswith("REPLACE_ME")]
     if missing:
         return "warn", f"Missing or placeholder: {', '.join(missing)}"
@@ -173,11 +173,24 @@ def chk_docker_services() -> tuple[str, str]:
 
 def chk_obsidian_bridge() -> tuple[str, str]:
     try:
-        with urllib.request.urlopen("http://localhost:5056/", timeout=2) as r:
+        env_path = WORKSPACE / "config" / ".env"
+        secret = ""
+        if env_path.exists():
+            for line in env_path.read_text().splitlines():
+                if line.startswith("ADWI_LOCAL_SECRET="):
+                    secret = line.split("=", 1)[1].strip().strip('"').strip("'")
+                    break
+        headers = {"X-Adwi-Secret": secret} if secret else {}
+        req = urllib.request.Request("http://localhost:5056/", headers=headers)
+        with urllib.request.urlopen(req, timeout=2) as r:
             data = json.loads(r.read())
         if data.get("status") == "ok":
             return "pass", "Obsidian bridge :5056 responding"
         return "warn", f"Bridge responded but status={data.get('status')}"
+    except urllib.error.HTTPError as e:
+        if e.code == 401:
+            return "warn", "Obsidian bridge :5056 up but ADWI_LOCAL_SECRET mismatch"
+        return "warn", f"Obsidian bridge HTTP {e.code}"
     except Exception:
         return "warn", "Obsidian bridge not running at :5056 — run: bin/start-obsidian-bridge"
 

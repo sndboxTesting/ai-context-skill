@@ -26,6 +26,23 @@ from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 from urllib.parse import parse_qs, urlparse
 
+def _load_env():
+    """Load config/.env into os.environ (setdefault — does not override shell env)."""
+    env_path = Path(__file__).parent.parent.parent / "config" / ".env"
+    if not env_path.exists():
+        return
+    for raw in env_path.read_text(encoding="utf-8").splitlines():
+        line = raw.strip()
+        if not line or line.startswith("#") or "=" not in line:
+            continue
+        k, _, v = line.partition("=")
+        k = k.strip(); v = v.strip().strip('"').strip("'")
+        if k and v:
+            os.environ.setdefault(k, v)
+
+_load_env()
+SECRET = os.environ.get("ADWI_LOCAL_SECRET", "")
+
 VAULT = Path(os.environ.get("OBSIDIAN_VAULT_PATH", "/Users/MAC/SuneelWorkSpace/obsidian-vault"))
 HOST  = "127.0.0.1"
 PORT  = int(os.environ.get("OBSIDIAN_BRIDGE_PORT", "5056"))
@@ -80,6 +97,11 @@ class Handler(BaseHTTPRequestHandler):
         self.end_headers()
         self.wfile.write(body)
 
+    def _check_auth(self) -> bool:
+        if not SECRET:
+            return True
+        return self.headers.get("X-Adwi-Secret") == SECRET
+
     def _read_body(self) -> dict:
         length = int(self.headers.get("Content-Length", 0))
         if not length:
@@ -90,6 +112,8 @@ class Handler(BaseHTTPRequestHandler):
             return {}
 
     def do_GET(self):
+        if not self._check_auth():
+            return self._json(401, {"error": "Unauthorized — X-Adwi-Secret header required"})
         parsed = urlparse(self.path)
         qs     = parse_qs(parsed.query)
         route  = parsed.path.rstrip("/") or "/"
@@ -140,6 +164,8 @@ class Handler(BaseHTTPRequestHandler):
             self._json(404, {"error": f"unknown route: {route}"})
 
     def do_POST(self):
+        if not self._check_auth():
+            return self._json(401, {"error": "Unauthorized — X-Adwi-Secret header required"})
         parsed = urlparse(self.path)
         route  = parsed.path.rstrip("/")
         body   = self._read_body()
@@ -194,6 +220,10 @@ class Handler(BaseHTTPRequestHandler):
 
 if __name__ == "__main__":
     VAULT.mkdir(parents=True, exist_ok=True)
+    if not SECRET:
+        print("[WARNING] ADWI_LOCAL_SECRET not set — Obsidian Bridge is unauthenticated.")
+    else:
+        print("[INFO] Auth enabled — X-Adwi-Secret header required.")
     print(f"Obsidian Bridge running at http://{HOST}:{PORT}")
     print(f"Vault: {VAULT}")
     ThreadingHTTPServer((HOST, PORT), Handler).serve_forever()

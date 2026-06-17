@@ -249,7 +249,7 @@ REGEX_INTENTS = [
     # ── Status (Bug 1: word boundaries stop substring false positives) ────────────
     # FIX-STATUS-002: "anything down", "is X available" patterns
     (re.compile(r"\b(anything|something)\b.{0,15}\b(down|broken|offline|unavailable|not\s+responding)\b", re.I), "status"),
-    (re.compile(r"\b(is|are)\b.{0,20}\b(ollama|docker|adwi|n8n|redis|api|server|service|stack)\b.{0,15}\b(available|up|running|reachable|responding)\b", re.I), "status"),
+    (re.compile(r"\b(is|are)\b.{0,20}\b(ollama|docker|adwi|n8n|redis|api|server|services?|stack|everything)\b.{0,15}\b(available|up|running|reachable|responding|down|offline|unavailable)\b", re.I), "status"),
     (re.compile(r"(check|verify).{0,20}(setup|stack|services|system)", re.I), "status"),
 
     # FIX-SPRINT-006: "implement the suggested improvement" → implement_idea BEFORE what_next's
@@ -274,7 +274,8 @@ REGEX_INTENTS = [
     # "what changed in the last reply/thread" must beat git_status "what changed"
     (re.compile(r"\bwhat\s+changed\b.{0,30}\b(?:reply|thread|email|message|conversation)\b", re.I), "gmail_thread_intel"),
     # FIX-STAGE3-001: "open/read/show the latest message" → gmail_read, not thread_intel
-    (re.compile(r"\b(?:open|read|show)\b.{0,10}\blatest\s+(?:message|email|mail)\b", re.I), "gmail_read"),
+    # negative lookahead: "open the latest email from X" falls through to gmail_open
+    (re.compile(r"\b(?:open|read|show)\b.{0,10}\blatest\s+(?:message|email|mail)\b(?!\s+from\b)", re.I), "gmail_read"),
     # "latest reply/message/delta" are email-specific, safe before web_search
     (re.compile(r"\blatest\s+(?:reply|message|delta)\b", re.I), "gmail_thread_intel"),
     # "latest update in this thread/email" must beat web_search "latest ... update"
@@ -443,7 +444,8 @@ REGEX_INTENTS = [
     (re.compile(r"(benchmark|speed.?test|how fast|tokens? per second).{0,20}(adwi|model|local|ollama)\b", re.I), "benchmark"),
     # FIX-SPRINT-001c: "tokens per second", "inference speed", "how performant" without requiring model name
     (re.compile(r"\b(?:how\s+many\s+)?tokens?\s+per\s+(?:sec(?:ond)?|s)\b", re.I), "benchmark"),
-    (re.compile(r"\b(?:my\s+)?inference\s+(?:speed|rate|throughput|perf)\b", re.I), "benchmark"),
+    # require "my" to distinguish measurement ("my inference speed") from advisory ("what affects inference speed")
+    (re.compile(r"\bmy\s+inference\s+(?:speed|rate|throughput|perf)\b", re.I), "benchmark"),
     (re.compile(r"\bhow\s+perf(?:ormant)?\b.{0,30}\b(llama|qwen|mistral|phi|gemma|ollama|model|llm)\d*", re.I), "benchmark"),
 
     # ── Gmail Phase 8: remove-attachment intent — MUST precede gmail_attach_file ──────────────
@@ -585,6 +587,8 @@ REGEX_INTENTS = [
     (re.compile(r"\bwhat.s\s+scheduled\b", re.I), "gmail_list_scheduled"),
     # gmail_schedule_send: requires temporal indicator: tomorrow/weekday/at-time/delay/later
     # FIX-STRESS-001: removed bare \bschedule\b to stop FP on "on schedule" in non-email context
+    # FIX-SCHED-001: "schedule for [weekday]" — anchored to start so "on schedule for Monday" doesn't FP
+    (re.compile(r"^schedule\s+for\s+(?:monday|tuesday|wednesday|thursday|friday|saturday|sunday)\b", re.I), "gmail_schedule_send"),
     (re.compile(r"\b(?:schedule|delay\s+send|send\s+later)\b.{0,40}\b(?:draft|email|message|this|it)\b", re.I), "gmail_schedule_send"),
     (re.compile(r"\b(?:delay\s+send|send\s+later)\b", re.I), "gmail_schedule_send"),
     (re.compile(r"\bsend\b.{0,30}\b(?:tomorrow|tonight|morning|afternoon|evening|monday|tuesday|wednesday|thursday|friday|saturday|sunday|next\s+week|in\s+\d+\s+(?:hours?|minutes?))\b", re.I), "gmail_schedule_send"),

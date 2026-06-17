@@ -228,6 +228,6 @@
     "MODEL_EMBED": "nomic-embed-text",
     "MODEL_NLU_FALLBACK": "qwen3:0.6b"
   },
-  "ts": "2026-06-16",
+  "ts": "2026-06-17",
   "_hash": "8a2281d6893b0276"
 }

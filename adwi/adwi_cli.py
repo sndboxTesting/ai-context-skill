@@ -813,9 +813,18 @@ _REGEX_INTENTS = [
     (re.compile(r"\b(?:add|include)\b.{0,20}\b(?:the\s+)?(?:pdf|spreadsheet|invoice|report|deck|image|attachment)\b.{0,30}\b(?:(?:to|in)\s+(?:(?:this|the)\s+)?(?:draft|email|message|reply))\b", re.I), "gmail_attach_file"),
     (re.compile(r"\battach\b.{0,30}\b(?:that|the|saved)\b.{0,20}\battachment\b", re.I), "gmail_attach_file"),
 
+    # ── Gmail Phase 14: subject update — MUST precede Phase 4 rewrite ───────────────────────
+    # gmail_update_subject — "rewrite the subject", "make the subject clearer", "better subject"
+    (re.compile(r"\b(?:rewrite|update|change|improve|fix)\b.{0,20}\bsubject\b", re.I), "gmail_update_subject"),
+    (re.compile(r"\b(?:make|write)\b.{0,20}\b(?:a\s+)?(?:better|clearer|shorter|stronger|good|clear|more\s+professional)\b.{0,10}\bsubject\b", re.I), "gmail_update_subject"),
+    (re.compile(r"\bsubject\b.{0,25}\b(?:is|feels?|seems?|sounds?)\b.{0,20}\b(?:weak|vague|unclear|bad|poor|generic|long|boring)\b", re.I), "gmail_update_subject"),
+    (re.compile(r"\bgive\s+me\b.{0,20}\b(?:a\s+)?(?:better|clearer|different|new|good)\b.{0,10}\bsubject\b", re.I), "gmail_update_subject"),
+
     # ── Gmail Phase 4: rewrite intent — MUST precede Phase 3 send/cancel patterns ──────────
     # Requires "it/the draft/the reply/this" + a style word, or "mention/add X to the draft"
-    (re.compile(r"\b(?:make|rewrite|revise|edit)\b.{0,20}\b(?:it|the\s+draft|the\s+reply|this|the\s+email)\b.{0,40}\b(?:shorter|longer|brief(?:er)?|concis(?:e|er)|professional(?:ly)?|formal(?:ly)?|casual(?:ly)?|warm(?:er|ly)?|friendli(?:er)?|direct(?:ly)?|clear(?:er)?)\b", re.I), "gmail_rewrite_draft"),
+    (re.compile(r"\b(?:make|rewrite|revise|edit)\b.{0,20}\b(?:it|the\s+draft|the\s+reply|this|the\s+email)\b.{0,40}\b(?:shorter|longer|brief(?:er)?|concis(?:e|er)|professional(?:ly)?|formal(?:ly)?|casual(?:ly)?|warm(?:er|ly)?|friendli(?:er)?|direct(?:ly)?|clear(?:er)?|natural(?:ly)?|informal(?:ly)?|polite(?:ly)?|robotic|engaging)\b", re.I), "gmail_rewrite_draft"),
+    (re.compile(r"\bturn\s+(?:this|it)\b.{0,30}\binto\b.{0,30}\b(?:shorter|brief|concise|professional|update|summary|formal|casual|polite|warm|friendly|direct|natural)\b", re.I), "gmail_rewrite_draft"),
+    (re.compile(r"\bwrite\b.{0,10}(?:a|an)\s+(?:shorter|briefer|more\s+(?:concise|direct|professional|formal|casual|friendly|polite|natural|warm))\b.{0,20}\b(?:version|draft|email|message|reply)?\b", re.I), "gmail_rewrite_draft"),
     (re.compile(r"\b(?:mention|add|include)\b.{0,50}\b(?:in|to)\s+(?:the\s+)?(?:draft|reply|email|message)\b", re.I), "gmail_rewrite_draft"),
 
     # ── Gmail Phase 5: add-cc / add-bcc — MUST precede Phase 3 (avoid cc/bcc in compose hitting here) ──
@@ -825,6 +834,13 @@ _REGEX_INTENTS = [
     # gmail_add_bcc — "add bcc me", "bcc Rahul on this draft", "bcc me on the email"
     (re.compile(r"\badd\s+bcc\b", re.I), "gmail_add_bcc"),
     (re.compile(r"\bbcc\b.{0,40}\b(?:to\s+(?:the\s+)?(?:draft|email|message)|on\s+(?:this|the\s+(?:draft|email|message)))\b", re.I), "gmail_add_bcc"),
+
+    # ── Gmail Phase 13: reschedule/open scheduled sends — MUST precede Phase 6 (attachments) ──
+    # gmail_open_scheduled_draft needs to beat gmail_save_attachment ("open...invoice")
+    (re.compile(r"\breschedule\b", re.I), "gmail_reschedule_send"),
+    (re.compile(r"\b(?:move|push|delay|postpone)\b.{0,30}\b(?:scheduled|the\s+(?:email|send|message|draft))\b.{0,30}\b(?:to|until)\b", re.I), "gmail_reschedule_send"),
+    (re.compile(r"\bchange\b.{0,20}\bscheduled\b.{0,20}\b(?:time|date|send|email|message)\b", re.I), "gmail_reschedule_send"),
+    (re.compile(r"\b(?:open|reopen|switch\s+to|load)\b.{0,20}\bscheduled\b.{0,20}\b(?:draft|email|send|message)\b", re.I), "gmail_open_scheduled_draft"),
 
     # ── Gmail Phase 6: attachment intents — MUST precede gmail_summarize (lower down) ──────
     # gmail_summarize_attachment — before Phase 3 AND before the generic gmail_summarize block
@@ -1190,13 +1206,14 @@ _ALL_INTENTS = [
     "gmail_archive", "gmail_trash", "gmail_mark_read", "gmail_mark_unread",
     "gmail_confirm", "gmail_cancel", "gmail_undo",
     "gmail_draft_reply", "gmail_compose", "gmail_show_draft",
-    "gmail_send_draft", "gmail_cancel_draft", "gmail_rewrite_draft",
+    "gmail_send_draft", "gmail_cancel_draft", "gmail_rewrite_draft", "gmail_update_subject",
     "gmail_add_cc", "gmail_add_bcc",
     "gmail_list_attachments", "gmail_save_attachment", "gmail_summarize_attachment",
     "gmail_attach_file", "gmail_remove_attachment",
     "gmail_triage",
     "gmail_schedule_send", "gmail_list_scheduled", "gmail_cancel_scheduled_send",
     "gmail_followup_reminder", "gmail_list_followups", "gmail_cancel_followup",
+    "gmail_reschedule_send", "gmail_open_scheduled_draft",
     "gmail_list_drafts", "gmail_open_draft", "gmail_delete_draft",
     # n8n / automation
     "sync",
@@ -1287,8 +1304,15 @@ _INTENT_SYSTEM = (
     "                      Only valid when a draft is pending. Requires explicit confirmation.\n"
     "   'gmail_cancel_draft': cancel/delete the current draft — 'cancel the draft', 'discard the draft'\n"
     "   'gmail_rewrite_draft': rewrite/update the current draft body — 'make it shorter',\n"
-    "                      'rewrite it professionally', 'mention that I can do Friday'\n"
+    "                      'rewrite it professionally', 'make it warmer', 'make it more direct',\n"
+    "                      'make it less robotic', 'make it more natural', 'turn this into a concise update',\n"
+    "                      'write a shorter version', 'mention that I can do Friday'.\n"
     "                      Always requires a current draft. Shows updated preview after rewrite.\n"
+    "                      NEVER use for subject-only changes (→ gmail_update_subject).\n"
+    "   'gmail_update_subject': update/rewrite the subject line of the current draft — 'make the subject clearer',\n"
+    "                      'rewrite the subject', 'give me a better subject', 'change the subject',\n"
+    "                      'the subject sounds weak', 'write a stronger subject line'.\n"
+    "                      NEVER for body rewrites (→ gmail_rewrite_draft). Always requires a current draft.\n"
     "   'gmail_add_cc'    : add a CC recipient to the current draft — 'add cc Priya',\n"
     "                      'cc Priya to the draft', 'also cc my manager'\n"
     "                      Always requires an active draft.\n"
@@ -1322,6 +1346,13 @@ _INTENT_SYSTEM = (
     "                      NEVER schedule without a draft in context.\n"
     "   'gmail_list_scheduled': show pending Adwi-scheduled sends — 'show scheduled emails',\n"
     "                      'what emails are scheduled', 'list scheduled sends', 'any scheduled messages'.\n"
+    "   'gmail_reschedule_send': move a pending scheduled send to a new time — 'reschedule to tomorrow morning',\n"
+    "                      'reschedule the Rahul send to Friday at 9', 'move the scheduled email to Monday',\n"
+    "                      'change the scheduled send time to next week', 'postpone to Friday', 'push to in 2 hours'.\n"
+    "                      ALWAYS requires a time phrase. NEVER for new schedules (→ gmail_schedule_send).\n"
+    "   'gmail_open_scheduled_draft': load the draft underlying a scheduled send — 'open the scheduled invoice draft',\n"
+    "                      'reopen the scheduled Rahul email', 'switch to the scheduled draft'.\n"
+    "                      NEVER use for listing (→ gmail_list_scheduled) or time changes (→ gmail_reschedule_send).\n"
     "   'gmail_cancel_scheduled_send': cancel a pending scheduled send — 'cancel the scheduled send',\n"
     "                      'cancel scheduled 1', 'unschedule that', 'don't send that', 'stop the scheduled email'.\n"
     "                      NEVER use for canceling an immediate send (use gmail_cancel for pending mutations).\n"
@@ -3438,6 +3469,7 @@ _GMAIL_CTX: dict = {
     "last_mutation":      None, # Phase 8: undo — {action, ids, count, description} of last confirmed op
     "triage_results":     None, # Phase 9: {reply_needed, action_needed, fyi, noise} id lists
     "scheduled_send":     None, # Phase 10: {id, draft_id, to, subject, send_at_iso} or None
+    "selected_scheduled": None, # Phase 13: user-selected scheduled-send entry
     "last_sent":          None, # Phase 11: {thread_id, to, subject, sent_at_iso} — captured after send
     "followup_reminder":  None, # Phase 11: most recently created follow-up reminder entry
     "draft_list":         [],   # Phase 12: cached [{draft_id,to,subject,mode,has_attachment,…}] from list_drafts
@@ -4000,7 +4032,8 @@ def cmd_gmail_list_scheduled() -> None:
             cprint(f"  ✗ {e.get('send_at_iso','?')[:16]}  {e.get('subject','?')[:40]}", RED)
 
     if pending:
-        cprint(f"\n  {GRAY}'cancel scheduled send' to cancel  ·  runner checks every 2 min{RESET}", "")
+        cprint(f"\n  {GRAY}'reschedule [n] to [time]' · 'open scheduled draft [n]' · 'cancel scheduled send [n]'{RESET}", "")
+        cprint(f"  {GRAY}runner checks every 2 min{RESET}", "")
 
 
 def cmd_gmail_cancel_scheduled_send(text: str = "") -> None:
@@ -4014,22 +4047,29 @@ def cmd_gmail_cancel_scheduled_send(text: str = "") -> None:
         _GMAIL_CTX["scheduled_send"] = None
         return
 
-    # Select: ordinal from text, or most recent if only one
-    target = None
-    m = re.search(r"\b([1-9])\b", text)
-    if m:
-        idx = int(m.group(1)) - 1
-        if 0 <= idx < len(pending):
-            target = pending[idx]
-        else:
-            cprint(f"  No pending send #{m.group(1)}.", YELLOW); return
-    elif len(pending) == 1:
-        target = pending[0]
-    else:
-        cprint(f"  {len(pending)} pending sends — say 'cancel scheduled send 1', 'cancel 2', etc.", YELLOW)
-        for i, e in enumerate(pending, 1):
-            cprint(f"  [{i}] {e.get('send_at_iso','?')[:16]}  {e.get('subject','?')[:40]}", "")
+    # Select via shared helper (ordinal, digit, keyword)
+    target, ambiguous = _resolve_scheduled_ref(text)
+    if ambiguous:
+        cprint(f"  Multiple pending sends match — which one?", YELLOW)
+        for i, e in enumerate(ambiguous, 1):
+            try:
+                when = datetime.fromisoformat(e["send_at_iso"]).strftime("%a %b %-d at %-I:%M %p")
+            except Exception:
+                when = e.get("send_at_iso", "?")[:16]
+            cprint(f"  [{i}] {when:<25} {e.get('subject','?')[:40]}", "")
         return
+    if target is None:
+        if len(pending) == 1:
+            target = pending[0]
+        else:
+            cprint(f"  {len(pending)} pending sends — say 'cancel scheduled send 1', 'cancel the Rahul send', etc.", YELLOW)
+            for i, e in enumerate(pending, 1):
+                try:
+                    when = datetime.fromisoformat(e["send_at_iso"]).strftime("%a %b %-d at %-I:%M %p")
+                except Exception:
+                    when = e.get("send_at_iso", "?")[:16]
+                cprint(f"  [{i}] {when:<25} {e.get('subject','?')[:40]}", "")
+            return
 
     try:
         dt   = datetime.fromisoformat(target["send_at_iso"])
@@ -4047,6 +4087,147 @@ def cmd_gmail_cancel_scheduled_send(text: str = "") -> None:
     if (_GMAIL_CTX.get("scheduled_send") or {}).get("id") == target["id"]:
         _GMAIL_CTX["scheduled_send"] = None
     cprint(f"  {GREEN}✓ Cancelled — draft still exists in Gmail and can be sent manually.{RESET}", "")
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Phase 13 — Reschedule / open scheduled sends
+# ─────────────────────────────────────────────────────────────────────────────
+
+def cmd_gmail_reschedule_send(text: str = "") -> None:
+    """Phase 13: Move a pending scheduled send to a new time."""
+    token = HOME / "SuneelWorkSpace" / "secrets" / "gmail-token.json"
+    if not token.exists():
+        cprint("  Not authorized. Run: /gmail-auth", YELLOW); return
+
+    entries = _load_scheduled_sends()
+    pending = [e for e in entries if e.get("status") == "pending"]
+
+    adwi_head("Gmail — Reschedule Scheduled Send")
+    if not pending:
+        cprint("  No pending scheduled sends to reschedule.", GRAY); return
+
+    target, ambiguous = _resolve_scheduled_ref(text)
+
+    if ambiguous:
+        cprint("  Multiple scheduled sends match — which one?", YELLOW)
+        for i, e in enumerate(ambiguous, 1):
+            try:
+                when = datetime.fromisoformat(e["send_at_iso"]).strftime("%a %b %-d at %-I:%M %p")
+            except Exception:
+                when = e.get("send_at_iso", "?")[:16]
+            cprint(f"  [{i}] {when:<25} {e.get('subject','?')[:40]}  →  {e.get('to','?')[:30]}", "")
+        cprint("  Say: 'reschedule 1 to tomorrow morning', 'reschedule the Rahul send to Monday', etc.", GRAY)
+        return
+
+    if target is None:
+        if len(pending) == 1:
+            target = pending[0]
+        else:
+            cprint(f"  {len(pending)} pending sends — specify which one (ordinal, number, or name).", YELLOW)
+            for i, e in enumerate(pending, 1):
+                try:
+                    when = datetime.fromisoformat(e["send_at_iso"]).strftime("%a %b %-d at %-I:%M %p")
+                except Exception:
+                    when = e.get("send_at_iso", "?")[:16]
+                cprint(f"  [{i}] {when:<25} {e.get('subject','?')[:40]}", "")
+            return
+
+    # Extract time phrase after a preposition when present
+    time_text = text
+    m_prep = re.search(r"\b(?:to|until|for)\b\s*(.+)", text, re.I | re.DOTALL)
+    if m_prep:
+        time_text = m_prep.group(1).strip()
+
+    dt, label = _resolve_schedule_time(time_text)
+    if dt is None:
+        cprint(f"  {YELLOW}{label}{RESET}", "")
+        cprint("  Try: 'reschedule to tomorrow morning', 'reschedule the Rahul send to Friday at 9 AM'.", GRAY)
+        return
+
+    if dt <= datetime.now():
+        cprint(f"  {YELLOW}Resolved time is in the past ({label}). Please pick a future time.{RESET}", "")
+        return
+
+    try:
+        old_when = datetime.fromisoformat(target["send_at_iso"]).strftime("%a %b %-d at %-I:%M %p")
+    except Exception:
+        old_when = target.get("send_at_iso", "?")[:16]
+
+    cprint(f"  Subject:   {target.get('subject','?')[:55]}", "")
+    cprint(f"  To:        {target.get('to','?')[:55]}", "")
+    cprint(f"  Was:       {GRAY}{old_when}{RESET}", "")
+    cprint(f"  New time:  {YELLOW}{label}{RESET}", "")
+    ans = input(f"  {YELLOW}Reschedule to {label}? (y/n){RESET} ").strip().lower()
+    if ans not in ("y", "yes"):
+        cprint("  Kept original schedule.", GRAY); return
+
+    target["send_at_iso"] = dt.isoformat(timespec="seconds")
+    target["rescheduled_at_iso"] = datetime.now().isoformat(timespec="seconds")
+    _save_scheduled_sends(entries)
+
+    if (_GMAIL_CTX.get("scheduled_send") or {}).get("id") == target["id"]:
+        _GMAIL_CTX["scheduled_send"] = target
+    if (_GMAIL_CTX.get("selected_scheduled") or {}).get("id") == target["id"]:
+        _GMAIL_CTX["selected_scheduled"] = target
+
+    cprint(f"  {GREEN}✓ Rescheduled — will now send {label}.{RESET}", "")
+
+
+def cmd_gmail_open_scheduled_draft(text: str = "") -> None:
+    """Phase 13: Load the underlying draft from a pending scheduled send into session context."""
+    token = HOME / "SuneelWorkSpace" / "secrets" / "gmail-token.json"
+    if not token.exists():
+        cprint("  Not authorized. Run: /gmail-auth", YELLOW); return
+
+    adwi_head("Gmail — Open Scheduled Draft")
+
+    target, ambiguous = _resolve_scheduled_ref(text)
+    if ambiguous:
+        cprint("  Multiple pending sends match — which one?", YELLOW)
+        for i, e in enumerate(ambiguous, 1):
+            try:
+                when = datetime.fromisoformat(e["send_at_iso"]).strftime("%a %b %-d at %-I:%M %p")
+            except Exception:
+                when = e.get("send_at_iso", "?")[:16]
+            cprint(f"  [{i}] {when:<25} {e.get('subject','?')[:40]}  →  {e.get('to','?')[:30]}", "")
+        return
+
+    if target is None:
+        entries = _load_scheduled_sends()
+        pending = [e for e in entries if e.get("status") == "pending"]
+        if not pending:
+            cprint("  No pending scheduled sends found.", GRAY); return
+        if len(pending) == 1:
+            target = pending[0]
+        else:
+            cprint("  Specify which scheduled send to open (by ordinal or name).", YELLOW)
+            for i, e in enumerate(pending, 1):
+                cprint(f"  [{i}] {e.get('subject','?')[:50]}  →  {e.get('to','?')[:30]}", "")
+            return
+
+    draft_id = target.get("draft_id", "")
+    if not draft_id:
+        cprint("  This scheduled send has no draft ID on record.", RED); return
+
+    try:
+        gh = _gmail()
+        full_draft = gh.get_draft(draft_id)
+    except Exception as exc:
+        cprint(f"  Error loading draft: {exc}", RED)
+        cprint("  The draft may have already been sent or deleted.", YELLOW); return
+
+    _GMAIL_CTX["draft"] = full_draft
+    _GMAIL_CTX["selected_scheduled"] = target
+
+    try:
+        when = datetime.fromisoformat(target["send_at_iso"]).strftime("%a %b %-d at %-I:%M %p")
+    except Exception:
+        when = target.get("send_at_iso", "?")[:16]
+
+    cprint(f"  Draft loaded. This send is scheduled for {YELLOW}{when}{RESET}.", "")
+    cprint(f"  {GRAY}To change the schedule: 'reschedule to [new time]'", "")
+    cprint(f"  To cancel the scheduled send: 'cancel the scheduled send'{RESET}", "")
+    _gmail_draft_preview(full_draft)
 
 
 # ─────────────────────────────────────────────────────────────────────────────
@@ -4300,6 +4481,61 @@ def _resolve_draft_ref(text: str) -> tuple:
         return matches[0], []
     if len(matches) > 1:
         return None, matches
+    return None, []
+
+
+def _resolve_scheduled_ref(text: str, pending_only: bool = True) -> tuple:
+    """
+    Phase 13: Find a scheduled-send entry by ordinal or name/keyword.
+    Returns (entry, []) if one match, (None, [candidates]) if ambiguous, (None, []) if not found.
+    pending_only: if True, only search entries with status='pending'.
+    """
+    all_entries = _load_scheduled_sends()
+    entries = [e for e in all_entries if not pending_only or e.get("status") == "pending"]
+    if not entries:
+        return None, []
+
+    text_l = text.lower().strip()
+
+    # Ordinal word
+    for word, idx in _DRAFT_ORDINALS.items():
+        if re.search(rf"\b{word}\b", text_l):
+            real_idx = len(entries) - 1 if idx == -1 else idx
+            if 0 <= real_idx < len(entries):
+                return entries[real_idx], []
+            return None, []
+
+    # Bare digit
+    m = re.search(r"\b([1-9])\b", text_l)
+    if m:
+        idx = int(m.group(1)) - 1
+        if 0 <= idx < len(entries):
+            return entries[idx], []
+        return None, []
+
+    # Strip command/time stop-words, match To or Subject
+    stop = r"\b(?:the|a|an|my|that|this|scheduled|schedule|reschedule|send|email|message|move|push|delay|postpone|change|cancel|open|reopen|to|for|until|load|switch)\b"
+    kw = re.sub(stop, " ", text_l).strip()
+    kw = re.sub(r"\s+", " ", kw).strip()
+
+    # Remove time phrases so "to tomorrow" doesn't become the keyword
+    time_pat = r"\b(?:tomorrow|tonight|morning|afternoon|evening|eod|noon|am|pm|monday|tuesday|wednesday|thursday|friday|saturday|sunday|next\s+week|in\s+\d+\s+\w+|at\s+\d{1,2})\b"
+    kw = re.sub(time_pat, " ", kw).strip()
+    kw = re.sub(r"\s+", " ", kw).strip()
+
+    if kw:
+        matches = [
+            e for e in entries
+            if kw in (e.get("to") or "").lower() or kw in (e.get("subject") or "").lower()
+        ]
+        if len(matches) == 1:
+            return matches[0], []
+        if len(matches) > 1:
+            return None, matches
+
+    # No keyword match — implicit "that" context: return single entry
+    if len(entries) == 1:
+        return entries[0], []
     return None, []
 
 
@@ -5083,7 +5319,7 @@ def cmd_gmail_compose(text: str = "") -> None:
             instruction = input(f"  {YELLOW}What should the email say?{RESET} ").strip()
             if not instruction:
                 cprint("  Cancelled.", GRAY); return
-        _gmail_do_compose(resolved, instruction[:60].rstrip(".,?!"), instruction,
+        _gmail_do_compose(resolved, _derive_subject(text, instruction), instruction,
                           cc=cc_resolved, bcc=bcc_resolved)
     elif candidates:
         cprint(f"\n  Multiple contacts named {to_raw!r}:", YELLOW)
@@ -5098,7 +5334,7 @@ def cmd_gmail_compose(text: str = "") -> None:
             "instruction": instruction,
             "candidates":  candidates,
             "mode":        "compose",
-            "subject":     instruction[:60].rstrip(".,?!"),
+            "subject":     _derive_subject(text, instruction),
             "cc":          cc_resolved,
             "bcc":         bcc_resolved,
         }
@@ -5111,9 +5347,71 @@ def cmd_gmail_compose(text: str = "") -> None:
             instruction = input(f"  {YELLOW}What should the email say?{RESET} ").strip()
             if not instruction:
                 cprint("  Cancelled.", GRAY); return
-        _gmail_do_compose(email, instruction[:60].rstrip(".,?!"), instruction,
+        _gmail_do_compose(email, _derive_subject(text, instruction), instruction,
                           cc=cc_resolved, bcc=bcc_resolved)
 
+
+
+# ── Gmail Phase 14: smart subject extraction helper ─────────────────────────────
+
+def _derive_subject(text: str, instruction: str) -> str:
+    """
+    Phase 14: Derive a concise email subject from the compose prompt.
+    Priority: explicit about/re/regarding topic phrase → cleaned title-case.
+    Fallback: first significant words of the instruction.
+    """
+    tl = text.lower()
+
+    # Pattern 1: "about X saying/to say/to tell/that/mentioning" → X is the topic
+    m = re.search(
+        r"\babout\s+([\w][\w\s,.'/-]{1,55}?)"
+        r"(?=\s+(?:saying|to\s+say|to\s+tell|that\s+I|mentioning|and\s+I\b))",
+        text, re.I
+    )
+    if m:
+        return _clean_subject_phrase(m.group(1))
+
+    # Pattern 2: "re:? X" (stops at saying/about-2 or end of phrase)
+    m = re.search(
+        r"\bre:?\s+([\w][\w\s,.'/-]{1,55}?)(?=\s+(?:saying|and\s+I|to\s+say)|[.,?]|$)",
+        text, re.I
+    )
+    if m:
+        return _clean_subject_phrase(m.group(1))
+
+    # Pattern 3: "regarding X"
+    m = re.search(
+        r"\bregarding\s+([\w][\w\s,.'/-]{1,55}?)(?=\s+(?:saying|and\s+I)|[.,?]|$)",
+        text, re.I
+    )
+    if m:
+        return _clean_subject_phrase(m.group(1))
+
+    # Pattern 4: bare "about X" (no saying — takes until punctuation or end)
+    m = re.search(
+        r"\babout\s+([\w][\w\s,.'/-]{2,50})(?=[.,?]|$)",
+        text, re.I
+    )
+    if m:
+        return _clean_subject_phrase(m.group(1))
+
+    # Fallback: strip filler from instruction, take first ~55 chars
+    filler = r"^\s*(?:I\s+want\s+to|please\s+|can\s+you\s+|just\s+|i\s+need\s+to\s+)"
+    cleaned = re.sub(filler, "", instruction, flags=re.I).strip()
+    return cleaned[:55].rstrip(".,?! ") or instruction[:55].rstrip(".,?! ")
+
+
+def _clean_subject_phrase(phrase: str) -> str:
+    """Trim, strip leading articles, limit length, title-case if short."""
+    phrase = phrase.strip().rstrip(".,?! ")
+    # Strip leading article
+    phrase = re.sub(r"^(?:the|a|an)\s+", "", phrase, flags=re.I).strip()
+    phrase = phrase[:55].rstrip(".,?! ")
+    # Title-case only if 4 words or fewer (avoids mangling long phrases)
+    words = phrase.split()
+    if len(words) <= 4:
+        return " ".join(w.capitalize() if w.lower() not in {"the","a","an","of","to","in","at","and","or","for","on","by"} or i == 0 else w for i, w in enumerate(words))
+    return phrase
 
 
 # ── Gmail Phase 4: contact resolution + draft rewrite helpers ─────────────────
@@ -5547,14 +5845,14 @@ def cmd_gmail_recipient_choice(selection: int) -> None:
     cprint(f"  ✓ Recipient: {display} <{to}>", GREEN)
     _GMAIL_CTX["pending_recipient"] = None
     instruction = pr.get("instruction", "")
-    subject     = pr.get("subject", instruction[:60].rstrip(".,?!"))
+    subject     = pr.get("subject") or _derive_subject(instruction, instruction)
     cc          = pr.get("cc", "")
     bcc         = pr.get("bcc", "")
     if not instruction:
         instruction = input(f"  {YELLOW}What should the email say?{RESET} ").strip()
         if not instruction:
             cprint("  Cancelled.", GRAY); return
-        subject = instruction[:60].rstrip(".,?!")
+        subject = _derive_subject(instruction, instruction)
     _gmail_do_compose(to, subject, instruction, cc=cc, bcc=bcc)
 
 
@@ -5801,14 +6099,19 @@ def cmd_gmail_rewrite_draft(text: str = "") -> None:
     current_body = draft.get("body", "")
     prompt = (
         f"Rewrite this email body according to the instruction.\n"
-        f"Keep the same factual content unless the instruction says to add or change specific information.\n\n"
+        f"IMPORTANT: Preserve all specific dates, names, commitments, and facts unless the instruction explicitly says to change them.\n\n"
         f"Original email body:\n{current_body}\n\n"
         f"Rewrite instruction: {instruction}\n\n"
-        f"Output ONLY the rewritten email body. No subject line."
+        f"Output ONLY the rewritten email body. No subject line. No explanation."
     )
     new_body = _llm_generate(
         prompt,
-        system="You are rewriting an email draft for Suneel. Output only the new body text. No subject line."
+        system=(
+            "You are rewriting an email draft for Suneel. "
+            "Apply the tone/length/style instruction faithfully. "
+            "Preserve all factual content (dates, commitments, names). "
+            "Output only the new body text. No subject line."
+        )
     )
     if not new_body or new_body.startswith("[LLM error"):
         cprint(f"  Rewrite failed: {new_body}", RED); return
@@ -5829,6 +6132,67 @@ def cmd_gmail_rewrite_draft(text: str = "") -> None:
     # Always update local context and show preview
     _GMAIL_CTX["draft"]["body"] = new_body
     cprint(f"  ✓ Draft rewritten", GREEN)
+    _gmail_draft_preview(_GMAIL_CTX["draft"])
+
+
+def cmd_gmail_update_subject(text: str = "") -> None:
+    """Phase 14: Rewrite/update the subject line of the current draft."""
+    draft = _GMAIL_CTX.get("draft")
+    if not draft:
+        cprint("  No current draft. Create one with 'compose an email to X' or 'reply saying X'.", YELLOW); return
+
+    # Extract instruction: strip subject-meta preamble
+    instruction = re.sub(
+        r"^\s*(?:rewrite|update|change|improve|fix|make|give\s+me|write)\s+(?:the\s+)?(?:a\s+)?(?:better|clearer|shorter|stronger|good|clear|new|different|more\s+professional\s+)?subject(?:\s+line)?\s*(?:to\s+be\s+|to\s+|as\s+)?",
+        "", text, flags=re.I
+    ).strip()
+    # If instruction is "to X" (literal new subject specified), use X directly
+    literal_m = re.match(r"^(?:to|as)\s+['\"]?(.+?)['\"]?\s*$", instruction, re.I)
+    if literal_m:
+        new_subject = literal_m.group(1).strip().rstrip(".,?!")
+    else:
+        # LLM-generate a better subject from current body context + instruction
+        adwi_head("Gmail — Update Subject")
+        current_body   = draft.get("body", "")
+        current_subject = draft.get("subject", "(no subject)")
+        guidance = instruction if instruction else "Write a clear, concise subject line for this email."
+        cprint(f"  {GRAY}Generating better subject…{RESET}")
+        prompt = (
+            f"Current email subject: {current_subject}\n\n"
+            f"Email body:\n{current_body[:600]}\n\n"
+            f"Task: {guidance}\n\n"
+            f"Output ONLY the subject line text. No quotes, no 'Subject:', no explanation."
+        )
+        new_subject = _llm_generate(
+            prompt,
+            system="You are improving an email subject line. Output only the subject line text, nothing else.",
+            max_tokens=60,
+        ).strip().rstrip(".,?!")
+        if not new_subject or new_subject.startswith("[LLM error"):
+            cprint(f"  Could not generate subject: {new_subject}", RED); return
+
+    old_subject = draft.get("subject", "(no subject)")
+    adwi_head("Gmail — Update Subject")
+    cprint(f"  Was:  {GRAY}{old_subject}{RESET}", "")
+    cprint(f"  New:  {YELLOW}{new_subject}{RESET}", "")
+    ans = input(f"  {YELLOW}Use this subject? (y/n){RESET} ").strip().lower()
+    if ans not in ("y", "yes"):
+        cprint("  Kept original subject.", GRAY); return
+
+    try:
+        gh = _gmail()
+        gh.update_draft(
+            draft["draft_id"], draft["to"], new_subject, draft.get("body", ""),
+            thread_id=draft.get("thread_id"),
+            message_id_header=draft.get("message_id", ""),
+            cc=draft.get("cc") or "",
+            bcc=draft.get("bcc") or "",
+            attachments=[a["path"] for a in draft.get("outbound_attachments") or []],
+        )
+    except Exception as exc:
+        cprint(f"  {YELLOW}Gmail update failed ({exc}) — preview reflects new subject.{RESET}")
+    _GMAIL_CTX["draft"]["subject"] = new_subject
+    cprint(f"  {GREEN}✓ Subject updated.{RESET}")
     _gmail_draft_preview(_GMAIL_CTX["draft"])
 
 
@@ -7916,6 +8280,8 @@ def dispatch_natural(text: str):
         cmd_gmail_cancel_draft()
     elif intent == "gmail_rewrite_draft":
         cmd_gmail_rewrite_draft(text)
+    elif intent == "gmail_update_subject":
+        cmd_gmail_update_subject(text)
     elif intent == "gmail_add_cc":
         cmd_gmail_add_cc(text)
     elif intent == "gmail_add_bcc":
@@ -7932,6 +8298,10 @@ def dispatch_natural(text: str):
         cmd_gmail_list_scheduled()
     elif intent == "gmail_cancel_scheduled_send":
         cmd_gmail_cancel_scheduled_send(text)
+    elif intent == "gmail_reschedule_send":
+        cmd_gmail_reschedule_send(text)
+    elif intent == "gmail_open_scheduled_draft":
+        cmd_gmail_open_scheduled_draft(text)
     elif intent == "gmail_followup_reminder":
         cmd_gmail_followup_reminder(text)
     elif intent == "gmail_list_followups":
@@ -8272,6 +8642,8 @@ def handle(line: str) -> bool:
     elif line == "/gmail-cancel-draft": cmd_gmail_cancel_draft()
     elif line == "/gmail-rewrite": cmd_gmail_rewrite_draft("")
     elif line.startswith("/gmail-rewrite "): cmd_gmail_rewrite_draft(line[15:].strip())
+    elif line == "/gmail-update-subject": cmd_gmail_update_subject("")
+    elif line.startswith("/gmail-update-subject "): cmd_gmail_update_subject(line[22:].strip())
     elif line == "/gmail-add-cc": cmd_gmail_add_cc("")
     elif line.startswith("/gmail-add-cc "): cmd_gmail_add_cc(line[14:].strip())
     elif line == "/gmail-add-bcc": cmd_gmail_add_bcc("")
@@ -8292,6 +8664,10 @@ def handle(line: str) -> bool:
     elif line == "/gmail-scheduled": cmd_gmail_list_scheduled()
     elif line == "/gmail-cancel-scheduled": cmd_gmail_cancel_scheduled_send("")
     elif line.startswith("/gmail-cancel-scheduled "): cmd_gmail_cancel_scheduled_send(line[24:].strip())
+    elif line == "/gmail-reschedule": cmd_gmail_reschedule_send("")
+    elif line.startswith("/gmail-reschedule "): cmd_gmail_reschedule_send(line[18:].strip())
+    elif line == "/gmail-open-scheduled": cmd_gmail_open_scheduled_draft("")
+    elif line.startswith("/gmail-open-scheduled "): cmd_gmail_open_scheduled_draft(line[22:].strip())
     elif line.startswith("/gmail-followup "): cmd_gmail_followup_reminder(line[16:].strip())
     elif line == "/gmail-followup": cmd_gmail_followup_reminder("")
     elif line == "/gmail-followups": cmd_gmail_list_followups()

@@ -42,6 +42,7 @@ ALL_INTENTS = [
     "gmail_triage",
     "gmail_schedule_send", "gmail_list_scheduled", "gmail_cancel_scheduled_send",
     "gmail_followup_reminder", "gmail_list_followups", "gmail_cancel_followup",
+    "gmail_reschedule_send", "gmail_open_scheduled_draft",
     "gmail_list_drafts", "gmail_open_draft", "gmail_delete_draft",
     "sync",
     "nightly_status","nightly_run",
@@ -344,6 +345,11 @@ REGEX_INTENTS = [
     (re.compile(r"\bcc\b.{0,40}\b(?:to\s+(?:the\s+)?(?:draft|email|message)|on\s+(?:this|the\s+(?:draft|email|message)))\b", re.I), "gmail_add_cc"),
     (re.compile(r"\badd\s+bcc\b", re.I), "gmail_add_bcc"),
     (re.compile(r"\bbcc\b.{0,40}\b(?:to\s+(?:the\s+)?(?:draft|email|message)|on\s+(?:this|the\s+(?:draft|email|message)))\b", re.I), "gmail_add_bcc"),
+    # gmail Phase 13: reschedule/open scheduled sends — MUST precede Phase 6 (open+invoice conflict)
+    (re.compile(r"\breschedule\b", re.I), "gmail_reschedule_send"),
+    (re.compile(r"\b(?:move|push|delay|postpone)\b.{0,30}\b(?:scheduled|the\s+(?:email|send|message|draft))\b.{0,30}\b(?:to|until)\b", re.I), "gmail_reschedule_send"),
+    (re.compile(r"\bchange\b.{0,20}\bscheduled\b.{0,20}\b(?:time|date|send|email|message)\b", re.I), "gmail_reschedule_send"),
+    (re.compile(r"\b(?:open|reopen|switch\s+to|load)\b.{0,20}\bscheduled\b.{0,20}\b(?:draft|email|send|message)\b", re.I), "gmail_open_scheduled_draft"),
     # gmail Phase 6: attachment intents
     (re.compile(r"\b(?:summarize|tldr|what.s\s+in|whats\s+in)\b.{0,30}\b(?:the\s+)?(?:attached\s+)?(?:attachment|pdf|document|invoice|receipt|spreadsheet)\b", re.I), "gmail_summarize_attachment"),
     (re.compile(r"\bwhat(?:'s|\s+is)\b.{0,30}\b(?:in\s+)?(?:the\s+)?(?:attached|attachment)\b", re.I), "gmail_summarize_attachment"),
@@ -1151,6 +1157,26 @@ def build_p2_corpus() -> list[dict]:
         "remove draft 2",
     ]:
         add(p, "comms", "gmail_delete_draft", "medium", fam="gmail_delete_draft")
+
+    # Phase 13: reschedule / open scheduled sends
+    for p in [
+        "reschedule the scheduled send to tomorrow morning",
+        "reschedule to Monday at 9",
+        "reschedule that to Friday",
+        "move the scheduled email to Friday afternoon",
+        "change the scheduled send time to tomorrow",
+        "postpone the email to Monday",
+        "push the scheduled send to in 2 hours",
+    ]:
+        add(p, "comms", "gmail_reschedule_send", "medium", fam="gmail_reschedule_send")
+    for p in [
+        "open the scheduled invoice draft",
+        "reopen the scheduled Rahul email",
+        "switch to the scheduled draft",
+        "open scheduled send 2",
+        "open the scheduled email draft",
+    ]:
+        add(p, "comms", "gmail_open_scheduled_draft", "medium", fam="gmail_open_scheduled_draft")
 
     return sc
 

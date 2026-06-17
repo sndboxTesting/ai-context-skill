@@ -35,13 +35,14 @@ ALL_INTENTS = [
     "git_status","backup_now","backup_status","backup_log",
     "gmail","gmail_read","gmail_open","gmail_thread","gmail_summarize","gmail_list_category",
     "gmail_archive","gmail_trash","gmail_mark_read","gmail_mark_unread","gmail_confirm","gmail_cancel",
-    "gmail_draft_reply","gmail_compose","gmail_show_draft","gmail_send_draft","gmail_cancel_draft","gmail_rewrite_draft",
+    "gmail_draft_reply","gmail_compose","gmail_show_draft","gmail_send_draft","gmail_cancel_draft","gmail_rewrite_draft","gmail_update_subject",
     "gmail_add_cc","gmail_add_bcc",
     "gmail_list_attachments","gmail_save_attachment","gmail_summarize_attachment",
     "gmail_attach_file", "gmail_remove_attachment", "gmail_undo",
     "gmail_triage",
     "gmail_schedule_send", "gmail_list_scheduled", "gmail_cancel_scheduled_send",
     "gmail_followup_reminder", "gmail_list_followups", "gmail_cancel_followup",
+    "gmail_reschedule_send", "gmail_open_scheduled_draft",
     "gmail_list_drafts", "gmail_open_draft", "gmail_delete_draft",
     "sync",
     "nightly_status","nightly_run",
@@ -367,14 +368,26 @@ REGEX_INTENTS = [
     (re.compile(r"\battach\b.{0,50}\b(?:pdf|document|file|spreadsheet|invoice|report|deck|image|photo|attachment)\b", re.I), "gmail_attach_file"),
     (re.compile(r"\b(?:add|include)\b.{0,20}\b(?:the\s+)?(?:pdf|spreadsheet|invoice|report|deck|image|attachment)\b.{0,30}\b(?:(?:to|in)\s+(?:(?:this|the)\s+)?(?:draft|email|message|reply))\b", re.I), "gmail_attach_file"),
     (re.compile(r"\battach\b.{0,30}\b(?:that|the|saved)\b.{0,20}\battachment\b", re.I), "gmail_attach_file"),
+    # gmail Phase 14: subject update — MUST precede Phase 4 rewrite
+    (re.compile(r"\b(?:rewrite|update|change|improve|fix)\b.{0,20}\bsubject\b", re.I), "gmail_update_subject"),
+    (re.compile(r"\b(?:make|write)\b.{0,20}\b(?:a\s+)?(?:better|clearer|shorter|stronger|good|clear|more\s+professional)\b.{0,10}\bsubject\b", re.I), "gmail_update_subject"),
+    (re.compile(r"\bsubject\b.{0,25}\b(?:is|feels?|seems?|sounds?)\b.{0,20}\b(?:weak|vague|unclear|bad|poor|generic|long|boring)\b", re.I), "gmail_update_subject"),
+    (re.compile(r"\bgive\s+me\b.{0,20}\b(?:a\s+)?(?:better|clearer|different|new|good)\b.{0,10}\bsubject\b", re.I), "gmail_update_subject"),
     # gmail Phase 4: rewrite intent — MUST precede Phase 3 patterns
-    (re.compile(r"\b(?:make|rewrite|revise|edit)\b.{0,20}\b(?:it|the\s+draft|the\s+reply|this|the\s+email)\b.{0,40}\b(?:shorter|longer|brief(?:er)?|concis(?:e|er)|professional(?:ly)?|formal(?:ly)?|casual(?:ly)?|warm(?:er|ly)?|friendli(?:er)?|direct(?:ly)?|clear(?:er)?)\b", re.I), "gmail_rewrite_draft"),
+    (re.compile(r"\b(?:make|rewrite|revise|edit)\b.{0,20}\b(?:it|the\s+draft|the\s+reply|this|the\s+email)\b.{0,40}\b(?:shorter|longer|brief(?:er)?|concis(?:e|er)|professional(?:ly)?|formal(?:ly)?|casual(?:ly)?|warm(?:er|ly)?|friendli(?:er)?|direct(?:ly)?|clear(?:er)?|natural(?:ly)?|informal(?:ly)?|polite(?:ly)?|robotic|engaging)\b", re.I), "gmail_rewrite_draft"),
+    (re.compile(r"\bturn\s+(?:this|it)\b.{0,30}\binto\b.{0,30}\b(?:shorter|brief|concise|professional|update|summary|formal|casual|polite|warm|friendly|direct|natural)\b", re.I), "gmail_rewrite_draft"),
+    (re.compile(r"\bwrite\b.{0,10}(?:a|an)\s+(?:shorter|briefer|more\s+(?:concise|direct|professional|formal|casual|friendly|polite|natural|warm))\b.{0,20}\b(?:version|draft|email|message|reply)?\b", re.I), "gmail_rewrite_draft"),
     (re.compile(r"\b(?:mention|add|include)\b.{0,50}\b(?:in|to)\s+(?:the\s+)?(?:draft|reply|email|message)\b", re.I), "gmail_rewrite_draft"),
     # gmail Phase 5: add-cc / add-bcc — MUST precede Phase 3
     (re.compile(r"\badd\s+cc\b", re.I), "gmail_add_cc"),
     (re.compile(r"\bcc\b.{0,40}\b(?:to\s+(?:the\s+)?(?:draft|email|message)|on\s+(?:this|the\s+(?:draft|email|message)))\b", re.I), "gmail_add_cc"),
     (re.compile(r"\badd\s+bcc\b", re.I), "gmail_add_bcc"),
     (re.compile(r"\bbcc\b.{0,40}\b(?:to\s+(?:the\s+)?(?:draft|email|message)|on\s+(?:this|the\s+(?:draft|email|message)))\b", re.I), "gmail_add_bcc"),
+    # gmail Phase 13: reschedule/open scheduled sends — MUST precede Phase 6 (open+invoice conflict)
+    (re.compile(r"\breschedule\b", re.I), "gmail_reschedule_send"),
+    (re.compile(r"\b(?:move|push|delay|postpone)\b.{0,30}\b(?:scheduled|the\s+(?:email|send|message|draft))\b.{0,30}\b(?:to|until)\b", re.I), "gmail_reschedule_send"),
+    (re.compile(r"\bchange\b.{0,20}\bscheduled\b.{0,20}\b(?:time|date|send|email|message)\b", re.I), "gmail_reschedule_send"),
+    (re.compile(r"\b(?:open|reopen|switch\s+to|load)\b.{0,20}\bscheduled\b.{0,20}\b(?:draft|email|send|message)\b", re.I), "gmail_open_scheduled_draft"),
     # gmail Phase 6: attachment intents
     (re.compile(r"\b(?:summarize|tldr|what.s\s+in|whats\s+in)\b.{0,30}\b(?:the\s+)?(?:attached\s+)?(?:attachment|pdf|document|invoice|receipt|spreadsheet)\b", re.I), "gmail_summarize_attachment"),
     (re.compile(r"\bwhat(?:'s|\s+is)\b.{0,30}\b(?:in\s+)?(?:the\s+)?(?:attached|attachment)\b", re.I), "gmail_summarize_attachment"),
@@ -1121,6 +1134,20 @@ def build_corpus() -> list[dict]:
     ]:
         add(p, "comms", "gmail_rewrite_draft", "medium", fam="gmail_rewrite_draft")
 
+    # Phase 14 — extended rewrite + subject update
+    for p in [
+        "make it more polite","make it sound less robotic","make it more natural",
+        "make it more informal","turn this into a concise update",
+        "write a shorter version","write a more professional reply",
+    ]:
+        add(p, "comms", "gmail_rewrite_draft", "medium", fam="gmail_rewrite_draft")
+    for p in [
+        "make the subject clearer","rewrite the subject","update the subject",
+        "give me a better subject","the subject sounds weak","write a stronger subject",
+        "improve the subject line","change the subject to something shorter",
+    ]:
+        add(p, "comms", "gmail_update_subject", "medium", fam="gmail_update_subject")
+
     # ─────────────────────────────────────────────────────────────────────────
     # GMAIL PHASE 5 — add_cc / add_bcc  (12 scenarios)
     # ─────────────────────────────────────────────────────────────────────────
@@ -1302,6 +1329,28 @@ def build_corpus() -> list[dict]:
         "remove draft 2",
     ]:
         add(p, "comms", "gmail_delete_draft", "medium", fam="gmail_delete_draft")
+
+    # Phase 13: reschedule / open scheduled sends
+    for p in [
+        "reschedule the scheduled send to tomorrow morning",
+        "reschedule to Monday at 9",
+        "reschedule that to Friday",
+        "reschedule the Rahul send to next week",
+        "move the scheduled email to Friday afternoon",
+        "change the scheduled send time to tomorrow",
+        "postpone the email to Monday",
+        "push the scheduled send to in 2 hours",
+    ]:
+        add(p, "comms", "gmail_reschedule_send", "medium", fam="gmail_reschedule_send")
+    for p in [
+        "open the scheduled invoice draft",
+        "reopen the scheduled Rahul email",
+        "switch to the scheduled draft",
+        "load the scheduled send draft",
+        "open scheduled send 2",
+        "open the scheduled email draft",
+    ]:
+        add(p, "comms", "gmail_open_scheduled_draft", "medium", fam="gmail_open_scheduled_draft")
 
     # ─────────────────────────────────────────────────────────────────────────
     # WEB SEARCH  (45 scenarios)

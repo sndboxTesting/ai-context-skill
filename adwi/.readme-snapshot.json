@@ -60,9 +60,11 @@
     "/gmail-mark-read",
     "/gmail-mark-unread",
     "/gmail-open-draft",
+    "/gmail-open-scheduled",
     "/gmail-promos",
     "/gmail-read",
     "/gmail-remove-attachment",
+    "/gmail-reschedule",
     "/gmail-rewrite",
     "/gmail-save-attachment",
     "/gmail-scheduled",
@@ -77,6 +79,7 @@
     "/gmail-trash",
     "/gmail-triage",
     "/gmail-undo",
+    "/gmail-update-subject",
     "/ha",
     "/help",
     "/image <path>  or  /screenshot-analyze <path>",
@@ -165,7 +168,7 @@
     [
       "open-webui",
       "1",
-      "Up 20 hours (healthy)"
+      "Up 21 hours (healthy)"
     ],
     [
       "n8n",
@@ -190,7 +193,7 @@
     [
       "grafana",
       "1",
-      "Up 20 hours"
+      "Up 21 hours"
     ],
     [
       "node-exporter",
@@ -245,5 +248,5 @@
     "MODEL_NLU_FALLBACK": "qwen3:0.6b"
   },
   "ts": "2026-06-17",
-  "_hash": "7f9ad317023eb788"
+  "_hash": "4a3be74ddef2c2b5"
 }

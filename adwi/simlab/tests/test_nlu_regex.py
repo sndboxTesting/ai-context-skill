@@ -1117,5 +1117,77 @@ class TestGmailRoutingPhase12(unittest.TestCase):
         self.assertNotEqual(result, "gmail_show_draft")
 
 
+class TestGmailRoutingPhase13(unittest.TestCase):
+    """Phase 13 — reschedule/open scheduled sends NLU routing."""
+
+    # ── gmail_reschedule_send ──────────────────────────────────────────────────
+
+    def test_reschedule_bare_word(self):
+        self.assertEqual(_classify("reschedule the scheduled send to tomorrow morning"), "gmail_reschedule_send")
+
+    def test_reschedule_to_monday(self):
+        self.assertEqual(_classify("reschedule to Monday at 9"), "gmail_reschedule_send")
+
+    def test_reschedule_that_to_friday(self):
+        self.assertEqual(_classify("reschedule that to Friday"), "gmail_reschedule_send")
+
+    def test_reschedule_named_send(self):
+        self.assertEqual(_classify("reschedule the Rahul send to next week"), "gmail_reschedule_send")
+
+    def test_move_scheduled_email(self):
+        self.assertEqual(_classify("move the scheduled email to Friday afternoon"), "gmail_reschedule_send")
+
+    def test_change_scheduled_send_time(self):
+        self.assertEqual(_classify("change the scheduled send time to tomorrow"), "gmail_reschedule_send")
+
+    def test_postpone_email(self):
+        self.assertEqual(_classify("postpone the email to Monday"), "gmail_reschedule_send")
+
+    def test_push_scheduled_send(self):
+        self.assertEqual(_classify("push the scheduled send to in 2 hours"), "gmail_reschedule_send")
+
+    def test_reschedule_not_schedule_send(self):
+        # "reschedule" must NOT bleed into gmail_schedule_send
+        self.assertEqual(_classify("reschedule this to tomorrow"), "gmail_reschedule_send")
+        self.assertNotEqual(_classify("reschedule this to tomorrow"), "gmail_schedule_send")
+
+    def test_reschedule_not_cancel_scheduled(self):
+        # reschedule must not bleed into cancel
+        result = _classify("reschedule to Friday")
+        self.assertEqual(result, "gmail_reschedule_send")
+        self.assertNotEqual(result, "gmail_cancel_scheduled_send")
+
+    # ── gmail_open_scheduled_draft ────────────────────────────────────────────
+
+    def test_open_scheduled_invoice_draft(self):
+        self.assertEqual(_classify("open the scheduled invoice draft"), "gmail_open_scheduled_draft")
+
+    def test_reopen_scheduled_email(self):
+        self.assertEqual(_classify("reopen the scheduled Rahul email"), "gmail_open_scheduled_draft")
+
+    def test_switch_to_scheduled_draft(self):
+        self.assertEqual(_classify("switch to the scheduled draft"), "gmail_open_scheduled_draft")
+
+    def test_load_scheduled_send_draft(self):
+        self.assertEqual(_classify("load the scheduled send draft"), "gmail_open_scheduled_draft")
+
+    def test_open_scheduled_send_ordinal(self):
+        self.assertEqual(_classify("open scheduled send 2"), "gmail_open_scheduled_draft")
+
+    def test_open_scheduled_email_draft(self):
+        self.assertEqual(_classify("open the scheduled email draft"), "gmail_open_scheduled_draft")
+
+    def test_open_scheduled_draft_beats_open_draft(self):
+        # "open the scheduled draft" must go to open_scheduled_draft, not open_draft
+        result = _classify("open the scheduled draft")
+        self.assertEqual(result, "gmail_open_scheduled_draft")
+        self.assertNotEqual(result, "gmail_open_draft")
+
+    def test_open_scheduled_draft_beats_list_scheduled(self):
+        # "open the scheduled invoice draft" must not go to list_scheduled
+        result = _classify("open the scheduled invoice draft")
+        self.assertNotEqual(result, "gmail_list_scheduled")
+
+
 if __name__ == "__main__":
     unittest.main(verbosity=2)

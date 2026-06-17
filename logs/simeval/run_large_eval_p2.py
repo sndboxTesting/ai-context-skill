@@ -42,6 +42,7 @@ ALL_INTENTS = [
     "gmail_triage",
     "gmail_schedule_send", "gmail_list_scheduled", "gmail_cancel_scheduled_send",
     "gmail_followup_reminder", "gmail_list_followups", "gmail_cancel_followup",
+    "gmail_list_drafts", "gmail_open_draft", "gmail_delete_draft",
     "sync",
     "nightly_status","nightly_run",
     "fix_error","patch_adwi","inspect_code","test_adwi","eval_routing","eval_adwi",
@@ -352,6 +353,19 @@ REGEX_INTENTS = [
     (re.compile(r"\battachment.{0,25}\b(?:on|in|for|from)\b", re.I), "gmail_list_attachments"),
     (re.compile(r"\bany\s+attachments?\b", re.I), "gmail_list_attachments"),
     (re.compile(r"\b(?:what|which)\b.{0,20}\b(?:file|attachment|pdf|document).{0,15}\battach", re.I), "gmail_list_attachments"),
+    # gmail Phase 12: multi-draft management — MUST precede Phase 3 patterns
+    (re.compile(r"\b(?:list|show)\b.{0,5}\b(?:my\s+|all\s+)?drafts\b", re.I), "gmail_list_drafts"),
+    (re.compile(r"\b(?:show|view|see)\b.{0,20}\ball\s+drafts\b", re.I), "gmail_list_drafts"),
+    (re.compile(r"\b(?:show|list)\b.{0,20}\b(?:scheduled|unscheduled|unsent|pending)\s+drafts\b", re.I), "gmail_list_drafts"),
+    (re.compile(r"\bwhat\s+drafts\b.{0,20}\b(?:do\s+I\s+have|are\s+there)\b", re.I), "gmail_list_drafts"),
+    (re.compile(r"\b(?:open|switch\s+to|go\s+(?:back\s+)?to|load|select|use)\b.{0,30}\b(?:\d|first|second|third|fourth|fifth|last)\b.{0,10}\bdraft\b", re.I), "gmail_open_draft"),
+    (re.compile(r"\b(?:open|switch\s+to|go\s+(?:back\s+)?to|load|select)\b.{0,5}draft\s+[1-9]\b", re.I), "gmail_open_draft"),
+    (re.compile(r"\bsend\b.{0,5}(?:draft\s+[1-9]|the\s+(?:first|second|third|fourth|fifth|last)\s+draft)\b", re.I), "gmail_open_draft"),
+    (re.compile(r"\bsend\b.{0,5}the\s+(?!draft\b)\w+\s+draft\b", re.I), "gmail_open_draft"),
+    (re.compile(r"\b(?:open|switch\s+to|go\s+(?:back\s+)?to)\b.{0,5}the\s+(?!draft\b)\w+\s+draft\b", re.I), "gmail_open_draft"),
+    (re.compile(r"\b(?:delete|remove|trash)\b.{0,5}(?:draft\s+[1-9]|the\s+(?:first|second|third|fourth|fifth|last)\s+draft)\b", re.I), "gmail_delete_draft"),
+    (re.compile(r"\b(?:delete|remove|trash)\b.{0,5}the\s+(?!draft\b)(?!that\b)(?!current\b)\w+\s+draft\b", re.I), "gmail_delete_draft"),
+    (re.compile(r"\b(?:cancel|delete|remove)\b.{0,15}\bold\b.{0,10}\bdraft\b", re.I), "gmail_delete_draft"),
     # gmail Phase 11: follow-up reminders — MUST precede Phase 10 patterns
     (re.compile(r"\bcancel\b.{0,25}\b(?:follow.?up|reminder|that\s+reminder)\b", re.I), "gmail_cancel_followup"),
     (re.compile(r"\b(?:remove|delete|stop)\b.{0,20}\breminder\b", re.I), "gmail_cancel_followup"),
@@ -1104,6 +1118,39 @@ def build_p2_corpus() -> list[dict]:
         "delete reminder",
     ]:
         add(p, "comms", "gmail_cancel_followup", "medium", fam="gmail_cancel_followup")
+
+    # Phase 12: multi-draft management
+    for p in [
+        "show my drafts",
+        "list drafts",
+        "show all drafts",
+        "show scheduled drafts",
+        "show unscheduled drafts",
+        "what drafts do I have",
+        "which draft has the PDF attached",
+    ]:
+        add(p, "comms", "gmail_list_drafts", "easy", fam="gmail_list_drafts")
+
+    for p in [
+        "open draft 2",
+        "open the second draft",
+        "go back to the invoice draft",
+        "switch to the Rahul draft",
+        "send the second draft",
+        "send draft 2",
+        "send the Rahul draft",
+        "load draft 1",
+    ]:
+        add(p, "comms", "gmail_open_draft", "medium", fam="gmail_open_draft")
+
+    for p in [
+        "delete draft 1",
+        "delete the second draft",
+        "delete the Rahul draft",
+        "cancel the old draft",
+        "remove draft 2",
+    ]:
+        add(p, "comms", "gmail_delete_draft", "medium", fam="gmail_delete_draft")
 
     return sc
 

@@ -385,19 +385,65 @@ def get_my_email() -> str:
     return service.users().getProfile(userId="me").execute().get("emailAddress", "")
 
 
-def get_draft(draft_id: str) -> dict:
-    """Fetch draft details from Gmail. Returns subject/to/body dict."""
+def list_drafts(max_results: int = 15) -> list:
+    """
+    List Gmail drafts with metadata. Each dict:
+    {draft_id, message_id, thread_id, to, subject, mode, has_attachment, snippet}
+    Uses metadata format for speed; attachment detection via payload mimeType.
+    """
     service = get_service()
-    d = service.users().drafts().get(userId="me", id=draft_id, format="full").execute()
+    resp = service.users().drafts().list(
+        userId="me", maxResults=max_results
+    ).execute()
+    result = []
+    for item in resp.get("drafts", []):
+        did = item["id"]
+        try:
+            d   = service.users().drafts().get(
+                userId="me", id=did, format="metadata",
+                metadataHeaders=["To", "Subject", "In-Reply-To"],
+            ).execute()
+            msg     = d.get("message", {})
+            payload = msg.get("payload", {})
+            headers = {h["name"]: h["value"] for h in payload.get("headers", [])}
+            mode    = "reply" if headers.get("In-Reply-To") else "compose"
+            has_att = payload.get("mimeType", "") == "multipart/mixed"
+            result.append({
+                "draft_id":       did,
+                "message_id":     msg.get("id", ""),
+                "thread_id":      msg.get("threadId", ""),
+                "to":             headers.get("To", ""),
+                "subject":        headers.get("Subject", "(no subject)"),
+                "mode":           mode,
+                "has_attachment": has_att,
+                "snippet":        msg.get("snippet", ""),
+            })
+        except Exception:
+            pass
+    return result
+
+
+def get_draft(draft_id: str) -> dict:
+    """Fetch full draft details from Gmail. Returns a complete draft context dict."""
+    service = get_service()
+    d   = service.users().drafts().get(userId="me", id=draft_id, format="full").execute()
     msg = d.get("message", {})
-    headers = {h["name"]: h["value"]
-               for h in msg.get("payload", {}).get("headers", [])}
-    body = _extract_body(msg.get("payload", {})) or msg.get("snippet", "")
+    payload = msg.get("payload", {})
+    headers = {h["name"]: h["value"] for h in payload.get("headers", [])}
+    body = _extract_body(payload) or msg.get("snippet", "")
+    mode = "reply" if headers.get("In-Reply-To") else "compose"
     return {
-        "draft_id": d["id"],
-        "to":       headers.get("To", ""),
-        "subject":  headers.get("Subject", ""),
-        "body":     body[:3000],
+        "draft_id":             d["id"],
+        "message_id":           msg.get("id", ""),
+        "thread_id":            msg.get("threadId", ""),
+        "to":                   headers.get("To", ""),
+        "cc":                   headers.get("Cc", ""),
+        "bcc":                  headers.get("Bcc", ""),
+        "subject":              headers.get("Subject", ""),
+        "body":                 body[:3000],
+        "mode":                 mode,
+        "in_reply_to":          headers.get("In-Reply-To", ""),
+        "outbound_attachments": [],
     }
 
 

@@ -839,6 +839,23 @@ _REGEX_INTENTS = [
     (re.compile(r"\bany\s+attachments?\b", re.I), "gmail_list_attachments"),
     (re.compile(r"\b(?:what|which)\b.{0,20}\b(?:file|attachment|pdf|document).{0,15}\battach", re.I), "gmail_list_attachments"),
 
+    # ── Gmail Phase 12: multi-draft management — MUST precede Phase 11/10 patterns ──────────
+    # gmail_list_drafts — plural "drafts" (beats gmail_list_scheduled for "show scheduled drafts")
+    (re.compile(r"\b(?:list|show)\b.{0,5}\b(?:my\s+|all\s+)?drafts\b", re.I), "gmail_list_drafts"),
+    (re.compile(r"\b(?:show|view|see)\b.{0,20}\ball\s+drafts\b", re.I), "gmail_list_drafts"),
+    (re.compile(r"\b(?:show|list)\b.{0,20}\b(?:scheduled|unscheduled|unsent|pending)\s+drafts\b", re.I), "gmail_list_drafts"),
+    (re.compile(r"\bwhat\s+drafts\b.{0,20}\b(?:do\s+I\s+have|are\s+there)\b", re.I), "gmail_list_drafts"),
+    # gmail_open_draft — ordinal/name selection; MUST precede gmail_send_draft and gmail_show_draft
+    (re.compile(r"\b(?:open|switch\s+to|go\s+(?:back\s+)?to|load|select|use)\b.{0,30}\b(?:\d|first|second|third|fourth|fifth|last)\b.{0,10}\bdraft\b", re.I), "gmail_open_draft"),
+    (re.compile(r"\b(?:open|switch\s+to|go\s+(?:back\s+)?to|load|select)\b.{0,5}draft\s+[1-9]\b", re.I), "gmail_open_draft"),
+    (re.compile(r"\bsend\b.{0,5}(?:draft\s+[1-9]|the\s+(?:first|second|third|fourth|fifth|last)\s+draft)\b", re.I), "gmail_open_draft"),
+    (re.compile(r"\bsend\b.{0,5}the\s+(?!draft\b)\w+\s+draft\b", re.I), "gmail_open_draft"),
+    (re.compile(r"\b(?:open|switch\s+to|go\s+(?:back\s+)?to)\b.{0,5}the\s+(?!draft\b)\w+\s+draft\b", re.I), "gmail_open_draft"),
+    # gmail_delete_draft — targeted deletion (ordinal or named); MUST precede gmail_cancel_draft
+    (re.compile(r"\b(?:delete|remove|trash)\b.{0,5}(?:draft\s+[1-9]|the\s+(?:first|second|third|fourth|fifth|last)\s+draft)\b", re.I), "gmail_delete_draft"),
+    (re.compile(r"\b(?:delete|remove|trash)\b.{0,5}the\s+(?!draft\b)(?!that\b)(?!current\b)\w+\s+draft\b", re.I), "gmail_delete_draft"),
+    (re.compile(r"\b(?:cancel|delete|remove)\b.{0,15}\bold\b.{0,10}\bdraft\b", re.I), "gmail_delete_draft"),
+
     # ── Gmail Phase 11: follow-up reminders — MUST precede Phase 10 patterns ─────────────
     # gmail_cancel_followup FIRST (cancel+reminder must win over cancel+scheduled)
     (re.compile(r"\bcancel\b.{0,25}\b(?:follow.?up|reminder|that\s+reminder)\b", re.I), "gmail_cancel_followup"),
@@ -1180,6 +1197,7 @@ _ALL_INTENTS = [
     "gmail_triage",
     "gmail_schedule_send", "gmail_list_scheduled", "gmail_cancel_scheduled_send",
     "gmail_followup_reminder", "gmail_list_followups", "gmail_cancel_followup",
+    "gmail_list_drafts", "gmail_open_draft", "gmail_delete_draft",
     # n8n / automation
     "sync",
     # Nightly
@@ -1318,6 +1336,17 @@ _INTENT_SYSTEM = (
     "   'gmail_cancel_followup': cancel an existing follow-up reminder.\n"
     "                      'cancel the follow-up', 'cancel reminder 2', 'remove that reminder',\n"
     "                      'stop the follow-up reminder', 'delete reminder'. NEVER for scheduled sends.\n"
+    "   'gmail_list_drafts': list all Gmail drafts — 'show my drafts', 'list drafts',\n"
+    "                      'show scheduled drafts', 'show unsent drafts', 'which draft has a PDF?'.\n"
+    "                      ONLY use for PLURAL 'drafts' or explicit list context.\n"
+    "                      NEVER use when user wants to see the current single draft (→ gmail_show_draft).\n"
+    "   'gmail_open_draft': switch active draft by ordinal or name — 'open draft 2', 'open the second draft',\n"
+    "                      'go back to the invoice draft', 'switch to the Rahul draft',\n"
+    "                      'send the second draft' (selects AND sends).\n"
+    "                      NEVER use for 'send the draft' (→ gmail_send_draft).\n"
+    "   'gmail_delete_draft': delete a specific draft by ordinal or name — 'delete draft 2',\n"
+    "                      'delete the Rahul draft', 'cancel the old draft', 'remove draft 1'.\n"
+    "                      NEVER use for 'delete the draft' (plain → gmail_cancel_draft).\n"
     "   'generate_image' : ONLY when creating a brand-new image/picture/artwork/visual output.\n"
     "                      NEVER for explanations, comparisons, or code/model concepts.\n"
     "                      'generation' as a software concept (code generation, token generation,\n"
@@ -3411,6 +3440,7 @@ _GMAIL_CTX: dict = {
     "scheduled_send":     None, # Phase 10: {id, draft_id, to, subject, send_at_iso} or None
     "last_sent":          None, # Phase 11: {thread_id, to, subject, sent_at_iso} — captured after send
     "followup_reminder":  None, # Phase 11: most recently created follow-up reminder entry
+    "draft_list":         [],   # Phase 12: cached [{draft_id,to,subject,mode,has_attachment,…}] from list_drafts
 }
 
 _GMAIL_ACTION_PAST = {
@@ -4212,6 +4242,260 @@ def cmd_gmail_cancel_followup(text: str = "") -> None:
     if (_GMAIL_CTX.get("followup_reminder") or {}).get("id") == target["id"]:
         _GMAIL_CTX["followup_reminder"] = None
     cprint(f"  {GREEN}✓ Reminder cancelled.{RESET}", "")
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Phase 12 — Multi-draft memory + draft management
+# ─────────────────────────────────────────────────────────────────────────────
+
+_DRAFT_ORDINALS: dict = {
+    "first": 0, "second": 1, "third": 2, "fourth": 3, "fifth": 4,
+    "sixth": 5, "seventh": 6, "eighth": 7, "ninth": 8, "tenth": 9,
+    "1st": 0, "2nd": 1, "3rd": 2, "4th": 3, "5th": 4,
+    "last": -1,
+}
+
+
+def _resolve_draft_ref(text: str) -> tuple:
+    """
+    Find a draft from _GMAIL_CTX["draft_list"] by ordinal or name/keyword.
+    Returns (entry_dict, []) if exactly one match,
+            (None, [candidates]) if ambiguous (>1 match),
+            (None, []) if not found or list is empty.
+    """
+    dl = _GMAIL_CTX.get("draft_list", [])
+    if not dl:
+        return None, []
+
+    text_l = text.lower().strip()
+
+    # Try ordinal word
+    for word, idx in _DRAFT_ORDINALS.items():
+        if re.search(rf"\b{word}\b", text_l):
+            real_idx = len(dl) - 1 if idx == -1 else idx
+            if 0 <= real_idx < len(dl):
+                return dl[real_idx], []
+            return None, []
+
+    # Try bare digit: "draft 2", "open 3"
+    m = re.search(r"\b([1-9])\b", text_l)
+    if m:
+        idx = int(m.group(1)) - 1
+        if 0 <= idx < len(dl):
+            return dl[idx], []
+        return None, []
+
+    # Keyword search: strip stop-words, match to/subject
+    stop = r"\b(?:the|a|an|my|that|this|old|draft|drafts|send|open|delete|remove|trash|switch|to|go|back|select|load|use)\b"
+    kw = re.sub(stop, " ", text_l).strip()
+    kw = re.sub(r"\s+", " ", kw).strip()
+    if not kw:
+        return None, []
+
+    matches = [
+        e for e in dl
+        if kw in (e.get("to") or "").lower() or kw in (e.get("subject") or "").lower()
+    ]
+    if len(matches) == 1:
+        return matches[0], []
+    if len(matches) > 1:
+        return None, matches
+    return None, []
+
+
+def _draft_list_row(i: int, e: dict, scheduled_ids: set) -> str:
+    """Format one row for the draft list display."""
+    to_s   = (e.get("to") or "(no recipient)")[:30]
+    subj   = (e.get("subject") or "(no subject)")[:38]
+    mode   = "↩ reply" if e.get("mode") == "reply" else "✉ compose"
+    att    = " 📎" if e.get("has_attachment") else ""
+    sched  = " ⏰" if e.get("draft_id") in scheduled_ids else ""
+    return f"  [{i}] {to_s:<30}  {subj:<38}  {mode}{att}{sched}"
+
+
+def cmd_gmail_list_drafts(text: str = "") -> None:
+    """Phase 12: List all Gmail drafts with metadata and scheduled status."""
+    token = HOME / "SuneelWorkSpace" / "secrets" / "gmail-token.json"
+    if not token.exists():
+        cprint("  Not authorized. Run: /gmail-auth", YELLOW); return
+
+    try:
+        gh = _gmail()
+        drafts = gh.list_drafts(max_results=15)
+    except Exception as e:
+        cprint(f"  Error fetching drafts: {e}", RED); return
+
+    _GMAIL_CTX["draft_list"] = drafts
+
+    if not drafts:
+        cprint("  No drafts found in Gmail.", GRAY); return
+
+    # Cross-reference scheduled sends
+    scheduled_ids = {
+        e.get("draft_id", "") for e in _load_scheduled_sends()
+        if e.get("status") == "pending"
+    }
+
+    # Optional filter: "show scheduled drafts" / "show unscheduled drafts"
+    text_l = text.lower()
+    want_sched   = re.search(r"\bscheduled\b", text_l)
+    want_unsched = re.search(r"\bunscheduled\b|\bunsent\b", text_l)
+    want_att     = re.search(r"\battach(?:ment|ed)?\b|\bpdf\b|\bfile\b", text_l)
+
+    display = drafts
+    filter_label = ""
+    if want_sched:
+        display = [d for d in drafts if d["draft_id"] in scheduled_ids]
+        filter_label = " (scheduled only)"
+    elif want_unsched:
+        display = [d for d in drafts if d["draft_id"] not in scheduled_ids]
+        filter_label = " (unscheduled)"
+    elif want_att:
+        display = [d for d in drafts if d.get("has_attachment")]
+        filter_label = " (with attachment)"
+
+    adwi_head(f"Gmail — Drafts ({len(display)}/{len(drafts)}){filter_label}")
+    if not display:
+        cprint(f"  No drafts match that filter.", GRAY); return
+
+    for i, e in enumerate(display, 1):
+        cprint(_draft_list_row(i, e, scheduled_ids), "")
+
+    cprint("", "")
+    cprint("  Say 'open draft 2' · 'send the second draft' · 'delete draft 1' to act.", GRAY)
+    if want_att and not display:
+        cprint("  Note: attachment detection is based on draft format — may not be 100% accurate.", GRAY)
+
+
+def cmd_gmail_open_draft(text: str = "") -> None:
+    """
+    Phase 12: Switch active draft context to a specific draft by ordinal or name.
+    If text contains a send verb, confirms and sends after switching.
+    """
+    token = HOME / "SuneelWorkSpace" / "secrets" / "gmail-token.json"
+    if not token.exists():
+        cprint("  Not authorized. Run: /gmail-auth", YELLOW); return
+
+    # Populate draft_list if empty
+    if not _GMAIL_CTX.get("draft_list"):
+        try:
+            gh = _gmail()
+            _GMAIL_CTX["draft_list"] = gh.list_drafts(max_results=15)
+        except Exception as e:
+            cprint(f"  Error fetching drafts: {e}", RED); return
+
+    dl = _GMAIL_CTX["draft_list"]
+    if not dl:
+        cprint("  No drafts found in Gmail.", GRAY); return
+
+    entry, ambiguous = _resolve_draft_ref(text)
+
+    if ambiguous:
+        adwi_head("Gmail — Open Draft — Disambiguation")
+        cprint(f"  Multiple drafts match — which one?", YELLOW)
+        scheduled_ids = {e.get("draft_id") for e in _load_scheduled_sends() if e.get("status") == "pending"}
+        for i, e in enumerate(ambiguous, 1):
+            cprint(_draft_list_row(i, e, scheduled_ids), "")
+        cprint("  Say 'open draft 1', 'open the first one', etc.", GRAY)
+        return
+
+    if entry is None:
+        adwi_head("Gmail — Open Draft")
+        cprint(f"  No draft found matching: '{text[:50]}'", YELLOW)
+        cprint(f"  {len(dl)} draft(s) available. Say 'show my drafts' to see the list.", GRAY)
+        return
+
+    # Fetch full draft content (body, cc, bcc)
+    try:
+        gh         = _gmail()
+        full_draft = gh.get_draft(entry["draft_id"])
+    except Exception as e:
+        cprint(f"  Error loading draft: {e}", RED); return
+
+    # Merge list metadata into full draft dict
+    full_draft["mode"] = entry.get("mode", full_draft.get("mode", "compose"))
+    _GMAIL_CTX["draft"] = full_draft
+
+    send_intent = bool(re.search(r"\bsend\b", text.lower()))
+
+    adwi_head("Gmail — Draft Loaded")
+    cprint(f"  Switched to: {(entry.get('subject') or '(no subject)')[:55]}", GREEN)
+    _gmail_draft_preview(full_draft)
+
+    if send_intent:
+        cmd_gmail_send_draft()
+
+
+def cmd_gmail_delete_draft(text: str = "") -> None:
+    """
+    Phase 12: Delete a draft by ordinal, name, or (if none specified) the current draft.
+    Shows preview + requires confirmation before deleting.
+    """
+    token = HOME / "SuneelWorkSpace" / "secrets" / "gmail-token.json"
+    if not token.exists():
+        cprint("  Not authorized. Run: /gmail-auth", YELLOW); return
+
+    # Populate draft_list if empty
+    if not _GMAIL_CTX.get("draft_list"):
+        try:
+            gh = _gmail()
+            _GMAIL_CTX["draft_list"] = gh.list_drafts(max_results=15)
+        except Exception as e:
+            cprint(f"  Error fetching drafts: {e}", RED); return
+
+    dl = _GMAIL_CTX["draft_list"]
+
+    # Resolve target: ordinal/name → draft_list; else current draft
+    target_meta = None
+    entry, ambiguous = _resolve_draft_ref(text)
+
+    if ambiguous:
+        adwi_head("Gmail — Delete Draft — Disambiguation")
+        cprint("  Multiple drafts match — which one do you want to delete?", YELLOW)
+        scheduled_ids = {e.get("draft_id") for e in _load_scheduled_sends() if e.get("status") == "pending"}
+        for i, e in enumerate(ambiguous, 1):
+            cprint(_draft_list_row(i, e, scheduled_ids), "")
+        cprint("  Say 'delete draft 1', 'delete the first one', etc.", GRAY)
+        return
+
+    if entry is not None:
+        target_meta = entry
+    elif _GMAIL_CTX.get("draft"):
+        # No reference given — fall through to current draft
+        target_meta = _GMAIL_CTX["draft"]
+    else:
+        adwi_head("Gmail — Delete Draft")
+        if dl:
+            cprint("  No reference given and no current draft. Say 'delete draft 1' or 'show my drafts'.", YELLOW)
+        else:
+            cprint("  No drafts found.", GRAY)
+        return
+
+    draft_id = target_meta.get("draft_id", "")
+    to       = (target_meta.get("to") or "")[:50]
+    subject  = (target_meta.get("subject") or "(no subject)")[:50]
+
+    adwi_head("Gmail — Delete Draft")
+    cprint(f"  To:      {to}", "")
+    cprint(f"  Subject: {subject}", "")
+    cprint(f"  Draft ID: {draft_id[:20]}…", GRAY)
+    ans = input(f"  {YELLOW}Permanently delete this draft? (y/n){RESET} ").strip().lower()
+    if ans not in ("y", "yes"):
+        cprint("  Cancelled — draft kept.", GRAY); return
+
+    try:
+        gh = _gmail()
+        gh.delete_draft(draft_id)
+        cprint(f"  {GREEN}✓ Draft deleted.{RESET}", "")
+    except Exception as e:
+        cprint(f"  Error deleting draft: {e}", RED); return
+
+    # Clear from draft_list
+    _GMAIL_CTX["draft_list"] = [d for d in dl if d.get("draft_id") != draft_id]
+    # Clear current draft if it was the one deleted
+    cur = _GMAIL_CTX.get("draft") or {}
+    if cur.get("draft_id") == draft_id:
+        _GMAIL_CTX["draft"] = None
 
 
 def cmd_gmail_read(ref: str) -> None:
@@ -7654,6 +7938,12 @@ def dispatch_natural(text: str):
         cmd_gmail_list_followups()
     elif intent == "gmail_cancel_followup":
         cmd_gmail_cancel_followup(text)
+    elif intent == "gmail_list_drafts":
+        cmd_gmail_list_drafts(text)
+    elif intent == "gmail_open_draft":
+        cmd_gmail_open_draft(text)
+    elif intent == "gmail_delete_draft":
+        cmd_gmail_delete_draft(text)
     elif intent == "gmail_list_attachments":
         cmd_gmail_list_attachments(text)
     elif intent == "gmail_save_attachment":
@@ -8007,6 +8297,12 @@ def handle(line: str) -> bool:
     elif line == "/gmail-followups": cmd_gmail_list_followups()
     elif line == "/gmail-cancel-followup": cmd_gmail_cancel_followup("")
     elif line.startswith("/gmail-cancel-followup "): cmd_gmail_cancel_followup(line[23:].strip())
+    elif line == "/gmail-drafts": cmd_gmail_list_drafts("")
+    elif line.startswith("/gmail-drafts "): cmd_gmail_list_drafts(line[14:].strip())
+    elif line == "/gmail-open-draft": cmd_gmail_open_draft("")
+    elif line.startswith("/gmail-open-draft "): cmd_gmail_open_draft(line[18:].strip())
+    elif line == "/gmail-delete-draft": cmd_gmail_delete_draft("")
+    elif line.startswith("/gmail-delete-draft "): cmd_gmail_delete_draft(line[20:].strip())
     # ── Self-repair commands (confirm before patching) ──
     elif line.startswith("/fix-error"): cmd_fix_error(line[10:].strip())
     elif line == "/repair-adwi": cmd_repair_adwi()

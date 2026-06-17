@@ -1019,5 +1019,103 @@ class TestGmailRoutingPhase11(unittest.TestCase):
         self.assertNotEqual(result, "gmail_schedule_send")
 
 
+class TestGmailRoutingPhase12(unittest.TestCase):
+    """Phase 12: multi-draft management routing tests."""
+
+    # ── gmail_list_drafts ─────────────────────────────────────────────────────
+    def test_show_my_drafts(self):
+        self.assertEqual(_classify("show my drafts"), "gmail_list_drafts")
+
+    def test_list_drafts(self):
+        self.assertEqual(_classify("list drafts"), "gmail_list_drafts")
+
+    def test_show_all_drafts(self):
+        self.assertEqual(_classify("show all drafts"), "gmail_list_drafts")
+
+    def test_show_scheduled_drafts(self):
+        self.assertEqual(_classify("show scheduled drafts"), "gmail_list_drafts")
+
+    def test_show_unscheduled_drafts(self):
+        self.assertEqual(_classify("show unscheduled drafts"), "gmail_list_drafts")
+
+    def test_what_drafts_do_i_have(self):
+        self.assertEqual(_classify("what drafts do I have"), "gmail_list_drafts")
+
+    def test_show_draft_singular_stays_show_draft(self):
+        # "show my draft" (singular) must NOT go to gmail_list_drafts
+        result = _classify("show my draft")
+        self.assertNotEqual(result, "gmail_list_drafts")
+
+    # ── gmail_open_draft ──────────────────────────────────────────────────────
+    def test_open_draft_2(self):
+        self.assertEqual(_classify("open draft 2"), "gmail_open_draft")
+
+    def test_open_the_second_draft(self):
+        self.assertEqual(_classify("open the second draft"), "gmail_open_draft")
+
+    def test_go_back_to_invoice_draft(self):
+        self.assertEqual(_classify("go back to the invoice draft"), "gmail_open_draft")
+
+    def test_switch_to_rahul_draft(self):
+        self.assertEqual(_classify("switch to the Rahul draft"), "gmail_open_draft")
+
+    def test_send_the_second_draft(self):
+        result = _classify("send the second draft")
+        self.assertEqual(result, "gmail_open_draft")
+        self.assertNotEqual(result, "gmail_send_draft")
+
+    def test_send_draft_2(self):
+        result = _classify("send draft 2")
+        self.assertEqual(result, "gmail_open_draft")
+        self.assertNotEqual(result, "gmail_send_draft")
+
+    def test_send_the_rahul_draft(self):
+        result = _classify("send the Rahul draft")
+        self.assertEqual(result, "gmail_open_draft")
+
+    def test_load_draft_1(self):
+        self.assertEqual(_classify("load draft 1"), "gmail_open_draft")
+
+    # ── gmail_delete_draft ────────────────────────────────────────────────────
+    def test_delete_draft_1(self):
+        self.assertEqual(_classify("delete draft 1"), "gmail_delete_draft")
+
+    def test_delete_second_draft(self):
+        self.assertEqual(_classify("delete the second draft"), "gmail_delete_draft")
+
+    def test_delete_named_draft(self):
+        self.assertEqual(_classify("delete the Rahul draft"), "gmail_delete_draft")
+
+    def test_cancel_old_draft(self):
+        self.assertEqual(_classify("cancel the old draft"), "gmail_delete_draft")
+
+    def test_remove_draft_2(self):
+        self.assertEqual(_classify("remove draft 2"), "gmail_delete_draft")
+
+    # ── Non-bleed guards ──────────────────────────────────────────────────────
+    def test_send_it_still_send_draft(self):
+        # "send it" must NOT go to gmail_open_draft
+        result = _classify("send it")
+        self.assertEqual(result, "gmail_send_draft")
+
+    def test_send_the_draft_still_send_draft(self):
+        # "send the draft" (plain, no name/ordinal) must go to gmail_send_draft
+        result = _classify("send the draft")
+        self.assertEqual(result, "gmail_send_draft")
+        self.assertNotEqual(result, "gmail_open_draft")
+
+    def test_delete_the_draft_stays_cancel_draft(self):
+        # "delete the draft" (plain) must go to gmail_cancel_draft, not gmail_delete_draft
+        result = _classify("delete the draft")
+        self.assertEqual(result, "gmail_cancel_draft")
+        self.assertNotEqual(result, "gmail_delete_draft")
+
+    def test_list_drafts_beats_show_draft(self):
+        # "show my drafts" must go to list, not show_draft
+        result = _classify("show my drafts")
+        self.assertEqual(result, "gmail_list_drafts")
+        self.assertNotEqual(result, "gmail_show_draft")
+
+
 if __name__ == "__main__":
     unittest.main(verbosity=2)

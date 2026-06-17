@@ -52,11 +52,14 @@
     "/gmail-cancel-scheduled",
     "/gmail-compose",
     "/gmail-confirm",
+    "/gmail-delete-draft",
     "/gmail-draft-reply",
+    "/gmail-drafts",
     "/gmail-followup",
     "/gmail-followups",
     "/gmail-mark-read",
     "/gmail-mark-unread",
+    "/gmail-open-draft",
     "/gmail-promos",
     "/gmail-read",
     "/gmail-remove-attachment",
@@ -167,22 +170,22 @@
     [
       "n8n",
       "1",
-      "Up 20 hours"
+      "Up 21 hours"
     ],
     [
       "searxng",
       "1",
-      "Up 20 hours"
+      "Up 21 hours"
     ],
     [
       "prometheus",
       "1",
-      "Up 20 hours"
+      "Up 21 hours"
     ],
     [
       "loki",
       "1",
-      "Up 20 hours"
+      "Up 21 hours"
     ],
     [
       "grafana",
@@ -192,12 +195,12 @@
     [
       "node-exporter",
       "1",
-      "Up 20 hours"
+      "Up 21 hours"
     ],
     [
       "cadvisor",
       "1",
-      "Up 20 hours (healthy)"
+      "Up 21 hours (healthy)"
     ]
   ],
   "launchagents": [
@@ -242,5 +245,5 @@
     "MODEL_NLU_FALLBACK": "qwen3:0.6b"
   },
   "ts": "2026-06-17",
-  "_hash": "afefef917e1f80e1"
+  "_hash": "7f9ad317023eb788"
 }

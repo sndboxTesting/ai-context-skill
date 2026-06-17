@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
 """
-adwi-scheduled-send-runner — Phase 10 scheduled-send executor.
+adwi-scheduled-send-runner — Phase 10 scheduled-send + Phase 11 follow-up reminder executor.
 
-Reads adwi/scheduled_sends.json, sends any pending entries whose
-send_at_iso has passed, updates their status in-place.
+Reads adwi/scheduled_sends.json, sends any pending entries whose send_at_iso has passed.
+Also reads adwi/followup_reminders.json and marks overdue/satisfied entries.
 
 Run by LaunchAgent com.suneel.adwi-scheduled-send every 2 minutes.
 Standalone: does NOT import adwi_cli.py.
@@ -15,6 +15,7 @@ from pathlib import Path
 
 BASE              = Path(__file__).resolve().parents[1]
 QUEUE_FILE        = BASE / "adwi" / "scheduled_sends.json"
+FOLLOWUP_FILE     = BASE / "adwi" / "followup_reminders.json"
 GMAIL_HELPER      = BASE / "adwi" / "gmail_helper.py"
 LOG_FILE          = Path("/tmp/adwi-scheduled-send.log")
 
@@ -43,6 +44,70 @@ def _save(entries: list) -> None:
     tmp = QUEUE_FILE.with_suffix(".json.tmp")
     tmp.write_text(json.dumps(entries, indent=2, default=str), encoding="utf-8")
     tmp.replace(QUEUE_FILE)
+
+
+def _load_followups() -> list:
+    try:
+        return json.loads(FOLLOWUP_FILE.read_text(encoding="utf-8"))
+    except (FileNotFoundError, json.JSONDecodeError):
+        return []
+
+
+def _save_followups(entries: list) -> None:
+    tmp = FOLLOWUP_FILE.with_suffix(".json.tmp")
+    tmp.write_text(json.dumps(entries, indent=2, default=str), encoding="utf-8")
+    tmp.replace(FOLLOWUP_FILE)
+
+
+def _check_followup_reminders() -> None:
+    """
+    For each pending follow-up reminder:
+    - If thread_id present: check for inbound reply via gmail_helper.get_thread_reply_check()
+      → satisfied if reply found, due if past deadline with no reply
+    - If no thread_id (draft-based): mark due when past deadline
+    Does NOT send any emails.
+    """
+    if not FOLLOWUP_FILE.exists():
+        return
+
+    reminders = _load_followups()
+    now_iso   = datetime.now().isoformat(timespec="seconds")
+    changed   = False
+
+    try:
+        import gmail_helper as gh
+        gh_available = True
+    except Exception:
+        gh_available = False
+
+    for r in reminders:
+        if r.get("status") not in ("pending",):
+            continue
+
+        tid   = r.get("thread_id", "")
+        since = r.get("tracked_since_ms", 0)
+        due   = r.get("due_at_iso", "9999")
+
+        if gh_available and tid:
+            try:
+                check = gh.get_thread_reply_check(tid, since)
+                if check.get("has_reply"):
+                    r["status"]           = "satisfied"
+                    r["satisfied_at_iso"] = check.get("reply_at_iso", now_iso)
+                    r["reply_from"]       = check.get("reply_from", "")
+                    _log(f"FOLLOWUP satisfied: '{(r.get('subject') or '')[:40]}' replied by {r['reply_from']}")
+                    changed = True
+                    continue
+            except Exception as e:
+                _log(f"FOLLOWUP reply-check error for {r.get('id','?')}: {e}")
+
+        if due <= now_iso and r.get("status") == "pending":
+            r["status"] = "due"
+            _log(f"FOLLOWUP due (no reply): '{(r.get('subject') or '')[:40]}'")
+            changed = True
+
+    if changed:
+        _save_followups(reminders)
 
 
 def main() -> None:
@@ -86,6 +151,9 @@ def main() -> None:
 
     if changed:
         _save(entries)
+
+    # Phase 11: check follow-up reminders for replies / overdue status
+    _check_followup_reminders()
 
 
 if __name__ == "__main__":

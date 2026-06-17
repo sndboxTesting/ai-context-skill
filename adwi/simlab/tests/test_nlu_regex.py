@@ -934,5 +934,90 @@ class TestGmailRoutingPhase10(unittest.TestCase):
         self.assertNotEqual(result, "gmail_cancel")
 
 
+class TestGmailRoutingPhase11(unittest.TestCase):
+    """Phase 11: follow-up reminder routing tests."""
+
+    # ── gmail_followup_reminder ───────────────────────────────────────────────
+    def test_remind_me_if_no_reply(self):
+        self.assertEqual(_classify("remind me if no reply in 3 days"), "gmail_followup_reminder")
+
+    def test_if_no_reply(self):
+        self.assertEqual(_classify("if no reply by Monday remind me"), "gmail_followup_reminder")
+
+    def test_set_followup_reminder(self):
+        self.assertEqual(_classify("set a follow-up reminder"), "gmail_followup_reminder")
+
+    def test_remind_me_to_followup(self):
+        self.assertEqual(_classify("remind me to follow up"), "gmail_followup_reminder")
+
+    def test_followup_on_this_if_no_reply(self):
+        self.assertEqual(_classify("follow up on this if no reply"), "gmail_followup_reminder")
+
+    def test_followup_on_this_thread(self):
+        self.assertEqual(_classify("follow up on this thread Friday morning if they don't answer"), "gmail_followup_reminder")
+
+    def test_if_they_havent_replied(self):
+        self.assertEqual(_classify("if they haven't replied in 2 days ping me"), "gmail_followup_reminder")
+
+    def test_if_they_dont_respond(self):
+        self.assertEqual(_classify("if they don't respond by Friday"), "gmail_followup_reminder")
+
+    # ── gmail_list_followups ──────────────────────────────────────────────────
+    def test_show_my_followups(self):
+        self.assertEqual(_classify("show my follow-ups"), "gmail_list_followups")
+
+    def test_list_pending_reminders(self):
+        self.assertEqual(_classify("list pending follow-up reminders"), "gmail_list_followups")
+
+    def test_what_am_i_waiting_on(self):
+        self.assertEqual(_classify("what am I waiting on?"), "gmail_list_followups")
+
+    def test_what_threads_am_i_following(self):
+        self.assertEqual(_classify("what threads am I following up on"), "gmail_list_followups")
+
+    def test_who_hasnt_replied(self):
+        self.assertEqual(_classify("who hasn't replied"), "gmail_list_followups")
+
+    def test_open_followups(self):
+        self.assertEqual(_classify("open follow-ups"), "gmail_list_followups")
+
+    def test_pending_followups(self):
+        self.assertEqual(_classify("pending follow-ups"), "gmail_list_followups")
+
+    # ── gmail_cancel_followup ─────────────────────────────────────────────────
+    def test_cancel_followup(self):
+        self.assertEqual(_classify("cancel the follow-up"), "gmail_cancel_followup")
+
+    def test_cancel_reminder_2(self):
+        self.assertEqual(_classify("cancel reminder 2"), "gmail_cancel_followup")
+
+    def test_remove_that_reminder(self):
+        self.assertEqual(_classify("remove that reminder"), "gmail_cancel_followup")
+
+    def test_stop_followup_reminder(self):
+        self.assertEqual(_classify("stop the follow-up reminder"), "gmail_cancel_followup")
+
+    def test_delete_reminder(self):
+        self.assertEqual(_classify("delete reminder"), "gmail_cancel_followup")
+
+    # ── Non-bleed guards ──────────────────────────────────────────────────────
+    def test_cancel_followup_beats_cancel_scheduled(self):
+        # "cancel the follow-up" must NOT go to gmail_cancel_scheduled_send
+        result = _classify("cancel the follow-up reminder")
+        self.assertEqual(result, "gmail_cancel_followup")
+        self.assertNotEqual(result, "gmail_cancel_scheduled_send")
+
+    def test_followup_reminder_beats_schedule_send(self):
+        # "remind me" must go to followup, not schedule_send
+        result = _classify("remind me if no reply in 3 days")
+        self.assertEqual(result, "gmail_followup_reminder")
+        self.assertNotEqual(result, "gmail_schedule_send")
+
+    def test_in_3_days_parser(self):
+        # "in N days" time phrase belongs to followup, not schedule_send
+        result = _classify("remind me if no reply in 3 days")
+        self.assertNotEqual(result, "gmail_schedule_send")
+
+
 if __name__ == "__main__":
     unittest.main(verbosity=2)

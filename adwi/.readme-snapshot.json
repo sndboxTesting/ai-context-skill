@@ -48,10 +48,13 @@
     "/gmail-auth",
     "/gmail-cancel",
     "/gmail-cancel-draft",
+    "/gmail-cancel-followup",
     "/gmail-cancel-scheduled",
     "/gmail-compose",
     "/gmail-confirm",
     "/gmail-draft-reply",
+    "/gmail-followup",
+    "/gmail-followups",
     "/gmail-mark-read",
     "/gmail-mark-unread",
     "/gmail-promos",
@@ -159,7 +162,7 @@
     [
       "open-webui",
       "1",
-      "Up 19 hours (healthy)"
+      "Up 20 hours (healthy)"
     ],
     [
       "n8n",
@@ -184,7 +187,7 @@
     [
       "grafana",
       "1",
-      "Up 19 hours"
+      "Up 20 hours"
     ],
     [
       "node-exporter",
@@ -239,5 +242,5 @@
     "MODEL_NLU_FALLBACK": "qwen3:0.6b"
   },
   "ts": "2026-06-17",
-  "_hash": "dba1bcc0cd2f4f04"
+  "_hash": "afefef917e1f80e1"
 }

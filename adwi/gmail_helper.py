@@ -646,3 +646,41 @@ def list_inbox_for_triage(max_results: int = 20,
         })
     emails.sort(key=lambda e: e["internalDate"], reverse=True)
     return emails[:max_results]
+
+
+def get_thread_reply_check(thread_id: str, after_epoch_ms: int) -> dict:
+    """
+    Phase 11: Check whether an inbound reply exists in a thread after a given timestamp.
+
+    An inbound message is any message without the 'SENT' label.
+    Uses metadata-only fetch (fast, no body download).
+
+    Returns: {"has_reply": bool, "reply_from": str, "reply_at_iso": str}
+    """
+    from datetime import datetime as _dt
+    service = get_service()
+    try:
+        t = service.users().threads().get(
+            userId="me", id=thread_id, format="metadata",
+            metadataHeaders=["From", "Date"],
+        ).execute()
+    except Exception as e:
+        return {"has_reply": False, "reply_from": "", "reply_at_iso": "", "error": str(e)}
+
+    for msg in t.get("messages", []):
+        ts = int(msg.get("internalDate", 0))
+        if ts <= after_epoch_ms:
+            continue
+        label_ids = msg.get("labelIds", [])
+        if "SENT" not in label_ids:   # inbound = no SENT label
+            headers = {
+                h["name"]: h["value"]
+                for h in msg.get("payload", {}).get("headers", [])
+            }
+            at_iso = _dt.fromtimestamp(ts / 1000).isoformat(timespec="seconds")
+            return {
+                "has_reply":    True,
+                "reply_from":   headers.get("From", ""),
+                "reply_at_iso": at_iso,
+            }
+    return {"has_reply": False, "reply_from": "", "reply_at_iso": ""}

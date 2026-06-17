@@ -89,6 +89,7 @@ adwi/memory.db
 adwi/knowledge.db
 adwi/rag-db/
 adwi/scheduled_sends.json
+adwi/followup_reminders.json
 bin/*.backup.*
 
 # ── Misc ─────────────────────────────────────────────────────────────

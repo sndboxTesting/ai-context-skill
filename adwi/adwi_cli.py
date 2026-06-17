@@ -839,21 +839,37 @@ _REGEX_INTENTS = [
     (re.compile(r"\bany\s+attachments?\b", re.I), "gmail_list_attachments"),
     (re.compile(r"\b(?:what|which)\b.{0,20}\b(?:file|attachment|pdf|document).{0,15}\battach", re.I), "gmail_list_attachments"),
 
+    # ── Gmail Phase 11: follow-up reminders — MUST precede Phase 10 patterns ─────────────
+    # gmail_cancel_followup FIRST (cancel+reminder must win over cancel+scheduled)
+    (re.compile(r"\bcancel\b.{0,25}\b(?:follow.?up|reminder|that\s+reminder)\b", re.I), "gmail_cancel_followup"),
+    (re.compile(r"\b(?:remove|delete|stop)\b.{0,20}\breminder\b", re.I), "gmail_cancel_followup"),
+    # gmail_list_followups
+    (re.compile(r"\b(?:show|list|view|what.{0,10}are)\b.{0,20}\b(?:follow.?up|pending\s+reminder)s?\b", re.I), "gmail_list_followups"),
+    (re.compile(r"\b(?:what\s+(?:threads?|emails?)\s+am\s+I|what\s+am\s+I)\b.{0,20}\b(?:waiting|follow(?:ing)?)\b", re.I), "gmail_list_followups"),
+    (re.compile(r"\b(?:pending|open)\s+follow.?ups?\b", re.I), "gmail_list_followups"),
+    (re.compile(r"\b(?:who|what).{0,20}\b(?:hasn.t|have\s+not|haven.t)\s+replied\b", re.I), "gmail_list_followups"),
+    # gmail_followup_reminder — remind me / set follow-up / if no reply
+    (re.compile(r"\b(?:remind\s+me|set\s+(?:a\s+)?(?:follow.?up|reminder))\b", re.I), "gmail_followup_reminder"),
+    (re.compile(r"\bfollow.?up\b.{0,30}\b(?:on\s+this|on\s+(?:the\s+)?(?:thread|email|message|it)|if\s+no\s+reply|reminder)\b", re.I), "gmail_followup_reminder"),
+    (re.compile(r"\bif\s+no\s+reply\b", re.I), "gmail_followup_reminder"),
+    (re.compile(r"\bif\s+they\s+(?:don.t|haven.t)\b.{0,20}\b(?:answer(?:ed)?|repl(?:y|ied)|respond(?:ed)?)\b", re.I), "gmail_followup_reminder"),
+
     # ── Gmail Phase 10: scheduled send — MUST precede gmail_send_draft ────────────────────
-    # Requires temporal indicator: tomorrow/Monday/at/schedule/delay/later
-    (re.compile(r"\b(?:schedule|delay\s+send|send\s+later)\b.{0,40}\b(?:draft|email|message|this|it)\b", re.I), "gmail_schedule_send"),
-    (re.compile(r"\b(?:schedule|delay\s+send|send\s+later)\b", re.I), "gmail_schedule_send"),
-    (re.compile(r"\bsend\b.{0,30}\b(?:tomorrow|tonight|morning|afternoon|evening|monday|tuesday|wednesday|thursday|friday|saturday|sunday|next\s+week|in\s+\d+\s+(?:hour|minute))\b", re.I), "gmail_schedule_send"),
-    (re.compile(r"\bsend\b.{0,20}\b(?:this|it|the\s+(?:draft|email|message))\b.{0,30}\b(?:tomorrow|tonight|morning|afternoon|evening|monday|tuesday|wednesday|thursday|friday|saturday|sunday|at\s+\d)\b", re.I), "gmail_schedule_send"),
-    (re.compile(r"\bschedule\b.{0,30}\b(?:this|it|the\s+(?:draft|email|message))\b", re.I), "gmail_schedule_send"),
-    # gmail_list_scheduled — show pending scheduled emails
+    # gmail_cancel_scheduled_send FIRST — "cancel scheduled X" must not bleed into list patterns
+    (re.compile(r"\bcancel\b.{0,30}\bscheduled\b.{0,20}\b(?:send|email|message|draft)?\b", re.I), "gmail_cancel_scheduled_send"),
+    (re.compile(r"\bcancel\b.{0,20}\bthe\s+scheduled\b", re.I), "gmail_cancel_scheduled_send"),
+    (re.compile(r"\b(?:don.t\s+send|stop\s+sending|unschedule)\b.{0,30}\b(?:that|it|the\s+(?:email|draft|message))\b", re.I), "gmail_cancel_scheduled_send"),
+    # gmail_list_scheduled
     (re.compile(r"\b(?:show|list|view|what|any)\b.{0,20}\b(?:my\s+)?scheduled\b.{0,20}\b(?:emails?|sends?|messages?|drafts?)\b", re.I), "gmail_list_scheduled"),
     (re.compile(r"\bscheduled\s+(?:emails?|sends?|messages?|drafts?)\b", re.I), "gmail_list_scheduled"),
     (re.compile(r"\bwhat.{0,20}\b(?:is|are)\b.{0,15}\bscheduled\b", re.I), "gmail_list_scheduled"),
-    # gmail_cancel_scheduled_send — cancel a pending scheduled send
-    (re.compile(r"\bcancel\b.{0,30}\bscheduled\b.{0,20}\b(?:send|email|message|draft)?\b", re.I), "gmail_cancel_scheduled_send"),
-    (re.compile(r"\b(?:don.t\s+send|stop\s+sending|unschedule)\b.{0,30}\b(?:that|it|the\s+(?:email|draft|message))\b", re.I), "gmail_cancel_scheduled_send"),
-    (re.compile(r"\bcancel\b.{0,20}\bthe\s+scheduled\b", re.I), "gmail_cancel_scheduled_send"),
+    # gmail_schedule_send: requires temporal indicator: tomorrow/weekday/at-time/delay/later
+    (re.compile(r"\b(?:schedule|delay\s+send|send\s+later)\b.{0,40}\b(?:draft|email|message|this|it)\b", re.I), "gmail_schedule_send"),
+    (re.compile(r"\b(?:schedule|delay\s+send|send\s+later)\b", re.I), "gmail_schedule_send"),
+    (re.compile(r"\bsend\b.{0,30}\b(?:tomorrow|tonight|morning|afternoon|evening|monday|tuesday|wednesday|thursday|friday|saturday|sunday|next\s+week|in\s+\d+\s+(?:hours?|minutes?))\b", re.I), "gmail_schedule_send"),
+    (re.compile(r"\bsend\b.{0,20}\b(?:this|it|the\s+(?:draft|email|message))\b.{0,30}\b(?:tomorrow|tonight|morning|afternoon|evening|monday|tuesday|wednesday|thursday|friday|saturday|sunday)\b", re.I), "gmail_schedule_send"),
+    (re.compile(r"\bsend\b.{0,30}at\s+\d{1,2}(?::\d{2})?\s*(?:am|pm)\b", re.I), "gmail_schedule_send"),
+    (re.compile(r"\bschedule\b.{0,30}\b(?:this|it|the\s+(?:draft|email|message))\b", re.I), "gmail_schedule_send"),
 
     # ── Gmail Phase 3: draft / send intents — MUST precede Phase 2 mutation patterns ──────
     # gmail_send_draft — anchored bare forms; also "send the draft" (requires "draft" word)
@@ -1163,6 +1179,7 @@ _ALL_INTENTS = [
     "gmail_attach_file", "gmail_remove_attachment",
     "gmail_triage",
     "gmail_schedule_send", "gmail_list_scheduled", "gmail_cancel_scheduled_send",
+    "gmail_followup_reminder", "gmail_list_followups", "gmail_cancel_followup",
     # n8n / automation
     "sync",
     # Nightly
@@ -1290,6 +1307,17 @@ _INTENT_SYSTEM = (
     "   'gmail_cancel_scheduled_send': cancel a pending scheduled send — 'cancel the scheduled send',\n"
     "                      'cancel scheduled 1', 'unschedule that', 'don't send that', 'stop the scheduled email'.\n"
     "                      NEVER use for canceling an immediate send (use gmail_cancel for pending mutations).\n"
+    "   'gmail_followup_reminder': set a follow-up reminder on the last sent email or current thread.\n"
+    "                      'remind me if no reply in 3 days', 'follow up on this Friday if they don't answer',\n"
+    "                      'set a follow-up reminder', 'if they haven't replied by Monday ping me',\n"
+    "                      'remind me to follow up'. NEVER auto-sends anything — reminder only.\n"
+    "                      NEVER use when user asks to see reminders (→ gmail_list_followups).\n"
+    "   'gmail_list_followups': list all pending follow-up reminders with live reply-detection.\n"
+    "                      'show my follow-ups', 'what am I waiting on?', 'who hasn't replied?',\n"
+    "                      'pending follow-ups', 'open follow-ups', 'list my reminders'.\n"
+    "   'gmail_cancel_followup': cancel an existing follow-up reminder.\n"
+    "                      'cancel the follow-up', 'cancel reminder 2', 'remove that reminder',\n"
+    "                      'stop the follow-up reminder', 'delete reminder'. NEVER for scheduled sends.\n"
     "   'generate_image' : ONLY when creating a brand-new image/picture/artwork/visual output.\n"
     "                      NEVER for explanations, comparisons, or code/model concepts.\n"
     "                      'generation' as a software concept (code generation, token generation,\n"
@@ -3381,6 +3409,8 @@ _GMAIL_CTX: dict = {
     "last_mutation":      None, # Phase 8: undo — {action, ids, count, description} of last confirmed op
     "triage_results":     None, # Phase 9: {reply_needed, action_needed, fyi, noise} id lists
     "scheduled_send":     None, # Phase 10: {id, draft_id, to, subject, send_at_iso} or None
+    "last_sent":          None, # Phase 11: {thread_id, to, subject, sent_at_iso} — captured after send
+    "followup_reminder":  None, # Phase 11: most recently created follow-up reminder entry
 }
 
 _GMAIL_ACTION_PAST = {
@@ -3393,6 +3423,7 @@ _GMAIL_ACTION_PAST = {
 _GMAIL_MAX_CANDIDATES  = 25  # hard cap on mutation batch size
 ATTACH_SAVE_DIR        = BASE / "gmail-attachments"  # Phase 6: bounded attachment save dir
 SCHEDULED_SENDS_FILE   = BASE / "adwi" / "scheduled_sends.json"  # Phase 10: pending scheduled-send queue
+FOLLOWUP_FILE          = BASE / "adwi" / "followup_reminders.json"  # Phase 11: follow-up reminders queue
 
 _GMAIL_CATEGORY_MAP = {
     "promotions": "CATEGORY_PROMOTIONS", "promotion":  "CATEGORY_PROMOTIONS",
@@ -3679,13 +3710,21 @@ def _resolve_schedule_time(text: str) -> tuple:
     def _apply_hm(base: datetime, h: int, m: int = 0) -> datetime:
         return base.replace(hour=h, minute=m, second=0, microsecond=0)
 
-    # ── "in N minutes / hours" ────────────────────────────────────────────────
-    m = re.search(r"\bin\s+(\d+)\s+(minute|min|hour|hr)s?\b", text_l)
+    # ── "in N minutes / hours / days / weeks" ────────────────────────────────
+    m = re.search(r"\bin\s+(\d+|a|an)\s+(minute|min|hour|hr|day|week)s?\b", text_l)
     if m:
-        n, unit = int(m.group(1)), m.group(2)
-        delta = timedelta(hours=n) if unit.startswith("h") else timedelta(minutes=n)
+        n_raw, unit = m.group(1), m.group(2)
+        n = 1 if n_raw in ("a", "an") else int(n_raw)
+        if unit.startswith("w"):
+            delta = timedelta(weeks=n)
+        elif unit.startswith("d"):
+            delta = timedelta(days=n)
+        elif unit.startswith("h"):
+            delta = timedelta(hours=n)
+        else:
+            delta = timedelta(minutes=n)
         dt = now + delta
-        label = f"{dt.strftime('%A, %B %d')} at {dt.strftime('%-I:%M %p')}"
+        label = f"{dt.strftime('%A, %B %-d')} at {dt.strftime('%-I:%M %p')}"
         return dt, label
 
     # ── Explicit time "at H:MM PM" / "at H PM" / "at H" ──────────────────────
@@ -3705,6 +3744,14 @@ def _resolve_schedule_time(text: str) -> tuple:
             # Ambiguous — if hour < 8, assume PM (e.g. "at 3" → 3 PM)
             if parsed_hour < 8:
                 parsed_hour += 12
+
+    # ── "next week" ───────────────────────────────────────────────────────────
+    if re.search(r"\bnext\s+week\b", text_l):
+        target = now + timedelta(weeks=1)
+        h = parsed_hour if parsed_hour is not None else 9
+        dt = _apply_hm(target, h, parsed_min)
+        label = f"{dt.strftime('%A, %B %-d')} at {dt.strftime('%-I:%M %p')}"
+        return dt, label
 
     # ── "tonight" / "this evening" / "this morning" / "this afternoon" ────────
     for phrase, default_h in [
@@ -3800,6 +3847,24 @@ def _save_scheduled_sends(entries: list) -> None:
     tmp = SCHEDULED_SENDS_FILE.with_suffix(".json.tmp")
     tmp.write_text(json.dumps(entries, indent=2, default=str), encoding="utf-8")
     tmp.replace(SCHEDULED_SENDS_FILE)
+
+
+def _load_followup_reminders() -> list:
+    """Read the follow-up reminders file. Returns [] if missing or corrupt."""
+    try:
+        if FOLLOWUP_FILE.exists():
+            return json.loads(FOLLOWUP_FILE.read_text(encoding="utf-8"))
+    except (json.JSONDecodeError, OSError):
+        pass
+    return []
+
+
+def _save_followup_reminders(entries: list) -> None:
+    """Write the follow-up reminders file atomically."""
+    FOLLOWUP_FILE.parent.mkdir(parents=True, exist_ok=True)
+    tmp = FOLLOWUP_FILE.with_suffix(".json.tmp")
+    tmp.write_text(json.dumps(entries, indent=2, default=str), encoding="utf-8")
+    tmp.replace(FOLLOWUP_FILE)
 
 
 def cmd_gmail_schedule_send(text: str = "") -> None:
@@ -3952,6 +4017,201 @@ def cmd_gmail_cancel_scheduled_send(text: str = "") -> None:
     if (_GMAIL_CTX.get("scheduled_send") or {}).get("id") == target["id"]:
         _GMAIL_CTX["scheduled_send"] = None
     cprint(f"  {GREEN}✓ Cancelled — draft still exists in Gmail and can be sent manually.{RESET}", "")
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Phase 11 — Follow-up reminders
+# ─────────────────────────────────────────────────────────────────────────────
+
+def cmd_gmail_followup_reminder(text: str = "") -> None:
+    """
+    Phase 11: Set a follow-up reminder on the last sent email (or current thread).
+    Reminds Suneel if no reply arrives by the specified deadline.
+    Does NOT send anything automatically.
+    """
+    import hashlib as _hl11
+
+    # Context priority: last_sent > current_email > current_thread > draft
+    ctx_src = None
+    thread_id = ""
+    to = subject = ""
+    tracked_since_ms = int(datetime.now().timestamp() * 1000)
+
+    last_sent = _GMAIL_CTX.get("last_sent")
+    cur_email  = _GMAIL_CTX.get("current_email")
+    cur_thread = _GMAIL_CTX.get("current_thread")
+    draft      = _GMAIL_CTX.get("draft")
+
+    if last_sent and last_sent.get("thread_id"):
+        ctx_src = "last_sent"
+        thread_id = last_sent["thread_id"]
+        to        = last_sent.get("to", "")
+        subject   = last_sent.get("subject", "")
+        tracked_since_ms = last_sent.get("sent_at_ms", tracked_since_ms)
+    elif cur_email and cur_email.get("thread_id"):
+        ctx_src = "current_email"
+        thread_id = cur_email["thread_id"]
+        to        = cur_email.get("from_header", cur_email.get("from", ""))
+        subject   = cur_email.get("subject", "")
+    elif cur_thread and cur_thread.get("thread_id"):
+        ctx_src = "current_thread"
+        thread_id = cur_thread["thread_id"]
+        to        = cur_thread.get("from_header", "")
+        subject   = cur_thread.get("subject", "")
+    elif draft:
+        ctx_src = "draft"
+        thread_id = ""   # draft not yet sent — no thread_id available
+        to        = draft.get("to", "")
+        subject   = draft.get("subject", "")
+
+    if not thread_id and ctx_src != "draft":
+        cprint("  No sent email or open thread in context. Send an email first, or open a thread.", YELLOW)
+        return
+
+    # Resolve due time
+    dt, label = _resolve_schedule_time(text)
+    if dt is None:
+        # Default: 3 business days from now
+        dt = datetime.now() + timedelta(days=3)
+        label = f"{dt.strftime('%A, %B %-d')} at {dt.strftime('%-I:%M %p')} (3 days)"
+
+    due_at_iso  = dt.isoformat(timespec="seconds")
+    uid = "fu_" + datetime.now().strftime("%Y%m%d_%H%M%S") + "_" + _hl11.md5(thread_id.encode()).hexdigest()[:4]
+
+    adwi_head("Gmail — Follow-up Reminder")
+    cprint(f"  Thread:  {subject[:60] or '(no subject)'}", "")
+    cprint(f"  To:      {to[:60] or '(unknown)'}", "")
+    cprint(f"  Remind:  {label}", "")
+    if not thread_id:
+        cprint("  Note: This draft hasn't been sent yet — reminder will fire by date, not reply detection.", YELLOW)
+    ans = input(f"  {YELLOW}Set this reminder? (y/n){RESET} ").strip().lower()
+    if ans not in ("y", "yes"):
+        cprint("  Cancelled.", GRAY); return
+
+    entry = {
+        "id":                uid,
+        "thread_id":         thread_id,
+        "to":                to,
+        "subject":           subject,
+        "tracked_since_ms":  tracked_since_ms,
+        "due_at_iso":        due_at_iso,
+        "status":            "pending",   # pending | due | satisfied | cancelled
+        "created_at_iso":    datetime.now().isoformat(timespec="seconds"),
+        "note":              text.strip() or "",
+    }
+    reminders = _load_followup_reminders()
+    reminders.append(entry)
+    _save_followup_reminders(reminders)
+    _GMAIL_CTX["followup_reminder"] = entry
+    cprint(f"  {GREEN}✓ Reminder set — I'll flag this thread if no reply by {label}.{RESET}", "")
+    cprint("  Say 'show follow-ups' to review all pending reminders.", GRAY)
+
+
+def cmd_gmail_list_followups() -> None:
+    """Phase 11: List all follow-up reminders with live reply-detection check."""
+    reminders = _load_followup_reminders()
+    if not reminders:
+        cprint("  No follow-up reminders.", GRAY); return
+
+    adwi_head("Gmail — Follow-up Reminders")
+    now_iso = datetime.now().isoformat(timespec="seconds")
+
+    # For pending reminders that have a thread_id, do a live reply check
+    gh = None
+    token = HOME / "SuneelWorkSpace" / "secrets" / "gmail-token.json"
+    if token.exists():
+        try:
+            gh = _gmail()
+        except Exception:
+            gh = None
+
+    changed = False
+    for r in reminders:
+        if r.get("status") != "pending":
+            continue
+        tid = r.get("thread_id", "")
+        if gh and tid:
+            try:
+                check = gh.get_thread_reply_check(tid, r.get("tracked_since_ms", 0))
+                if check.get("has_reply"):
+                    r["status"] = "satisfied"
+                    r["satisfied_at_iso"] = check.get("reply_at_iso", now_iso)
+                    r["reply_from"] = check.get("reply_from", "")
+                    changed = True
+            except Exception:
+                pass
+        # Mark overdue pending
+        if r.get("status") == "pending" and r.get("due_at_iso", "9999") <= now_iso:
+            r["status"] = "due"
+            changed = True
+
+    if changed:
+        _save_followup_reminders(reminders)
+
+    _STATUS_ICONS = {
+        "pending":   "⏳",
+        "due":       "🔔",
+        "satisfied": "✓",
+        "cancelled": "✗",
+    }
+    for i, r in enumerate(reminders, 1):
+        status  = r.get("status", "?")
+        icon    = _STATUS_ICONS.get(status, "?")
+        subject = (r.get("subject") or "(no subject)")[:45]
+        due     = (r.get("due_at_iso") or "?")[:16].replace("T", " ")
+        to      = (r.get("to") or "")[:30]
+        line    = f"  [{i}] {icon} {subject}"
+        if to:
+            line += f"  →  {to}"
+        cprint(line, GREEN if status == "satisfied" else ("" if status == "pending" else YELLOW))
+        cprint(f"       due {due}  status: {status}", GRAY)
+        if status == "satisfied":
+            rf = r.get("reply_from", "")
+            ra = (r.get("satisfied_at_iso") or "")[:16].replace("T", " ")
+            cprint(f"       replied by {rf} at {ra}", GRAY)
+    cprint("", "")
+    cprint("  Say 'cancel follow-up' or 'cancel reminder 2' to remove one.", GRAY)
+
+
+def cmd_gmail_cancel_followup(text: str = "") -> None:
+    """Phase 11: Cancel a follow-up reminder by index or most recent."""
+    reminders = _load_followup_reminders()
+    pending   = [r for r in reminders if r.get("status") in ("pending", "due")]
+
+    adwi_head("Gmail — Cancel Follow-up Reminder")
+    if not pending:
+        cprint("  No active follow-up reminders to cancel.", GRAY)
+        _GMAIL_CTX["followup_reminder"] = None
+        return
+
+    target = None
+    m = re.search(r"\b([1-9])\b", text)
+    if m:
+        idx = int(m.group(1)) - 1
+        if 0 <= idx < len(pending):
+            target = pending[idx]
+        else:
+            cprint(f"  No active reminder #{m.group(1)}.", YELLOW); return
+    elif len(pending) == 1:
+        target = pending[0]
+    else:
+        cprint(f"  {len(pending)} active reminders — say 'cancel reminder 1', 'cancel 2', etc.", YELLOW)
+        for i, r in enumerate(pending, 1):
+            subj = (r.get("subject") or "(no subject)")[:40]
+            due  = (r.get("due_at_iso") or "?")[:16].replace("T", " ")
+            cprint(f"  [{i}] {subj}  due {due}", "")
+        return
+
+    cprint(f"  Cancelling reminder: '{(target.get('subject') or '')[:50]}'", "")
+    ans = input(f"  {YELLOW}Confirm cancel? (y/n){RESET} ").strip().lower()
+    if ans not in ("y", "yes"):
+        cprint("  Kept.", GRAY); return
+
+    target["status"] = "cancelled"
+    _save_followup_reminders(reminders)
+    if (_GMAIL_CTX.get("followup_reminder") or {}).get("id") == target["id"]:
+        _GMAIL_CTX["followup_reminder"] = None
+    cprint(f"  {GREEN}✓ Reminder cancelled.{RESET}", "")
 
 
 def cmd_gmail_read(ref: str) -> None:
@@ -5322,8 +5582,18 @@ def cmd_gmail_send_draft() -> None:
     try:
         gh     = _gmail()
         result = gh.send_draft(draft_id)
+        # Capture last_sent before clearing draft (Phase 11: follow-up reminders use this)
+        _GMAIL_CTX["last_sent"] = {
+            "thread_id":    result.get("threadId", ""),
+            "message_id":   result.get("id", ""),
+            "to":           to,
+            "subject":      subject,
+            "sent_at_iso":  datetime.now().isoformat(timespec="seconds"),
+            "sent_at_ms":   int(datetime.now().timestamp() * 1000),
+        }
         _GMAIL_CTX["draft"] = None
         cprint(f"  ✓ Sent (id: {result.get('id','?')[:16]}…)", GREEN)
+        cprint("  Tip: say 'remind me if no reply in 3 days' to set a follow-up reminder.", GRAY)
     except Exception as e:
         cprint(f"  Send failed: {e}", RED)
         if "403" in str(e) or "scope" in str(e).lower() or "Insufficient" in str(e):
@@ -7378,6 +7648,12 @@ def dispatch_natural(text: str):
         cmd_gmail_list_scheduled()
     elif intent == "gmail_cancel_scheduled_send":
         cmd_gmail_cancel_scheduled_send(text)
+    elif intent == "gmail_followup_reminder":
+        cmd_gmail_followup_reminder(text)
+    elif intent == "gmail_list_followups":
+        cmd_gmail_list_followups()
+    elif intent == "gmail_cancel_followup":
+        cmd_gmail_cancel_followup(text)
     elif intent == "gmail_list_attachments":
         cmd_gmail_list_attachments(text)
     elif intent == "gmail_save_attachment":
@@ -7726,6 +8002,11 @@ def handle(line: str) -> bool:
     elif line == "/gmail-scheduled": cmd_gmail_list_scheduled()
     elif line == "/gmail-cancel-scheduled": cmd_gmail_cancel_scheduled_send("")
     elif line.startswith("/gmail-cancel-scheduled "): cmd_gmail_cancel_scheduled_send(line[24:].strip())
+    elif line.startswith("/gmail-followup "): cmd_gmail_followup_reminder(line[16:].strip())
+    elif line == "/gmail-followup": cmd_gmail_followup_reminder("")
+    elif line == "/gmail-followups": cmd_gmail_list_followups()
+    elif line == "/gmail-cancel-followup": cmd_gmail_cancel_followup("")
+    elif line.startswith("/gmail-cancel-followup "): cmd_gmail_cancel_followup(line[23:].strip())
     # ── Self-repair commands (confirm before patching) ──
     elif line.startswith("/fix-error"): cmd_fix_error(line[10:].strip())
     elif line == "/repair-adwi": cmd_repair_adwi()

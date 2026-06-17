@@ -41,6 +41,7 @@ ALL_INTENTS = [
     "gmail_attach_file", "gmail_remove_attachment", "gmail_undo",
     "gmail_triage",
     "gmail_schedule_send", "gmail_list_scheduled", "gmail_cancel_scheduled_send",
+    "gmail_followup_reminder", "gmail_list_followups", "gmail_cancel_followup",
     "sync",
     "nightly_status","nightly_run",
     "fix_error","patch_adwi","inspect_code","test_adwi","eval_routing","eval_adwi",
@@ -351,18 +352,31 @@ REGEX_INTENTS = [
     (re.compile(r"\battachment.{0,25}\b(?:on|in|for|from)\b", re.I), "gmail_list_attachments"),
     (re.compile(r"\bany\s+attachments?\b", re.I), "gmail_list_attachments"),
     (re.compile(r"\b(?:what|which)\b.{0,20}\b(?:file|attachment|pdf|document).{0,15}\battach", re.I), "gmail_list_attachments"),
+    # gmail Phase 11: follow-up reminders — MUST precede Phase 10 patterns
+    (re.compile(r"\bcancel\b.{0,25}\b(?:follow.?up|reminder|that\s+reminder)\b", re.I), "gmail_cancel_followup"),
+    (re.compile(r"\b(?:remove|delete|stop)\b.{0,20}\breminder\b", re.I), "gmail_cancel_followup"),
+    (re.compile(r"\b(?:show|list|view|what.{0,10}are)\b.{0,20}\b(?:follow.?up|pending\s+reminder)s?\b", re.I), "gmail_list_followups"),
+    (re.compile(r"\b(?:what\s+(?:threads?|emails?)\s+am\s+I|what\s+am\s+I)\b.{0,20}\b(?:waiting|follow(?:ing)?)\b", re.I), "gmail_list_followups"),
+    (re.compile(r"\b(?:pending|open)\s+follow.?ups?\b", re.I), "gmail_list_followups"),
+    (re.compile(r"\b(?:who|what).{0,20}\b(?:hasn.t|have\s+not|haven.t)\s+replied\b", re.I), "gmail_list_followups"),
+    (re.compile(r"\b(?:remind\s+me|set\s+(?:a\s+)?(?:follow.?up|reminder))\b", re.I), "gmail_followup_reminder"),
+    (re.compile(r"\bfollow.?up\b.{0,30}\b(?:on\s+this|on\s+(?:the\s+)?(?:thread|email|message|it)|if\s+no\s+reply|reminder)\b", re.I), "gmail_followup_reminder"),
+    (re.compile(r"\bif\s+no\s+reply\b", re.I), "gmail_followup_reminder"),
+    (re.compile(r"\bif\s+they\s+(?:don.t|haven.t)\b.{0,20}\b(?:answer(?:ed)?|repl(?:y|ied)|respond(?:ed)?)\b", re.I), "gmail_followup_reminder"),
     # gmail Phase 10: scheduled send — MUST precede gmail_send_draft
-    (re.compile(r"\b(?:schedule|delay\s+send|send\s+later)\b.{0,40}\b(?:draft|email|message|this|it)\b", re.I), "gmail_schedule_send"),
-    (re.compile(r"\b(?:schedule|delay\s+send|send\s+later)\b", re.I), "gmail_schedule_send"),
-    (re.compile(r"\bsend\b.{0,30}\b(?:tomorrow|tonight|morning|afternoon|evening|monday|tuesday|wednesday|thursday|friday|saturday|sunday|next\s+week|in\s+\d+\s+(?:hour|minute))\b", re.I), "gmail_schedule_send"),
-    (re.compile(r"\bsend\b.{0,20}\b(?:this|it|the\s+(?:draft|email|message))\b.{0,30}\b(?:tomorrow|tonight|morning|afternoon|evening|monday|tuesday|wednesday|thursday|friday|saturday|sunday|at\s+\d)\b", re.I), "gmail_schedule_send"),
-    (re.compile(r"\bschedule\b.{0,30}\b(?:this|it|the\s+(?:draft|email|message))\b", re.I), "gmail_schedule_send"),
+    # cancel first — prevents "cancel scheduled X" bleeding into list patterns
+    (re.compile(r"\bcancel\b.{0,30}\bscheduled\b.{0,20}\b(?:send|email|message|draft)?\b", re.I), "gmail_cancel_scheduled_send"),
+    (re.compile(r"\bcancel\b.{0,20}\bthe\s+scheduled\b", re.I), "gmail_cancel_scheduled_send"),
+    (re.compile(r"\b(?:don.t\s+send|stop\s+sending|unschedule)\b.{0,30}\b(?:that|it|the\s+(?:email|draft|message))\b", re.I), "gmail_cancel_scheduled_send"),
     (re.compile(r"\b(?:show|list|view|what|any)\b.{0,20}\b(?:my\s+)?scheduled\b.{0,20}\b(?:emails?|sends?|messages?|drafts?)\b", re.I), "gmail_list_scheduled"),
     (re.compile(r"\bscheduled\s+(?:emails?|sends?|messages?|drafts?)\b", re.I), "gmail_list_scheduled"),
     (re.compile(r"\bwhat.{0,20}\b(?:is|are)\b.{0,15}\bscheduled\b", re.I), "gmail_list_scheduled"),
-    (re.compile(r"\bcancel\b.{0,30}\bscheduled\b.{0,20}\b(?:send|email|message|draft)?\b", re.I), "gmail_cancel_scheduled_send"),
-    (re.compile(r"\b(?:don.t\s+send|stop\s+sending|unschedule)\b.{0,30}\b(?:that|it|the\s+(?:email|draft|message))\b", re.I), "gmail_cancel_scheduled_send"),
-    (re.compile(r"\bcancel\b.{0,20}\bthe\s+scheduled\b", re.I), "gmail_cancel_scheduled_send"),
+    (re.compile(r"\b(?:schedule|delay\s+send|send\s+later)\b.{0,40}\b(?:draft|email|message|this|it)\b", re.I), "gmail_schedule_send"),
+    (re.compile(r"\b(?:schedule|delay\s+send|send\s+later)\b", re.I), "gmail_schedule_send"),
+    (re.compile(r"\bsend\b.{0,30}\b(?:tomorrow|tonight|morning|afternoon|evening|monday|tuesday|wednesday|thursday|friday|saturday|sunday|next\s+week|in\s+\d+\s+(?:hours?|minutes?))\b", re.I), "gmail_schedule_send"),
+    (re.compile(r"\bsend\b.{0,20}\b(?:this|it|the\s+(?:draft|email|message))\b.{0,30}\b(?:tomorrow|tonight|morning|afternoon|evening|monday|tuesday|wednesday|thursday|friday|saturday|sunday)\b", re.I), "gmail_schedule_send"),
+    (re.compile(r"\bsend\b.{0,30}at\s+\d{1,2}(?::\d{2})?\s*(?:am|pm)\b", re.I), "gmail_schedule_send"),
+    (re.compile(r"\bschedule\b.{0,30}\b(?:this|it|the\s+(?:draft|email|message))\b", re.I), "gmail_schedule_send"),
     # gmail Phase 3: draft/send intents — MUST precede Phase 2 mutation patterns
     (re.compile(r"^send\s+(?:it|the\s+draft|that|this)\s*$", re.I), "gmail_send_draft"),
     (re.compile(r"^(?:go\s+ahead\s+and\s+)?send(?:\s+it|\s+the\s+draft|\s+now)\s*$", re.I), "gmail_send_draft"),
@@ -1058,6 +1072,38 @@ def build_p2_corpus() -> list[dict]:
     ]:
         add(p, "safety", None, "hard", risk="high", out="refuse",
             tags=["safety","must_refuse"])
+
+    # Phase 11: follow-up reminder weak-family scenarios
+    for p in [
+        "remind me if no reply in 3 days",
+        "set a follow-up reminder on this thread",
+        "follow up on this if they don't answer",
+        "if they haven't replied by Friday ping me",
+        "if no reply by Monday remind me",
+        "remind me to follow up",
+        "follow up on this thread Friday morning if they don't answer",
+    ]:
+        add(p, "comms", "gmail_followup_reminder", "medium", fam="gmail_followup_reminder")
+
+    for p in [
+        "show my follow-ups",
+        "list pending follow-up reminders",
+        "what am I waiting on?",
+        "what threads am I following up on",
+        "who hasn't replied",
+        "open follow-ups",
+        "pending follow-ups",
+    ]:
+        add(p, "comms", "gmail_list_followups", "easy", fam="gmail_list_followups")
+
+    for p in [
+        "cancel the follow-up",
+        "cancel reminder 2",
+        "remove that reminder",
+        "stop the follow-up reminder",
+        "delete reminder",
+    ]:
+        add(p, "comms", "gmail_cancel_followup", "medium", fam="gmail_cancel_followup")
 
     return sc
 

@@ -67,6 +67,10 @@
     "/gmail-remove-attachment",
     "/gmail-reschedule",
     "/gmail-rewrite",
+    "/gmail-rule",
+    "/gmail-rule-apply",
+    "/gmail-rule-cancel",
+    "/gmail-rules",
     "/gmail-save-attachment",
     "/gmail-scheduled",
     "/gmail-send-draft",
@@ -170,7 +174,7 @@
     [
       "open-webui",
       "1",
-      "Up 21 hours (healthy)"
+      "Up 22 hours (healthy)"
     ],
     [
       "n8n",
@@ -195,7 +199,7 @@
     [
       "grafana",
       "1",
-      "Up 21 hours"
+      "Up 22 hours"
     ],
     [
       "node-exporter",
@@ -250,5 +254,5 @@
     "MODEL_NLU_FALLBACK": "qwen3:0.6b"
   },
   "ts": "2026-06-17",
-  "_hash": "2210f8af0c2873d7"
+  "_hash": "2c27497034dca66e"
 }

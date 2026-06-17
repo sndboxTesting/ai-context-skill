@@ -1335,5 +1335,108 @@ class TestGmailRoutingPhase15(unittest.TestCase):
         self.assertEqual(_classify("forward it to boss"), "gmail_forward")
 
 
+class TestGmailRoutingPhase16(unittest.TestCase):
+    """Phase 16: gmail_filter_build / apply / cancel / list NLU routing."""
+
+    # ── gmail_filter_build ───────────────────────────────────────────────────
+
+    def test_always_label_invoices(self):
+        self.assertEqual(_classify("always label invoices Finance"), "gmail_filter_build")
+
+    def test_auto_archive_newsletters(self):
+        self.assertEqual(_classify("auto archive newsletters from this sender"), "gmail_filter_build")
+
+    def test_automatically_label_receipts(self):
+        self.assertEqual(_classify("automatically label receipts Finance"), "gmail_filter_build")
+
+    def test_mark_github_notifications_read(self):
+        # "always mark X as read" triggers rule; bare "mark X as read" is a mutation (gmail_mark_read)
+        self.assertEqual(_classify("always mark GitHub notifications as read"), "gmail_filter_build")
+        self.assertEqual(_classify("auto mark GitHub notifications as read"), "gmail_filter_build")
+
+    def test_create_rule_for_amazon(self):
+        self.assertEqual(_classify("create a rule for Amazon receipts"), "gmail_filter_build")
+
+    def test_create_gmail_filter(self):
+        self.assertEqual(_classify("create a Gmail filter for these promotional emails"), "gmail_filter_build")
+
+    def test_make_filter_for_invoices(self):
+        self.assertEqual(_classify("make a filter for invoices"), "gmail_filter_build")
+
+    def test_build_rule_to_archive(self):
+        self.assertEqual(_classify("build a rule to archive newsletters"), "gmail_filter_build")
+
+    def test_set_up_a_rule(self):
+        self.assertEqual(_classify("set up a rule for Amazon"), "gmail_filter_build")
+
+    def test_show_me_what_rule(self):
+        self.assertEqual(_classify("show me what rule you would make for these"), "gmail_filter_build")
+
+    def test_filter_build_beats_compose(self):
+        # "create a Gmail rule for these emails" must not hit gmail_compose
+        result = _classify("create a Gmail rule for these emails")
+        self.assertEqual(result, "gmail_filter_build")
+        self.assertNotEqual(result, "gmail_compose")
+
+    def test_always_archive_not_mutation(self):
+        # "always archive newsletters" must not go to gmail_archive mutation
+        result = _classify("always archive newsletters")
+        self.assertEqual(result, "gmail_filter_build")
+        self.assertNotEqual(result, "gmail_archive")
+
+    # ── gmail_filter_apply ───────────────────────────────────────────────────
+
+    def test_create_that_rule(self):
+        self.assertEqual(_classify("create that rule"), "gmail_filter_apply")
+
+    def test_apply_the_rule(self):
+        self.assertEqual(_classify("apply the rule"), "gmail_filter_apply")
+
+    def test_save_the_filter(self):
+        self.assertEqual(_classify("save the filter"), "gmail_filter_apply")
+
+    def test_confirm_the_filter(self):
+        self.assertEqual(_classify("confirm the filter"), "gmail_filter_apply")
+
+    def test_yes_create_that_rule(self):
+        self.assertEqual(_classify("yes create that rule"), "gmail_filter_apply")
+
+    def test_apply_beats_filter_build(self):
+        # "create that rule" must go to filter_apply, not filter_build
+        result = _classify("create that rule")
+        self.assertNotEqual(result, "gmail_filter_build")
+
+    # ── gmail_filter_cancel ──────────────────────────────────────────────────
+
+    def test_cancel_rule_creation(self):
+        self.assertEqual(_classify("cancel rule creation"), "gmail_filter_cancel")
+
+    def test_discard_the_rule(self):
+        self.assertEqual(_classify("discard the rule"), "gmail_filter_cancel")
+
+    def test_cancel_the_filter(self):
+        self.assertEqual(_classify("cancel the filter"), "gmail_filter_cancel")
+
+    def test_filter_cancel_not_draft_cancel(self):
+        # "cancel the filter" must not go to gmail_cancel_draft
+        result = _classify("cancel the filter")
+        self.assertNotEqual(result, "gmail_cancel_draft")
+        self.assertNotEqual(result, "gmail_cancel")
+
+    # ── gmail_filter_list ────────────────────────────────────────────────────
+
+    def test_show_my_rules(self):
+        self.assertEqual(_classify("show my rules"), "gmail_filter_list")
+
+    def test_list_my_gmail_filters(self):
+        self.assertEqual(_classify("list my Gmail filters"), "gmail_filter_list")
+
+    def test_show_saved_filters(self):
+        self.assertEqual(_classify("show my saved filters"), "gmail_filter_list")
+
+    def test_view_my_rules(self):
+        self.assertEqual(_classify("view my rules"), "gmail_filter_list")
+
+
 if __name__ == "__main__":
     unittest.main(verbosity=2)

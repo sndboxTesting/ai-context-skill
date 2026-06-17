@@ -45,6 +45,7 @@ ALL_INTENTS = [
     "gmail_reschedule_send", "gmail_open_scheduled_draft",
     "gmail_list_drafts", "gmail_open_draft", "gmail_delete_draft",
     "gmail_thread_intel", "gmail_forward",
+    "gmail_filter_build", "gmail_filter_apply", "gmail_filter_cancel", "gmail_filter_list",
     "sync",
     "nightly_status","nightly_run",
     "fix_error","patch_adwi","inspect_code","test_adwi","eval_routing","eval_adwi",
@@ -452,6 +453,19 @@ REGEX_INTENTS = [
     (re.compile(r"\b(?:forget|throw\s+away)\b.{0,20}\b(?:the\s+)?draft\b", re.I), "gmail_cancel_draft"),
     (re.compile(r"\b(?:show|display|view|preview|read)\b.{0,20}\b(?:the\s+|my\s+)?draft\b", re.I), "gmail_show_draft"),
     (re.compile(r"\bwhat(?:\s+does)?.{0,20}(?:the\s+)?draft\b", re.I), "gmail_show_draft"),
+    # gmail Phase 16: filter/rule builder — MUST precede Phase 3
+    (re.compile(r"\b(?:cancel|discard|abort|stop)\b.{0,20}\b(?:rule|filter)\b", re.I), "gmail_filter_cancel"),
+    (re.compile(r"\bcreate\b.{0,15}\b(?:that|the)\b.{0,10}\b(?:rule|filter)\b", re.I), "gmail_filter_apply"),
+    (re.compile(r"\b(?:apply|confirm|save)\b.{0,20}\b(?:the|that)\b.{0,15}\b(?:rule|filter)\b", re.I), "gmail_filter_apply"),
+    (re.compile(r"\byes,?\s+create\b.{0,20}\b(?:rule|filter)\b", re.I), "gmail_filter_apply"),
+    (re.compile(r"\b(?:show|list|view)\b.{0,20}\b(?:my\s+)?(?:rules|filters)\b", re.I), "gmail_filter_list"),
+    (re.compile(r"\b(?:show|list)\b.{0,15}\bsaved\b.{0,15}\b(?:rules|filters)\b", re.I), "gmail_filter_list"),
+    (re.compile(r"\b(?:always|auto|automatically)\b.{0,30}\b(?:label|archive|star)\b", re.I), "gmail_filter_build"),
+    (re.compile(r"\b(?:always|auto|automatically)\b.{0,40}\bmark\b.{0,30}\bread\b", re.I), "gmail_filter_build"),
+    (re.compile(r"\bcreate\b.{0,20}\b(?:a\s+)?(?:rule|filter)\b.{0,25}\b(?:for|to|that|when)\b", re.I), "gmail_filter_build"),
+    (re.compile(r"\b(?:make|build|set\s+up)\b.{0,20}\b(?:a\s+)?(?:rule|filter)\b", re.I), "gmail_filter_build"),
+    (re.compile(r"\b(?:create|make)\b.{0,10}\b(?:a\s+)?gmail\s+(?:rule|filter)\b", re.I), "gmail_filter_build"),
+    (re.compile(r"\b(?:show\s+me|what\s+rule|what\s+filter)\b.{0,30}\b(?:for|would|you\s+make)\b", re.I), "gmail_filter_build"),
     # gmail Phase 15: thread intel + forward — MUST precede gmail_draft_reply / gmail_compose
     (re.compile(r"\baction\s+items?\b", re.I), "gmail_thread_intel"),
     (re.compile(r"\bwhat\s+(?:action\s+items?|decisions?|questions?|changed|do\s+I\s+(?:owe|need\s+to\s+do))\b", re.I), "gmail_thread_intel"),
@@ -1400,6 +1414,53 @@ def build_corpus() -> list[dict]:
         "fwd to noreply@example.com",
     ]:
         add(p, "comms", "gmail_forward", "easy", fam="gmail_forward")
+
+    # ─────────────────────────────────────────────────────────────────────────
+    # GMAIL PHASE 16 — filter_build / filter_apply / filter_cancel / filter_list  (28 scenarios)
+    # ─────────────────────────────────────────────────────────────────────────
+    for p in [
+        "always label invoices Finance",
+        "automatically label receipts Finance",
+        "auto archive newsletters from this sender",
+        "always archive newsletters",
+        "always mark GitHub notifications as read",
+        "auto mark GitHub notifications as read",
+        "create a rule for Amazon receipts",
+        "create a rule for these emails",
+        "create a Gmail filter for these promotional emails",
+        "make a filter for invoices",
+        "build a rule to archive newsletters",
+        "set up a rule for Amazon",
+        "show me what rule you would make for these",
+        "show me a filter for invoices older than a week",
+        "create a Gmail rule for these emails",
+    ]:
+        add(p, "comms", "gmail_filter_build", "easy", fam="gmail_filter_build")
+
+    for p in [
+        "create that rule",
+        "apply the rule",
+        "save the filter",
+        "confirm the filter",
+        "yes create that rule",
+    ]:
+        add(p, "comms", "gmail_filter_apply", "easy", fam="gmail_filter_apply")
+
+    for p in [
+        "cancel rule creation",
+        "discard the rule",
+        "cancel the filter",
+        "abort the rule",
+    ]:
+        add(p, "comms", "gmail_filter_cancel", "easy", fam="gmail_filter_cancel")
+
+    for p in [
+        "show my rules",
+        "list my Gmail filters",
+        "show my saved filters",
+        "view my rules",
+    ]:
+        add(p, "comms", "gmail_filter_list", "easy", fam="gmail_filter_list")
 
     # ─────────────────────────────────────────────────────────────────────────
     # WEB SEARCH  (45 scenarios)

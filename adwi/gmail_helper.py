@@ -765,3 +765,100 @@ def get_thread_reply_check(thread_id: str, after_epoch_ms: int) -> dict:
                 "reply_at_iso": at_iso,
             }
     return {"has_reply": False, "reply_from": "", "reply_at_iso": ""}
+
+
+# ── Phase 16: label + filter helpers ─────────────────────────────────────────
+
+def list_labels_all() -> list:
+    """List all Gmail labels. Returns [{id, name, type}, ...]."""
+    service = get_service()
+    labels = service.users().labels().list(userId="me").execute().get("labels", [])
+    return [{"id": l["id"], "name": l["name"], "type": l.get("type", "user")} for l in labels]
+
+
+def get_or_create_label(name: str) -> str:
+    """Find an existing Gmail label by name (case-insensitive) or create it. Returns label_id."""
+    service = get_service()
+    labels = service.users().labels().list(userId="me").execute().get("labels", [])
+    for lbl in labels:
+        if lbl["name"].lower() == name.lower():
+            return lbl["id"]
+    result = service.users().labels().create(
+        userId="me",
+        body={
+            "name": name,
+            "labelListVisibility": "labelShow",
+            "messageListVisibility": "show",
+        }
+    ).execute()
+    return result["id"]
+
+
+def apply_rule_to_existing(query: str, label_id: str = "", archive: bool = False,
+                            mark_read: bool = False, star: bool = False,
+                            max_results: int = 100) -> int:
+    """
+    Apply rule actions to existing messages matching a Gmail query.
+    Uses gmail.modify scope (already authorized). Returns count of messages modified.
+    """
+    if not query:
+        return 0
+    emails = list_emails(max_results=max_results, query=query, inbox_only=False)
+    if not emails:
+        return 0
+    msg_ids = [e["id"] for e in emails]
+    if label_id:
+        _batch_modify(msg_ids, add_labels=[label_id])
+    if archive:
+        _batch_modify(msg_ids, remove_labels=["INBOX"])
+    if mark_read:
+        _batch_modify(msg_ids, remove_labels=["UNREAD"])
+    if star:
+        _batch_modify(msg_ids, add_labels=["STARRED"])
+    return len(msg_ids)
+
+
+def create_filter_native(from_: str = "", subject: str = "", query: str = "",
+                          label_id: str = "", archive: bool = False,
+                          mark_read: bool = False) -> dict | None:
+    """
+    Attempt to create a persistent Gmail filter via the Settings API.
+    Requires gmail.settings.basic scope (not in default SCOPES).
+    Returns {filter_id} on success; None on 403 (scope insufficient).
+    Caller must handle None gracefully and prompt for scope upgrade.
+    """
+    service = get_service()
+    criteria: dict = {}
+    if from_:    criteria["from"] = from_
+    if subject:  criteria["subject"] = subject
+    if query and not from_ and not subject:
+        criteria["query"] = query
+    if not criteria:
+        return None
+
+    action: dict = {}
+    add_labels: list[str] = []
+    remove_labels: list[str] = []
+    if label_id:
+        add_labels.append(label_id)
+    if archive:
+        remove_labels.append("INBOX")
+    if mark_read:
+        remove_labels.append("UNREAD")
+    if add_labels:
+        action["addLabelIds"] = add_labels
+    if remove_labels:
+        action["removeLabelIds"] = remove_labels
+    if not action:
+        return None
+
+    try:
+        result = service.users().settings().filters().create(
+            userId="me",
+            body={"criteria": criteria, "action": action}
+        ).execute()
+        return {"filter_id": result.get("id", "")}
+    except Exception as e:
+        if "insufficientPermissions" in str(e) or "403" in str(e):
+            return None
+        raise

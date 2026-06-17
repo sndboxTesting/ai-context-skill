@@ -915,6 +915,24 @@ _REGEX_INTENTS = [
     (re.compile(r"\bsend\b.{0,30}at\s+\d{1,2}(?::\d{2})?\s*(?:am|pm)\b", re.I), "gmail_schedule_send"),
     (re.compile(r"\bschedule\b.{0,30}\b(?:this|it|the\s+(?:draft|email|message))\b", re.I), "gmail_schedule_send"),
 
+    # ── Gmail Phase 16: filter / rule builder — MUST precede Phase 3 ─────────
+    # gmail_filter_cancel — "cancel rule creation", "discard the filter"
+    (re.compile(r"\b(?:cancel|discard|abort|stop)\b.{0,20}\b(?:rule|filter)\b", re.I), "gmail_filter_cancel"),
+    # gmail_filter_apply — "create that rule", "apply the filter", "save the rule" — before filter_build
+    (re.compile(r"\bcreate\b.{0,15}\b(?:that|the)\b.{0,10}\b(?:rule|filter)\b", re.I), "gmail_filter_apply"),
+    (re.compile(r"\b(?:apply|confirm|save)\b.{0,20}\b(?:the|that)\b.{0,15}\b(?:rule|filter)\b", re.I), "gmail_filter_apply"),
+    (re.compile(r"\byes,?\s+create\b.{0,20}\b(?:rule|filter)\b", re.I), "gmail_filter_apply"),
+    # gmail_filter_list — "show my rules", "list my Gmail filters"
+    (re.compile(r"\b(?:show|list|view)\b.{0,20}\b(?:my\s+)?(?:rules|filters)\b", re.I), "gmail_filter_list"),
+    (re.compile(r"\b(?:show|list)\b.{0,15}\bsaved\b.{0,15}\b(?:rules|filters)\b", re.I), "gmail_filter_list"),
+    # gmail_filter_build — "always label X", "create a rule for X", "auto archive X", "make a filter"
+    (re.compile(r"\b(?:always|auto|automatically)\b.{0,30}\b(?:label|archive|star)\b", re.I), "gmail_filter_build"),
+    (re.compile(r"\b(?:always|auto|automatically)\b.{0,40}\bmark\b.{0,30}\bread\b", re.I), "gmail_filter_build"),
+    (re.compile(r"\bcreate\b.{0,20}\b(?:a\s+)?(?:rule|filter)\b.{0,25}\b(?:for|to|that|when)\b", re.I), "gmail_filter_build"),
+    (re.compile(r"\b(?:make|build|set\s+up)\b.{0,20}\b(?:a\s+)?(?:rule|filter)\b", re.I), "gmail_filter_build"),
+    (re.compile(r"\b(?:create|make)\b.{0,10}\b(?:a\s+)?gmail\s+(?:rule|filter)\b", re.I), "gmail_filter_build"),
+    (re.compile(r"\b(?:show\s+me|what\s+rule|what\s+filter)\b.{0,30}\b(?:for|would|you\s+make)\b", re.I), "gmail_filter_build"),
+
     # ── Gmail Phase 15: thread intel + forward — MUST precede Phase 3 (gmail_draft_reply / gmail_compose) ──
     # gmail_thread_intel — action items, decisions, questions, reply-needed, latest-delta
     (re.compile(r"\baction\s+items?\b", re.I), "gmail_thread_intel"),
@@ -1240,6 +1258,7 @@ _ALL_INTENTS = [
     "gmail_reschedule_send", "gmail_open_scheduled_draft",
     "gmail_list_drafts", "gmail_open_draft", "gmail_delete_draft",
     "gmail_thread_intel", "gmail_forward",
+    "gmail_filter_build", "gmail_filter_apply", "gmail_filter_cancel", "gmail_filter_list",
     # n8n / automation
     "sync",
     # Nightly
@@ -1410,6 +1429,18 @@ _INTENT_SYSTEM = (
     "   'gmail_forward'  : forward current email to a new recipient — 'forward to Rahul',\n"
     "                      'forward this to priya@example.com', 'forward with a summary',\n"
     "                      'fwd this to the team'. Always creates a draft first.\n"
+    "   'gmail_filter_build': parse and preview a reusable Gmail filter rule from natural language —\n"
+    "                      'always label invoices Finance', 'archive newsletters from this sender',\n"
+    "                      'mark GitHub notifications as read', 'create a rule for Amazon receipts',\n"
+    "                      'create a Gmail filter for these promotional emails',\n"
+    "                      'show me what rule you would make for these emails'.\n"
+    "                      NEVER use when the user just wants a one-time action (→ gmail_archive, gmail_mark_read).\n"
+    "                      'always', 'auto', 'create a rule/filter', 'make a filter' are the key signals.\n"
+    "   'gmail_filter_apply': confirm and create the pending Gmail filter rule —\n"
+    "                      'create that rule', 'apply the filter', 'save the rule', 'yes create it'.\n"
+    "                      ONLY use when a pending rule exists (user built one first).\n"
+    "   'gmail_filter_cancel': cancel the pending rule — 'cancel rule creation', 'discard the filter'.\n"
+    "   'gmail_filter_list': list saved Gmail rules — 'show my rules', 'list my Gmail filters'.\n"
     "   'generate_image' : ONLY when creating a brand-new image/picture/artwork/visual output.\n"
     "                      NEVER for explanations, comparisons, or code/model concepts.\n"
     "                      'generation' as a software concept (code generation, token generation,\n"
@@ -3506,6 +3537,7 @@ _GMAIL_CTX: dict = {
     "followup_reminder":  None, # Phase 11: most recently created follow-up reminder entry
     "draft_list":         [],   # Phase 12: cached [{draft_id,to,subject,mode,has_attachment,…}] from list_drafts
     "thread_intel":       None, # Phase 15: last thread intelligence result {mode, subject}
+    "pending_rule":       None, # Phase 16: candidate filter rule dict or None
 }
 
 _GMAIL_ACTION_PAST = {
@@ -3519,6 +3551,7 @@ _GMAIL_MAX_CANDIDATES  = 25  # hard cap on mutation batch size
 ATTACH_SAVE_DIR        = BASE / "gmail-attachments"  # Phase 6: bounded attachment save dir
 SCHEDULED_SENDS_FILE   = BASE / "adwi" / "scheduled_sends.json"  # Phase 10: pending scheduled-send queue
 FOLLOWUP_FILE          = BASE / "adwi" / "followup_reminders.json"  # Phase 11: follow-up reminders queue
+GMAIL_RULES_FILE       = BASE / "adwi" / "gmail_rules.json"         # Phase 16: local rule store
 
 _GMAIL_CATEGORY_MAP = {
     "promotions": "CATEGORY_PROMOTIONS", "promotion":  "CATEGORY_PROMOTIONS",
@@ -4880,6 +4913,298 @@ def cmd_gmail_thread(query: str = "") -> None:
         _display_thread(thread)
     except Exception as e:
         cprint(f"  Gmail error: {e}", RED)
+
+
+# ── Gmail Phase 16: filter / rule builder ────────────────────────────────────
+
+def _extract_sender_email(from_str: str) -> str:
+    """Extract bare email address from 'Name <email>' or bare email string."""
+    m = re.search(r"<([^>]+)>", from_str)
+    return m.group(1).strip() if m else from_str.strip()
+
+
+def _load_gmail_rules() -> list:
+    if GMAIL_RULES_FILE.exists():
+        try:
+            return json.loads(GMAIL_RULES_FILE.read_text(encoding="utf-8"))
+        except Exception:
+            return []
+    return []
+
+
+def _save_gmail_rules(rules: list) -> None:
+    GMAIL_RULES_FILE.parent.mkdir(parents=True, exist_ok=True)
+    tmp = GMAIL_RULES_FILE.with_suffix(".json.tmp")
+    tmp.write_text(json.dumps(rules, indent=2, ensure_ascii=False), encoding="utf-8")
+    tmp.replace(GMAIL_RULES_FILE)
+
+
+def _parse_filter_rule(text: str) -> dict:
+    """Parse natural-language input into a structured candidate filter rule."""
+    rule: dict = {
+        "criteria": {"from_": "", "to": "", "subject": "", "query": ""},
+        "actions":  {"label": "", "archive": False, "mark_read": False, "star": False},
+        "description": "",
+        "status": "pending",
+    }
+
+    # ── Action extraction ────────────────────────────────────────────────────
+    label_m = (
+        re.search(r"\blabel\b.{1,30}\b([A-Z][A-Za-z0-9_-]{1,25})\s*$", text)
+        or re.search(r'\blabel\s+(?:as\s+|it\s+)?["\']?([A-Za-z][A-Za-z0-9_-]{1,25})["\']?\b', text, re.I)
+        or re.search(r'\bapply\s+label\s+["\']?([A-Za-z][A-Za-z0-9_-]{1,25})["\']?\b', text, re.I)
+    )
+    if label_m:
+        rule["actions"]["label"] = label_m.group(1).strip("\"' ")
+    if re.search(r"\barchive\b|\bskip\s+inbox\b|\bnot\s+in\s+inbox\b", text, re.I):
+        rule["actions"]["archive"] = True
+    if re.search(r"\bmark\b.{0,10}(?:as\s+)?read\b|\bmark\s+read\b", text, re.I):
+        rule["actions"]["mark_read"] = True
+    if re.search(r"\bstar\b.{0,10}\b(?:it|them|message|email|emails)?\b|\bmark\s+(?:as\s+)?important\b", text, re.I):
+        rule["actions"]["star"] = True
+
+    # ── Criteria extraction ──────────────────────────────────────────────────
+    em = _GMAIL_CTX.get("current_email")
+
+    if re.search(r"\bfrom\s+this\s+sender\b|\bthis\s+sender\b|\bsame\s+sender\b", text, re.I):
+        if em:
+            rule["criteria"]["from_"] = _extract_sender_email(em.get("from", ""))
+    elif sender_m := re.search(r"\bfrom\s+([\w.@+-]+(?:\.(?:com|io|org|net|co|app|ai|dev))?)\b", text, re.I):
+        rule["criteria"]["from_"] = sender_m.group(1).strip()
+
+    # Well-known sender shorthands
+    if re.search(r"\bgithub\b.{0,20}\bnotifications?\b|\bnotifications?\b.{0,20}\bgithub\b", text, re.I):
+        rule["criteria"]["from_"] = "notifications@github.com"
+    elif re.search(r"\bamazon\b", text, re.I) and not rule["criteria"]["from_"]:
+        rule["criteria"]["from_"] = "@amazon.com"
+
+    # Subject keywords → criteria + sensible action default
+    if re.search(r"\binvoices?\b", text, re.I):
+        rule["criteria"]["subject"] = "invoice"
+        if not rule["actions"]["label"] and not rule["actions"]["archive"]:
+            rule["actions"]["label"] = "Finance"
+    elif re.search(r"\breceipts?\b", text, re.I):
+        rule["criteria"]["subject"] = "receipt"
+        if not rule["actions"]["label"] and not rule["actions"]["archive"]:
+            rule["actions"]["label"] = "Finance"
+
+    # Category keywords → query + sensible action default
+    if re.search(r"\bnewsletters?\b|\bpromotions?\b|\bpromotional\b", text, re.I):
+        rule["criteria"]["query"] = "category:promotions"
+        if not rule["actions"]["label"] and not rule["actions"]["archive"]:
+            rule["actions"]["archive"] = True
+    elif re.search(r"\bnotifications?\b", text, re.I) and not rule["criteria"]["from_"]:
+        rule["criteria"]["query"] = "category:updates"
+
+    # "these/this emails" → use current email sender as criterion
+    if re.search(r"\b(?:these|this)\b.{0,15}\b(?:emails?|messages?|mails?)\b", text, re.I) and em:
+        if not rule["criteria"]["from_"]:
+            rule["criteria"]["from_"] = _extract_sender_email(em.get("from", ""))
+
+    # ── Description ─────────────────────────────────────────────────────────
+    crit_parts: list[str] = []
+    if rule["criteria"]["from_"]:   crit_parts.append(f"from '{rule['criteria']['from_']}'")
+    if rule["criteria"]["to"]:      crit_parts.append(f"to '{rule['criteria']['to']}'")
+    if rule["criteria"]["subject"]: crit_parts.append(f"subject contains '{rule['criteria']['subject']}'")
+    if rule["criteria"]["query"]:   crit_parts.append(f"matching {rule['criteria']['query']}")
+
+    act_parts: list[str] = []
+    if rule["actions"]["label"]:     act_parts.append(f"label '{rule['actions']['label']}'")
+    if rule["actions"]["archive"]:   act_parts.append("skip inbox")
+    if rule["actions"]["mark_read"]: act_parts.append("mark as read")
+    if rule["actions"]["star"]:      act_parts.append("star")
+
+    crit_str = " and ".join(crit_parts) if crit_parts else "any email"
+    act_str  = ", ".join(act_parts) if act_parts else "⚠ no action set"
+    rule["description"] = f"When {crit_str}: {act_str}"
+    return rule
+
+
+def _filter_criteria_to_query(criteria: dict) -> str:
+    """Convert rule criteria dict to a Gmail search query string."""
+    parts: list[str] = []
+    if criteria.get("from_"):    parts.append(f"from:{criteria['from_']}")
+    if criteria.get("to"):       parts.append(f"to:{criteria['to']}")
+    if criteria.get("subject"):  parts.append(f"subject:{criteria['subject']}")
+    if criteria.get("query"):    parts.append(criteria["query"])
+    return " ".join(parts)
+
+
+def _filter_preview(rule: dict) -> None:
+    """Render a structured filter rule preview box."""
+    W = 62
+    crit = rule.get("criteria", {})
+    acts = rule.get("actions", {})
+    cprint(f"\n  ┌{'─'*W}┐", GRAY)
+    cprint(f"  │  {BOLD}Gmail Rule Preview{RESET}{'':>{W-20}}│")
+    cprint(f"  ├{'─'*W}┤", GRAY)
+    cprint(f"  │  {CYAN}MATCH CRITERIA:{RESET}{'':>{W-18}}│")
+    if crit.get("from_"):
+        cprint(f"  │    From:    {crit['from_'][:W-14]:<{W-14}}│")
+    if crit.get("subject"):
+        subj_line = f"contains '{crit['subject']}'"
+        cprint(f"  │    Subject: {subj_line[:W-14]:<{W-14}}│")
+    if crit.get("query"):
+        cprint(f"  │    Query:   {crit['query'][:W-14]:<{W-14}}│")
+    if not any(crit.get(k) for k in ("from_", "to", "subject", "query")):
+        cprint(f"  │    {YELLOW}(all incoming email — refine before creating){RESET}{'':>{W-47}}│")
+    cprint(f"  ├{'─'*W}┤", GRAY)
+    cprint(f"  │  {CYAN}ACTIONS:{RESET}{'':>{W-11}}│")
+    if acts.get("label"):
+        cprint(f"  │    ✓ Apply label: {acts['label'][:W-20]:<{W-20}}│")
+    if acts.get("archive"):
+        cprint(f"  │    ✓ Skip inbox (archive){'':>{W-28}}│")
+    if acts.get("mark_read"):
+        cprint(f"  │    ✓ Mark as read{'':>{W-20}}│")
+    if acts.get("star"):
+        cprint(f"  │    ✓ Star the message{'':>{W-24}}│")
+    if not any(acts.get(k) for k in ("label", "archive", "mark_read", "star")):
+        cprint(f"  │    {YELLOW}⚠ No action — say 'archive' or 'label Finance'{RESET}{'':>{W-49}}│")
+    cprint(f"  ├{'─'*W}┤", GRAY)
+    hint = "Say 'create that rule' to apply  ·  'cancel' to discard"
+    cprint(f"  │  {YELLOW}{hint:<{W-2}}{RESET}│")
+    cprint(f"  └{'─'*W}┘\n", GRAY)
+
+
+def cmd_gmail_filter_build(text: str = "") -> None:
+    """Parse natural-language input into a Gmail filter rule and show a preview."""
+    token = HOME / "SuneelWorkSpace" / "secrets" / "gmail-token.json"
+    if not token.exists():
+        cprint("  Gmail not authorized — run /gmail-auth first", RED); return
+
+    adwi_head("Gmail — Rule Builder")
+    rule = _parse_filter_rule(text)
+
+    has_criteria = any(rule["criteria"].get(k) for k in ("from_", "to", "subject", "query"))
+    has_action   = any(rule["actions"].get(k) for k in ("label", "archive", "mark_read", "star"))
+
+    if not has_criteria and not has_action:
+        cprint("  Could not extract criteria or action from that.", YELLOW)
+        cprint("  Try:", GRAY)
+        cprint("    'always label invoices Finance'", GRAY)
+        cprint("    'archive newsletters from this sender'", GRAY)
+        cprint("    'mark GitHub notifications as read'", GRAY)
+        cprint("    'create a rule for Amazon receipts'", GRAY)
+        return
+
+    _GMAIL_CTX["pending_rule"] = rule
+    _filter_preview(rule)
+
+
+def cmd_gmail_filter_apply(text: str = "") -> None:
+    """Confirm and apply the pending Gmail filter rule."""
+    token = HOME / "SuneelWorkSpace" / "secrets" / "gmail-token.json"
+    if not token.exists():
+        cprint("  Gmail not authorized — run /gmail-auth first", RED); return
+
+    rule = _GMAIL_CTX.get("pending_rule")
+    if not rule or rule.get("status") != "pending":
+        cprint("  No pending rule. Build one first — e.g. 'always label invoices Finance'.", YELLOW)
+        return
+
+    has_action = any(rule["actions"].get(k) for k in ("label", "archive", "mark_read", "star"))
+    if not has_action:
+        cprint("  This rule has no action. Say 'archive' or 'label Finance' first.", YELLOW)
+        _filter_preview(rule); return
+
+    adwi_head("Gmail — Applying Rule")
+    cprint(f"  {rule['description']}", GRAY)
+    print()
+
+    try:
+        gh = _gmail()
+        label_id = ""
+
+        # Step 1: create/find label
+        if rule["actions"]["label"]:
+            cprint(f"  {GRAY}Creating/finding label '{rule['actions']['label']}'…{RESET}")
+            label_id = gh.get_or_create_label(rule["actions"]["label"])
+            cprint(f"  {GREEN}✓ Label ready: '{rule['actions']['label']}'{RESET}")
+
+        # Step 2: backfill — apply to existing matching emails
+        query = _filter_criteria_to_query(rule["criteria"])
+        applied_count = 0
+        if query:
+            cprint(f"  {GRAY}Searching existing emails: {query[:60]}{RESET}")
+            applied_count = gh.apply_rule_to_existing(
+                query     = query,
+                label_id  = label_id,
+                archive   = rule["actions"]["archive"],
+                mark_read = rule["actions"]["mark_read"],
+                star      = rule["actions"]["star"],
+            )
+            if applied_count:
+                cprint(f"  {GREEN}✓ Applied to {applied_count} existing email(s){RESET}")
+            else:
+                cprint(f"  {GRAY}No existing emails matched the criteria.{RESET}")
+
+        # Step 3: attempt persistent Gmail native filter
+        cprint(f"  {GRAY}Attempting persistent Gmail filter…{RESET}")
+        filter_result = gh.create_filter_native(
+            from_     = rule["criteria"].get("from_", ""),
+            subject   = rule["criteria"].get("subject", ""),
+            query     = rule["criteria"].get("query", ""),
+            label_id  = label_id,
+            archive   = rule["actions"]["archive"],
+            mark_read = rule["actions"]["mark_read"],
+        )
+        gmail_filter_id = None
+        if filter_result:
+            gmail_filter_id = filter_result.get("filter_id")
+            cprint(f"  {GREEN}✓ Gmail native filter created (ID: {gmail_filter_id}){RESET}")
+        else:
+            cprint(f"  {YELLOW}⚠ Persistent filter not created — needs gmail.settings.basic scope.{RESET}")
+            cprint(f"  {GRAY}  To enable: add 'https://www.googleapis.com/auth/gmail.settings.basic'{RESET}")
+            cprint(f"  {GRAY}  to SCOPES in adwi/gmail_helper.py, then run /gmail-auth.{RESET}")
+
+        # Step 4: save locally
+        from datetime import datetime
+        rules = _load_gmail_rules()
+        rules.append({
+            "id":              f"rule_{datetime.now().strftime('%Y%m%d_%H%M%S')}",
+            "created_at":      datetime.now().isoformat(timespec="seconds"),
+            "criteria":        rule["criteria"],
+            "actions":         rule["actions"],
+            "description":     rule["description"],
+            "label_id":        label_id,
+            "gmail_filter_id": gmail_filter_id,
+            "applied_count":   applied_count,
+        })
+        _save_gmail_rules(rules)
+        cprint(f"\n  {GREEN}✓ Rule saved locally ({len(rules)} total){RESET}")
+
+        rule["status"] = "applied"
+        _GMAIL_CTX["pending_rule"] = None
+
+    except Exception as e:
+        cprint(f"  Error applying rule: {e}", RED)
+
+
+def cmd_gmail_filter_cancel(text: str = "") -> None:
+    """Cancel the pending Gmail filter rule."""
+    if _GMAIL_CTX.get("pending_rule"):
+        _GMAIL_CTX["pending_rule"] = None
+        cprint("  Rule creation cancelled.", GRAY)
+    else:
+        cprint("  No pending rule to cancel.", GRAY)
+
+
+def cmd_gmail_filter_list(text: str = "") -> None:
+    """List locally saved Gmail rules."""
+    adwi_head("Gmail — Saved Rules")
+    rules = _load_gmail_rules()
+    if not rules:
+        cprint("  No rules saved yet.", GRAY)
+        cprint("  Try: 'always label invoices Finance'", GRAY)
+        return
+    for i, r in enumerate(rules, 1):
+        created = r.get("created_at", "")[:10]
+        has_nat = " 🔗 persistent" if r.get("gmail_filter_id") else ""
+        applied = r.get("applied_count", 0)
+        cprint(f"  {i:>2}. {BOLD}{r.get('description','')[:72]}{RESET}{has_nat}")
+        cprint(f"      {GRAY}Created: {created}  |  Applied to: {applied} email(s){RESET}")
+        print()
+    cprint(f"  {GRAY}Total: {len(rules)} rule(s){RESET}")
 
 
 # ── Gmail Phase 15: thread helpers ───────────────────────────────────────────
@@ -8611,6 +8936,14 @@ def dispatch_natural(text: str):
         cmd_gmail_thread_intel(text)
     elif intent == "gmail_forward":
         cmd_gmail_forward(text)
+    elif intent == "gmail_filter_build":
+        cmd_gmail_filter_build(text)
+    elif intent == "gmail_filter_apply":
+        cmd_gmail_filter_apply(text)
+    elif intent == "gmail_filter_cancel":
+        cmd_gmail_filter_cancel(text)
+    elif intent == "gmail_filter_list":
+        cmd_gmail_filter_list(text)
     elif intent == "gmail_list_attachments":
         cmd_gmail_list_attachments(text)
     elif intent == "gmail_save_attachment":
@@ -8936,6 +9269,11 @@ def handle(line: str) -> bool:
     elif line.startswith("/gmail-thread-intel "): cmd_gmail_thread_intel(line[20:].strip())
     elif line == "/gmail-forward": cmd_gmail_forward("")
     elif line.startswith("/gmail-forward "): cmd_gmail_forward(line[15:].strip())
+    elif line == "/gmail-rule": cmd_gmail_filter_build("")
+    elif line.startswith("/gmail-rule "): cmd_gmail_filter_build(line[12:].strip())
+    elif line == "/gmail-rule-apply": cmd_gmail_filter_apply("")
+    elif line == "/gmail-rule-cancel": cmd_gmail_filter_cancel("")
+    elif line == "/gmail-rules": cmd_gmail_filter_list("")
     elif line == "/gmail-compose": cmd_gmail_compose("")
     elif line.startswith("/gmail-compose "): cmd_gmail_compose(line[15:].strip())
     elif line == "/gmail-show-draft": cmd_gmail_show_draft()

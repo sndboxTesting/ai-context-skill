@@ -1,0 +1,105 @@
+{
+  "name": "Adwi — Daily Brief",
+  "nodes": [
+    {
+      "parameters": {},
+      "id": "manual-trigger",
+      "name": "Manual Test Trigger",
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [0, 0]
+    },
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "days",
+              "triggerAtHour": 7,
+              "triggerAtMinute": 0
+            }
+          ]
+        }
+      },
+      "id": "schedule-trigger",
+      "name": "Daily 07:00 Schedule",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [0, 200]
+    },
+    {
+      "parameters": {
+        "method": "GET",
+        "url": "http://host.docker.internal:5055/adwi-daily-brief-n8n",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "X-Adwi-Secret",
+              "value": "={{ $env.ADWI_LOCAL_SECRET }}"
+            }
+          ]
+        },
+        "sendBody": false,
+        "options": {
+          "timeout": 120000
+        }
+      },
+      "id": "call-daily-brief-n8n",
+      "name": "Run Daily Brief (n8n mode)",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [300, 100]
+    },
+    {
+      "parameters": {
+        "jsCode": "// The Safe Command API wraps stdout in a JSON envelope.\n// Extract and parse the inner daily-brief JSON.\nconst envelope = $input.item.json;\nconst raw = (envelope.stdout || '').trim();\nif (!raw) {\n  throw new Error('Empty stdout from /adwi-daily-brief-n8n');\n}\nconst brief = JSON.parse(raw);\nif (!brief.ok) {\n  throw new Error('Daily brief returned ok=false: ' + JSON.stringify(brief.errors));\n}\nreturn {\n  ok: brief.ok,\n  generated_at: brief.generated_at,\n  brief_text: brief.brief,\n  gmail_summary: brief.gmail?.summary || '',\n  gmail_unread: brief.gmail?.unread_count || 0,\n  gmail_available: brief.gmail?.available || false,\n  services: brief.services,\n  saved_to: brief.saved_to,\n  warnings: (brief.warnings || []).join('; ')\n};"
+      },
+      "id": "parse-brief-json",
+      "name": "Parse Brief JSON",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [600, 100]
+    }
+  ],
+  "connections": {
+    "Manual Test Trigger": {
+      "main": [
+        [
+          {
+            "node": "Run Daily Brief (n8n mode)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Daily 07:00 Schedule": {
+      "main": [
+        [
+          {
+            "node": "Run Daily Brief (n8n mode)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Run Daily Brief (n8n mode)": {
+      "main": [
+        [
+          {
+            "node": "Parse Brief JSON",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "notes": "Calls /adwi-daily-brief-n8n on the Safe Command API (host:5055). Requires ADWI_LOCAL_SECRET set as n8n environment variable. The HTTP Request node uses host.docker.internal to reach the Mac host from inside Docker. After the Parse Brief JSON node, add Telegram/Slack/push notification nodes using {{ $json.brief_text }}. Do NOT log the X-Adwi-Secret header value in n8n execution logs.",
+  "active": false
+}

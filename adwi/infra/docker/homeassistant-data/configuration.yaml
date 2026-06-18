@@ -26,6 +26,16 @@ rest_command:
     method: POST
     content_type: "application/json"
     payload: '{"command": "brief"}'
+  adwi_e2e_auto_loop:
+    url: "http://100.110.47.128:5678/webhook/adwi-e2e-auto-loop"
+    method: POST
+    content_type: "application/json"
+    payload: '{"command": "e2e-auto-loop"}'
+  adwi_e2e_auto_loop_status:
+    url: "http://100.110.47.128:5678/webhook/adwi-e2e-auto-loop-status"
+    method: POST
+    content_type: "application/json"
+    payload: '{"command": "e2e-auto-loop-status"}'
 
 automation: !include automations.yaml
 script: !include scripts.yaml

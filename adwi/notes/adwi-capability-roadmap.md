@@ -60,6 +60,21 @@ Use `/add-capability-plan <idea>` to add new ideas. Use `/daily-improve` to revi
 - [x] bin/mcp-status script — terminal status overview, auto-starts Qdrant if offline
 - [x] Claude Code settings — all 10 MCP servers also configured in ~/.claude/settings.json
 
+## Phase 5 — Assistant Upgrade Pack (2026-06-18)
+
+- [x] **Research Operator** — `/research <question>` + `/research-save` — deep multi-source research (SearXNG + optional Exa/Tavily/Firecrawl), produces cited brief saved to `notes/research/`
+- [x] **Browser Delegate** — `/browser-delegate <task>` + dry-run mode — Playwright agent with confirmation gate before any form-submit/payment/auth action, saves to `notes/browser-tasks/`
+- [x] **Daily Brief** — `/daily-brief` — proactive assistant brief: service status + Gmail snapshot + priorities + learning tip + setup suggestion, saves to `notes/daily-briefs/` + Obsidian daily note, n8n-callable
+- [x] **Tech Radar** — `/tech-radar` — scans 6 AI/dev tech areas (OpenAI Agents, MCP, Ollama, browser agents, LangGraph, local voice/vision/RAG), categorises try-now/watch/ignore, saves to `notes/tech-radar/`
+- [x] **Memory Curator** — `/memory-curate` — reviews recent logs, proposes 3-5 durable memories, requires explicit Y/N per item, never auto-stores
+- [x] **Upgrade Status** — `/assistant-upgrade-status` — shows all 5 commands + optional API key status + output paths
+- [x] 6 new NLU intents + regex patterns wired into `_ALL_INTENTS` and `_REGEX_INTENTS`
+- [x] 68 total capability entries in `capabilities.json` (up from 62)
+
+Optional env keys to unlock full power: `EXA_API_KEY`, `TAVILY_API_KEY`, `FIRECRAWL_API_KEY`, `OPENWEBUI_API_KEY` (all in `adwi/config/.env.example`).
+
+Next steps for Codex: wire `/daily-brief` into the n8n "Adwi — Brief" workflow, add eval test cases to `run_large_eval.py`/`run_large_eval_p2.py` for the 6 new intents, implement `/daily-brief --n8n` flag for machine-readable JSON output.
+
 ## Phase 4 — Planned
 
 - [ ] Implement-from-video flow: paste video → "implement this" → plan → apply

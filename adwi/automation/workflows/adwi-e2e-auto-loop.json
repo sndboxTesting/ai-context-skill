@@ -1,0 +1,159 @@
+{
+  "name": "Adwi — E2E Auto Loop",
+  "nodes": [
+    {
+      "parameters": {},
+      "id": "manual-trigger",
+      "name": "Manual Test Trigger",
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [0, 0]
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "adwi-e2e-auto-loop",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "id": "webhook-start",
+      "name": "Webhook — E2E Auto Loop Start",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [0, 200],
+      "webhookId": "adwi-e2e-auto-loop"
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "adwi-e2e-auto-loop-status",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "id": "webhook-status",
+      "name": "Webhook — E2E Auto Loop Status",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [0, 400],
+      "webhookId": "adwi-e2e-auto-loop-status"
+    },
+    {
+      "parameters": {
+        "method": "GET",
+        "url": "http://host.docker.internal:5055/adwi-e2e-auto-loop-start",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "X-Adwi-Secret",
+              "value": "={{ $env.ADWI_LOCAL_SECRET }}"
+            }
+          ]
+        },
+        "sendBody": false,
+        "options": {
+          "timeout": 10000
+        }
+      },
+      "id": "call-e2e-start",
+      "name": "Start E2E Loop (Safe Command API)",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [320, 100]
+    },
+    {
+      "parameters": {
+        "method": "GET",
+        "url": "http://host.docker.internal:5055/adwi-e2e-auto-loop-status",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "X-Adwi-Secret",
+              "value": "={{ $env.ADWI_LOCAL_SECRET }}"
+            }
+          ]
+        },
+        "sendBody": false,
+        "options": {
+          "timeout": 10000
+        }
+      },
+      "id": "call-e2e-status",
+      "name": "Get E2E Status (Safe Command API)",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [320, 400]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Extract job_id and status from Safe Command API envelope.\n// The start route uses Popen and returns JSON directly (not wrapped in stdout).\n// Do NOT log the X-Adwi-Secret header value.\nconst env = $input.item.json;\n\n// The start route returns JSON directly from _handle_e2e_start\nif (env.job_id) {\n  return {\n    ok: true,\n    job_id: env.job_id,\n    status: env.status || 'started',\n    pid: env.pid || null,\n    status_route: env.status_route || '/adwi-e2e-auto-loop-status'\n  };\n}\n\n// Fallback: wrapped in stdout envelope\nconst raw = (env.stdout || '').trim();\nif (!raw) return { ok: false, error: 'Empty response from /adwi-e2e-auto-loop-start' };\ntry {\n  const result = JSON.parse(raw);\n  return {\n    ok: true,\n    job_id: result.job_id || 'unknown',\n    status: result.status || 'started',\n    pid: result.pid || null\n  };\n} catch (e) {\n  return { ok: false, error: String(e), raw: String(raw).slice(0, 200) };\n}"
+      },
+      "id": "parse-start-result",
+      "name": "Parse Start Result",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [640, 100]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Extract status from Safe Command API envelope.\n// Status route uses subprocess.run — stdout is wrapped in envelope.\nconst env = $input.item.json;\nconst raw = (env.stdout || '').trim();\nif (!raw) return { ok: false, error: 'Empty stdout from /adwi-e2e-auto-loop-status' };\ntry {\n  const s = JSON.parse(raw);\n  return {\n    ok: true,\n    job_id: s.job_id || null,\n    status: s.status || null,\n    combined_pct: s.final_combined_pct || null,\n    needs_llm_review: s.needs_llm_review || false,\n    cycle: s.cycle || 0,\n    max_cycles: s.max_cycles || 3,\n    updated_at: s.updated_at || null,\n    stop_reason: s.stop_reason || null\n  };\n} catch (e) {\n  return { ok: false, error: String(e), raw: String(raw).slice(0, 200) };\n}"
+      },
+      "id": "parse-status-result",
+      "name": "Parse Status Result",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [640, 400]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ JSON.stringify($json) }}"
+      },
+      "id": "respond-start",
+      "name": "Respond to HA (start)",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [960, 100]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ JSON.stringify($json) }}"
+      },
+      "id": "respond-status",
+      "name": "Respond to HA (status)",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [960, 400]
+    }
+  ],
+  "connections": {
+    "Manual Test Trigger": {
+      "main": [[{ "node": "Start E2E Loop (Safe Command API)", "type": "main", "index": 0 }]]
+    },
+    "Webhook — E2E Auto Loop Start": {
+      "main": [[{ "node": "Start E2E Loop (Safe Command API)", "type": "main", "index": 0 }]]
+    },
+    "Webhook — E2E Auto Loop Status": {
+      "main": [[{ "node": "Get E2E Status (Safe Command API)", "type": "main", "index": 0 }]]
+    },
+    "Start E2E Loop (Safe Command API)": {
+      "main": [[{ "node": "Parse Start Result", "type": "main", "index": 0 }]]
+    },
+    "Get E2E Status (Safe Command API)": {
+      "main": [[{ "node": "Parse Status Result", "type": "main", "index": 0 }]]
+    },
+    "Parse Start Result": {
+      "main": [[{ "node": "Respond to HA (start)", "type": "main", "index": 0 }]]
+    },
+    "Parse Status Result": {
+      "main": [[{ "node": "Respond to HA (status)", "type": "main", "index": 0 }]]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "notes": "Adwi E2E Auto Loop workflow. Import: n8n Settings → Workflows → Import from file. Prerequisites: ADWI_LOCAL_SECRET must be set in n8n Settings → Environment variables. The start route uses Popen — returns job_id in <1s. The status route reads status.json. Do NOT log X-Adwi-Secret values. Webhook URLs after import: POST http://<n8n-host>:5678/webhook/adwi-e2e-auto-loop (start), POST http://<n8n-host>:5678/webhook/adwi-e2e-auto-loop-status (status check).",
+  "active": false
+}

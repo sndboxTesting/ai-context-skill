@@ -87,6 +87,29 @@ views:
               action: url
               url_path: "http://100.110.47.128:8123"
 
+          - type: button
+            name: E2E Auto Loop
+            icon: mdi:refresh-auto
+            tap_action:
+              action: call-service
+              service: rest_command.adwi_e2e_auto_loop
+            hold_action:
+              action: call-service
+              service: notify.mobile_app_the_suns_iphone
+              service_data:
+                title: "Adwi E2E Loop"
+                message: "E2E Auto Loop started — check /e2e-auto-loop-status for progress"
+                data:
+                  push:
+                    sound: default
+
+          - type: button
+            name: E2E Loop Status
+            icon: mdi:chart-line
+            tap_action:
+              action: call-service
+              service: rest_command.adwi_e2e_auto_loop_status
+
       # ── Sun / time context ───────────────────────────────────────────────────
       - type: horizontal-stack
         cards:

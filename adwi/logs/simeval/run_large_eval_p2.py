@@ -52,6 +52,8 @@ ALL_INTENTS = [
     "fix_error","patch_adwi","inspect_code","test_adwi","eval_routing","eval_adwi",
     "learn_from_error","export_training","route","github_connected","trusted_roots",
     "extract_ideas","implement_idea","tool_roadmap","voice_in","voice_out","chat",
+    # Assistant Upgrade Pack (Phase 5)
+    "research","browser_delegate","daily_brief","tech_radar","memory_curate","assistant_upgrade_status",
 ]
 
 INTENT_SYSTEM = (
@@ -108,6 +110,19 @@ INTENT_SYSTEM = (
     "   'memory_context' : show the current session memory/context summary.\n"
     "                      'show context', 'show my context', 'what context do you have',\n"
     "                      'current session context', 'context summary', 'show me the context'.\n"
+    "   'research'       : deep multi-source research with citations. 'research X for me',\n"
+    "                      'do deep research on X', 'deep dive into X', 'write a research brief on X',\n"
+    "                      'cited report on X', 'save research about X'. NOT 'web_search' (quick lookup).\n"
+    "   'browser_delegate': delegate a browsing task to a safe Playwright agent. 'browser delegate X',\n"
+    "                      'use browser to X', 'use playwright to X', 'browser task X'. NOT bare 'browse'.\n"
+    "   'daily_brief'    : proactive daily assistant brief. 'daily brief', 'morning brief',\n"
+    "                      'give me my brief', 'what should I focus on today'. NOT 'daily_improve'.\n"
+    "   'tech_radar'     : scan trending tech. 'tech radar', 'scan new AI tools',\n"
+    "                      'what new tech should I try', 'technology radar'.\n"
+    "   'memory_curate'  : review logs and propose durable memories. 'curate memories',\n"
+    "                      'memory curation', 'propose new memories'. NOT 'memory_scan' or 'memory_recall'.\n"
+    "   'assistant_upgrade_status': show Assistant Upgrade Pack status. 'upgrade pack status',\n"
+    "                      'assistant upgrade status', 'show research status'.\n"
     "   'chat'           : DEFAULT for everything else — advisory, explanations, comparisons, how-to.\n"
     "4. arguments  — {path, query, url, size_mb, days, description, target} — omit inapplicable keys.\n"
     "Return valid JSON only — no markdown fences, no prose."
@@ -262,7 +277,7 @@ REGEX_INTENTS = [
     (re.compile(r"\b(junk|garbage|clutter|cruft)\b.{0,20}files?\b", re.I), "cleanup"),
 
     # ── RAG / knowledge search — BEFORE file_search (notes-specific guard) ───────
-    (re.compile(r"(search|find|look up|recall|what do i know).{0,30}(my notes|my knowledge|local knowledge|knowledge base|from notes)", re.I), "rag_search"),
+    (re.compile(r"\b(search|find|look up|recall|what do i know).{0,30}(my notes|my knowledge|local knowledge|knowledge base|from notes)", re.I), "rag_search"),
     (re.compile(r"(in my notes|from my notes|check my notes).{0,30}(about|for|on)", re.I), "rag_search"),
 
     # ── File operations ──────────────────────────────────────────────────────────
@@ -358,6 +373,10 @@ REGEX_INTENTS = [
     (re.compile(r"\b(how|what)\b.{0,15}\b(should|can|could|would)\b.{0,20}(improv|refactor|enhanc|optimiz).{0,20}\badwi\b", re.I), "what_next"),
     (re.compile(r"\bwhat\b.{0,15}\b(code\s+changes?|improvements?|refactors?)\b.{0,20}\b(adwi|better|make)\b", re.I), "what_next"),
     (re.compile(r"\bgenerate\b.{0,20}\b(todo|to.?do|task)\s+(list|items?)\b.{0,20}\badwi\b", re.I), "what_next"),
+    # ── Daily brief (BEFORE daily_improve) ───────────────────────────────────────
+    (re.compile(r"\b(daily.?brief|morning.?brief|today.{0,5}brief)\b", re.I), "daily_brief"),
+    (re.compile(r"\b(give me|show me|run|start)\b.{0,15}\b(my\s+)?(daily|morning|today.{0,5})\s+(brief|summary|digest|rundown)\b", re.I), "daily_brief"),
+    (re.compile(r"\bwhat.{0,10}(my|today.{0,5})\s+(day|agenda|priorities|focus|schedule)\b", re.I), "daily_brief"),
     # ── Daily improve — NHR-006: no regex existed; LLM was routing to status/chat ─
     (re.compile(r"\b(daily.?improv|daily.?enhanc|daily.?routine)\b", re.I), "daily_improve"),
     (re.compile(r"\brun.{0,10}daily.{0,10}(improve|maintenance|self.?improve)\b", re.I), "daily_improve"),
@@ -376,6 +395,14 @@ REGEX_INTENTS = [
     # ── Gmail Phase 17 early guard — "save tasks to daily note" must precede obsidian_daily ──
     (re.compile(r"\b(?:save|add|put|write|export)\b.{0,30}\b(?:tasks?|items?|checklist|action\s+items?|todos?)\b.{0,50}\bdaily\s+note\b", re.I), "gmail_tasks_save"),
 
+    # ── Browser delegate (safe agent browse, BEFORE bare browse) ─────────────────
+    (re.compile(r"\b(browser.?delegate|delegate.{0,15}browser|safe.?browse|browser.?agent|browser.?task)\b", re.I), "browser_delegate"),
+    (re.compile(r"\b(use\s+browser\s+to|use\s+playwright\s+to|automate.{0,20}browser)\b", re.I), "browser_delegate"),
+    # ── Research operator (deep cited research, BEFORE web_search) ───────────────
+    (re.compile(r"\b(deep.?dive|deep.?research|research.?brief|cited\s+report|research\s+report)\b", re.I), "research"),
+    (re.compile(r"\b(research|investigate|look\s+into).{0,15}\bfor\s+me\b", re.I), "research"),
+    (re.compile(r"\b(write|produce|generate)\b.{0,20}\b(research|cited|sourced)\s+(brief|report|summary)\b", re.I), "research"),
+    (re.compile(r"\bsave\b.{0,20}\bresearch\b.{0,30}\b(about|on|into)\b", re.I), "research"),
     # ── Browse — URL/domain visit patterns BEFORE web_search ─────────────────────
     (re.compile(r"\b(visit|browse\s+to|navigate\s+to)\b.{0,50}(https?://|\.(com|io|org|dev|net|ai|co|app))\b", re.I), "browse"),
     (re.compile(r"\bfetch\b.{0,40}(https?://|content\s+of\s+https?://)", re.I), "browse"),
@@ -907,6 +934,20 @@ REGEX_INTENTS = [
     (re.compile(r"(any (new|unread) )?emails?\b", re.I), "gmail"),
     (re.compile(r"gmail\b", re.I), "gmail"),
 
+    # ── Tech radar ────────────────────────────────────────────────────────────────
+    (re.compile(r"\b(tech.?radar|technology.?radar)\b", re.I), "tech_radar"),
+    (re.compile(r"\bscan\b.{0,20}\b(new|latest|trending).{0,20}\b(ai.?tools?|tech.?tools?|frameworks?|models?)\b", re.I), "tech_radar"),
+    (re.compile(r"\b(what.{0,20}(new|interesting|trending).{0,20}(tech|ai.?tools?|frameworks?|models?))\b.{0,30}\b(try|watch|ignore|adopt|for\s+me|my\s+setup)\b", re.I), "tech_radar"),
+    # ── Memory curate (BEFORE memory_scan) ───────────────────────────────────────
+    (re.compile(r"\bmemory.{0,2}curat\w+\b", re.I), "memory_curate"),
+    (re.compile(r"\bcurat\w*.{0,10}\bmemor(?:y|ies)\b", re.I), "memory_curate"),
+    (re.compile(r"\breview\b.{0,20}\bmemor(?:y|ies)\b", re.I), "memory_curate"),
+    (re.compile(r"\bclean\b.{0,10}\bmemor(?:y|ies)\b", re.I), "memory_curate"),
+    (re.compile(r"\b(propose|suggest)\b.{0,20}\b(new\s+)?(durable\s+)?(memory|memories|facts?)\b", re.I), "memory_curate"),
+    (re.compile(r"\blearn\s+(from|about)\b.{0,30}\b(my\s+)?(recent\s+)?(logs?|history|sessions?|notes?)\b", re.I), "memory_curate"),
+    # ── Assistant upgrade status ──────────────────────────────────────────────────
+    (re.compile(r"\b(upgrade.?pack.?status|assistant.?upgrade.?status)\b", re.I), "assistant_upgrade_status"),
+    (re.compile(r"\b(research|browser.?delegate|tech.?radar|memory.?curat).{0,20}\b(status|ready|installed|available)\b", re.I), "assistant_upgrade_status"),
     # ── Memory ledger ────────────────────────────────────────────────────────────
     (re.compile(r"(scan|index|update|build).{0,20}(my )?(memory|memories|ledger|context)", re.I), "memory_scan"),
     # FIX-MEMSCAN-002: refresh/rebuild/rescan and "memory scan X" patterns
@@ -1732,6 +1773,45 @@ def build_p2_corpus() -> list[dict]:
         "set reminders for those tasks",
     ]:
         add(p, "comms", "gmail_tasks_remind", "easy", fam="gmail_tasks_remind")
+
+    # ─────────────────────────────────────────────────────────────────────────
+    # ASSISTANT UPGRADE PACK — Phase 5 adversarial variants (9 scenarios)
+    # Focus: distinguish research from web_search, daily_brief from daily_improve,
+    # browser_delegate from browse, memory_curate from memory_scan.
+    # ─────────────────────────────────────────────────────────────────────────
+    for p in [
+        "research the latest Ollama release for me",
+        "do a deep research on Qdrant vs Weaviate",
+    ]:
+        add(p, "upgrade_pack", "research", "hard", fam="research_vs_websearch",
+            accept=["research", "web_search"])
+
+    for p in [
+        "use browser to go to ollama.com and list the models",
+        "browser delegate: navigate to github.com/qdrant/qdrant and find the star count",
+    ]:
+        add(p, "upgrade_pack", "browser_delegate", "hard", fam="browser_delegate_vs_browse",
+            accept=["browser_delegate", "browse"])
+
+    for p in [
+        "today's brief",
+        "what's on my plate today",
+    ]:
+        add(p, "upgrade_pack", "daily_brief", "medium", fam="daily_brief_vs_daily_improve",
+            accept=["daily_brief", "what_next"])
+
+    for p in [
+        "scan new AI tools and tell me what to try",
+        "what should I watch in the AI space this week",
+    ]:
+        add(p, "upgrade_pack", "tech_radar", "medium", fam="tech_radar_vs_web_search",
+            accept=["tech_radar", "web_search"])
+
+    for p in [
+        "propose memories from my recent session",
+    ]:
+        add(p, "upgrade_pack", "memory_curate", "hard", fam="memory_curate_vs_memory_scan",
+            accept=["memory_curate", "memory_scan"])
 
     return sc
 

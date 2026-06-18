@@ -13,7 +13,7 @@ Adwi is a local AI operating system running on an Apple Silicon Mac. It is not a
 
 **Primary model:** `adwi:latest` (qwen3:30b via Ollama, 131K context, 64 GB RAM)
 
-**NLU classifier:** `llama3.1:8b` — classifies every natural-language input into one of 109 intent classes before dispatch.
+**NLU classifier:** `llama3.1:8b` — classifies every natural-language input into one of 115 intent classes before dispatch.
 
 ---
 
@@ -25,18 +25,18 @@ Adwi is a local AI operating system running on an Apple Silicon Mac. It is not a
 | `adwi/path_validator.py` | Deny-first path guard — understand before any file operation |
 | `adwi/adwi_cli.py` lines 503–660 | `_REGEX_INTENTS` — NLU fast path, ordering is critical |
 | `adwi/adwi_cli.py` lines 865–1020 | `_INTENT_SYSTEM` — LLM classification prompt |
-| `adwi/logs/simeval/MASTER_REPORT_v2.md` | ⚠️ STALE (89.0%, 2026-06-16) — historical baseline only. Current state is in the table below. |
+| `adwi/logs/simeval/MASTER_REPORT_v2.md` | Refreshed 2026-06-18 (CYCLE-7, 95.8% combined dedup). Current state is in the table below. |
 | `adwi/docs/NLU_REPAIR_BACKLOG.md` | Prioritized fix list with exact code proposals |
 
 ---
 
-## Current NLU quality (as of 2026-06-17)
+## Current NLU quality (as of 2026-06-18)
 
-| Eval | Scenarios | Pre-NHR | Stabilize sprint | CYCLE-5 | CYCLE-6 | Total gain |
-|------|-----------|---------|------------------|---------|---------|------------|
-| Large eval P1 | ~1,808 | 78.0% | 92.6% | 96.3% | **96.7%** | +18.7pp |
-| Large eval P2 (weak-family targeting) | 561 | 68.6% | 88.8% | 97.0% | **98.2%** | +29.6pp |
-| **Combined** | **~2,369** | **75.8%** | **~91.7%** | **~96.5%** | **~97.0%** | **+21.2pp** |
+| Eval | Scenarios | Pre-NHR | Stabilize sprint | CYCLE-5 | CYCLE-6 | CYCLE-7 | Total gain |
+|------|-----------|---------|------------------|---------|---------|---------|------------|
+| Large eval P1 | 1,834 | 78.0% | 92.6% | 96.3% | 96.7% | **95.7%** | +17.7pp |
+| Large eval P2 (weak-family targeting) | 570 | 68.6% | 88.8% | 97.0% | 98.2% | **97.0%** | +28.4pp |
+| **Combined (dedup)** | **~2,283** | **75.8%** | **~91.7%** | **~96.5%** | **~97.0%** | **~95.8%** | **+20.0pp** |
 
 **Stop Condition A reached 2026-06-17: combined >95%. All 10 NHR items applied 2026-06-16. Sessions 2-4 applied 2026-06-16. Gmail burn-in + stabilization sprint applied 2026-06-17. CYCLE-5 (2026-06-17): 13 bare-command anchors, chat advisory fixes, status/advisory boundary, memory_scan/github_connected/web_search additions — synced to all 3 files. CYCLE-6 (2026-06-17): PermissionError guard before CYCLE-1, run-aider before self-heal, organize before chat, use_local/large_files/gmail_list_attachments/capabilities/trusted_roots/tool_roadmap/test_adwi targeted fixes — synced to all 3 files.**
 
@@ -46,7 +46,9 @@ Session-3 applied 9 regex patch groups (FIX-CLEAN-004, FIX-NOTES-001, FIX-STATUS
 
 Session-4 applied 8 false-positive hardening fixes. Gmail burn-in applied 12 FIX-STRESS patches + 4 FIX-STAGE3 patches. Stabilization sprint applied 9 regex fix groups + 4 _INTENT_SYSTEM additions + 6 test gap fixes. Total test suite after CYCLE-6: 897 tests.
 
-**Current baseline: ~97.0% combined.** Remaining P1 failures (~40): ~11 LLM-routed chat bleed, irreducible __none__ safety blocks, scattered LLM variance. P2 has zero hard failures (551/561 pass, 10 warns).
+**CYCLE-7 (2026-06-18): Assistant Upgrade Pack (Phase 5) NLU integration — 6 new intents (research, browser_delegate, daily_brief, tech_radar, memory_curate, assistant_upgrade_status) added to all 3 files. memory_curate regex fixed (word-boundary bug). rag_search word-boundary guard added (was matching "research" via "re**search**" substring). save-research-about regex added. INTENT_SYSTEM descriptions for all 6 new intents added to adwi_cli.py. 35 new eval scenarios added (26 P1 + 9 P2). P1 total: 1,834 scenarios. P2 total: 570 scenarios.**
+
+**Current baseline: ~95.8% combined (dedup).** Note: score reflects 35 harder upgrade_pack scenarios added to eval that didn't exist at CYCLE-6. P1 failures (~61): ~18 LLM chat bleed, 3 status ambiguity, 3 git_status boundary, scattered LLM variance. P2 failures (~7): borderline LLM cases only, no upgrade_pack regressions.
 
 Changes are synchronized across all 3 files: `adwi/adwi_cli.py`, `adwi/logs/simeval/run_large_eval.py`, `adwi/logs/simeval/run_large_eval_p2.py`.
 

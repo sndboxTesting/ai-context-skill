@@ -665,7 +665,7 @@ _REGEX_INTENTS = [
     (re.compile(r"\b(junk|garbage|clutter|cruft)\b.{0,20}files?\b", re.I), "cleanup"),
 
     # ── RAG / knowledge search — BEFORE file_search (notes-specific guard) ───────
-    (re.compile(r"(search|find|look up|recall|what do i know).{0,30}(my notes|my knowledge|local knowledge|knowledge base|from notes)", re.I), "rag_search"),
+    (re.compile(r"\b(search|find|look up|recall|what do i know).{0,30}(my notes|my knowledge|local knowledge|knowledge base|from notes)", re.I), "rag_search"),
     (re.compile(r"(in my notes|from my notes|check my notes).{0,30}(about|for|on)", re.I), "rag_search"),
 
     # ── File operations ──────────────────────────────────────────────────────────
@@ -761,6 +761,10 @@ _REGEX_INTENTS = [
     (re.compile(r"\b(how|what)\b.{0,15}\b(should|can|could|would)\b.{0,20}(improv|refactor|enhanc|optimiz).{0,20}\badwi\b", re.I), "what_next"),
     (re.compile(r"\bwhat\b.{0,15}\b(code\s+changes?|improvements?|refactors?)\b.{0,20}\b(adwi|better|make)\b", re.I), "what_next"),
     (re.compile(r"\bgenerate\b.{0,20}\b(todo|to.?do|task)\s+(list|items?)\b.{0,20}\badwi\b", re.I), "what_next"),
+    # ── Daily brief (proactive user brief, BEFORE daily_improve dev routine) ────
+    (re.compile(r"\b(daily.?brief|morning.?brief|today.{0,5}brief)\b", re.I), "daily_brief"),
+    (re.compile(r"\b(give me|show me|run|start)\b.{0,15}\b(my\s+)?(daily|morning|today.{0,5})\s+(brief|summary|digest|rundown)\b", re.I), "daily_brief"),
+    (re.compile(r"\bwhat.{0,10}(my|today.{0,5})\s+(day|agenda|priorities|focus|schedule)\b", re.I), "daily_brief"),
     # ── Daily improve — NHR-006: no regex existed; LLM was routing to status/chat ─
     (re.compile(r"\b(daily.?improv|daily.?enhanc|daily.?routine)\b", re.I), "daily_improve"),
     (re.compile(r"\brun.{0,10}daily.{0,10}(improve|maintenance|self.?improve)\b", re.I), "daily_improve"),
@@ -779,6 +783,14 @@ _REGEX_INTENTS = [
     # ── Gmail Phase 17 early guard — "save tasks to daily note" must precede obsidian_daily ──
     (re.compile(r"\b(?:save|add|put|write|export)\b.{0,30}\b(?:tasks?|items?|checklist|action\s+items?|todos?)\b.{0,50}\bdaily\s+note\b", re.I), "gmail_tasks_save"),
 
+    # ── Browser delegate (safe agent browse, BEFORE bare browse) ─────────────────
+    (re.compile(r"\b(browser.?delegate|delegate.{0,15}browser|safe.?browse|browser.?agent|browser.?task)\b", re.I), "browser_delegate"),
+    (re.compile(r"\b(use\s+browser\s+to|use\s+playwright\s+to|automate.{0,20}browser)\b", re.I), "browser_delegate"),
+    # ── Research operator (deep cited research, BEFORE web_search) ───────────────
+    (re.compile(r"\b(deep.?dive|deep.?research|research.?brief|cited\s+report|research\s+report)\b", re.I), "research"),
+    (re.compile(r"\b(research|investigate|look\s+into).{0,15}\bfor\s+me\b", re.I), "research"),
+    (re.compile(r"\b(write|produce|generate)\b.{0,20}\b(research|cited|sourced)\s+(brief|report|summary)\b", re.I), "research"),
+    (re.compile(r"\bsave\b.{0,20}\bresearch\b.{0,30}\b(about|on|into)\b", re.I), "research"),
     # ── Browse — URL/domain visit patterns BEFORE web_search ─────────────────────
     # CYCLE-5: bare "browse" command + "browse to X" without URL (e.g. "browse to the adwi docs")
     (re.compile(r"^browse\s*$", re.I), "browse"),
@@ -1312,6 +1324,20 @@ _REGEX_INTENTS = [
 
     # ── Memory ledger ────────────────────────────────────────────────────────────
     (re.compile(r"(scan|index|update|build).{0,20}(my )?(memory|memories|ledger|context)", re.I), "memory_scan"),
+    # ── Tech radar ────────────────────────────────────────────────────────────────
+    (re.compile(r"\b(tech.?radar|technology.?radar)\b", re.I), "tech_radar"),
+    (re.compile(r"\bscan\b.{0,20}\b(new|latest|trending).{0,20}\b(ai.?tools?|tech.?tools?|frameworks?|models?)\b", re.I), "tech_radar"),
+    (re.compile(r"\b(what.{0,20}(new|interesting|trending).{0,20}(tech|ai.?tools?|frameworks?|models?))\b.{0,30}\b(try|watch|ignore|adopt|for\s+me|my\s+setup)\b", re.I), "tech_radar"),
+    # ── Memory curate (propose + confirm durable memories, BEFORE memory_scan) ───
+    (re.compile(r"\bmemory.{0,2}curat\w+\b", re.I), "memory_curate"),
+    (re.compile(r"\bcurat\w*.{0,10}\bmemor(?:y|ies)\b", re.I), "memory_curate"),
+    (re.compile(r"\breview\b.{0,20}\bmemor(?:y|ies)\b", re.I), "memory_curate"),
+    (re.compile(r"\bclean\b.{0,10}\bmemor(?:y|ies)\b", re.I), "memory_curate"),
+    (re.compile(r"\b(propose|suggest)\b.{0,20}\b(new\s+)?(durable\s+)?(memory|memories|facts?)\b", re.I), "memory_curate"),
+    (re.compile(r"\blearn\s+(from|about)\b.{0,30}\b(my\s+)?(recent\s+)?(logs?|history|sessions?|notes?)\b", re.I), "memory_curate"),
+    # ── Assistant upgrade status ──────────────────────────────────────────────────
+    (re.compile(r"\b(upgrade.?pack.?status|assistant.?upgrade.?status)\b", re.I), "assistant_upgrade_status"),
+    (re.compile(r"\b(research|browser.?delegate|tech.?radar|memory.?curat).{0,20}\b(status|ready|installed|available)\b", re.I), "assistant_upgrade_status"),
     # FIX-MEMSCAN-002: refresh/rebuild/rescan and "memory scan X" patterns
     (re.compile(r"\b(refresh|rebuild|rescan|reindex)\b.{0,20}\b(memory|knowledge|index|ledger)\b", re.I), "memory_scan"),
     (re.compile(r"\bindex\b.{0,20}\b(terminal\s+history|history|session|conversation)\b", re.I), "memory_scan"),
@@ -1546,6 +1572,9 @@ _ALL_INTENTS = [
     # Route / misc
     "route", "github_connected", "trusted_roots",
     "extract_ideas", "implement_idea", "tool_roadmap",
+    # Assistant Upgrade Pack (Phase 5)
+    "research", "browser_delegate", "daily_brief", "tech_radar",
+    "memory_curate", "assistant_upgrade_status",
     # Voice (Pillar C)
     "voice_in", "voice_out",
     # Catch-all
@@ -1846,6 +1875,29 @@ _INTENT_SYSTEM = (
     "                      NOT advisory/explanatory questions → those are 'chat':\n"
     "                      'why is ollama slow', 'how can I speed up my LLM', 'is 16GB enough',\n"
     "                      'what affects inference speed', 'how to make AI faster' → 'chat'.\n"
+    "   'research'       : multi-source web research WITH citations; saves to notes/research/.\n"
+    "                      'research X for me', 'deep dive into X', 'write a research brief on X',\n"
+    "                      'save research about X', 'save research on X to my notes',\n"
+    "                      'find information about X and save it'. ALWAYS research intent even when\n"
+    "                      the user says 'save' — saving is part of /research. NOT 'rag_search'\n"
+    "                      (which searches existing local notes, not the web).\n"
+    "   'browser_delegate': delegate a multi-step browser task to the Playwright agent.\n"
+    "                      'use browser to X', 'browser task: X', 'open browser and X',\n"
+    "                      'browser agent: X', 'go to X in a browser and Y'. Never for bare browse URL.\n"
+    "   'daily_brief'    : generate service status + Gmail + AI priorities morning brief.\n"
+    "                      'daily brief', 'morning brief', 'give me my brief', 'morning summary'.\n"
+    "                      NOT 'nightly_status' (which checks nightly maintenance logs).\n"
+    "   'tech_radar'     : scan for new/trending AI tools, frameworks, models; recommend try/watch/ignore.\n"
+    "                      'tech radar', 'scan AI tools', 'what new AI tools should I try',\n"
+    "                      'latest AI frameworks', 'AI news scan', 'trending models'.\n"
+    "   'memory_curate'  : review recent logs and propose durable memories for explicit user confirmation.\n"
+    "                      'curate memories', 'curate my memories', 'memory curation',\n"
+    "                      'review my memory', 'clean up memory', 'propose new memories',\n"
+    "                      'review my memory and suggest updates'. NOT 'memory_recall' (reading memory)\n"
+    "                      or 'memory_scan' (scanning for patterns). This is proposal+confirmation.\n"
+    "   'assistant_upgrade_status': show status of the Assistant Upgrade Pack commands.\n"
+    "                      'upgrade pack status', 'assistant upgrade status',\n"
+    "                      'is research ready', 'browser delegate status'.\n"
     "   'chat'           : DEFAULT for everything else — use this for:\n"
     "                      • advisory/recommendation questions ('what is the best...', 'should I...')\n"
     "                      • questions about tools, services, subscriptions NOT directly about adwi\n"
@@ -2619,6 +2671,160 @@ def cmd_daily_improve():
     cprint(f"\n  Done — {datetime.now().strftime('%H:%M')} · {test_summary}", GREEN, bold=True)
     log_action("daily-improve", analysis)
 
+
+def _svc_probe(url: str, timeout: float = 2.0) -> str:
+    """Quick HTTP liveness check; returns 'up' or 'down'.
+    Any HTTP response (including 401/403) counts as 'up' — server is listening.
+    Only connection errors and timeouts return 'down'.
+    """
+    try:
+        urllib.request.urlopen(url, timeout=timeout)
+        return "up"
+    except urllib.error.HTTPError:
+        return "up"   # server responded with an HTTP error — it IS up
+    except Exception:
+        return "down"
+
+
+def cmd_daily_brief(n8n_mode: bool = False) -> None:
+    """Proactive daily assistant brief: status + Gmail + priorities + learning tip.
+
+    n8n_mode=True: suppress all terminal output, emit a single JSON line to stdout.
+    """
+    now = datetime.now()
+    sections: list[str] = []
+    _warn: list[str] = []
+    _err:  list[str] = []
+
+    if not n8n_mode:
+        adwi_head(f"Daily brief — {now.strftime('%A %Y-%m-%d %H:%M')}")
+
+    # ── [1/4] Service status ──────────────────────────────────────────────────
+    if not n8n_mode:
+        cprint("  [1/4] Service status", BOLD)
+
+    status_summary = ""
+    service_status: dict[str, str] = {}
+    if n8n_mode:
+        _SVCS = {
+            "ollama":    "http://127.0.0.1:11434",
+            "qdrant":    "http://127.0.0.1:6333",
+            "safe_api":  "http://127.0.0.1:5055",
+            "searxng":   "http://127.0.0.1:8888",
+            "open_webui":"http://127.0.0.1:3000",
+            "n8n":       "http://127.0.0.1:5678",
+        }
+        for svc, url in _SVCS.items():
+            service_status[svc] = _svc_probe(url)
+        status_summary = "; ".join(f"{k}={v}" for k, v in service_status.items())
+    else:
+        status_out = run_cmd("d-status", ["status-ai"], quiet=True) or ""
+        status_lines = [l for l in status_out.splitlines() if l.strip()][:8]
+        status_summary = "\n".join(status_lines) if status_lines else "status-ai unavailable"
+        cprint(f"  {GRAY}{status_summary[:200]}{RESET}", "")
+    sections.append(f"## Service Status\n{status_summary[:400]}")
+
+    # ── [2/4] Gmail inbox snapshot ────────────────────────────────────────────
+    if not n8n_mode:
+        cprint("  [2/4] Gmail inbox snapshot", BOLD)
+
+    gmail_snippet = ""
+    gmail_data: dict = {"available": False, "unread_count": 0, "summary": "", "warnings": []}
+    try:
+        token = HOME / "SuneelWorkSpace" / "secrets" / "gmail-token.json"
+        if token.exists():
+            gh = _gmail()
+            emails = gh.list_emails(max_results=10, query="is:unread newer_than:1d")
+            if emails:
+                gmail_snippet = "\n".join(
+                    f"• {e['from'][:30]}: {e['subject'][:60]}"
+                    for e in emails[:8]
+                )
+                gmail_data = {
+                    "available": True,
+                    "unread_count": len(emails),
+                    "summary": gmail_snippet,
+                    "warnings": [],
+                }
+                if not n8n_mode:
+                    cprint(f"  {len(emails)} unread today", GREEN)
+            else:
+                gmail_snippet = "Inbox clear."
+                gmail_data = {"available": True, "unread_count": 0, "summary": "Inbox clear.", "warnings": []}
+                if not n8n_mode:
+                    cprint(f"  {GREEN}Inbox clear{RESET}", "")
+        else:
+            gmail_snippet = "Gmail not authorized — run /gmail-auth"
+            gmail_data = {"available": False, "unread_count": 0, "summary": "", "warnings": ["Gmail not authorized — run /gmail-auth"]}
+            if not n8n_mode:
+                cprint(f"  {YELLOW}Gmail not authorized{RESET}", "")
+    except Exception as _ge:
+        gmail_snippet = f"Gmail error: {_ge}"
+        gmail_data = {"available": False, "unread_count": 0, "summary": "", "warnings": [str(_ge)]}
+        if not n8n_mode:
+            cprint(f"  {YELLOW}Gmail: {_ge}{RESET}", "")
+    sections.append(f"## Gmail (unread today)\n{gmail_snippet}")
+
+    # ── [3/4] AI analysis ─────────────────────────────────────────────────────
+    if not n8n_mode:
+        cprint("  [3/4] AI analysis", BOLD)
+    if ROADMAP_FILE.exists():
+        sections.append(f"## Roadmap (last 500 chars)\n{ROADMAP_FILE.read_text(encoding='utf-8')[-500:]}")
+    ctx = "\n\n".join(sections)
+    brief = (
+        call_cloud(
+            f"You are Adwi, Suneel's personal AI assistant. Today is {now.strftime('%A %Y-%m-%d')}.\n\n"
+            f"Context:\n{ctx}\n\n"
+            "Write a concise daily brief (under 200 words) with:\n"
+            "1. **Priorities** — top 2 things to focus on today\n"
+            "2. **Inbox** — flag any urgent emails\n"
+            "3. **Learning** — one concrete thing to read/try today (AI/dev/tools)\n"
+            "4. **Setup tip** — one small Adwi improvement to make today\n"
+            "Be specific and actionable. No fluff.",
+            messages=None,
+        ) if _cloud_ok() else quick_local(
+            f"Today is {now.strftime('%A %Y-%m-%d')}.\nContext:\n{ctx[:1500]}\n\n"
+            "Write a 100-word daily brief: priorities, inbox flags, one learning item, one setup tip."
+        )
+    )
+    if not n8n_mode:
+        adwi_say(brief)
+
+    # ── [4/4] Save to Obsidian + notes ────────────────────────────────────────
+    if not n8n_mode:
+        cprint("  [4/4] Saving to Obsidian daily note", BOLD)
+    entry = f"# Daily Brief\n\n{brief}\n\n---\n\n{gmail_snippet}"
+    obs_result = _obsidian_api("POST", "/daily-note", {"content": f"\n## Daily Brief {now.strftime('%H:%M')}\n{brief}\n"})
+    if "error" in obs_result:
+        _warn.append(f"Obsidian save skipped: {obs_result.get('error','unknown')}")
+    elif not n8n_mode:
+        cprint(f"  {GREEN}✓ Saved to Obsidian daily note{RESET}", "")
+    brief_dir = NOTES / "daily-briefs"
+    brief_dir.mkdir(parents=True, exist_ok=True)
+    brief_path = brief_dir / f"{now.strftime('%Y-%m-%d')}.md"
+    brief_path.write_text(
+        f"# Daily Brief — {now.strftime('%Y-%m-%d')}\n\n{entry}\n", encoding="utf-8"
+    )
+    log_action("daily-brief", brief[:500])
+    if not n8n_mode:
+        cprint(f"  {GREEN}✓ Saved to notes/daily-briefs/{now.strftime('%Y-%m-%d')}.md{RESET}", "")
+
+    # ── n8n JSON output ───────────────────────────────────────────────────────
+    if n8n_mode:
+        payload = {
+            "ok": True,
+            "generated_at": now.isoformat(),
+            "mode": "n8n",
+            "services": service_status,
+            "gmail": gmail_data,
+            "brief": brief,
+            "saved_to": str(brief_path),
+            "warnings": _warn,
+            "errors": _err,
+        }
+        print(json.dumps(payload))
+
+
 # ── Helpers ───────────────────────────────────────────────────────────────────
 def _human_size(b: int) -> str:
     for unit in ["B","KB","MB","GB","TB"]:
@@ -2891,6 +3097,142 @@ def cmd_web_search(query: str = "") -> None:
     )
     activity_done(f"{len(real)} results via {sources}")
     log_action("web_search", f"Query: {query} | sources: {sources}\n{ctx[:1000]}")
+
+
+def cmd_research(question: str = "", save: bool = False) -> None:
+    """Deep multi-source research with citations. Saves brief to notes/research/."""
+    if not question:
+        question = input(f"  {CYAN}Research question:{RESET} ").strip()
+    if not question:
+        return
+    adwi_head(f"Research: {question[:70]}")
+    activity_start(question, "Research Operator")
+
+    # ── Gather sources ─────────────────────────────────────────────────────────
+    results, sources = search_web(question, max_results=10)
+    real = [r for r in results if r.get("url")]
+    cprint(f"  {GRAY}Sources: {sources} · {len(real)} results{RESET}", "")
+
+    # ── Deep-fetch top 3 URLs for fuller content ───────────────────────────────
+    deep_content: list[str] = []
+    for r in real[:3]:
+        url = r.get("url", "")
+        if not url:
+            continue
+        try:
+            if FIRECRAWL_API_KEY:
+                fc = _firecrawl_scrape(url)
+                if fc.get("markdown"):
+                    deep_content.append(f"[{url}]\n{fc['markdown'][:2000]}")
+                    continue
+            from playwright.sync_api import sync_playwright  # type: ignore
+            with sync_playwright() as p:
+                br = p.chromium.launch(headless=True)
+                pg = br.new_page(user_agent="Mozilla/5.0")
+                pg.goto(url, wait_until="domcontentloaded", timeout=20000)
+                txt = pg.evaluate(
+                    "() => Array.from(document.querySelectorAll('article,main,p,h1,h2,h3'))"
+                    ".map(e=>e.innerText).join('\\n').slice(0,2000)"
+                )
+                br.close()
+                if txt.strip():
+                    deep_content.append(f"[{url}]\n{txt}")
+        except Exception:
+            pass
+
+    # ── Build research context ─────────────────────────────────────────────────
+    snippet_ctx = "\n\n".join(
+        f"[{i}] {r['title']}\nURL: {r['url']}\n{r['content']}"
+        for i, r in enumerate(real, 1)
+    )
+    deep_ctx = "\n\n".join(deep_content)
+    full_ctx = snippet_ctx + ("\n\n## Deep Content\n" + deep_ctx if deep_ctx else "")
+
+    # ── Synthesize cited brief ────────────────────────────────────────────────
+    ts = datetime.now().strftime("%Y-%m-%d %H:%M")
+    prompt = (
+        f"Research question: {question}\n"
+        f"Date: {ts}\n"
+        f"Sources queried: {sources}\n\n"
+        f"Search results:\n{full_ctx[:6000]}\n\n"
+        "Write a structured research brief with:\n"
+        "## Answer\nDirect answer in 2-3 sentences.\n"
+        "## Key Findings\nBullet list of key claims with source URLs in brackets.\n"
+        "## Sources\nNumbered list: title + URL.\n"
+        "## Confidence\nHigh/Medium/Low — why.\n"
+        "## Open Questions\nWhat this research does NOT answer.\n"
+        "Never invent facts. Only use what is in the search results."
+    )
+    print()
+    brief = (
+        call_cloud(prompt) if _cloud_ok()
+        else quick_local(prompt)
+    )
+    adwi_say(brief)
+
+    # ── Save to notes ─────────────────────────────────────────────────────────
+    slug = re.sub(r"[^a-z0-9]+", "-", question.lower())[:40].strip("-")
+    research_dir = NOTES / "research"
+    research_dir.mkdir(parents=True, exist_ok=True)
+    fname = f"{datetime.now().strftime('%Y-%m-%d')}-{slug}.md"
+    (research_dir / fname).write_text(
+        f"# Research: {question}\n_Generated: {ts}_\n\n{brief}\n\n---\n\n## Raw Sources\n{snippet_ctx[:2000]}\n",
+        encoding="utf-8",
+    )
+    cprint(f"  {GREEN}✓ Saved → notes/research/{fname}{RESET}", "")
+    if save:
+        _obsidian_api("POST", "/daily-note", {"content": f"\n## Research: {question}\n{brief[:600]}\n"})
+    activity_done(f"{len(real)} sources · saved to notes/research/{fname}")
+    log_action("research", f"Q: {question} | sources: {sources}")
+
+
+def cmd_tech_radar() -> None:
+    """Scan trending AI/dev technologies. Categorises as try-now / watch / ignore."""
+    adwi_head("Tech Radar")
+    TOPICS = [
+        ("OpenAI Agents / Responses API", "OpenAI agents SDK responses API 2025 2026"),
+        ("MCP & MCP Apps",                "Model Context Protocol MCP servers apps 2025"),
+        ("Ollama / local models",          "Ollama latest local LLM models 2025 2026"),
+        ("Browser automation agents",      "Browser Use Stagehand Playwright agent automation 2025"),
+        ("LangGraph durable agents",       "LangGraph agent orchestration durable state 2025"),
+        ("Local voice / vision / RAG",     "local whisper vision RAG embeddings 2025 apple silicon"),
+    ]
+
+    radar_sections: list[str] = []
+    for label, query in TOPICS:
+        cprint(f"  {GRAY}→ {label}{RESET}", "")
+        results, _ = search_web(query, max_results=5)
+        real = [r for r in results if r.get("url")]
+        snippets = "\n".join(
+            f"  - {r['title']}: {r['content'][:120]}" for r in real[:4]
+        )
+        radar_sections.append(f"### {label}\n{snippets if snippets else '(no results)'}")
+
+    ctx = "\n\n".join(radar_sections)
+    ts  = datetime.now().strftime("%Y-%m-%d")
+    prompt = (
+        f"Today: {ts}. Suneel runs: Apple M4 Max 64GB, Ollama, n8n, Home Assistant, Playwright, Qdrant.\n\n"
+        f"Tech signals:\n{ctx}\n\n"
+        "For each topic produce one line:\n"
+        "  [TRY NOW | WATCH | IGNORE] — reason (≤15 words) — best link if available\n\n"
+        "TRY NOW = works today, clear value for his setup.\n"
+        "WATCH   = promising but not ready or no clear use-case yet.\n"
+        "IGNORE  = hype, irrelevant, or superseded.\n"
+        "Be concrete. No hedging."
+    )
+    print()
+    report = call_cloud(prompt) if _cloud_ok() else quick_local(prompt[:2000])
+    adwi_say(report)
+
+    radar_dir = NOTES / "tech-radar"
+    radar_dir.mkdir(parents=True, exist_ok=True)
+    fname = f"{ts}-tech-radar.md"
+    (radar_dir / fname).write_text(
+        f"# Tech Radar — {ts}\n\n{report}\n\n---\n\n## Raw Signals\n{ctx}\n",
+        encoding="utf-8",
+    )
+    cprint(f"  {GREEN}✓ Saved → notes/tech-radar/{fname}{RESET}", "")
+    log_action("tech-radar", report[:300])
 
 
 def cmd_exa_search(query: str = "") -> None:
@@ -3222,6 +3564,108 @@ def cmd_browse(url_and_q: str) -> None:
             f"Summarize this page for Suneel:\nURL: {url}\nTitle: {title}\n\nContent:\n{text}",
             system="You are Adwi. Give a structured 5-bullet summary. Note code, commands, or action items.",
         )
+
+def cmd_browser_delegate(task: str = "", dry_run: bool = False) -> None:
+    """Safe browser agent. Confirms before any account-changing, form-submit, or payment action."""
+    if not task:
+        task = input(f"  {CYAN}Browser task:{RESET} ").strip()
+    if not task:
+        return
+
+    mode = f"{YELLOW}[DRY-RUN]{RESET}" if dry_run else f"{GREEN}[LIVE]{RESET}"
+    adwi_head(f"Browser Delegate {mode} — {task[:60]}")
+
+    # ── Extract URL from task ─────────────────────────────────────────────────
+    url_m = re.search(r"https?://[^\s]+", task)
+    url   = url_m.group(0) if url_m else ""
+    if not url:
+        cprint("  No URL found in task. Please include a URL to browse.", YELLOW)
+        return
+
+    # ── Classify risk before doing anything ──────────────────────────────────
+    _RISKY_VERBS = re.compile(
+        r"\b(submit|click\s+submit|sign\s+up|register|login|log\s+in|purchase|buy|"
+        r"checkout|pay|delete|remove|cancel|unsubscribe|post|publish|send|reply|"
+        r"fill|enter\s+my|fill\s+in\s+my)\b", re.I
+    )
+    risky = bool(_RISKY_VERBS.search(task))
+    if risky:
+        cprint(f"  {YELLOW}⚠ Task contains account/form/payment action.{RESET}", "")
+        if dry_run:
+            cprint(f"  Dry-run: would navigate to {url} and attempt: {task[:80]}", GRAY)
+            cprint(f"  {YELLOW}Dry-run complete — no actions taken.{RESET}", "")
+            return
+        confirm = input(f"  {YELLOW}Proceed? This may change account state. (y/N):{RESET} ").strip().lower()
+        if confirm != "y":
+            cprint("  Cancelled.", GRAY); return
+
+    # ── Navigate and extract ──────────────────────────────────────────────────
+    text = title = method = ""
+    try:
+        from playwright.sync_api import sync_playwright  # type: ignore
+        cprint(f"  {GRAY}Launching browser → {url[:60]}{RESET}", "")
+        with sync_playwright() as p:
+            browser = p.chromium.launch(headless=True)
+            page    = browser.new_page(user_agent="Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7)")
+
+            # Stop before auth walls / paywalls
+            page.on("response", lambda r: None)
+            page.goto(url, wait_until="domcontentloaded", timeout=25000)
+            title = page.title()
+
+            # Detect login/paywall walls
+            page_text_check = page.evaluate("() => document.body.innerText.slice(0,500)")
+            wall_signals = re.search(r"\b(sign in|log in|subscribe|paywall|members only|access denied)\b",
+                                     page_text_check, re.I)
+            if wall_signals:
+                cprint(f"  {YELLOW}⚠ Wall detected ({wall_signals.group(0)}) — stopping.{RESET}", "")
+                browser.close()
+                adwi_say(f"Page at {url} requires login or subscription. I stopped to avoid bypassing auth.")
+                return
+
+            text = page.evaluate(
+                "() => { const els = document.querySelectorAll('article,main,p,h1,h2,h3,li');"
+                " return Array.from(els).map(e=>e.innerText).join('\\n').slice(0,6000); }"
+            )
+            browser.close()
+            method = "Playwright"
+    except ImportError:
+        cprint("  Playwright not available. Install: pip install playwright && playwright install chromium", YELLOW)
+        return
+    except Exception as e:
+        cprint(f"  Browser error: {e}", RED); return
+
+    if not text.strip():
+        cprint("  Page appears empty or JS-blocked.", YELLOW); return
+
+    cprint(f"  {GREEN}✓{RESET} {title[:60]} {GRAY}[{method}]{RESET}", "")
+    if dry_run:
+        cprint(f"  {YELLOW}Dry-run: extracted {len(text)} chars. No further actions taken.{RESET}", "")
+    print()
+    stream_local(
+        f"URL: {url}\nTask: {task}\nPage title: {title}\nContent:\n{text}",
+        system=(
+            "You are Adwi. Complete the browsing task using the page content. "
+            "If the task requires interacting with forms, logins, or payments — describe what you see "
+            "but DO NOT take the action. Summarize what you found instead."
+        ),
+    )
+
+    # ── Save result to notes ─────────────────────────────────────────────────
+    tasks_dir = NOTES / "browser-tasks"
+    tasks_dir.mkdir(parents=True, exist_ok=True)
+    slug = re.sub(r"[^a-z0-9]+", "-", task.lower())[:30].strip("-")
+    fname = f"{datetime.now().strftime('%Y-%m-%d-%H%M')}-{slug}.md"
+    (tasks_dir / fname).write_text(
+        f"# Browser Task\n_Date: {datetime.now().strftime('%Y-%m-%d %H:%M')}_\n"
+        f"_Mode: {'DRY-RUN' if dry_run else 'LIVE'}_\n\n"
+        f"**Task:** {task}\n**URL:** {url}\n**Title:** {title}\n\n"
+        f"## Extracted Content\n{text[:3000]}\n",
+        encoding="utf-8",
+    )
+    cprint(f"  {GREEN}✓ Saved → notes/browser-tasks/{fname}{RESET}", "")
+    log_action("browser-delegate", f"task: {task[:80]} | url: {url}")
+
 
 # ── Code execution sandbox ─────────────────────────────────────────────────────
 def _extract_code(text: str) -> str:
@@ -8973,6 +9417,118 @@ def cmd_memory_context(query: str = "") -> None:
         cprint(f"  ✗ {e}", RED)
 
 
+def cmd_memory_curate() -> None:
+    """Review recent logs and propose durable memories. Requires explicit Y/N per item."""
+    adwi_head("Memory Curation — reviewing recent activity")
+
+    # ── Read recent action logs (safe approved path only) ─────────────────────
+    log_files = sorted(LOG_DIR.glob("*.md"), reverse=True)[:20]
+    snippets: list[str] = []
+    for lf in log_files:
+        try:
+            txt = lf.read_text(encoding="utf-8", errors="replace")
+            snippets.append(f"[{lf.stem}]\n{txt[:300]}")
+        except Exception:
+            pass
+
+    if not snippets:
+        cprint("  No action logs found — run some commands first.", GRAY); return
+
+    cprint(f"  Read {len(snippets)} recent log entries.", GRAY)
+    ctx = "\n\n".join(snippets[:15])
+
+    # ── Ask LLM to propose memories ──────────────────────────────────────────
+    prompt = (
+        "You are reviewing Adwi's recent activity logs to propose durable personal memories "
+        "for Suneel's AI assistant. Focus on:\n"
+        "- User preferences (what he likes/dislikes)\n"
+        "- Project facts (key decisions, current priorities)\n"
+        "- Recurrent patterns (things he does often)\n\n"
+        f"Recent logs:\n{ctx[:4000]}\n\n"
+        "Propose exactly 3-5 memory items. Format each as:\n"
+        "MEMORY: <concise fact in one sentence>\n"
+        "REASON: <why this is worth remembering>\n"
+        "TYPE: preference | project | pattern\n"
+        "---\n"
+        "Only propose facts clearly evidenced in the logs. No guessing."
+    )
+    raw = call_cloud(prompt) if _cloud_ok() else quick_local(prompt[:3000])
+
+    # ── Parse proposals ───────────────────────────────────────────────────────
+    proposals = re.findall(
+        r"MEMORY:\s*(.+?)\nREASON:\s*(.+?)\nTYPE:\s*(\w+)", raw, re.S
+    )
+    if not proposals:
+        cprint("  No structured proposals found — showing raw output:", GRAY)
+        adwi_say(raw); return
+
+    cprint(f"\n  {len(proposals)} memory proposals. Review each (y/n/q to quit):\n", BOLD)
+    stored = 0
+    for i, (mem, reason, mtype) in enumerate(proposals, 1):
+        mem = mem.strip(); reason = reason.strip(); mtype = mtype.strip()
+        cprint(f"  [{i}/{len(proposals)}] {CYAN}{mem}{RESET}", "")
+        cprint(f"        Reason: {reason}", GRAY)
+        cprint(f"        Type:   {mtype}", GRAY)
+        ans = input(f"  Store this? (y/N/q): ").strip().lower()
+        if ans == "q":
+            cprint("  Curation stopped.", GRAY); break
+        if ans == "y":
+            try:
+                mod = _memory_mod()
+                m   = mod.AdwiMemory()
+                m.store(mem, source="memory_curate", metadata={"type": mtype, "reason": reason})
+                m.close()
+                cprint(f"  {GREEN}✓ Stored{RESET}", "")
+                stored += 1
+            except Exception as _me:
+                cprint(f"  {YELLOW}Could not store ({_me}) — logged only{RESET}", "")
+                # Fallback: append to journal
+                with JOURNAL_FILE.open("a", encoding="utf-8") as jf:
+                    jf.write(f"\n**Memory (curated):** {mem}  [{mtype}]\n")
+        else:
+            cprint(f"  {GRAY}Skipped.{RESET}", "")
+
+    cprint(f"\n  Done — {stored}/{len(proposals)} memories stored.", GREEN, bold=True)
+    log_action("memory-curate", f"{stored}/{len(proposals)} stored")
+
+
+def cmd_assistant_upgrade_status() -> None:
+    """Show status of all Assistant Upgrade Pack commands and optional integrations."""
+    adwi_head("Assistant Upgrade Pack — Status")
+    COMMANDS = [
+        ("/research <question>",          "Deep multi-source research with citations",        True),
+        ("/research-save <question>",     "Research + save brief to Obsidian daily note",     True),
+        ("/browser-delegate <task>",      "Safe browser agent with confirmation gate",         True),
+        ("/browser-delegate-dry-run <t>", "Browser delegate dry-run (no actions taken)",      True),
+        ("/daily-brief",                  "Proactive daily assistant brief",                   True),
+        ("/tech-radar",                   "Scan trending AI/dev tech (try/watch/ignore)",      True),
+        ("/memory-curate",               "Review logs → propose durable memories",            True),
+    ]
+    OPTIONAL = [
+        ("EXA_API_KEY",       "Exa neural search (better research results)"),
+        ("TAVILY_API_KEY",    "Tavily web search (research + daily brief)"),
+        ("FIRECRAWL_API_KEY", "Firecrawl clean markdown (research deep-fetch)"),
+        ("OPENWEBUI_API_KEY", "Cloud LLM synthesis (better summaries)"),
+    ]
+    cprint("\n  Commands:", BOLD)
+    for cmd, desc, _ in COMMANDS:
+        cprint(f"  {GREEN}✓{RESET}  {CYAN}{cmd:<35}{RESET}  {desc}", "")
+    cprint("\n  Optional integrations:", BOLD)
+    for key, desc in OPTIONAL:
+        val = os.environ.get(key, "")
+        set_flag = bool(val and not val.startswith("PASTE_"))
+        icon = f"{GREEN}✓ set{RESET}" if set_flag else f"{YELLOW}not set{RESET}"
+        cprint(f"  {icon}  {key:<25} {GRAY}{desc}{RESET}", "")
+    cprint("\n  Output paths:", BOLD)
+    for label, path in [
+        ("Research briefs", str(NOTES / "research")),
+        ("Daily briefs",    str(NOTES / "daily-briefs")),
+        ("Tech radar",      str(NOTES / "tech-radar")),
+        ("Browser tasks",   str(NOTES / "browser-tasks")),
+    ]:
+        cprint(f"  {GRAY}{label:<18}{RESET}  {path}", "")
+
+
 # ── Semantic router command ────────────────────────────────────────────────────
 
 def cmd_route(query: str = "") -> None:
@@ -9075,6 +9631,167 @@ def cmd_nightly_run() -> None:
         cwd=str(BASE), timeout=600
     )
     cprint(f"\n  {'✓ Done' if r.returncode == 0 else '⚠ Finished with errors'}. Use /nightly-log to see the report.", GREEN if r.returncode == 0 else YELLOW)
+
+
+# ── E2E Auto Loop commands ────────────────────────────────────────────────────
+
+def cmd_e2e_auto_loop(args: str = "") -> None:
+    """Start E2E auto-loop (NLU eval → analyze → fix → retest). Default: target=98%, max-cycles=3."""
+    import argparse as _ap
+    p = _ap.ArgumentParser(prog="/e2e-auto-loop", add_help=False)
+    p.add_argument("--target",       type=float, default=98.0)
+    p.add_argument("--max-cycles",   type=int,   default=3)
+    p.add_argument("--dry-run",      action="store_true")
+    p.add_argument("--analyze-only", action="store_true")
+    p.add_argument("--workers",      type=int,   default=5)
+    p.add_argument("--background",   action="store_true")
+    try:
+        opts, _ = p.parse_known_args(args.split() if args else [])
+    except SystemExit:
+        return
+
+    pid_file = ADWI_DIR / "notes" / "e2e-auto-loop" / "running.pid"
+    if pid_file.exists():
+        try:
+            import os as _os
+            existing_pid = int(pid_file.read_text().strip())
+            _os.kill(existing_pid, 0)
+            adwi_say(f"E2E loop already running (PID {existing_pid}). Use /e2e-auto-loop-status.")
+            return
+        except (ValueError, ProcessLookupError):
+            pass   # stale lock
+
+    if opts.background:
+        import subprocess as _sp
+        job_id   = f"e2e-{datetime.now().strftime('%Y%m%d-%H%M%S')}"
+        loop_dir = ADWI_DIR / "notes" / "e2e-auto-loop" / job_id
+        loop_dir.mkdir(parents=True, exist_ok=True)
+        log_path = loop_dir / "loop.log"
+        cmd_args = [
+            str(ADWI_DIR / ".venv" / "bin" / "python3"),
+            str(ADWI_DIR / "e2e_auto_loop.py"),
+            "--job-id", job_id,
+            "--target", str(opts.target),
+            "--max-cycles", str(opts.max_cycles),
+            "--workers", str(opts.workers),
+        ]
+        if opts.dry_run:
+            cmd_args.append("--dry-run")
+        if opts.analyze_only:
+            cmd_args.append("--analyze-only")
+        _sp.Popen(cmd_args, start_new_session=True,
+                  stdout=open(str(log_path), "w"), stderr=_sp.STDOUT)
+        adwi_say(f"E2E loop started in background — job_id={job_id}")
+        cprint(f"  Log:    {log_path}", GRAY)
+        cprint(f"  Status: /e2e-auto-loop-status", GRAY)
+    else:
+        sys.path.insert(0, str(ADWI_DIR))
+        from e2e_auto_loop import main as _e2e_main
+        adwi_head("E2E Auto Loop")
+        rc = _e2e_main(
+            target=opts.target, max_cycles=opts.max_cycles,
+            dry_run=opts.dry_run, analyze_only=opts.analyze_only, workers=opts.workers,
+        )
+        if rc == 0:
+            cprint(f"\n  {GREEN}✓ Loop completed{RESET}", "")
+        else:
+            cprint(f"\n  {RED}✗ Loop ended with errors — see /e2e-auto-loop-report{RESET}", "")
+
+
+def cmd_e2e_auto_loop_status() -> None:
+    """Show current/last E2E auto-loop job status."""
+    loop_dir = ADWI_DIR / "notes" / "e2e-auto-loop"
+    status_f = loop_dir / "status.json"
+    adwi_head("E2E Auto Loop Status")
+    if not status_f.exists():
+        cprint("  No E2E loop has ever run on this machine.", GRAY)
+        return
+    try:
+        d = json.loads(status_f.read_text(encoding="utf-8"))
+    except Exception as exc:
+        cprint(f"  Cannot read status.json: {exc}", RED)
+        return
+    status = d.get("status", "unknown")
+    clr    = GREEN if status == "success" else (YELLOW if status in ("running", "dry_run_complete") else RED)
+    cprint(f"  Status:   {clr}{status}{RESET}", "")
+    cprint(f"  Job ID:   {d.get('job_id', '—')}", "")
+    cprint(f"  Cycle:    {d.get('cycle', 0)} / {d.get('max_cycles', 3)}", "")
+    cprint(f"  Target:   {d.get('target', 98.0)}%", "")
+    cprint(f"  Updated:  {d.get('updated_at', '—')}", GRAY)
+    if d.get("final_combined_pct") is not None:
+        pct = d["final_combined_pct"]
+        clr = GREEN if pct >= d.get("target", 98.0) else YELLOW
+        cprint(f"  Final combined: {clr}{pct}%{RESET}", "")
+    if d.get("needs_llm_review"):
+        cprint(f"\n  {YELLOW}⚠ Needs LLM review — run /e2e-auto-loop-report{RESET}", "")
+    if d.get("stop_reason"):
+        cprint(f"\n  Stop reason: {d['stop_reason']}", GRAY)
+
+
+def cmd_e2e_auto_loop_report() -> None:
+    """Show the latest E2E auto-loop cycle or final report."""
+    loop_dir = ADWI_DIR / "notes" / "e2e-auto-loop"
+    status_f = loop_dir / "status.json"
+    adwi_head("E2E Auto Loop Report")
+    if not status_f.exists():
+        cprint("  No E2E loop has ever run on this machine.", GRAY)
+        return
+    try:
+        d       = json.loads(status_f.read_text(encoding="utf-8"))
+        job_id  = d.get("job_id")
+        job_dir = loop_dir / job_id if job_id else None
+    except Exception as exc:
+        cprint(f"  Cannot read status.json: {exc}", RED)
+        return
+
+    report_f = None
+    if job_dir and (job_dir / "final-report.json").exists():
+        report_f = job_dir / "final-report.json"
+    elif job_dir:
+        cycles = sorted(job_dir.glob("cycle-*-report.json"))
+        if cycles:
+            report_f = cycles[-1]
+
+    if not report_f:
+        cprint("  No cycle reports yet — loop may still be starting.", GRAY)
+        return
+    try:
+        r = json.loads(report_f.read_text(encoding="utf-8"))
+    except Exception as exc:
+        cprint(f"  Cannot parse report: {exc}", RED)
+        return
+
+    cprint(f"  File: {report_f.name}", GRAY)
+    cprint(f"  Status: {r.get('status', r.get('cycle', '?'))}", "")
+    if r.get("combined_pct") is not None:
+        cprint(f"  Combined: {r['combined_pct']}%  "
+               f"(P1={r.get('p1_pct')}%  P2={r.get('p2_pct')}%)", BOLD)
+    if r.get("fail_by_intent"):
+        cprint(f"\n  Top failing intents:", "")
+        for intent, count in list(r["fail_by_intent"].items())[:8]:
+            cprint(f"    {RED}{intent}{RESET}: {count}", "")
+    if r.get("unfixed_clusters"):
+        cprint(f"\n  {YELLOW}Unfixed clusters (need LLM review):{RESET} "
+               f"{r['unfixed_clusters'][:10]}", "")
+    if r.get("patches_applied"):
+        cprint(f"\n  {GREEN}Patches applied:{RESET} {r['patches_applied']}", "")
+    if r.get("stop_reason"):
+        cprint(f"\n  Stop reason: {r['stop_reason']}", GRAY)
+
+
+def cmd_e2e_auto_loop_cancel() -> None:
+    """Cancel a running E2E auto-loop job."""
+    loop_dir    = ADWI_DIR / "notes" / "e2e-auto-loop"
+    cancel_file = loop_dir / "cancel"
+    pid_file    = loop_dir / "running.pid"
+    adwi_head("E2E Auto Loop Cancel")
+    if not pid_file.exists():
+        cprint("  No E2E loop appears to be running.", GRAY)
+        return
+    loop_dir.mkdir(parents=True, exist_ok=True)
+    cancel_file.write_text("cancel")
+    cprint(f"  {GREEN}✓ Cancel sentinel written{RESET} — loop will stop after current operation.", "")
+    cprint(f"  Check: /e2e-auto-loop-status", GRAY)
 
 
 # ── Voice I/O commands (Pillar C) ────────────────────────────────────────────
@@ -9401,6 +10118,19 @@ def dispatch_natural(text: str):
         cmd_what_next()
     elif intent == "daily_improve":
         cmd_daily_improve()
+    elif intent == "daily_brief":
+        cmd_daily_brief()
+    elif intent == "research":
+        q = args.get("query") or target or re.sub(r"^(research|investigate|look into)\s*", "", text, flags=re.I).strip()
+        cmd_research(q or text)
+    elif intent == "browser_delegate":
+        cmd_browser_delegate(args.get("task") or target or text)
+    elif intent == "tech_radar":
+        cmd_tech_radar()
+    elif intent == "memory_curate":
+        cmd_memory_curate()
+    elif intent == "assistant_upgrade_status":
+        cmd_assistant_upgrade_status()
     elif intent == "sync":
         run_cmd("sync", ["sync-openwebui-knowledge"], timeout=1200)
     elif intent == "model_status":
@@ -10013,6 +10743,18 @@ def handle(line: str) -> bool:
     elif line.startswith("/trace-log "):
         arg = line[11:].strip()
         cmd_trace_log(int(arg) if arg.isdigit() else 0)
+    # ── Assistant Upgrade Pack ──
+    elif line.startswith("/research-save "): cmd_research(line[15:].strip(), save=True)
+    elif line.startswith("/research "): cmd_research(line[10:].strip())
+    elif line == "/research": cmd_research()
+    elif line.startswith("/browser-delegate-dry-run "): cmd_browser_delegate(line[26:].strip(), dry_run=True)
+    elif line.startswith("/browser-delegate "): cmd_browser_delegate(line[18:].strip())
+    elif line == "/browser-delegate": cmd_browser_delegate()
+    elif line == "/daily-brief --n8n": cmd_daily_brief(n8n_mode=True)
+    elif line == "/daily-brief": cmd_daily_brief()
+    elif line == "/tech-radar": cmd_tech_radar()
+    elif line == "/memory-curate": cmd_memory_curate()
+    elif line == "/assistant-upgrade-status": cmd_assistant_upgrade_status()
     # ── Memory Layer ──
     elif line == "/memory-scan": cmd_memory_scan()
     elif line == "/memory-stats": cmd_memory_stats()
@@ -10029,6 +10771,12 @@ def handle(line: str) -> bool:
         arg = line[12:].strip()
         cmd_nightly_log(int(arg) if arg.isdigit() else 0)
     elif line == "/nightly-run": cmd_nightly_run()
+    # ── E2E Auto Loop ──
+    elif line.startswith("/e2e-auto-loop "):  cmd_e2e_auto_loop(line[15:].strip())
+    elif line == "/e2e-auto-loop":            cmd_e2e_auto_loop()
+    elif line == "/e2e-auto-loop-status":     cmd_e2e_auto_loop_status()
+    elif line == "/e2e-auto-loop-report":     cmd_e2e_auto_loop_report()
+    elif line == "/e2e-auto-loop-cancel":     cmd_e2e_auto_loop_cancel()
     # ── Voice I/O (Pillar C) ──
     elif line in ("/voice-in", "/voice", "/listen"): cmd_voice_in()
     elif line.startswith("/voice-out "): cmd_voice_out(line[11:].strip())
@@ -10191,6 +10939,15 @@ You can say things like:
   /nightly-status            LaunchAgent status, last run, pending improvements
   /nightly-log [n]           Read most recent (or nth) nightly report
   /nightly-run               Trigger nightly loop right now (with confirm)
+
+{BOLD}E2E Auto Loop (NLU eval → analyze → fix → retest):{RESET}
+  /e2e-auto-loop                       Start loop (default: --target 98 --max-cycles 3)
+  /e2e-auto-loop --dry-run             Preflight only — safe test of loop control flow
+  /e2e-auto-loop --analyze-only        Eval + write enriched failure reports; no patching
+  /e2e-auto-loop --background          Detach to background and return immediately
+  /e2e-auto-loop-status                Show current/last job status
+  /e2e-auto-loop-report                Show latest cycle or final report
+  /e2e-auto-loop-cancel                Cancel a running loop job
 
 {BOLD}GitHub Backup:{RESET}
   /backup-status             Git status, remote, last commit, LaunchAgent

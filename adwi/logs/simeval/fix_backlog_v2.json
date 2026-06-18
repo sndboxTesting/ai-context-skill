@@ -2,9 +2,8 @@
   {
     "id": "FIX-001",
     "title": "file_search regex too broad \u2014 swallows cleanup/duplicates/large_files",
-    "count": 2,
+    "count": 1,
     "evidence": [
-      "find my heaviest files",
       "find dupkicates"
     ],
     "root_cause": "`\\b(find|search for|locate|look for)\\b.{0,20}\\bfiles?\\b` matches 'find things to delete', 'find duplicate files', 'find large files'. The word 'files' appears in disk management prompts but should not trigger file_search.",
@@ -12,42 +11,20 @@
     "affected_file": "adwi/adwi_cli.py \u2014 _REGEX_INTENTS file_search section",
     "effort": "low",
     "confidence": "high",
-    "impact": "~2 scenarios would flip to pass"
-  },
-  {
-    "id": "FIX-005",
-    "title": "organize \u2192 chat/file_search LLM miss",
-    "count": 5,
-    "evidence": [
-      "what's the best way to structure these files",
-      "help organize my workspace",
-      "how to structure my project folders",
-      "how to organize dev projects",
-      "organize"
-    ],
-    "root_cause": "organize intent has no explicit rule in _INTENT_SYSTEM. LLM sees 'help me organize files' as advisory chat, and sometimes as file_search. The regex covers 'organiz/tidy/restructure' but not all advisory phrasing.",
-    "proposed_fix": "Add to _INTENT_SYSTEM: 'organize: user wants help organizing, sorting, restructuring, or tidying their file/folder hierarchy. Different from cleanup (deletion) and file_search (finding files).'",
-    "affected_file": "adwi/adwi_cli.py \u2014 _INTENT_SYSTEM",
-    "effort": "low",
-    "confidence": "medium",
-    "impact": "~5 scenarios"
+    "impact": "~1 scenarios would flip to pass"
   },
   {
     "id": "FIX-006",
     "title": "benchmark regex too narrow \u2014 misses 'how fast is my model'",
-    "count": 7,
+    "count": 1,
     "evidence": [
-      "how fast is adwi responding",
-      "how fast is llama3.1:8b",
-      "my local AI model is responding much slower than usual what could be causing this and how do i benchmark it",
-      "how fast is llama3.1 on this machine",
-      "what's my inference speed"
+      "my local AI model is responding much slower than usual what could be causing this and how do i benchmark it"
     ],
     "root_cause": "Current benchmark regex requires 'adwi|model|local|ollama' in the same phrase as 'benchmark|speed test|how fast|tokens per second'. Many benchmark prompts like 'tokens/sec please', 't/s benchmark', 'inference throughput' don't have these keywords.",
     "proposed_fix": "Add: `(tokens?/s|t/s|tok/s|throughput).{0,20}(model|llm|ollama|adwi)?` \u2192 benchmark\nAnd: `(inference|llm|model|ollama).{0,20}(speed|throughput|latency|benchmark)` \u2192 benchmark\nAnd: `how fast.{0,20}(llm|model|is adwi|is ollama)` \u2192 benchmark",
     "affected_file": "adwi/adwi_cli.py \u2014 _REGEX_INTENTS",
     "effort": "low",
     "confidence": "high",
-    "impact": "~7 scenarios"
+    "impact": "~1 scenarios"
   }
 ]

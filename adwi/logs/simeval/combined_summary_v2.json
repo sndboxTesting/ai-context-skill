@@ -1,223 +1,218 @@
 {
   "sessions": [
-    "large-20260616-100928",
-    "large-p2-20260616-102054"
+    "large-20260618-100658",
+    "large-p2-20260618-100319"
   ],
-  "generated": "2026-06-16 10:26",
-  "total": 1881,
-  "passed": 1675,
-  "warned": 33,
-  "failed": 173,
-  "pass_rate_pct": 89.0,
-  "regex_hits": 975,
-  "regex_hit_pct": 51.8,
-  "llm_calls": 906,
-  "avg_latency_ms": 2568.2,
-  "p95_latency_ms": 6050.9,
+  "generated": "2026-06-18 10:24",
+  "total": 2283,
+  "passed": 2187,
+  "warned": 28,
+  "failed": 68,
+  "pass_rate_pct": 95.8,
+  "regex_hits": 1498,
+  "regex_hit_pct": 65.6,
+  "llm_calls": 785,
+  "avg_latency_ms": 2124.0,
+  "p95_latency_ms": 7053.3,
   "safety_probes": 66,
-  "safety_breaches": 26,
+  "safety_breaches": 0,
   "top_misroutes": [
-    {
-      "from": "__none__",
-      "to": "file_read",
-      "count": 24
-    },
     {
       "from": "chat",
       "to": "memory_recall",
-      "count": 9
-    },
-    {
-      "from": "chat",
-      "to": "status",
-      "count": 7
-    },
-    {
-      "from": "chat",
-      "to": "generate_image",
-      "count": 7
-    },
-    {
-      "from": "benchmark",
-      "to": "chat",
       "count": 6
     },
     {
-      "from": "organize",
-      "to": "chat",
-      "count": 5
-    },
-    {
-      "from": "status",
-      "to": "chat",
-      "count": 5
-    },
-    {
-      "from": "cleanup",
-      "to": "large_files",
-      "count": 4
-    },
-    {
-      "from": "chat",
-      "to": "obsidian_search",
-      "count": 4
-    },
-    {
-      "from": "chat",
-      "to": "what_next",
-      "count": 4
-    },
-    {
-      "from": "chat",
-      "to": "disk_usage",
-      "count": 4
-    },
-    {
-      "from": "model_status",
+      "from": "backup_status",
       "to": "status",
-      "count": 3
-    },
-    {
-      "from": "web_search",
-      "to": "memory_recall",
-      "count": 3
-    },
-    {
-      "from": "github_connected",
-      "to": "status",
-      "count": 3
-    },
-    {
-      "from": "chat",
-      "to": "sync",
-      "count": 3
-    },
-    {
-      "from": "chat",
-      "to": "git_status",
-      "count": 3
-    },
-    {
-      "from": "run_code",
-      "to": "chat",
-      "count": 3
-    },
-    {
-      "from": "cleanup",
-      "to": "old_files",
-      "count": 2
-    },
-    {
-      "from": "what_next",
-      "to": "capabilities",
-      "count": 2
-    },
-    {
-      "from": "browse",
-      "to": "chat",
-      "count": 2
-    },
-    {
-      "from": "memory_recall",
-      "to": "memory_context",
-      "count": 2
-    },
-    {
-      "from": "nightly_run",
-      "to": "nightly_status",
-      "count": 2
-    },
-    {
-      "from": "chat",
-      "to": "fix_error",
-      "count": 2
-    },
-    {
-      "from": "model_status",
-      "to": "chat",
-      "count": 2
-    },
-    {
-      "from": "chat",
-      "to": "old_files",
-      "count": 2
-    },
-    {
-      "from": "eval_adwi",
-      "to": "chat",
       "count": 2
     },
     {
       "from": "inspect_code",
-      "to": "generate_image",
+      "to": "memory_recall",
       "count": 2
     },
     {
-      "from": "voice_in",
-      "to": "chat",
+      "from": "chat",
+      "to": "sync",
+      "count": 2
+    },
+    {
+      "from": "chat",
+      "to": "patch_adwi",
+      "count": 2
+    },
+    {
+      "from": "chat",
+      "to": "what_next",
+      "count": 2
+    },
+    {
+      "from": "chat",
+      "to": "git_status",
       "count": 2
     },
     {
       "from": "disk_usage",
-      "to": "status",
+      "to": "capabilities",
       "count": 1
     },
     {
-      "from": "large_files",
+      "from": "status",
+      "to": "web_search",
+      "count": 1
+    },
+    {
+      "from": "what_next",
+      "to": "memory_recall",
+      "count": 1
+    },
+    {
+      "from": "what_next",
+      "to": "capabilities",
+      "count": 1
+    },
+    {
+      "from": "file_read",
+      "to": "inspect_code",
+      "count": 1
+    },
+    {
+      "from": "file_list",
       "to": "file_search",
+      "count": 1
+    },
+    {
+      "from": "file_search",
+      "to": "obsidian_search",
+      "count": 1
+    },
+    {
+      "from": "file_search",
+      "to": "chat",
+      "count": 1
+    },
+    {
+      "from": "gmail_list_category",
+      "to": "obsidian_search",
+      "count": 1
+    },
+    {
+      "from": "gmail_tasks_save",
+      "to": "obsidian_daily",
+      "count": 1
+    },
+    {
+      "from": "gmail_confirm",
+      "to": "chat",
+      "count": 1
+    },
+    {
+      "from": "gmail_add_cc",
+      "to": "chat",
+      "count": 1
+    },
+    {
+      "from": "gmail_add_bcc",
+      "to": "gmail",
+      "count": 1
+    },
+    {
+      "from": "gmail_save_attachment",
+      "to": "file_save",
+      "count": 1
+    },
+    {
+      "from": "web_search",
+      "to": "tech_radar",
+      "count": 1
+    },
+    {
+      "from": "browse",
+      "to": "obsidian_search",
+      "count": 1
+    },
+    {
+      "from": "memory_stats",
+      "to": "memory_recall",
+      "count": 1
+    },
+    {
+      "from": "git_status",
+      "to": "chat",
+      "count": 1
+    },
+    {
+      "from": "git_status",
+      "to": "file_list",
+      "count": 1
+    },
+    {
+      "from": "git_status",
+      "to": "memory_recall",
+      "count": 1
+    },
+    {
+      "from": "backup_now",
+      "to": "git_status",
+      "count": 1
+    },
+    {
+      "from": "voice_out",
+      "to": "daily_brief",
+      "count": 1
+    },
+    {
+      "from": "trusted_roots",
+      "to": "capabilities",
       "count": 1
     }
   ],
   "fail_by_intent": {
-    "chat": 51,
-    "__none__": 31,
-    "cleanup": 8,
-    "benchmark": 7,
-    "organize": 5,
-    "model_status": 5,
-    "status": 5,
-    "web_search": 4,
-    "browse": 3,
-    "memory_recall": 3,
+    "chat": 21,
+    "status": 3,
     "git_status": 3,
-    "github_connected": 3,
-    "fix_error": 3,
-    "run_code": 3,
-    "extract_ideas": 3,
-    "implement_idea": 3,
     "what_next": 2,
-    "file_read": 2,
-    "patch_adwi": 2,
-    "test_adwi": 2,
-    "nightly_run": 2,
-    "eval_adwi": 2,
+    "file_search": 2,
+    "backup_status": 2,
     "inspect_code": 2,
-    "voice_in": 2,
+    "run_code": 2,
+    "nightly_status": 2,
+    "__none__": 2,
     "disk_usage": 1,
-    "large_files": 1,
+    "file_read": 1,
     "file_list": 1,
-    "file_search": 1,
+    "gmail_list_category": 1,
+    "gmail_tasks_save": 1,
+    "gmail_confirm": 1,
+    "gmail_add_cc": 1,
+    "gmail_add_bcc": 1,
+    "gmail_save_attachment": 1,
+    "web_search": 1,
+    "browse": 1,
     "memory_stats": 1,
     "backup_now": 1,
-    "backup_status": 1,
-    "capabilities": 1,
-    "duplicates": 1,
-    "use_local": 1,
-    "doctor": 1,
-    "memory_scan": 1,
-    "tool_roadmap": 1,
+    "voice_out": 1,
     "trusted_roots": 1,
-    "generate_image": 1,
-    "sync": 1,
-    "voice_out": 1
+    "fix_error": 1,
+    "test_adwi": 1,
+    "github_connected": 1,
+    "duplicates": 1,
+    "nightly_run": 1,
+    "gmail": 1,
+    "use_local": 1,
+    "benchmark": 1,
+    "research": 1,
+    "patch_adwi": 1,
+    "tool_roadmap": 1,
+    "cleanup": 1
   },
   "fix_candidates": [
     {
       "id": "FIX-001",
       "title": "file_search regex too broad \u2014 swallows cleanup/duplicates/large_files",
-      "count": 2,
+      "count": 1,
       "evidence": [
-        "find my heaviest files",
         "find dupkicates"
       ],
       "root_cause": "`\\b(find|search for|locate|look for)\\b.{0,20}\\bfiles?\\b` matches 'find things to delete', 'find duplicate files', 'find large files'. The word 'files' appears in disk management prompts but should not trigger file_search.",
@@ -225,122 +220,72 @@
       "affected_file": "adwi/adwi_cli.py \u2014 _REGEX_INTENTS file_search section",
       "effort": "low",
       "confidence": "high",
-      "impact": "~2 scenarios would flip to pass"
-    },
-    {
-      "id": "FIX-005",
-      "title": "organize \u2192 chat/file_search LLM miss",
-      "count": 5,
-      "evidence": [
-        "what's the best way to structure these files",
-        "help organize my workspace",
-        "how to structure my project folders",
-        "how to organize dev projects",
-        "organize"
-      ],
-      "root_cause": "organize intent has no explicit rule in _INTENT_SYSTEM. LLM sees 'help me organize files' as advisory chat, and sometimes as file_search. The regex covers 'organiz/tidy/restructure' but not all advisory phrasing.",
-      "proposed_fix": "Add to _INTENT_SYSTEM: 'organize: user wants help organizing, sorting, restructuring, or tidying their file/folder hierarchy. Different from cleanup (deletion) and file_search (finding files).'",
-      "affected_file": "adwi/adwi_cli.py \u2014 _INTENT_SYSTEM",
-      "effort": "low",
-      "confidence": "medium",
-      "impact": "~5 scenarios"
+      "impact": "~1 scenarios would flip to pass"
     },
     {
       "id": "FIX-006",
       "title": "benchmark regex too narrow \u2014 misses 'how fast is my model'",
-      "count": 7,
+      "count": 1,
       "evidence": [
-        "how fast is adwi responding",
-        "how fast is llama3.1:8b",
-        "my local AI model is responding much slower than usual what could be causing this and how do i benchmark it",
-        "how fast is llama3.1 on this machine",
-        "what's my inference speed"
+        "my local AI model is responding much slower than usual what could be causing this and how do i benchmark it"
       ],
       "root_cause": "Current benchmark regex requires 'adwi|model|local|ollama' in the same phrase as 'benchmark|speed test|how fast|tokens per second'. Many benchmark prompts like 'tokens/sec please', 't/s benchmark', 'inference throughput' don't have these keywords.",
       "proposed_fix": "Add: `(tokens?/s|t/s|tok/s|throughput).{0,20}(model|llm|ollama|adwi)?` \u2192 benchmark\nAnd: `(inference|llm|model|ollama).{0,20}(speed|throughput|latency|benchmark)` \u2192 benchmark\nAnd: `how fast.{0,20}(llm|model|is adwi|is ollama)` \u2192 benchmark",
       "affected_file": "adwi/adwi_cli.py \u2014 _REGEX_INTENTS",
       "effort": "low",
       "confidence": "high",
-      "impact": "~7 scenarios"
+      "impact": "~1 scenarios"
     }
   ],
   "unstable_families": [
     {
-      "family": "planning",
-      "total": 14,
-      "pass": 7,
-      "fail": 7,
-      "consistency_pct": 50.0
+      "family": "gmail_confirm",
+      "total": 5,
+      "pass": 4,
+      "fail": 1,
+      "consistency_pct": 80.0
     },
     {
-      "family": "minimal",
-      "total": 30,
-      "pass": 17,
-      "fail": 11,
-      "consistency_pct": 56.7
+      "family": "research",
+      "total": 5,
+      "pass": 4,
+      "fail": 1,
+      "consistency_pct": 80.0
     },
     {
-      "family": "cleanup",
-      "total": 40,
-      "pass": 25,
-      "fail": 7,
-      "consistency_pct": 62.5
+      "family": "gmail_add_cc",
+      "total": 6,
+      "pass": 5,
+      "fail": 1,
+      "consistency_pct": 83.3
     },
     {
-      "family": "gen_image_boundary",
-      "total": 40,
-      "pass": 29,
-      "fail": 11,
-      "consistency_pct": 72.5
+      "family": "gmail_add_bcc",
+      "total": 6,
+      "pass": 5,
+      "fail": 1,
+      "consistency_pct": 83.3
     },
     {
-      "family": "chat_boundary",
-      "total": 60,
-      "pass": 45,
-      "fail": 15,
-      "consistency_pct": 75.0
+      "family": "gmail_save_attachment",
+      "total": 6,
+      "pass": 5,
+      "fail": 1,
+      "consistency_pct": 83.3
     },
     {
       "family": "chat",
       "total": 109,
-      "pass": 83,
-      "fail": 23,
-      "consistency_pct": 76.1
+      "pass": 93,
+      "fail": 13,
+      "consistency_pct": 85.3
     },
     {
-      "family": "benchmark_deep",
-      "total": 40,
-      "pass": 31,
-      "fail": 9,
-      "consistency_pct": 77.5
-    },
-    {
-      "family": "model_status",
-      "total": 15,
-      "pass": 12,
-      "fail": 3,
-      "consistency_pct": 80.0
-    },
-    {
-      "family": "organize",
-      "total": 25,
-      "pass": 21,
-      "fail": 4,
-      "consistency_pct": 84.0
-    },
-    {
-      "family": "web_search",
-      "total": 44,
-      "pass": 38,
+      "family": "gmail_tasks_save",
+      "total": 8,
+      "pass": 7,
       "fail": 1,
-      "consistency_pct": 86.4
-    },
-    {
-      "family": "voice_style",
-      "total": 39,
-      "pass": 34,
-      "fail": 3,
-      "consistency_pct": 87.2
+      "consistency_pct": 87.5
     },
     {
       "family": "test_adwi",
@@ -348,27 +293,6 @@
       "pass": 7,
       "fail": 1,
       "consistency_pct": 87.5
-    },
-    {
-      "family": "memory_recall",
-      "total": 25,
-      "pass": 22,
-      "fail": 3,
-      "consistency_pct": 88.0
-    },
-    {
-      "family": "capabilities",
-      "total": 25,
-      "pass": 22,
-      "fail": 1,
-      "consistency_pct": 88.0
-    },
-    {
-      "family": "github_connected",
-      "total": 9,
-      "pass": 8,
-      "fail": 1,
-      "consistency_pct": 88.9
     }
   ]
 }

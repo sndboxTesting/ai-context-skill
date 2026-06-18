@@ -1,0 +1,77 @@
+#!/usr/bin/env python3
+"""
+Adwi E2E Auto Loop — read-only status/report/cancel helper.
+Prints valid JSON only. Never reads secrets.
+Usage: adwi-e2e-status-reader [--status | --report | --cancel]
+"""
+import json, sys
+from pathlib import Path
+
+HOME     = Path.home()
+LOOP_DIR = HOME / "SuneelWorkSpace" / "adwi" / "notes" / "e2e-auto-loop"
+STATUS_F = LOOP_DIR / "status.json"
+CANCEL_F = LOOP_DIR / "cancel"
+
+_NO_JOB = {"status": "no_job",
+            "message": "No E2E auto loop has ever run on this machine."}
+
+
+def _cmd_status() -> None:
+    if not STATUS_F.exists():
+        print(json.dumps(_NO_JOB))
+        return
+    print(STATUS_F.read_text(encoding="utf-8"))
+
+
+def _cmd_report() -> None:
+    if not STATUS_F.exists():
+        print(json.dumps(_NO_JOB))
+        return
+    try:
+        status = json.loads(STATUS_F.read_text(encoding="utf-8"))
+    except Exception as exc:
+        print(json.dumps({"error": f"Cannot parse status.json: {exc}"}))
+        return
+
+    job_id  = status.get("job_id")
+    job_dir = LOOP_DIR / job_id if job_id else None
+
+    if job_dir and (job_dir / "final-report.json").exists():
+        print((job_dir / "final-report.json").read_text(encoding="utf-8"))
+        return
+
+    if job_dir:
+        cycles = sorted(job_dir.glob("cycle-*-report.json"))
+        if cycles:
+            print(cycles[-1].read_text(encoding="utf-8"))
+            return
+
+    print(json.dumps({"status": status.get("status", "unknown"),
+                      "message": "No cycle reports yet — loop may still be starting."}))
+
+
+def _cmd_cancel() -> None:
+    LOOP_DIR.mkdir(parents=True, exist_ok=True)
+    CANCEL_F.write_text("cancel")
+    print(json.dumps({
+        "ok": True,
+        "cancel_requested": True,
+        "message": "Cancel sentinel written. Loop will stop after current operation.",
+    }))
+
+
+def main() -> None:
+    mode = sys.argv[1] if len(sys.argv) > 1 else "--status"
+    if mode == "--status":
+        _cmd_status()
+    elif mode == "--report":
+        _cmd_report()
+    elif mode == "--cancel":
+        _cmd_cancel()
+    else:
+        print(json.dumps({"error": f"Unknown mode: {mode}. Use --status, --report, or --cancel."}))
+        sys.exit(1)
+
+
+if __name__ == "__main__":
+    main()

@@ -653,6 +653,69 @@
       "uses_secrets": false,
       "logs": "notes/adwi-action-logs",
       "test_command": "/test-adwi"
+    },
+    {
+      "name": "Research Operator",
+      "command": "/research <question>  or  /research-save <question>",
+      "description": "Deep multi-source research (SearXNG + Exa/Tavily/Firecrawl optional). Produces a cited brief saved to notes/research/. /research-save also appends to Obsidian daily note.",
+      "risk": "low",
+      "allowed_paths": ["notes/research", "obsidian-vault"],
+      "uses_secrets": false,
+      "optional_env": ["EXA_API_KEY", "TAVILY_API_KEY", "FIRECRAWL_API_KEY", "OPENWEBUI_API_KEY"],
+      "logs": "notes/adwi-action-logs",
+      "status": "active"
+    },
+    {
+      "name": "Browser Delegate",
+      "command": "/browser-delegate <task>  or  /browser-delegate-dry-run <task>",
+      "description": "Safe browser agent using Playwright. Stops and asks confirmation before any account-changing, form-submit, payment, or delete action. Dry-run mode shows what it would do without acting. Saves results to notes/browser-tasks/.",
+      "risk": "medium",
+      "allowed_paths": ["notes/browser-tasks"],
+      "uses_secrets": false,
+      "logs": "notes/adwi-action-logs",
+      "status": "active"
+    },
+    {
+      "name": "Daily Brief",
+      "command": "/daily-brief",
+      "description": "Proactive daily assistant brief: service status, Gmail inbox snapshot, today's priorities, a learning suggestion, and one setup improvement. Saves to notes/daily-briefs/ and Obsidian daily note. Callable from n8n.",
+      "risk": "low",
+      "allowed_paths": ["notes/daily-briefs", "obsidian-vault"],
+      "uses_secrets": false,
+      "optional_env": ["OPENWEBUI_API_KEY"],
+      "logs": "notes/adwi-action-logs",
+      "status": "active"
+    },
+    {
+      "name": "Tech Radar",
+      "command": "/tech-radar",
+      "description": "Scans 6 AI/dev technology areas (OpenAI Agents, MCP, Ollama, browser agents, LangGraph, local voice/vision/RAG). Categorises each as try-now / watch / ignore with reasoning. Saves to notes/tech-radar/.",
+      "risk": "low",
+      "allowed_paths": ["notes/tech-radar"],
+      "uses_secrets": false,
+      "optional_env": ["EXA_API_KEY", "TAVILY_API_KEY", "OPENWEBUI_API_KEY"],
+      "logs": "notes/adwi-action-logs",
+      "status": "active"
+    },
+    {
+      "name": "Memory Curator",
+      "command": "/memory-curate",
+      "description": "Reviews recent action logs and proposes 3-5 durable personal memories (preferences, project facts, patterns). Each proposal requires explicit Y/N confirmation before storage. Never auto-stores.",
+      "risk": "low",
+      "allowed_paths": ["notes/adwi-action-logs"],
+      "uses_secrets": false,
+      "logs": "notes/adwi-action-logs",
+      "status": "active"
+    },
+    {
+      "name": "Assistant Upgrade Status",
+      "command": "/assistant-upgrade-status",
+      "description": "Shows all 5 Upgrade Pack commands, which optional API keys are configured, and where output is saved.",
+      "risk": "low",
+      "allowed_paths": [],
+      "uses_secrets": false,
+      "logs": "notes/adwi-action-logs",
+      "status": "active"
     }
   ]
 }

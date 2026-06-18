@@ -1,7 +1,7 @@
 {
   "schema_version": "1.0.0",
-  "generated_at": "2026-06-18T03:51:02.484115+00:00",
-  "generated_by": "adwi/bin/generate-manifest",
+  "generated_at": "2026-06-18T14:54:40.995651+00:00",
+  "generated_by": "bin/generate-manifest",
   "system_identity": {
     "name": "Adwi",
     "operator": "Suneel Bikkasani",
@@ -198,7 +198,7 @@
     }
   ],
   "nlu_pipeline": {
-    "intent_count": 109,
+    "intent_count": 115,
     "fixture_count": 96,
     "regex_intent_count": 1,
     "fast_path_threshold": 0.88,
@@ -246,21 +246,22 @@
       "BLOCKED_PATHS and PathValidator must never be weakened",
       "SimLab never auto-applies Tier C (safety/security) changes",
       "secrets/ is gitignored entirely \u2014 never commit",
-      "adwi/config/.env is gitignored \u2014 adwi/config/.env.example is the safe template",
+      "config/.env is gitignored \u2014 config/.env.example is the safe template",
       "adwi/memory.db and adwi/knowledge.db are gitignored \u2014 regenerated per machine",
       "aider never touches secret files"
     ]
   },
   "command_registry": {
-    "total_commands": 167,
+    "total_commands": 173,
     "source_files": [
       "adwi/adwi_cli.py",
       "adwi/capabilities.json"
     ],
-    "last_counted": "2026-06-17",
+    "last_counted": "2026-06-18",
     "commands": [
       "/add-capability-plan",
       "/add-root",
+      "/assistant-upgrade-status",
       "/backup-audit",
       "/backup-disable",
       "/backup-enable",
@@ -269,6 +270,7 @@
       "/backup-status",
       "/benchmark",
       "/browse",
+      "/browser-delegate",
       "/capabilities",
       "/capability-audit",
       "/capability-status",
@@ -277,6 +279,7 @@
       "/cloud",
       "/cmd",
       "/confirm",
+      "/daily-brief",
       "/daily-improve",
       "/disk",
       "/doctor",
@@ -364,6 +367,7 @@
       "/mcp",
       "/mcp-setup",
       "/memory-context",
+      "/memory-curate",
       "/memory-recall",
       "/memory-scan",
       "/memory-stats",
@@ -392,6 +396,7 @@
       "/repair-adwi",
       "/repo-private",
       "/repo-public",
+      "/research",
       "/reset-context",
       "/review-plan",
       "/roadmap",
@@ -410,6 +415,7 @@
       "/sync-knowledge",
       "/tailscale",
       "/tavily",
+      "/tech-radar",
       "/test-adwi",
       "/tool-roadmap",
       "/trace-log",
@@ -437,7 +443,7 @@
     "p1_scenarios": 1808,
     "p2_scenarios": 561,
     "measured_at": "2026-06-17",
-    "report_path": "adwi/logs/simeval/MASTER_REPORT_v2.md",
+    "report_path": "logs/simeval/MASTER_REPORT_v2.md",
     "note": "MASTER_REPORT_v2.md shows 89.0% from 2026-06-16 and is stale. Current baseline 97.0% is from post-CYCLE-6 session on 2026-06-17 (see CLAUDE.md)."
   },
   "phase_status": [
@@ -446,7 +452,7 @@
       "title": "Heavyweight Infrastructure Observability",
       "status": "complete",
       "key_files": [
-        "adwi/infra/docker/docker-compose.yml"
+        "local-ai-stack/docker-compose.yml"
       ]
     },
     {
@@ -503,7 +509,7 @@
       "title": "LLM-Priming Documentation Update Invariants",
       "status": "complete",
       "key_files": [
-        "adwi/bin/auto-update-readme",
+        "bin/auto-update-readme",
         "adwi/backup.py"
       ]
     },
@@ -548,13 +554,13 @@
         "SimLab guide",
         "NLU Eval history"
       ],
-      "generator": "adwi/bin/auto-update-readme"
+      "generator": "bin/auto-update-readme"
     },
     "canonical_files": [
       "adwi/adwi_cli.py",
       "adwi/capabilities.json",
       "adwi/path_validator.py",
-      "adwi/infra/docker/docker-compose.yml",
+      "local-ai-stack/docker-compose.yml",
       "~/Library/LaunchAgents/com.suneel.*.plist",
       "adwi/system_manifest.json"
     ],
@@ -563,9 +569,9 @@
       "adwi/system_manifest.json"
     ],
     "historical_files": [
-      "adwi/logs/simeval/MASTER_REPORT_v2.md",
-      "adwi/docs/NLU_REPAIR_BACKLOG.md",
-      "adwi/notes/adwi-mistakes-and-fixes.md"
+      "logs/simeval/MASTER_REPORT_v2.md",
+      "docs/NLU_REPAIR_BACKLOG.md",
+      "notes/adwi-mistakes-and-fixes.md"
     ]
   }
 }

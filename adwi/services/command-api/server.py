@@ -28,6 +28,10 @@ SECRET = os.environ.get("ADWI_LOCAL_SECRET", "")
 VENV_PY = os.path.join(HOME, "SuneelWorkSpace", "adwi", ".venv", "bin", "python3")
 ADWI_CLI = os.path.join(HOME, "SuneelWorkSpace", "adwi", "adwi_cli.py")
 
+E2E_LOOP_PY       = os.path.join(HOME, "SuneelWorkSpace", "adwi", "e2e_auto_loop.py")
+E2E_STATUS_READER = os.path.join(HOME, "SuneelWorkSpace", "adwi", "bin", "adwi-e2e-status-reader")
+E2E_LOOP_DIR      = Path(HOME) / "SuneelWorkSpace" / "adwi" / "notes" / "e2e-auto-loop"
+
 ALLOWED_COMMANDS = {
     "/status-ai":              [os.path.join(BIN, "status-ai")],
     "/daily-ai-status-report": [os.path.join(BIN, "daily-ai-status-report")],
@@ -43,6 +47,16 @@ ALLOWED_COMMANDS = {
     "/adwi-brief":             [VENV_PY, ADWI_CLI, "/what-next"],
     "/adwi-status":            [VENV_PY, ADWI_CLI, "/status"],
     "/adwi-doctor":            [VENV_PY, ADWI_CLI, "/doctor"],
+    # /adwi-daily-brief-n8n — emits a single JSON line; safe for n8n HTTP Request node.
+    # n8n HTTP Request: GET http://127.0.0.1:5055/adwi-daily-brief-n8n
+    # Header: X-Adwi-Secret: {{$env.ADWI_LOCAL_SECRET}}
+    # Parse response: response.body.stdout (trim trailing whitespace, parse as JSON)
+    "/adwi-daily-brief-n8n":   [VENV_PY, ADWI_CLI, "/daily-brief", "--n8n"],
+    # ── E2E Auto Loop (read-only routes use existing subprocess.run pattern) ────
+    "/adwi-e2e-auto-loop-status": [VENV_PY, E2E_STATUS_READER, "--status"],
+    "/adwi-e2e-auto-loop-report": [VENV_PY, E2E_STATUS_READER, "--report"],
+    "/adwi-e2e-auto-loop-cancel": [VENV_PY, E2E_STATUS_READER, "--cancel"],
+    # Note: /adwi-e2e-auto-loop-start is handled separately via Popen (see _handle_e2e_start)
 }
 
 class Handler(BaseHTTPRequestHandler):
@@ -73,10 +87,15 @@ class Handler(BaseHTTPRequestHandler):
             })
             return
 
+        # E2E start uses Popen (non-blocking) — handle before ALLOWED_COMMANDS lookup
+        if self.path == "/adwi-e2e-auto-loop-start":
+            self._handle_e2e_start()
+            return
+
         if self.path not in ALLOWED_COMMANDS:
             self._send_json(404, {
                 "error": "Route not allowed",
-                "allowed_routes": sorted(ALLOWED_COMMANDS.keys())
+                "allowed_routes": sorted(ALLOWED_COMMANDS.keys()) + ["/adwi-e2e-auto-loop-start"]
             })
             return
 
@@ -106,6 +125,55 @@ class Handler(BaseHTTPRequestHandler):
                 "route": self.path,
                 "error": str(e)
             })
+
+    def _handle_e2e_start(self) -> None:
+        """Launch e2e_auto_loop.py as a detached background process. Returns in <1s."""
+        pid_file = E2E_LOOP_DIR / "running.pid"
+        if pid_file.exists():
+            try:
+                existing_pid = int(pid_file.read_text().strip())
+                os.kill(existing_pid, 0)
+                self._send_json(409, {
+                    "error": "E2E loop already running",
+                    "pid": existing_pid,
+                    "status_route": "/adwi-e2e-auto-loop-status",
+                })
+                return
+            except (ValueError, ProcessLookupError):
+                pass   # stale lock — proceed
+            except PermissionError:
+                self._send_json(409, {
+                    "error": "E2E loop already running (PermissionError checking PID)",
+                })
+                return
+
+        job_id  = f"e2e-{datetime.now().strftime('%Y%m%d-%H%M%S')}"
+        job_dir = E2E_LOOP_DIR / job_id
+        job_dir.mkdir(parents=True, exist_ok=True)
+        log_path = job_dir / "loop.log"
+
+        try:
+            proc = subprocess.Popen(
+                [VENV_PY, E2E_LOOP_PY, "--job-id", job_id],
+                start_new_session=True,
+                stdout=open(str(log_path), "w"),
+                stderr=subprocess.STDOUT,
+                env={
+                    **os.environ,
+                    "PATH": f"{BIN}:/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin",
+                    "SUNEEL_COMMAND_API_CONTEXT": "1",
+                },
+            )
+            self._send_json(200, {
+                "job_id":       job_id,
+                "status":       "started",
+                "pid":          proc.pid,
+                "log":          str(log_path),
+                "status_route": "/adwi-e2e-auto-loop-status",
+                "report_route": "/adwi-e2e-auto-loop-report",
+            })
+        except Exception as exc:
+            self._send_json(500, {"error": f"Failed to start E2E loop: {exc}"})
 
     def log_message(self, format, *args):
         return

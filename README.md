@@ -87,14 +87,14 @@ SYSTEM You are Adwi, a cautious local AI assistant. Never read secrets, never co
 | 0 | Instant pre-checks | YouTube URL regex, image path regex (0 ms) |
 | 1 | Regex pre-filter | `_regex_prefilter()` — zero-latency for common phrases |
 | 2 | Few-shot injection | Qdrant `nlu_fixtures` top-3 semantic matches (96 fixtures, 768-dim Cosine) |
-| 3 | LLM classification | `llama3.1:8b` with JSON schema — `analysis`+`confidence`+`intent`+`arguments` (109 intent classes) |
+| 3 | LLM classification | `llama3.1:8b` with JSON schema — `analysis`+`confidence`+`intent`+`arguments` (115 intent classes) |
 | 4 | Argument dispatch | 29 typed slot reads: `path`, `query`, `url`, `size_mb`, `days`, `description` |
 | 5 | Fallback | `qwen3:0.6b` (80-token budget, no analysis block) |
 
 **Schema fields (Phase 6):**
 - `analysis` — dense one-sentence reasoning before intent selection
 - `confidence` — float 0.0–1.0
-- `intent` — one of 109 registered intent classes
+- `intent` — one of 115 registered intent classes
 - `arguments` — typed key-value slots fed straight into command handlers
 
 **Qdrant few-shot collection:** `nlu_fixtures` · 96 seed fixtures · scored at `score_threshold=0.5` · provisioned via `python3 adwi/memory.py provision-nlu`
@@ -189,12 +189,14 @@ Dashboard: http://localhost:4000 (user: suneel)
 ## §3 Deterministic Capability Grid
 
 <!-- AUTO:COMMANDS -->
-**167 registered commands.** Key groups:
+**173 registered commands.** Key groups:
 
 **add**: `/add-capability-plan`  `/add-root`
+**assistant**: `/assistant-upgrade-status`
 **backup**: `/backup-audit`  `/backup-disable`  `/backup-enable`  `/backup-log`  `/backup-now`  `/backup-status`
 **benchmark**: `/benchmark`
 **browse**: `/browse`
+**browser**: `/browser-delegate`
 **capabilities**: `/capabilities`
 **capability**: `/capability-audit`  `/capability-status`
 **cleanup**: `/cleanup`
@@ -202,7 +204,7 @@ Dashboard: http://localhost:4000 (user: suneel)
 **cloud**: `/cloud`
 **cmd**: `/cmd`
 **confirm**: `/confirm`
-**daily**: `/daily-improve`
+**daily**: `/daily-brief`  `/daily-improve`
 **disk**: `/disk`
 **doctor**: `/doctor`
 **duplicates**: `/duplicates`
@@ -231,7 +233,7 @@ Dashboard: http://localhost:4000 (user: suneel)
 **listen**: `/listen`
 **local**: `/local`
 **mcp**: `/mcp`  `/mcp-setup`
-**memory**: `/memory-context`  `/memory-recall`  `/memory-scan`  `/memory-stats`
+**memory**: `/memory-context`  `/memory-curate`  `/memory-recall`  `/memory-scan`  `/memory-stats`
 **mistakes**: `/mistakes`
 **model**: `/model-status`
 **models**: `/models`
@@ -249,6 +251,7 @@ Dashboard: http://localhost:4000 (user: suneel)
 **remote**: `/remote`  `/remote-status`
 **repair**: `/repair-adwi`
 **repo**: `/repo-private`  `/repo-public`
+**research**: `/research`
 **reset**: `/reset-context`
 **review**: `/review-plan`
 **roadmap**: `/roadmap`
@@ -265,6 +268,7 @@ Dashboard: http://localhost:4000 (user: suneel)
 **sync**: `/sync-knowledge`
 **tailscale**: `/tailscale`
 **tavily**: `/tavily`
+**tech**: `/tech-radar`
 **test**: `/test-adwi`
 **tool**: `/tool-roadmap`
 **trace**: `/trace-log`
@@ -993,7 +997,7 @@ python3 -m py_compile adwi/adwi_cli.py && echo "still compiles"
 | 2 | LangGraph Orchestration & Interactive Permission Surface | Planner→Executor→Critic state machine; Phase 2 boxed gate with WHY explanation | `adwi/reason_engine.py` |
 | 3 | Memory Lifecycle, Scoring & Safety Gate | importance_score, recency_decay, provenance columns; BLOCKED/REVIEW/SAFE classifier | `adwi/memory.py` |
 | 4 | Real-Time Self-Healing & Hermes Skill Compiling | aider non-interactive patch → pytest verify → skills/ SKILL.md; skill pre-flight match | `adwi/reason_engine.py · skills/` |
-| 5 | prompt_toolkit Slash-Command Autocomplete | 167-command registry; substring fuzzy scoring; Tab/arrow REPL overlay | `adwi/adwi_cli.py (SlashCommandCompleter)` |
+| 5 | prompt_toolkit Slash-Command Autocomplete | 173-command registry; substring fuzzy scoring; Tab/arrow REPL overlay | `adwi/adwi_cli.py (SlashCommandCompleter)` |
 | 6 | Chain-of-Intent Schema & Semantic Slot-Filling | analysis+confidence+intent+arguments JSON schema; 29 structured arg reads in dispatch | `adwi/adwi_cli.py (_INTENT_JSON_SCHEMA)` |
 | 7 | Qdrant-Driven Dynamic Few-Shot Routing | 96-fixture nlu_fixtures collection; top-3 injected into llama3.1:8b system prompt | `adwi/memory.py · Qdrant :6333` |
 | 8 | LLM-Priming Documentation Update Invariants | auto-update-readme always runs before backup; PHASES+NLU sections auto-injected | `bin/auto-update-readme · adwi/backup.py` |

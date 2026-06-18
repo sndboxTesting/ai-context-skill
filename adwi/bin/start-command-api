@@ -1,0 +1,21 @@
+#!/bin/zsh
+set -e
+API_DIR="$HOME/SuneelWorkSpace/adwi/services/command-api"
+SERVER="$API_DIR/server.py"
+mkdir -p "$API_DIR"
+
+if curl -s http://127.0.0.1:5055/ >/dev/null 2>&1; then
+  echo "Safe Command API is already responding."
+  echo "URL: http://127.0.0.1:5055"
+  curl -s http://127.0.0.1:5055/ | python3 -m json.tool
+  exit 0
+fi
+
+nohup python3 "$SERVER" > "$API_DIR/api.log" 2>&1 &
+echo $! > "$API_DIR/api.pid"
+sleep 2
+
+echo "Safe Command API started."
+echo "PID: $(cat "$API_DIR/api.pid")"
+echo "URL: http://127.0.0.1:5055"
+curl -s http://127.0.0.1:5055/ | python3 -m json.tool

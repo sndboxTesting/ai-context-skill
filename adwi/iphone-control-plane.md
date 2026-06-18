@@ -21,7 +21,7 @@ iPhone → Cloudflare Tunnel → n8n webhook (for inbound triggers like Telegram
 ## Step 1: Start Home Assistant
 
 ```bash
-cd ~/SuneelWorkSpace/local-ai-stack
+cd ~/SuneelWorkSpace/adwi/infra/docker
 docker compose up -d homeassistant
 ```
 

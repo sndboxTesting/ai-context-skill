@@ -1,0 +1,3 @@
+#!/bin/zsh
+cd "$HOME/SuneelWorkSpace/adwi/infra/docker"
+docker compose logs --tail=120

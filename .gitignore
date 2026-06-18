@@ -44,25 +44,25 @@ node_modules/
 Thumbs.db
 
 # ── Docker runtime data (large, contains runtime secrets) ───────────
-local-ai-stack/open-webui-data/
-local-ai-stack/n8n-data/
-local-ai-stack/searxng-data/
-local-ai-stack/qdrant-data/
-local-ai-stack/data/
-mcp-servers/qdrant-data/
+adwi/infra/docker/open-webui-data/
+adwi/infra/docker/n8n-data/
+adwi/infra/docker/searxng-data/
+adwi/infra/docker/qdrant-data/
+adwi/infra/docker/data/
+adwi/services/mcp/qdrant-data/
 
 # ── Home Assistant runtime data ──────────────────────────────────────
-local-ai-stack/homeassistant-data/
+adwi/infra/docker/homeassistant-data/
 
 # ── High-volume log directories ──────────────────────────────────────
-notes/clipboard-command-logs/
-notes/open-webui-sync-logs/
-notes/adwi-action-logs/
-notes/adwi-repair-logs/backups/
-notes/daily-status/
-notes/maintenance-logs/
-notes/self-heal-logs/
-notes/secrets-logs/
+adwi/notes/clipboard-command-logs/
+adwi/notes/open-webui-sync-logs/
+adwi/notes/adwi-action-logs/
+adwi/notes/adwi-repair-logs/backups/
+adwi/notes/daily-status/
+adwi/notes/maintenance-logs/
+adwi/notes/self-heal-logs/
+adwi/notes/secrets-logs/
 
 # ── AI model files (large binaries) ─────────────────────────────────
 *.gguf
@@ -83,15 +83,15 @@ ollama-blobs/
 
 # ── Runtime state files ──────────────────────────────────────────────
 *.pid
-local-command-api/api.pid
-mcp-servers/workspace.db
+adwi/services/command-api/api.pid
+adwi/services/mcp/workspace.db
 adwi/memory.db
 adwi/knowledge.db
 adwi/rag-db/
 adwi/scheduled_sends.json
 adwi/followup_reminders.json
 adwi/gmail_rules.json
-bin/*.backup.*
+adwi/bin/*.backup.*
 
 # ── Misc ─────────────────────────────────────────────────────────────
 *.log
@@ -100,8 +100,8 @@ bin/*.backup.*
 .env.local
 
 # ── Config env (API tokens) ──
-config/.env
-# config/.env.example is intentionally tracked (safe template, no real values)
+adwi/config/.env
+# adwi/config/.env.example is intentionally tracked (safe template, no real values)
 
 # ── Obsidian vault runtime files ──
 obsidian-vault/.obsidian/workspace.json
@@ -110,41 +110,41 @@ obsidian-vault/.obsidian/workspace-mobile.json
 # ── Eval session result directories (large/regenerable) ──────────────────────
 # Tracked: MASTER_REPORT_v2.md, fix_backlog_v2.json, *.py harnesses
 # Ignored: large raw result dirs (thousands of jsonl rows, regenerable)
-logs/simeval/large-*/
-logs/simeval/large-p2-*/
-logs/simeval/session-*/
-logs/simeval/__pycache__/
-logs/simlab/
+adwi/logs/simeval/large-*/
+adwi/logs/simeval/large-p2-*/
+adwi/logs/simeval/session-*/
+adwi/logs/simeval/__pycache__/
+adwi/logs/simlab/
 
 # ── Nightly eval session artifacts (large/regenerable) ───────────────────────
 # Tracked: 00_morning_brief.md, 01_repair_backlog.md (markdown reports)
 # Ignored: raw JSONL results, per-session dirs (too large, fully regenerable)
-logs/nightly/[0-9]*/nlu_results.jsonl
-logs/nightly/[0-9]*/scenarios.jsonl
-logs/nightly/[0-9]*/phoenix_upload.jsonl
-logs/nightly/__pycache__/
-logs/nightly-eval.stdout.log
-logs/nightly-eval.stderr.log
-logs/nightly-eval.lock
+adwi/logs/nightly/[0-9]*/nlu_results.jsonl
+adwi/logs/nightly/[0-9]*/scenarios.jsonl
+adwi/logs/nightly/[0-9]*/phoenix_upload.jsonl
+adwi/logs/nightly/__pycache__/
+adwi/logs/nightly-eval.stdout.log
+adwi/logs/nightly-eval.stderr.log
+adwi/logs/nightly-eval.lock
 
 # ── Eval tool generated output (not committed) ───────────────────────────────
-eval/scenarios/generated/
-eval/promptfoo/results/
-eval/playwright/results/
-eval/playwright/test-results/
-eval/k6/results/
-eval/promptfoo/node_modules/
-eval/playwright/node_modules/
-eval/__pycache__/
-eval/nightly/__pycache__/
-eval/giskard/__pycache__/
-eval/deepeval/__pycache__/
-eval/deepeval/.deepeval/
+adwi/eval/frameworks/scenarios/generated/
+adwi/eval/promptfoo/results/
+adwi/eval/playwright/results/
+adwi/eval/playwright/test-results/
+adwi/eval/k6/results/
+adwi/eval/promptfoo/node_modules/
+adwi/eval/playwright/node_modules/
+adwi/eval/__pycache__/
+adwi/eval/nightly/__pycache__/
+adwi/eval/giskard/__pycache__/
+adwi/eval/deepeval/__pycache__/
+adwi/eval/deepeval/.deepeval/
 
 # ── Langfuse (optional, runtime data) ────────────────────────────────────────
-# config/langfuse/docker-compose.langfuse.yml is tracked (template)
+# adwi/config/langfuse/docker-compose.langfuse.yml is tracked (template)
 # Runtime DB and credentials are not
 langfuse_db_data/
 
-# ── config/eval/nightly.local.yaml — machine-local overrides ─────────────────
-config/eval/nightly.local.yaml
+# ── adwi/config/eval/nightly.local.yaml — machine-local overrides ─────────────────
+adwi/config/eval/nightly.local.yaml

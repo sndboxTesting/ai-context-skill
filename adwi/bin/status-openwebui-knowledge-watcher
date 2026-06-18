@@ -1,0 +1,46 @@
+#!/bin/zsh
+
+WATCH_DIR="$HOME/SuneelWorkSpace/adwi/services/watchers/open-webui-knowledge"
+LABEL="com.suneel.openwebui-knowledge-watcher"
+
+echo "=== OPEN WEBUI KNOWLEDGE WATCHER STATUS ==="
+echo ""
+
+echo "Manual watcher PID check:"
+if [ -f "$WATCH_DIR/watcher.pid" ]; then
+  ps -p "$(cat "$WATCH_DIR/watcher.pid")" -o pid,stat,command || true
+else
+  echo "No manual watcher PID file found."
+fi
+
+echo ""
+echo "LaunchAgent check:"
+launchctl print "gui/$(id -u)/$LABEL" 2>/dev/null | head -40 || echo "LaunchAgent not loaded."
+
+echo ""
+echo "Process check:"
+pgrep -fl "watch-openwebui-knowledge" || echo "No watch-openwebui-knowledge process found."
+
+echo ""
+echo "=== RECENT WATCHER LOG ==="
+tail -60 "$WATCH_DIR/launchd.out.log" 2>/dev/null || tail -60 "$WATCH_DIR/watcher.log" 2>/dev/null || echo "No watcher log found."
+
+echo ""
+echo "=== UPLOADED STATE SUMMARY ==="
+python3 - <<'PY'
+import json
+from pathlib import Path
+
+state = Path.home() / "SuneelWorkSpace/adwi/services/watchers/open-webui-knowledge/uploaded-state.json"
+
+if not state.exists():
+    print("No uploaded-state.json found.")
+    raise SystemExit
+
+data = json.loads(state.read_text())
+print(f"Tracked files: {len(data)}")
+
+for name in sorted(data.keys())[-15:]:
+    file_id = data[name].get("file_id", "")
+    print(f"- {name} :: {file_id}")
+PY

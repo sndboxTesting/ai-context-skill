@@ -1,0 +1,22 @@
+{
+  "_comment": "Manually maintained port registry for Adwi. Read by bin/auto-update-readme to generate the INFRA_PORTS section of README.md. Validated by bin/validate-docs (PORT-001: all docker-compose host ports must appear here). Update this file when adding or changing network services.",
+  "_last_verified": "2026-06-17",
+  "ports": [
+    { "port": 11434, "service": "Ollama",           "layer": "Host (brew)",        "purpose": "Local LLM inference API" },
+    { "port": 3000,  "service": "Open WebUI",       "layer": "Docker",             "purpose": "Browser chat UI + model switcher" },
+    { "port": 5055,  "service": "Safe Command API", "layer": "Host",               "purpose": "n8n→shell bridge (8 allowlisted routes)" },
+    { "port": 5056,  "service": "Obsidian Bridge",  "layer": "Host (LaunchAgent)", "purpose": "Vault HTTP CRUD API" },
+    { "port": 5678,  "service": "n8n",              "layer": "Docker",             "purpose": "Workflow automation / webhooks" },
+    { "port": 6006,  "service": "Arize Phoenix",    "layer": "Host (LaunchAgent)", "purpose": "Agent observability UI (OTel)" },
+    { "port": 6333,  "service": "Qdrant",           "layer": "Docker (LaunchAgent start)", "purpose": "Vector database — suneel-qdrant container, started by LaunchAgent" },
+    { "port": 8123,  "service": "Home Assistant",   "layer": "Docker",             "purpose": "iPhone control plane" },
+    { "port": 8888,  "service": "SearXNG",          "layer": "Docker",             "purpose": "Private local web search" },
+    { "port": 9090,  "service": "Prometheus",       "layer": "Docker",             "purpose": "Metrics scraper" },
+    { "port": 3100,  "service": "Loki",             "layer": "Docker",             "purpose": "Log aggregation" },
+    { "port": 4000,  "service": "Grafana",          "layer": "Docker",             "purpose": "Monitoring dashboards" },
+    { "port": 9100,  "service": "node-exporter",    "layer": "Docker",             "purpose": "Host system metrics" },
+    { "port": 9101,  "service": "cAdvisor",         "layer": "Docker",             "purpose": "Container metrics" },
+    { "port": 4317,  "service": "Phoenix gRPC",     "layer": "Host (LaunchAgent)", "purpose": "OTLP gRPC ingestion" },
+    { "port": 4318,  "service": "Phoenix HTTP",     "layer": "Host (LaunchAgent)", "purpose": "OTLP HTTP ingestion" }
+  ]
+}

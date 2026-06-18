@@ -1,9 +1,0 @@
-#!/bin/zsh
-set -e
-echo "Stopping Docker AI stack..."
-cd "$HOME/SuneelWorkSpace/local-ai-stack"
-docker compose stop
-echo "Stopping Ollama..."
-brew services stop ollama >/dev/null || true
-echo ""
-echo "AI stack stopped."

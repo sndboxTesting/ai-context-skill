@@ -1,0 +1,117 @@
+#!/bin/zsh
+set -e
+
+if [ -z "$1" ]; then
+  echo "Usage: plan-local-task 'describe the task you want to do'"
+  echo "Example: plan-local-task 'Create a command that summarizes a text file with Ollama'"
+  exit 1
+fi
+
+TASK="$1"
+PROFILE="$HOME/SuneelWorkSpace/adwi/notes/START-HERE-SUNEEL-LOCAL-AI.md"
+INDEX="$HOME/SuneelWorkSpace/adwi/notes/AI-NOTES-INDEX.md"
+OUTDIR="$HOME/SuneelWorkSpace/adwi/notes/task-plans"
+mkdir -p "$OUTDIR"
+
+STAMP="$(date +%Y%m%d-%H%M%S)"
+OUTFILE="$OUTDIR/$STAMP-task-plan.md"
+
+python3 - "$TASK" "$PROFILE" "$INDEX" "$OUTFILE" <<'PY'
+import json
+import sys
+import urllib.request
+from pathlib import Path
+from datetime import datetime
+
+task, profile_path, index_path, outfile = sys.argv[1], sys.argv[2], sys.argv[3], sys.argv[4]
+
+profile = Path(profile_path).read_text(encoding="utf-8", errors="replace")
+index = Path(index_path).read_text(encoding="utf-8", errors="replace") if Path(index_path).exists() else ""
+
+prompt = f"""
+You are Suneel's local AI task planner.
+
+Use the profile and notes index below to plan a local task.
+
+Very important safety rules:
+1. Do NOT execute anything.
+2. Only propose commands.
+3. Prefer one command at a time because Suneel is new to development.
+4. Do not propose destructive commands unless there is a clear backup/undo step.
+5. Do not ask for secrets, passwords, tokens, license keys, or private credentials.
+6. If the task touches email, credentials, files, system settings, money, or privacy, mark it as higher risk and recommend review first.
+7. Keep everything under /Users/MAC/SuneelWorkSpace unless there is a clear reason not to.
+8. Include a rollback or verification step when practical.
+9. If a command would change the system, clearly label it as "requires approval".
+
+Task from Suneel:
+{task}
+
+Authoritative local AI profile:
+{profile}
+
+Current notes index:
+{index}
+
+Create a task plan with these sections:
+
+# Local Task Plan
+
+## Task
+
+## Risk Level
+Low / Medium / High, with reason.
+
+## Assumptions
+
+## Recommended Plan
+
+## Commands To Run
+Use one command per step. Do not combine too many risky actions.
+
+## Verification
+
+## Rollback / Cleanup
+
+## What To Log After Completion
+"""
+
+payload = {
+    "model": "llama3.1:8b",
+    "prompt": prompt,
+    "stream": False,
+    "options": {
+        "temperature": 0.15
+    }
+}
+
+req = urllib.request.Request(
+    "http://127.0.0.1:11434/api/generate",
+    data=json.dumps(payload).encode("utf-8"),
+    headers={"Content-Type": "application/json"}
+)
+
+with urllib.request.urlopen(req, timeout=600) as response:
+    result = json.load(response)
+
+answer = result.get("response", "").strip()
+
+content = f"""# Saved Local Task Plan
+
+Created: {datetime.now().isoformat()}
+
+Original task:
+
+{task}
+
+---
+
+{answer}
+"""
+
+Path(outfile).write_text(content, encoding="utf-8")
+print(content)
+print()
+print("=== SAVED TASK PLAN ===")
+print(outfile)
+PY

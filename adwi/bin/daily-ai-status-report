@@ -1,0 +1,31 @@
+#!/bin/zsh
+set -e
+
+REPORT_DIR="$HOME/SuneelWorkSpace/adwi/notes/daily-status"
+mkdir -p "$REPORT_DIR"
+
+STAMP="$(date +%Y%m%d-%H%M%S)"
+REPORT_FILE="$REPORT_DIR/$STAMP-ai-status.md"
+
+{
+  echo "# Daily AI Status Report"
+  echo ""
+  echo "Generated: $(date)"
+  echo ""
+  echo "Workspace: $HOME/SuneelWorkSpace"
+  echo ""
+  echo "## Status Output"
+  echo ""
+  echo '```text'
+  status-ai
+  echo '```'
+  echo ""
+  echo "## Notes"
+  echo ""
+  echo "- Review whether all services are healthy."
+  echo "- If something is down, run \`start-ai\` and then \`status-ai\`."
+  echo "- Keep this report as part of the local AI learning/operations history."
+} > "$REPORT_FILE"
+
+echo "Created daily AI status report:"
+echo "$REPORT_FILE"

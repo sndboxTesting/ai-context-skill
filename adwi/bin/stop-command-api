@@ -1,0 +1,26 @@
+#!/bin/zsh
+set +e
+API_DIR="$HOME/SuneelWorkSpace/adwi/services/command-api"
+
+echo "Stopping Safe Command API..."
+
+if [ -f "$API_DIR/api.pid" ]; then
+  PID="$(cat "$API_DIR/api.pid")"
+  if ps -p "$PID" >/dev/null 2>&1; then
+    kill "$PID" 2>/dev/null || true
+    echo "Stopped wrapper PID $PID"
+  fi
+fi
+
+pkill -f "$API_DIR/server.py" 2>/dev/null || true
+pkill -f "local-command-api/server.py" 2>/dev/null || true
+
+PORT_PIDS="$(lsof -tiTCP:5055 -sTCP:LISTEN 2>/dev/null)"
+if [ -n "$PORT_PIDS" ]; then
+  echo "$PORT_PIDS" | xargs kill 2>/dev/null || true
+  echo "Stopped process using port 5055: $PORT_PIDS"
+fi
+
+rm -f "$API_DIR/api.pid"
+sleep 1
+echo "Safe Command API stopped."

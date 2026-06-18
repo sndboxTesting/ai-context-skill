@@ -1,0 +1,19 @@
+#!/bin/zsh
+set +e
+
+WATCH_DIR="$HOME/SuneelWorkSpace/adwi/services/watchers/open-webui-knowledge"
+
+if [ -f "$WATCH_DIR/watcher.pid" ]; then
+  PID="$(cat "$WATCH_DIR/watcher.pid")"
+  if ps -p "$PID" >/dev/null 2>&1; then
+    kill "$PID" 2>/dev/null || true
+    echo "Stopped Open WebUI Knowledge watcher PID $PID"
+  else
+    echo "PID file exists but process is not running."
+  fi
+else
+  echo "No watcher PID file found."
+fi
+
+pkill -f "watch-openwebui-knowledge" 2>/dev/null || true
+rm -f "$WATCH_DIR/watcher.pid"

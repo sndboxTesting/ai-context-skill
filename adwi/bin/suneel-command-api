@@ -1,0 +1,97 @@
+#!/bin/zsh
+set -e
+
+API_DIR="$HOME/SuneelWorkSpace/adwi/services/command-api"
+mkdir -p "$API_DIR"
+
+cat > "$API_DIR/server.py" <<'PY'
+from http.server import BaseHTTPRequestHandler, HTTPServer
+import json
+import subprocess
+import os
+from datetime import datetime
+
+HOME = os.path.expanduser("~")
+BIN = os.path.join(HOME, "SuneelWorkSpace", "bin")
+
+ALLOWED_COMMANDS = {
+    "/status-ai": [os.path.join(BIN, "status-ai")],
+    "/daily-ai-status-report": [os.path.join(BIN, "daily-ai-status-report")],
+    "/index-ai-notes": [os.path.join(BIN, "index-ai-notes")],
+}
+
+class Handler(BaseHTTPRequestHandler):
+    def _send_json(self, status, payload):
+        body = json.dumps(payload, indent=2).encode("utf-8")
+        self.send_response(status)
+        self.send_header("Content-Type", "application/json")
+        self.send_header("Content-Length", str(len(body)))
+        self.end_headers()
+        self.wfile.write(body)
+
+    def do_GET(self):
+        if self.path == "/":
+            self._send_json(200, {
+                "name": "Suneel Safe Local Command API",
+                "time": datetime.now().isoformat(),
+                "allowed_routes": sorted(ALLOWED_COMMANDS.keys()),
+                "safety": "Only explicitly allowlisted commands can run."
+            })
+            return
+
+        if self.path not in ALLOWED_COMMANDS:
+            self._send_json(404, {
+                "error": "Route not allowed",
+                "allowed_routes": sorted(ALLOWED_COMMANDS.keys())
+            })
+            return
+
+        cmd = ALLOWED_COMMANDS[self.path]
+
+        try:
+            result = subprocess.run(
+                cmd,
+                capture_output=True,
+                text=True,
+                timeout=120,
+                env={
+                    **os.environ,
+                    "PATH": f"{BIN}:/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin"
+                }
+            )
+            self._send_json(200, {
+                "route": self.path,
+                "command": cmd,
+                "returncode": result.returncode,
+                "stdout": result.stdout[-12000:],
+                "stderr": result.stderr[-4000:]
+            })
+        except Exception as e:
+            self._send_json(500, {
+                "route": self.path,
+                "error": str(e)
+            })
+
+    def log_message(self, format, *args):
+        return
+
+if __name__ == "__main__":
+    host = "127.0.0.1"
+    port = 5055
+    print(f"Suneel Safe Local Command API running at http://{host}:{port}")
+    HTTPServer((host, port), Handler).serve_forever()
+PY
+
+cat > "$API_DIR/start.sh" <<'SH'
+#!/bin/zsh
+cd "$HOME/SuneelWorkSpace/adwi/services/command-api"
+python3 server.py
+SH
+
+chmod +x "$API_DIR/start.sh"
+
+echo "Created safe local command API at:"
+echo "$API_DIR"
+echo ""
+echo "To start it, run:"
+echo "$API_DIR/start.sh"

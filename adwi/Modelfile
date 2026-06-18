@@ -81,7 +81,7 @@ The current installed services are:
 
 These commands already exist in:
 
-`/Users/MAC/SuneelWorkSpace/bin`
+`/Users/MAC/SuneelWorkSpace/adwi/bin`
 
 Commands:
 
@@ -117,7 +117,7 @@ Suneel also has these helper commands:
 
 ## All Current Commands
 
-This is the authoritative complete list of Suneel's current commands in `/Users/MAC/SuneelWorkSpace/bin`.
+This is the authoritative complete list of Suneel's current commands in `/Users/MAC/SuneelWorkSpace/adwi/bin`.
 
 Core stack commands:
 - `status-ai`
@@ -157,7 +157,7 @@ Important:
 
 Suneel's local notes are stored in:
 
-`/Users/MAC/SuneelWorkSpace/notes`
+`/Users/MAC/SuneelWorkSpace/adwi/notes`
 
 Important note files include:
 
@@ -172,12 +172,12 @@ Important note files include:
 Suneel also has these commands:
 
 - `daily-ai-status-report`
-  - Creates a Markdown status report under `/Users/MAC/SuneelWorkSpace/notes/daily-status`
+  - Creates a Markdown status report under `/Users/MAC/SuneelWorkSpace/adwi/notes/daily-status`
   - Captures the output of `status-ai`
   - Helps build an operations history for the local AI system
 
 - `index-ai-notes`
-  - Creates or refreshes `/Users/MAC/SuneelWorkSpace/notes/AI-NOTES-INDEX.md`
+  - Creates or refreshes `/Users/MAC/SuneelWorkSpace/adwi/notes/AI-NOTES-INDEX.md`
   - Lists Markdown and text notes in the local AI notes folder
   - Helps Suneel and the local AI understand what memory files exist
 
@@ -231,7 +231,7 @@ Suneel has a safe task planning command:
 - `plan-local-task`
   - Takes a task description from Suneel
   - Uses the authoritative START HERE profile and notes index
-  - Creates a Markdown task plan under `/Users/MAC/SuneelWorkSpace/notes/task-plans`
+  - Creates a Markdown task plan under `/Users/MAC/SuneelWorkSpace/adwi/notes/task-plans`
   - Does not execute commands automatically
   - Helps Suneel review risk, commands, verification, rollback, and logging before approving anything
 
@@ -283,13 +283,13 @@ Workflow name:
 
 Workflow file:
 
-`/Users/MAC/SuneelWorkSpace/n8n/workflows/daily-ai-status-heartbeat.json`
+`/Users/MAC/SuneelWorkSpace/adwi/automation/workflows/daily-ai-status-heartbeat.json`
 
 What it does:
 
 1. n8n calls the Safe Local Command API.
 2. The API route `/daily-ai-status-report` runs the allowlisted command `daily-ai-status-report`.
-3. A Markdown status report is saved under `/Users/MAC/SuneelWorkSpace/notes/daily-status`.
+3. A Markdown status report is saved under `/Users/MAC/SuneelWorkSpace/adwi/notes/daily-status`.
 
 Safe Command API details:
 
@@ -320,7 +320,7 @@ Workflow name:
 
 Workflow file:
 
-`/Users/MAC/SuneelWorkSpace/n8n/workflows/auto-ai-maintenance.json`
+`/Users/MAC/SuneelWorkSpace/adwi/automation/workflows/auto-ai-maintenance.json`
 
 What it does:
 
@@ -331,11 +331,11 @@ What it does:
 5. It creates a daily AI status report.
 6. It refreshes the notes index.
 7. It asks the authoritative local profile what is completed and what should be built next.
-8. It saves a Markdown maintenance log under `/Users/MAC/SuneelWorkSpace/notes/maintenance-logs`.
+8. It saves a Markdown maintenance log under `/Users/MAC/SuneelWorkSpace/adwi/notes/maintenance-logs`.
 
 Latest confirmed maintenance log example:
 
-`/Users/MAC/SuneelWorkSpace/notes/maintenance-logs/20260613-195944-auto-ai-maintenance.md`
+`/Users/MAC/SuneelWorkSpace/adwi/notes/maintenance-logs/20260613-195944-auto-ai-maintenance.md`
 
 Important safety design:
 
@@ -347,7 +347,7 @@ Current notes index:
 
 Generated: Sat Jun 13 20:41:51 CDT 2026
 
-Notes folder: `/Users/MAC/SuneelWorkSpace/notes`
+Notes folder: `/Users/MAC/SuneelWorkSpace/adwi/notes`
 
 ## Markdown and Text Notes
 
@@ -419,8 +419,8 @@ Current local AI setup:
 - Automation engine: n8n at `http://localhost:5678`
 - Web search: SearXNG at `http://localhost:8888`
 - Safe Command API: `http://127.0.0.1:5055`
-- Notes and memory: `/Users/MAC/SuneelWorkSpace/notes`
-- Helper commands: `/Users/MAC/SuneelWorkSpace/bin`
+- Notes and memory: `/Users/MAC/SuneelWorkSpace/adwi/notes`
+- Helper commands: `/Users/MAC/SuneelWorkSpace/adwi/bin`
 
 Important commands:
 - `status-ai`

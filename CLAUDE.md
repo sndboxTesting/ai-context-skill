@@ -9,11 +9,11 @@
 
 Adwi is a local AI operating system running on an Apple Silicon Mac. It is not a library or API — it is a personal AI assistant that operates as a terminal REPL and a set of daemon services. The operator is Suneel Bikkasani.
 
-**Entry point:** `bin/adwi` → `python3 adwi/adwi_cli.py`
+**Entry point:** `adwi/bin/adwi` → `python3 adwi/adwi_cli.py`
 
 **Primary model:** `adwi:latest` (qwen3:30b via Ollama, 131K context, 64 GB RAM)
 
-**NLU classifier:** `llama3.1:8b` — classifies every natural-language input into one of 62 intent classes before dispatch.
+**NLU classifier:** `llama3.1:8b` — classifies every natural-language input into one of 109 intent classes before dispatch.
 
 ---
 
@@ -25,8 +25,8 @@ Adwi is a local AI operating system running on an Apple Silicon Mac. It is not a
 | `adwi/path_validator.py` | Deny-first path guard — understand before any file operation |
 | `adwi/adwi_cli.py` lines 503–660 | `_REGEX_INTENTS` — NLU fast path, ordering is critical |
 | `adwi/adwi_cli.py` lines 865–1020 | `_INTENT_SYSTEM` — LLM classification prompt |
-| `logs/simeval/MASTER_REPORT_v2.md` | Current NLU quality state and 10 known repair items |
-| `docs/NLU_REPAIR_BACKLOG.md` | Prioritized fix list with exact code proposals |
+| `adwi/logs/simeval/MASTER_REPORT_v2.md` | ⚠️ STALE (89.0%, 2026-06-16) — historical baseline only. Current state is in the table below. |
+| `adwi/docs/NLU_REPAIR_BACKLOG.md` | Prioritized fix list with exact code proposals |
 
 ---
 
@@ -48,7 +48,7 @@ Session-4 applied 8 false-positive hardening fixes. Gmail burn-in applied 12 FIX
 
 **Current baseline: ~97.0% combined.** Remaining P1 failures (~40): ~11 LLM-routed chat bleed, irreducible __none__ safety blocks, scattered LLM variance. P2 has zero hard failures (551/561 pass, 10 warns).
 
-Changes are synchronized across all 3 files: `adwi/adwi_cli.py`, `logs/simeval/run_large_eval.py`, `logs/simeval/run_large_eval_p2.py`.
+Changes are synchronized across all 3 files: `adwi/adwi_cli.py`, `adwi/logs/simeval/run_large_eval.py`, `adwi/logs/simeval/run_large_eval_p2.py`.
 
 ---
 
@@ -58,7 +58,7 @@ Changes are synchronized across all 3 files: `adwi/adwi_cli.py`, `logs/simeval/r
 2. **`BLOCKED_PATHS` is execution-layer safety.** NLU routing to `file_read` for a blocked path is not a breach — the gate stops execution. Do not weaken the gate.
 3. **SimLab never auto-applies Tier C.** Safety/security changes always require human review.
 4. **`secrets/` is gitignored entirely.** Never suggest committing anything from there.
-5. **`config/.env` is gitignored.** `config/.env.example` is the commit-safe template.
+5. **`adwi/config/.env` is gitignored.** `adwi/config/.env.example` is the commit-safe template.
 6. **`adwi/memory.db` and `adwi/knowledge.db` are gitignored.** Regenerated on each machine.
 7. **`aider` never touches secret files.** Validated before any file is passed to aider.
 
@@ -68,7 +68,7 @@ Changes are synchronized across all 3 files: `adwi/adwi_cli.py`, `logs/simeval/r
 
 | File | Owns |
 |------|------|
-| `adwi/adwi_cli.py` | REPL, 121 commands, NLU pipeline (`_REGEX_INTENTS`, `_INTENT_SYSTEM`, dispatch), Phase 3 risk classifier, Phase 4 live self-heal |
+| `adwi/adwi_cli.py` | REPL, 167 commands, NLU pipeline (`_REGEX_INTENTS`, `_INTENT_SYSTEM`, dispatch), Phase 3 risk classifier, Phase 4 live self-heal |
 | `adwi/reason_engine.py` | LangGraph Planner→Executor→Critic, permission gate, aider integration, AchievementLedger |
 | `adwi/memory.py` | SQLite memory store, nomic-embed cosine search, Qdrant NLU fixtures, knowledge.db |
 | `adwi/path_validator.py` | Deny-first path containment — blocks `~/.ssh`, `~/.aws`, `secrets/`, etc. |
@@ -77,26 +77,26 @@ Changes are synchronized across all 3 files: `adwi/adwi_cli.py`, `logs/simeval/r
 | `adwi/voice.py` | STT (faster-whisper) + TTS (piper-tts) |
 | `adwi/backup.py` | Git backup orchestration |
 | `adwi/simlab/` | Bounded continuous eval & self-improvement (11 modules) |
-| `local-command-api/server.py` | Safe Command API :5055 (8 allowlisted routes for n8n/iPhone) |
-| `mcp-servers/obsidian-bridge/` | Vault HTTP CRUD API :5056 |
-| `bin/` | 35 shell helper scripts |
-| `logs/simeval/` | Large-scale eval artifacts (MASTER_REPORT_v2.md, fix_backlog_v2.json, jsonl results) |
-| `config/.env` | [gitignored] API keys — never read by Claude, only loaded as env vars |
-| `docs/` | Human + Claude onboarding documentation |
+| `adwi/services/command-api/server.py` | Safe Command API :5055 (8 allowlisted routes for n8n/iPhone) |
+| `adwi/services/mcp/obsidian-bridge/` | Vault HTTP CRUD API :5056 |
+| `adwi/bin/` | 41 scripts (shell + Python helpers) |
+| `adwi/logs/simeval/` | Large-scale eval artifacts (MASTER_REPORT_v2.md, fix_backlog_v2.json, jsonl results) |
+| `adwi/config/.env` | [gitignored] API keys — never read by Claude, only loaded as env vars |
+| `adwi/docs/` | Human + Claude onboarding documentation |
 
 ---
 
 ## How to make an NLU fix
 
-1. Read `docs/NLU_REPAIR_BACKLOG.md` for the current NHR item list.
+1. Read `adwi/docs/NLU_REPAIR_BACKLOG.md` for the current NHR item list.
 2. Identify which NHR item you are implementing.
 3. Locate `_REGEX_INTENTS` in `adwi/adwi_cli.py` (line ~503). New patterns must go BEFORE any intent they should beat.
 4. If adding an `_INTENT_SYSTEM` rule, locate the system prompt (line ~865) and add to the relevant intent's description.
 5. After editing, run the fast syntax check: `python3 -m py_compile adwi/adwi_cli.py && echo OK`
-6. Then run the eval harness: `python3 logs/simeval/run_large_eval.py --workers 5` (or a targeted P2 run)
-7. Compare new pass rate to the 82.1% combined baseline (post-NHR).
-8. Mark the NHR item as applied in `docs/NLU_REPAIR_BACKLOG.md`.
-9. Update `logs/simeval/MASTER_REPORT_v2.md` projected pass rate section if significantly changed.
+6. Then run the eval harness: `python3 adwi/logs/simeval/run_large_eval.py --workers 5` (or a targeted P2 run)
+7. Compare new pass rate to the **97.0% combined current baseline** (all NHR + CYCLE-5 + CYCLE-6 applied).
+8. Mark the NHR item as applied in `adwi/docs/NLU_REPAIR_BACKLOG.md`.
+9. If the session materially changes the pass rate, run `python3 adwi/logs/simeval/generate_master_report.py` with the new session paths to produce a fresh MASTER_REPORT. Update the table in this file.
 
 ---
 
@@ -110,42 +110,42 @@ python3 -m py_compile adwi/adwi_cli.py && echo "syntax OK"
 ollama list | grep llama3.1
 
 # Full 1,444-scenario eval (takes ~20-30 min with 10 workers)
-python3 logs/simeval/run_large_eval.py --workers 10
+python3 adwi/logs/simeval/run_large_eval.py --workers 10
 
 # Targeted P2 (446 scenarios, weak families only)
-python3 logs/simeval/run_large_eval_p2.py --workers 10
+python3 adwi/logs/simeval/run_large_eval_p2.py --workers 10
 
 # Combined analysis report
-python3 logs/simeval/generate_master_report.py \
-    logs/simeval/large-<date>-<time> \
-    logs/simeval/large-p2-<date>-<time>
+python3 adwi/logs/simeval/generate_master_report.py \
+    adwi/logs/simeval/large-<date>-<time> \
+    adwi/logs/simeval/large-p2-<date>-<time>
 ```
 
-Results land in `logs/simeval/<session-dir>/results.jsonl`. The eval harness is standalone — it does not import `adwi_cli.py` and does not touch production data.
+Results land in `adwi/logs/simeval/<session-dir>/results.jsonl`. The eval harness is standalone — it does not import `adwi_cli.py` and does not touch production data.
 
 ---
 
 ## What NOT to do
 
 - Do not weaken `BLOCKED_PATHS`, `PathValidator`, or the `REVIEW-REQUIRED` tier in the risk classifier.
-- Do not auto-commit or auto-push. Backup is triggered by `bin/adwi-git-backup` (runs every 30 min via LaunchAgent).
+- Do not auto-commit or auto-push. Backup is triggered by `adwi/bin/adwi-git-backup` (runs every 30 min via LaunchAgent).
 - Do not change the SimLab golden baseline (`adwi/simlab/golden_baseline.jsonl`) — it is immutable except via explicit human commit.
-- Do not suggest checking in `config/.env`, any file from `secrets/`, or any `*token*` file.
+- Do not suggest checking in `adwi/config/.env`, any file from `secrets/`, or any `*token*` file.
 - Do not import production `adwi_cli.py` from within an eval script — standalone eval harnesses only.
-- Do not `rm -rf` or destructively modify `logs/` — it contains the eval evidence chain.
+- Do not `rm -rf` or destructively modify `adwi/logs/` — it contains the eval evidence chain.
 
 ---
 
 ## How to bootstrap on a new machine
 
-See `docs/SETUP_NEW_MACHINE.md` for the full guide.
-Quick validation: `python3 scripts/validate_adwi_env.py`
+See `adwi/docs/SETUP_NEW_MACHINE.md` for the full guide.
+Quick validation: `python3 adwi/scripts/validate_adwi_env.py`
 
 ---
 
 ## Repair log conventions
 
 After making any change:
-1. Update `notes/adwi-mistakes-and-fixes.md` if you fixed a bug.
-2. Update `docs/NLU_REPAIR_BACKLOG.md` if you applied an NHR item.
-3. Do NOT create loose analysis files in the root — put them in `docs/` (persistent) or `logs/simeval/` (eval artifacts).
+1. Update `adwi/notes/adwi-mistakes-and-fixes.md` if you fixed a bug.
+2. Update `adwi/docs/NLU_REPAIR_BACKLOG.md` if you applied an NHR item.
+3. Do NOT create loose analysis files in the root — put them in `adwi/docs/` (persistent) or `adwi/logs/simeval/` (eval artifacts).

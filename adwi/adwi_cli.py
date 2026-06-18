@@ -80,11 +80,11 @@ def _otel_span(name: str, attrs: dict | None = None):
 # ── Paths ─────────────────────────────────────────────────────────────────────
 HOME          = Path.home()
 BASE          = HOME / "SuneelWorkSpace"
-BIN           = BASE / "bin"
-NOTES         = BASE / "notes"
 ADWI_DIR      = BASE / "adwi"
+BIN           = ADWI_DIR / "bin"
+NOTES         = ADWI_DIR / "notes"
 SECRETS_DIR   = BASE / "secrets"
-KNOWLEDGE_DIR = BASE / "open-webui-knowledge-upload"
+KNOWLEDGE_DIR = ADWI_DIR / "knowledge" / "openwebui"
 LOG_DIR       = NOTES / "adwi-action-logs"
 ROOTS_FILE    = ADWI_DIR / "allowed-read-roots.txt"
 ROUTING_FILE  = ADWI_DIR / "model-routing.env"
@@ -101,7 +101,7 @@ TRACE_DIR     = NOTES / "adwi-trace-logs"   # activity trace logs
 OBSIDIAN_VAULT   = BASE / "obsidian-vault"
 OBSIDIAN_BRIDGE  = "http://127.0.0.1:5056"
 SEARXNG_URL      = "http://127.0.0.1:8888"
-CONFIG_ENV       = BASE / "config" / ".env"
+CONFIG_ENV       = ADWI_DIR / "config" / ".env"
 
 # Model identifiers
 MODEL_MAIN    = "adwi:latest"          # 30.5B MoE — reasoning, long context
@@ -3712,7 +3712,7 @@ def cmd_mcp_setup() -> None:
             "sqlite": {
                 "command": "uvx",
                 "args": ["mcp-server-sqlite", "--db-path",
-                         str(BASE / "mcp-servers" / "workspace.db")],
+                         str(ADWI_DIR / "services" / "mcp" / "workspace.db")],
                 "description": "SQLite workspace DB — notes, tasks, learnings"
             },
             "memory": {
@@ -3737,13 +3737,13 @@ def cmd_mcp_setup() -> None:
             "comfyui": {
                 "command": "uv",
                 "args": ["run", "--with", "mcp", "python3",
-                         str(BASE / "mcp-servers" / "comfyui-bridge" / "server.py")],
+                         str(ADWI_DIR / "services" / "mcp" / "comfyui-bridge" / "server.py")],
                 "description": "ComfyUI image generation (start ComfyUI on :8188 first)"
             },
             "adwi-sandbox": {
                 "command": "uv",
                 "args": ["run", "--with", "mcp", "python3",
-                         str(BASE / "mcp-servers" / "adwi-sandbox" / "server.py")],
+                         str(ADWI_DIR / "services" / "mcp" / "adwi-sandbox" / "server.py")],
                 "description": "Adwi workspace tools — run code, notes, git, files"
             },
             "filesystem": {
@@ -6893,7 +6893,7 @@ def _gmail_resolve_attach_file(text: str) -> tuple:
         ATTACH_SAVE_DIR,
         HOME / "Downloads",
         NOTES,
-        BASE / "docs",
+        ADWI_DIR / "docs",
         BASE / "obsidian-vault",
     ]
     candidates: list[Path] = []
@@ -8553,7 +8553,7 @@ def cmd_tool_roadmap() -> None:
         ("ChromaDB",              "Simpler local vector DB for experiments",
          "planned", "pip install chromadb"),
         ("SQLite memory DB",      "Structured local memory / eval results",
-         "active",  "mcp-servers/workspace.db"),
+         "active",  "adwi/services/mcp/workspace.db"),
         ("Memory MCP",            "Persistent knowledge graph",
          "active",  "npx @modelcontextprotocol/server-memory"),
         ("Sequential Thinking MCP","Structured reasoning for complex tasks",
@@ -8573,11 +8573,11 @@ def cmd_tool_roadmap() -> None:
         ("Unsloth + LoRA/QLoRA",  "Future fine-tuning (1000+ examples needed first)",
          "planned", "pip install unsloth — NOT YET, need more training data"),
         ("Adwi code sandbox",     "Safe code execution (isolated)",
-         "active",  "mcp-servers/adwi-sandbox (8 tools)"),
+         "active",  "adwi/services/mcp/adwi-sandbox (8 tools)"),
         ("ComfyUI",               "Local image generation",
          "planned", "git clone https://github.com/comfyanonymous/ComfyUI"),
         ("Open WebUI Knowledge",  "Automatic knowledge sync to browser UI",
-         "active",  "bin/sync-openwebui-knowledge + watcher running"),
+         "active",  "adwi/bin/sync-openwebui-knowledge + watcher running"),
     ]
     STATUS_COLORS = {"active": GREEN, "planned": YELLOW, "partial": CYAN}
     print()
@@ -8770,15 +8770,15 @@ def cmd_backup_audit() -> None:
     included = [
         "adwi/*.py, *.env, *.txt, *.json, Modelfile",
         "adwi/evals/, adwi/training-data/",
-        "bin/adwi, bin/mcp-status, bin/adwi-git-backup",
-        "mcp-servers/adwi-sandbox/server.py, comfyui-bridge/server.py",
-        "notes/ADWI-START-HERE.md, START-HERE-SUNEEL-LOCAL-AI.md",
-        "notes/adwi-learning-journal.md, adwi-mistakes-and-fixes.md",
-        "notes/adwi-capability-roadmap.md",
-        "notes/adwi-repair-logs/*.md (reports, not backups/)",
-        "notes/system-inspections/",
-        "notes/git-backup-logs/",
-        "local-ai-stack/docker-compose.yml",
+        "adwi/bin/adwi, adwi/bin/mcp-status, adwi/bin/adwi-git-backup",
+        "adwi/services/mcp/adwi-sandbox/server.py, comfyui-bridge/server.py",
+        "adwi/notes/ADWI-START-HERE.md, START-HERE-SUNEEL-LOCAL-AI.md",
+        "adwi/notes/adwi-learning-journal.md, adwi-mistakes-and-fixes.md",
+        "adwi/notes/adwi-capability-roadmap.md",
+        "adwi/notes/adwi-repair-logs/*.md (reports, not backups/)",
+        "adwi/notes/system-inspections/",
+        "adwi/notes/git-backup-logs/",
+        "adwi/infra/docker/docker-compose.yml",
         ".gitignore, README.md, BACKUP_MANIFEST.md",
     ]
     for item in included:
@@ -8789,12 +8789,12 @@ def cmd_backup_audit() -> None:
         "secrets/ — API keys, tokens, credentials",
         "**/.env, **/secrets.local.env — env files with secrets",
         "**/*token*, **/*secret*, **/*key* — credential files",
-        "local-ai-stack/open-webui-data/ — runtime database",
-        "local-ai-stack/n8n-data/ — n8n runtime data",
-        "mcp-servers/qdrant-data/ — vector DB runtime data",
-        "notes/adwi-action-logs/ — high-volume logs",
-        "notes/adwi-repair-logs/backups/ — large file backups",
-        "notes/clipboard-command-logs/ — clipboard history",
+        "adwi/infra/docker/open-webui-data/ — runtime database",
+        "adwi/infra/docker/n8n-data/ — n8n runtime data",
+        "adwi/services/mcp/qdrant-data/ — vector DB runtime data",
+        "adwi/notes/adwi-action-logs/ — high-volume logs",
+        "adwi/notes/adwi-repair-logs/backups/ — large file backups",
+        "adwi/notes/clipboard-command-logs/ — clipboard history",
         "*.gguf, *.safetensors, *.bin — model files",
         "__pycache__/, node_modules/, .venv/ — generated artifacts",
         ".DS_Store — macOS metadata",

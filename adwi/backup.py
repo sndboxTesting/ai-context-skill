@@ -510,7 +510,7 @@ LAUNCHAGENT_CONTENT = """<?xml version="1.0" encoding="UTF-8"?>
     <key>ProgramArguments</key>
     <array>
         <string>/bin/bash</string>
-        <string>/Users/MAC/SuneelWorkSpace/bin/adwi-git-backup</string>
+        <string>/Users/MAC/SuneelWorkSpace/adwi/bin/adwi-git-backup</string>
     </array>
     <key>StartInterval</key>
     <integer>1800</integer>
@@ -537,7 +537,7 @@ BACKUP_SCRIPT_CONTENT = """#!/bin/bash
 set -euo pipefail
 
 WORKSPACE="/Users/MAC/SuneelWorkSpace"
-LOG_DIR="$WORKSPACE/notes/git-backup-logs"
+LOG_DIR="$WORKSPACE/adwi/notes/git-backup-logs"
 VENV_PY="$WORKSPACE/adwi/.venv/bin/python3"
 STAMP=$(date +%Y%m%d-%H%M%S)
 LOG="$LOG_DIR/$STAMP-git-backup.md"
@@ -549,8 +549,8 @@ echo "# Adwi Auto-Backup — $(date)" > "$LOG"
 
 # Phase 5: auto-update README.md before staging
 PY="${VENV_PY:-python3}"
-if [ -f "$WORKSPACE/bin/auto-update-readme" ]; then
-    "$PY" "$WORKSPACE/bin/auto-update-readme" --quiet 2>/dev/null || true
+if [ -f "$WORKSPACE/adwi/bin/auto-update-readme" ]; then
+    "$PY" "$WORKSPACE/adwi/bin/auto-update-readme" --quiet 2>/dev/null || true
 fi
 
 # Quick secret scan on changed files

@@ -1,0 +1,70 @@
+#!/bin/zsh
+set -e
+
+if [ -z "$1" ]; then
+  echo "Usage: ask-ai-profile 'your question here'"
+  echo "Example: ask-ai-profile 'What is my current setup and what should I build next?'"
+  exit 1
+fi
+
+QUESTION="$1"
+PROFILE="$HOME/SuneelWorkSpace/adwi/notes/START-HERE-SUNEEL-LOCAL-AI.md"
+
+if [ ! -f "$PROFILE" ]; then
+  echo "ERROR: Could not find profile file:"
+  echo "$PROFILE"
+  exit 1
+fi
+
+python3 - "$QUESTION" "$PROFILE" <<'PY'
+import json
+import sys
+import urllib.request
+
+question = sys.argv[1]
+profile_path = sys.argv[2]
+
+with open(profile_path, "r", encoding="utf-8", errors="replace") as f:
+    profile = f.read()
+
+prompt = f"""
+You are Suneel's local AI setup assistant.
+
+Use ONLY the profile document below as the source of truth.
+
+Rules:
+1. Do not say the setup is basic if the profile says it is already installed.
+2. Include current installed services.
+3. Include working helper commands.
+4. Include recommended next build steps.
+5. Include safety rules.
+6. If something is not in the profile, say it is not in the profile.
+7. Be specific and practical.
+
+Suneel's question:
+{question}
+
+Profile document:
+{profile}
+"""
+
+payload = {
+    "model": "llama3.1:8b",
+    "prompt": prompt,
+    "stream": False,
+    "options": {
+        "temperature": 0.1
+    }
+}
+
+req = urllib.request.Request(
+    "http://127.0.0.1:11434/api/generate",
+    data=json.dumps(payload).encode("utf-8"),
+    headers={"Content-Type": "application/json"}
+)
+
+with urllib.request.urlopen(req, timeout=600) as response:
+    result = json.load(response)
+
+print(result.get("response", "").strip())
+PY

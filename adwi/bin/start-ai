@@ -1,0 +1,11 @@
+#!/bin/zsh
+set -e
+echo "Starting Ollama..."
+brew services start ollama >/dev/null || true
+echo "Starting Docker AI stack..."
+cd "$HOME/SuneelWorkSpace/adwi/infra/docker"
+docker compose up -d
+echo ""
+echo "AI stack started."
+echo "Open WebUI: http://localhost:3000"
+echo "n8n:        http://localhost:5678"

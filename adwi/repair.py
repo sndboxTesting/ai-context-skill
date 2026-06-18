@@ -68,8 +68,8 @@ CATEGORY_HINTS = {
     "ollama":         ["Start Ollama: start-ai", "Check: ollama list"],
     "docker":         ["Run: docker ps", "Check logs: docker logs suneel-open-webui"],
     "knowledge_sync": ["Run: status-openwebui-knowledge-watcher", "Run: sync-openwebui-knowledge"],
-    "missing_tool":   ["Check ~/SuneelWorkSpace/bin/", "Install missing packages with pip3"],
-    "unknown":        ["Run /repair-adwi for diagnostics", "Check recent logs in notes/adwi-action-logs/"],
+    "missing_tool":   ["Check ~/SuneelWorkSpace/adwi/bin/", "Install missing packages with pip3"],
+    "unknown":        ["Run /repair-adwi for diagnostics", "Check recent logs in adwi/notes/adwi-action-logs/"],
 }
 
 

@@ -1,0 +1,15 @@
+#!/bin/zsh
+setopt NULL_GLOB
+set -e
+
+echo "Watching Open WebUI upload folder:"
+echo "$HOME/SuneelWorkSpace/adwi/knowledge/openwebui"
+echo ""
+echo "Every 10 seconds, changed .md/.txt files will sync to Open WebUI Knowledge."
+echo "Press Ctrl+C to stop if running manually."
+echo ""
+
+while true; do
+  sync-openwebui-knowledge || true
+  sleep 10
+done

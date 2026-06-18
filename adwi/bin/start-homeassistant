@@ -1,0 +1,15 @@
+#!/bin/zsh
+# Start Home Assistant
+echo "Starting Home Assistant on :8123 …"
+cd "$HOME/SuneelWorkSpace/adwi/infra/docker"
+docker compose up -d homeassistant
+echo ""
+echo "Home Assistant UI: http://localhost:8123"
+echo ""
+echo "First time? Complete onboarding, then:"
+echo "  Settings → Profile → Long-Lived Access Tokens → Create token"
+echo "  Add to: ~/SuneelWorkSpace/adwi/config/.env"
+echo "    HOME_ASSISTANT_TOKEN=<your token>"
+echo ""
+echo "For Siri Shortcuts + iPhone integration, see:"
+echo "  ~/SuneelWorkSpace/adwi/iphone-control-plane.md"

@@ -1,0 +1,33 @@
+#!/bin/zsh
+set -e
+
+if [ -z "$1" ]; then
+  echo "Usage: save-youtube-summary <youtube-url>"
+  echo "Example: save-youtube-summary 'https://www.youtube.com/watch?v=VIDEO_ID'"
+  exit 1
+fi
+
+URL="$1"
+OUTDIR="$HOME/SuneelWorkSpace/adwi/notes/youtube-summaries"
+mkdir -p "$OUTDIR"
+
+TITLE="$(yt-dlp --no-playlist --print "%(title)s" "$URL" 2>/dev/null || echo "youtube-video")"
+SAFE_TITLE="$(echo "$TITLE" | tr '[:upper:]' '[:lower:]' | sed 's/[^a-z0-9]/-/g' | sed 's/-\+/-/g' | sed 's/^-//' | sed 's/-$//' | cut -c1-80)"
+STAMP="$(date +%Y%m%d-%H%M%S)"
+FILE="$OUTDIR/$STAMP-$SAFE_TITLE.md"
+
+{
+  echo "# $TITLE"
+  echo ""
+  echo "Source: $URL"
+  echo ""
+  echo "Saved: $(date)"
+  echo ""
+  echo "---"
+  echo ""
+  summarize-youtube "$URL"
+} | tee "$FILE"
+
+echo ""
+echo "=== SAVED SUMMARY ==="
+echo "$FILE"

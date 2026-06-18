@@ -1,0 +1,177 @@
+#!/bin/zsh
+setopt NULL_GLOB
+set -e
+
+SECRETS_FILE="$HOME/SuneelWorkSpace/secrets/secrets.local.env"
+WATCH_DIR="$HOME/SuneelWorkSpace/adwi/knowledge/openwebui"
+LOG_DIR="$HOME/SuneelWorkSpace/adwi/notes/open-webui-sync-logs"
+STATE_FILE="$HOME/SuneelWorkSpace/adwi/services/watchers/open-webui-knowledge/uploaded-state.json"
+
+mkdir -p "$WATCH_DIR" "$LOG_DIR" "$(dirname "$STATE_FILE")"
+
+if [ ! -f "$SECRETS_FILE" ]; then
+  echo "ERROR: Secrets file missing:"
+  echo "$SECRETS_FILE"
+  echo "Run: adwi-secrets-status"
+  exit 1
+fi
+
+source "$SECRETS_FILE"
+
+if echo "$OPENWEBUI_API_KEY" | grep -q "PASTE_"; then
+  echo "ERROR: OPENWEBUI_API_KEY is not set."
+  echo "Run: adwi-secrets-edit"
+  exit 1
+fi
+
+if echo "$OPENWEBUI_KNOWLEDGE_ID" | grep -q "PASTE_"; then
+  echo "ERROR: OPENWEBUI_KNOWLEDGE_ID is not set."
+  echo "Run: adwi-secrets-edit"
+  exit 1
+fi
+
+if [ ! -f "$STATE_FILE" ]; then
+  echo "{}" > "$STATE_FILE"
+fi
+
+STAMP="$(date +%Y%m%d-%H%M%S)"
+LOG_FILE="$LOG_DIR/$STAMP-openwebui-sync.md"
+
+{
+  echo "# Open WebUI Knowledge Sync Log"
+  echo ""
+  echo "Generated: $(date)"
+  echo ""
+  echo "Watch folder: $WATCH_DIR"
+  echo "Open WebUI URL: $OPENWEBUI_URL"
+  echo "Knowledge ID: $OPENWEBUI_KNOWLEDGE_ID"
+  echo ""
+  echo "Secret values were not printed."
+  echo ""
+  echo "## Uploaded / Updated Files"
+  echo ""
+} > "$LOG_FILE"
+
+DID_WORK="0"
+
+for file in "$WATCH_DIR"/*.md "$WATCH_DIR"/*.txt; do
+  [ -f "$file" ] || continue
+
+  FILE_NAME="$(basename "$file")"
+  FILE_HASH="$(shasum -a 256 "$file" | awk '{print $1}')"
+
+  ALREADY_HASH="$(python3 - "$STATE_FILE" "$FILE_NAME" <<'PY'
+import json, sys
+from pathlib import Path
+state = Path(sys.argv[1])
+name = sys.argv[2]
+try:
+    data = json.loads(state.read_text())
+except Exception:
+    data = {}
+print(data.get(name, {}).get("sha256", ""))
+PY
+)"
+
+  if [ "$FILE_HASH" = "$ALREADY_HASH" ]; then
+    if [ "${OPENWEBUI_SYNC_VERBOSE:-0}" = "1" ]; then
+      echo "Already synced, skipping: $FILE_NAME"
+    fi
+    continue
+  fi
+
+  DID_WORK="1"
+  echo "Uploading: $FILE_NAME"
+
+  RESPONSE="$(curl -s -X POST "$OPENWEBUI_URL/api/v1/files/" \
+    -H "Authorization: Bearer $OPENWEBUI_API_KEY" \
+    -H "Accept: application/json" \
+    -F "file=@$file")"
+
+  FILE_ID="$(python3 - <<PY
+import json, sys
+raw = '''$RESPONSE'''
+try:
+    data = json.loads(raw)
+except Exception:
+    print("")
+    sys.exit(0)
+
+for key in ["id", "file_id"]:
+    if key in data:
+        print(data[key])
+        sys.exit(0)
+
+if isinstance(data.get("file"), dict):
+    for key in ["id", "file_id"]:
+        if key in data["file"]:
+            print(data["file"][key])
+            sys.exit(0)
+
+print("")
+PY
+)"
+
+  if [ -z "$FILE_ID" ]; then
+    echo "ERROR: Upload did not return file ID for $FILE_NAME"
+    echo "### $FILE_NAME" >> "$LOG_FILE"
+    echo "- ERROR: Upload did not return file ID." >> "$LOG_FILE"
+    echo '```json' >> "$LOG_FILE"
+    echo "$RESPONSE" >> "$LOG_FILE"
+    echo '```' >> "$LOG_FILE"
+    continue
+  fi
+
+  ADD_RESPONSE="$(curl -s -X POST "$OPENWEBUI_URL/api/v1/knowledge/$OPENWEBUI_KNOWLEDGE_ID/file/add" \
+    -H "Authorization: Bearer $OPENWEBUI_API_KEY" \
+    -H "Content-Type: application/json" \
+    -d "{\"file_id\":\"$FILE_ID\"}")"
+
+  python3 - "$STATE_FILE" "$FILE_NAME" "$FILE_HASH" "$FILE_ID" <<'PY'
+import json, sys
+from pathlib import Path
+
+state_path = Path(sys.argv[1])
+name = sys.argv[2]
+sha = sys.argv[3]
+file_id = sys.argv[4]
+
+try:
+    data = json.loads(state_path.read_text())
+except Exception:
+    data = {}
+
+data[name] = {
+    "sha256": sha,
+    "file_id": file_id
+}
+
+state_path.write_text(json.dumps(data, indent=2))
+PY
+
+  {
+    echo "### $FILE_NAME"
+    echo ""
+    echo "- File ID: \`$FILE_ID\`"
+    echo "- SHA256: \`$FILE_HASH\`"
+    echo "- Knowledge add response:"
+    echo '```json'
+    echo "$ADD_RESPONSE"
+    echo '```'
+    echo ""
+  } >> "$LOG_FILE"
+
+  echo "Uploaded and added to Knowledge: $FILE_NAME"
+done
+
+if [ "$DID_WORK" = "0" ]; then
+  if [ "${OPENWEBUI_SYNC_VERBOSE:-0}" = "1" ]; then
+    echo "No new or changed .md/.txt files found."
+  fi
+  rm -f "$LOG_FILE"
+  exit 0
+fi
+
+echo ""
+echo "=== SYNC COMPLETE ==="
+echo "$LOG_FILE"

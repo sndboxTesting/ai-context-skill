@@ -1,0 +1,46 @@
+#!/bin/zsh
+
+echo "=== SUNEEL LOCAL AI STATUS ==="
+date
+echo ""
+
+echo "=== PROJECT LOCATION ==="
+echo "$HOME/SuneelWorkSpace/adwi/infra/docker"
+echo ""
+
+echo "=== OLLAMA SERVICE ==="
+brew services list | grep -i ollama || true
+echo ""
+
+echo "=== OLLAMA API ==="
+curl -s http://127.0.0.1:11434/api/tags || true
+echo ""
+echo ""
+
+echo "=== OLLAMA MODELS ==="
+ollama list || true
+echo ""
+
+echo "=== DOCKER CONTAINERS ==="
+docker ps --format "table {{.Names}}\t{{.Status}}\t{{.Ports}}"
+echo ""
+
+echo "=== APP HEALTH CHECKS ==="
+echo "Open WebUI:"
+curl -I -s http://localhost:3000 | head -3 || true
+echo ""
+echo "n8n:"
+curl -I -s http://localhost:5678 | head -3 || true
+echo ""
+echo "SearXNG:"
+curl -I -s http://localhost:8888 | head -3 || true
+echo ""
+
+echo "=== LOCAL HELPER COMMANDS ==="
+for cmd in start-ai stop-ai status-ai logs-ai check-github-latest-release summarize-url; do
+  if command -v "$cmd" >/dev/null 2>&1; then
+    echo "$cmd = $(command -v "$cmd")"
+  else
+    echo "$cmd = NOT FOUND"
+  fi
+done

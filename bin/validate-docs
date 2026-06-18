@@ -26,6 +26,9 @@ CLAUDE_MD   = WORKSPACE / "CLAUDE.md"
 CLI_PATH    = WORKSPACE / "adwi" / "adwi_cli.py"
 CAPS_PATH   = WORKSPACE / "adwi" / "capabilities.json"
 MANIFEST    = WORKSPACE / "adwi" / "system_manifest.json"
+PORTS_JSON  = WORKSPACE / "config" / "infra_ports.json"
+COMPOSE     = WORKSPACE / "local-ai-stack" / "docker-compose.yml"
+MASTER_RPT  = WORKSPACE / "logs" / "simeval" / "MASTER_REPORT_v2.md"
 
 STRICT = "--strict" in sys.argv
 
@@ -226,6 +229,84 @@ def run_checks() -> None:
               "README.md header claims 'all sections authoritative' — this is misleading as §6 directory tree has static/stale annotations. Consider nuancing this claim.")
     else:
         check("PASS", "PRIME-001", "README header does not make overly broad 'all authoritative' claim")
+
+    # ── Port registry vs docker-compose cross-check ─────────────────────────
+
+    if PORTS_JSON.exists() and COMPOSE.exists():
+        try:
+            registry = json.loads(PORTS_JSON.read_text())
+            registry_ports = {str(e["port"]) for e in registry.get("ports", [])}
+            compose_src = COMPOSE.read_text()
+            compose_ports = set(re.findall(r':(\d{2,5}):\d{2,5}', compose_src))
+            missing = compose_ports - registry_ports
+            if missing:
+                check("FAIL", "PORT-001",
+                      f"docker-compose ports not in config/infra_ports.json: {sorted(missing)} — add them to the registry")
+            else:
+                check("PASS", "PORT-001",
+                      f"All {len(compose_ports)} docker-compose host ports are registered in config/infra_ports.json")
+        except Exception as e:
+            check("WARN", "PORT-001", f"Could not cross-check port registry: {e}")
+    elif not PORTS_JSON.exists():
+        check("WARN", "PORT-001", "config/infra_ports.json not found — run bin/generate-manifest or create it")
+    else:
+        check("SKIP", "PORT-001", "docker-compose.yml not found")
+
+    # ── INFRA_PORTS section reads from JSON (not hardcoded) ──────────────────
+
+    auto_readme_src = (WORKSPACE / "bin" / "auto-update-readme").read_text(errors="ignore")
+    if "PORTS_PATH" in auto_readme_src and "infra_ports.json" in auto_readme_src:
+        check("PASS", "PORT-002", "build_infra_ports_section() reads from config/infra_ports.json (not hardcoded)")
+    else:
+        check("WARN", "PORT-002", "build_infra_ports_section() may still be using hardcoded PORTS list — verify bin/auto-update-readme")
+
+    # ── CLAUDE.md stale-value checks ─────────────────────────────────────────
+
+    if CLAUDE_MD.exists():
+        claude = CLAUDE_MD.read_text()
+        # Intent count
+        m_cl = re.search(r"(\d+) intent classes", claude)
+        if m_cl:
+            cl_intents = int(m_cl.group(1))
+            if cl_intents == true_intent_count:
+                check("PASS", "CLAUDE-001", f"CLAUDE.md intent class count matches: {cl_intents}")
+            else:
+                check("FAIL", "CLAUDE-001", f"CLAUDE.md says {cl_intents} intent classes but _ALL_INTENTS has {true_intent_count}")
+        # Command count
+        m_cl2 = re.search(r"REPL, (\d+) commands", claude)
+        if m_cl2:
+            cl_cmds = int(m_cl2.group(1))
+            if abs(cl_cmds - true_cmd_count) <= 5:
+                check("PASS", "CLAUDE-002", f"CLAUDE.md command count ({cl_cmds}) is within 5 of actual ({true_cmd_count})")
+            else:
+                check("FAIL", "CLAUDE-002", f"CLAUDE.md says {cl_cmds} commands but actual is {true_cmd_count}")
+        # Stale MASTER_REPORT label
+        if "Current NLU quality state" in claude:
+            check("FAIL", "CLAUDE-003",
+                  "CLAUDE.md labels MASTER_REPORT_v2.md as 'Current NLU quality state' — it is stale. Update the label.")
+        else:
+            check("PASS", "CLAUDE-003", "CLAUDE.md does not present MASTER_REPORT_v2.md as current")
+    else:
+        check("SKIP", "CLAUDE-001", "CLAUDE.md not found")
+
+    # ── MASTER_REPORT staleness banner check ─────────────────────────────────
+
+    if MASTER_RPT.exists():
+        rpt = MASTER_RPT.read_text()
+        if "STALE" in rpt or "stale" in rpt.lower():
+            check("PASS", "STALE-001", "MASTER_REPORT_v2.md contains staleness warning")
+        else:
+            check("WARN", "STALE-001",
+                  "MASTER_REPORT_v2.md has no staleness warning — readers may mistake 89.0% for the current baseline")
+    else:
+        check("SKIP", "STALE-001", "MASTER_REPORT_v2.md not found")
+
+    # ── §6 directory tree label check ────────────────────────────────────────
+
+    if "MANUALLY MAINTAINED" in readme:
+        check("PASS", "STATIC-001", "README.md §6 has MANUALLY MAINTAINED label")
+    else:
+        check("WARN", "STATIC-001", "README.md §6 directory tree has no MANUALLY MAINTAINED label — readers may assume it is auto-generated")
 
     # ── Syntax check on adwi_cli.py ─────────────────────────────────────────
 

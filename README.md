@@ -113,10 +113,10 @@ SYSTEM You are Adwi, a cautious local AI assistant. Never read secrets, never co
 | :11434 | Ollama | Host (brew) | Local LLM inference API |
 | :3000 | Open WebUI | Docker | Browser chat UI + model switcher |
 | :5055 | Safe Command API | Host | n8n→shell bridge (8 allowlisted routes) |
-| :5056 | Obsidian Bridge | Host | Vault HTTP CRUD API |
+| :5056 | Obsidian Bridge | Host (LaunchAgent) | Vault HTTP CRUD API |
 | :5678 | n8n | Docker | Workflow automation / webhooks |
 | :6006 | Arize Phoenix | Host (LaunchAgent) | Agent observability UI (OTel) |
-| :6333 | Qdrant | Docker | Vector database |
+| :6333 | Qdrant | Docker (LaunchAgent start) | Vector database — suneel-qdrant container, started by LaunchAgent |
 | :8123 | Home Assistant | Docker | iPhone control plane |
 | :8888 | SearXNG | Docker | Private local web search |
 | :9090 | Prometheus | Docker | Metrics scraper |
@@ -845,6 +845,12 @@ Enforced by `_classify_cli_risk()` (adwi_cli.py) and `classify_risk()` (reason_e
 ---
 
 ## §6 Directory Structure
+
+> **MANUALLY MAINTAINED** — This section is a human-authored snapshot, not auto-generated.
+> Numeric annotations (command counts, fixture counts) are validated by `bin/validate-docs`.
+> Narrative file descriptions and line-count annotations may lag behind code.
+> For authoritative counts, run `bin/validate-docs` or check `adwi/system_manifest.json`.
+> Last verified: 2026-06-17.
 
 ```
 SuneelWorkSpace/

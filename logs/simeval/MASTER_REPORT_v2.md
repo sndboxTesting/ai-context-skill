@@ -1,4 +1,15 @@
 # Adwi NLU — Master Eval Report v2
+
+> ⚠️ **STALE REPORT — DO NOT USE AS CURRENT BASELINE**
+> Generated: 2026-06-16 10:26 (pre-stabilization-sprint, pre-CYCLE-5, pre-CYCLE-6)
+> Numbers in this file reflect **89.0% combined** pass rate — an intermediate state.
+> **Current baseline as of 2026-06-17: P1 96.7% · P2 98.2% · Combined ~97.0%**
+> Authoritative current state: `CLAUDE.md` (manually updated after each eval session).
+> To generate a fresh report: `python3 logs/simeval/run_large_eval.py --workers 10`
+>   then `python3 logs/simeval/run_large_eval_p2.py --workers 10`
+>   then `python3 logs/simeval/generate_master_report.py logs/simeval/large-<date>-<time> logs/simeval/large-p2-<date>-<time>`
+> This file is preserved as a historical eval artifact showing the pre-sprint baseline.
+
 *Generated: 2026-06-16 10:26 | Sessions: large-20260616-100928, large-p2-20260616-102054*
 
 ---

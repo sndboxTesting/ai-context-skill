@@ -177,22 +177,22 @@
     [
       "n8n",
       "5678",
-      "Up 34 hours"
+      "Up 35 hours"
     ],
     [
       "searxng",
       "8888",
-      "Up 34 hours"
+      "Up 35 hours"
     ],
     [
       "prometheus",
       "9090",
-      "Up 34 hours"
+      "Up 35 hours"
     ],
     [
       "loki",
       "3100",
-      "Up 34 hours"
+      "Up 35 hours"
     ],
     [
       "grafana",
@@ -202,12 +202,12 @@
     [
       "node-exporter",
       "9100",
-      "Up 34 hours"
+      "Up 35 hours"
     ],
     [
       "cadvisor",
       "9101",
-      "Up 34 hours (healthy)"
+      "Up 35 hours (healthy)"
     ]
   ],
   "launchagents": [
@@ -254,5 +254,5 @@
   "fixture_count": 96,
   "intent_count": 109,
   "ts": "2026-06-17",
-  "_hash": "f84e704e9e855c8a"
+  "_hash": "a9708c52d9f1ab61"
 }

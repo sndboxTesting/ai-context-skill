@@ -22,6 +22,7 @@ from pathlib import Path
 WORKSPACE    = Path.home() / "SuneelWorkSpace"
 README_PATH  = WORKSPACE / "README.md"
 CAPS_PATH    = WORKSPACE / "adwi" / "capabilities.json"
+PORTS_PATH   = WORKSPACE / "config" / "infra_ports.json"
 COMPOSE_PATH = WORKSPACE / "local-ai-stack" / "docker-compose.yml"
 CLI_PATH     = WORKSPACE / "adwi" / "adwi_cli.py"
 SNAP_PATH    = WORKSPACE / "adwi" / ".readme-snapshot.json"
@@ -241,29 +242,21 @@ def build_monitoring_section(snap: dict) -> str:
 
 
 def build_infra_ports_section(snap: dict) -> str:
-    """Complete port topology table — static definition enriched with live docker status."""
-    # Static port registry — authoritative source of truth
-    PORTS = [
-        (":11434", "Ollama",           "Host (brew)",   "Local LLM inference API"),
-        (":3000",  "Open WebUI",       "Docker",        "Browser chat UI + model switcher"),
-        (":5055",  "Safe Command API", "Host",          "n8n→shell bridge (8 allowlisted routes)"),
-        (":5056",  "Obsidian Bridge",  "Host",          "Vault HTTP CRUD API"),
-        (":5678",  "n8n",              "Docker",        "Workflow automation / webhooks"),
-        (":6006",  "Arize Phoenix",    "Host (LaunchAgent)", "Agent observability UI (OTel)"),
-        (":6333",  "Qdrant",           "Docker",        "Vector database"),
-        (":8123",  "Home Assistant",   "Docker",        "iPhone control plane"),
-        (":8888",  "SearXNG",          "Docker",        "Private local web search"),
-        (":9090",  "Prometheus",       "Docker",        "Metrics scraper"),
-        (":3100",  "Loki",             "Docker",        "Log aggregation"),
-        (":4000",  "Grafana",          "Docker",        "Monitoring dashboards"),
-        (":9100",  "node-exporter",    "Docker",        "Host system metrics"),
-        (":9101",  "cAdvisor",         "Docker",        "Container metrics"),
-        (":4317",  "Phoenix gRPC",     "Host (LaunchAgent)", "OTLP gRPC ingestion"),
-        (":4318",  "Phoenix HTTP",     "Host (LaunchAgent)", "OTLP HTTP ingestion"),
-    ]
+    """Complete port topology table — reads from config/infra_ports.json (manually maintained registry)."""
     lines = ["| Port | Service | Layer | Purpose |", "|---|---|---|---|"]
-    for port, svc, layer, purpose in PORTS:
-        lines.append(f"| {port} | {svc} | {layer} | {purpose} |")
+    if PORTS_PATH.exists():
+        try:
+            registry = json.loads(PORTS_PATH.read_text())
+            for entry in registry.get("ports", []):
+                port  = entry["port"]
+                svc   = entry["service"]
+                layer = entry["layer"]
+                purp  = entry["purpose"]
+                lines.append(f"| :{port} | {svc} | {layer} | {purp} |")
+        except Exception as e:
+            lines.append(f"| — | ERROR reading config/infra_ports.json: {e} | — | — |")
+    else:
+        lines.append("| — | config/infra_ports.json not found | — | run bin/generate-manifest |")
     return "\n".join(lines)
 
 

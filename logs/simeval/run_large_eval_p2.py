@@ -161,6 +161,12 @@ REGEX_INTENTS = [
     (re.compile(r"\bwhen\s+does\s+adwi\b.{0,30}\bgenerate\b", re.I), "chat"),
     (re.compile(r"\bwhat\s+is\s+semantic\s+memory\b", re.I), "chat"),
     (re.compile(r"\bwhat\s+is\s+the\s+best\s+way\s+to\s+store\s+memories\b", re.I), "chat"),
+    # CYCLE-5 chat advisory additions
+    (re.compile(r"\bwhy\s+is\b.{0,20}\b(?:ollama|model|adwi|llm|ai)\b.{0,10}\b(?:slow|sluggish|fast|behind|lagging)\b", re.I), "chat"),
+    (re.compile(r"\bhow\s+do\s+I\s+(?:migrate|switch|move)\b.{0,30}\b(?:from|between)\b", re.I), "chat"),
+    (re.compile(r"\bhow\s+do\s+I\s+(?:improve|enhance|optimize|boost)\b.{0,30}\b(?:quality|output|performance|results?|speed)\b", re.I), "chat"),
+    (re.compile(r"\bwhat.s\s+the\s+best\b.{0,40}\b(?:theme|tool|plugin|approach|configuration|option)\b", re.I), "chat"),
+    (re.compile(r"\bhow\s+do\s+I\s+generate\b.{0,20}\b(?:better|good|great|effective)\b.{0,20}\bprompts?\b", re.I), "chat"),
 
     # ══ CYCLE-2b: CLEANUP ADVISORY GUARDS ═════════════════════════════════════════
     (re.compile(r"\bwhat\s+should\s+(?:I|we)\b.{0,30}\b(?:throw\s+away|get\s+rid\s+of|toss|delete|remove)\b", re.I), "cleanup"),
@@ -237,6 +243,8 @@ REGEX_INTENTS = [
     (re.compile(r"\bfile\s+organization\b", re.I), "organize"),
     (re.compile(r"\b(help\s+me\s+)?(organize|structure|arrange)\b.{0,20}(my\s+)?notes?\s*folder\b", re.I), "organize"),
     (re.compile(r"\b(oragnaize|organzie|oragnize)\b", re.I), "organize"),
+    # CYCLE-5: bare "organize" command
+    (re.compile(r"^organize\s*$", re.I), "organize"),
 
     # ── Cleanup suggestions ──────────────────────────────────────────────────────
     (re.compile(r"(what|which).{0,20}(can|should|could|to).{0,20}(delete|remove|trash|clear|get rid)", re.I), "cleanup"),
@@ -309,12 +317,15 @@ REGEX_INTENTS = [
     (re.compile(r"\b(anything|something)\b.{0,15}\b(down|broken|offline|unavailable|not\s+responding)\b", re.I), "status"),
     (re.compile(r"\b(is|are)\b.{0,20}\b(ollama|docker|adwi|n8n|redis|api|server|services?|stack|everything)\b.{0,15}\b(available|up|running|reachable|responding|down|offline|unavailable)\b", re.I), "status"),
     (re.compile(r"(check|verify).{0,20}(setup|stack|services|system)", re.I), "status"),
-    # CYCLE-4: "is the model slow/fast/performing well" → status (not benchmark which needs specific model name)
-    (re.compile(r"\b(?:is|why\s+is)\b.{0,15}\b(?:the\s+)?(?:model|adwi|ollama)\b.{0,15}\b(?:slow|fast|sluggish|lagging|unresponsive|not\s+responding)\b", re.I), "status"),
+    # CYCLE-4: "is the model slow/fast/performing well" → status (diagnostic, not advisory)
+    (re.compile(r"\bis\b.{0,15}\b(?:the\s+)?(?:model|adwi|ollama)\b.{0,15}\b(?:slow|fast|sluggish|lagging|unresponsive|not\s+responding)\b", re.I), "status"),
+    # CYCLE-5: "how's my AI doing/performing" → status
+    (re.compile(r"\bhow.s\s+my\s+(?:ai|adwi|model|system)\b.{0,20}\b(?:doing|performing|running)\b", re.I), "status"),
 
     # CYCLE-4: extract_ideas — pull/extract ideas/insights/key points from content
     # Pattern 1: idea/insight/key-point vocabulary (NOT action-items which goes to gmail_extract_tasks)
-    (re.compile(r"\b(?:pull|extract|get)\b.{0,25}\b(?:ideas?|insights?|key\s+(?:points?|takeaways?|findings?)|main\s+(?:points?|ideas?))\b", re.I), "extract_ideas"),
+    # "actionable items" (with "able") does NOT match gmail_extract_tasks' "action items" pattern
+    (re.compile(r"\b(?:pull|extract|get)\b.{0,25}\b(?:ideas?|insights?|actionable\s+items?|key\s+(?:points?|takeaways?|findings?)|main\s+(?:points?|ideas?))\b", re.I), "extract_ideas"),
     # Pattern 2: "key takeaways" / "main insights" — advisory vocabulary, not gmail tasks
     (re.compile(r"\b(?:key\s+takeaways?|main\s+insights?|summarize\s+and\s+extract)\b.{0,30}\b(?:from|in|this|the)\b", re.I), "extract_ideas"),
     # CYCLE-4: implement_idea patterns — "implement this idea/feature/plan"
@@ -371,6 +382,8 @@ REGEX_INTENTS = [
     # CYCLE-4: bare "search" command and "find information about X"
     (re.compile(r"^search\s*$", re.I), "web_search"),
     (re.compile(r"\bfind\s+information\b.{0,20}\babout\b", re.I), "web_search"),
+    # CYCLE-5: generic "search for something/anything"
+    (re.compile(r"\bsearch\s+for\s+(?:something|anything)\b", re.I), "web_search"),
 
     # ── Obsidian daily — BEFORE obsidian_search (Bug 4: daily-note guard) ────────
     (re.compile(r"\b(daily.?note|today.{0,5}note|obsidian.{0,5}daily)\b", re.I), "obsidian_daily"),
@@ -392,6 +405,9 @@ REGEX_INTENTS = [
     (re.compile(r"\b(yt\s+video|youtu\.be|youtube\.com)\b", re.I), "youtube"),
 
     # ── Browse / fetch URL ───────────────────────────────────────────────────────
+    # CYCLE-5: bare "browse" and "browse/go to internal targets"
+    (re.compile(r"^browse\s*$", re.I), "browse"),
+    (re.compile(r"\b(?:browse|go)\s+to\b.{0,30}\b(?:adwi|docs?|documentation|obsidian|vault|wiki|page|repo)\b", re.I), "browse"),
     (re.compile(r"(browse|visit|open|fetch|go to|check out|navigate to).{0,15}(https?://|website|site|webpage|url|\.(com|io|org|dev|net))", re.I), "browse"),
 
     # ── Nightly maintenance ──────────────────────────────────────────────────────
@@ -404,6 +420,8 @@ REGEX_INTENTS = [
     (re.compile(r"\b(when.{0,10}(did.{0,10})?nightly|last.{0,10}nightly|show.{0,10}nightly)\b", re.I), "nightly_status"),
     (re.compile(r"\bnightly.{0,10}log\b", re.I), "nightly_status"),
     (re.compile(r"\b(run nightly|trigger nightly|nightly maintenance|run.{0,10}daily maintenance)\b", re.I), "nightly_run"),
+    # CYCLE-5: bare "nightly run" anchor
+    (re.compile(r"^nightly\s+run\s*$", re.I), "nightly_run"),
 
     # ── Model status / switching ─────────────────────────────────────────────────
     (re.compile(r"\b(what|which)\b.{0,15}\bmodel\b.{0,20}\b(am i|are you|is active|running|using|current|loaded)\b", re.I), "model_status"),
@@ -425,6 +443,8 @@ REGEX_INTENTS = [
     # CYCLE-4: bare "voice" and "voice in" anchored commands
     (re.compile(r"^voice\s*$", re.I), "voice_in"),
     (re.compile(r"^voice\s+in\s*$", re.I), "voice_in"),
+    # CYCLE-5: bare "voice out" anchor
+    (re.compile(r"^voice\s+out\s*$", re.I), "voice_out"),
     (re.compile(r"\b(voice input|voice mode|voice.{0,10}recording|start.{0,10}voice|listen.{0,10}voice)\b", re.I), "voice_in"),
     (re.compile(r"\bstart.{0,15}(recording|listening)\b", re.I), "voice_in"),
     (re.compile(r"\b(text.to.speech|tts\b|speak.{0,15}this|say.{0,20}(aloud|out loud)|read.{0,10}aloud|read.{0,10}this.{0,10}out)\b", re.I), "voice_out"),
@@ -495,6 +515,8 @@ REGEX_INTENTS = [
     (re.compile(r"(is adwi|adwi).{0,20}(connected|linked).{0,20}(github|git)", re.I), "github_connected"),
     (re.compile(r"(github|git hub).{0,20}(account|auth|login|connection|access)", re.I), "github_connected"),
     (re.compile(r"(connected to|link(ed)? to|set up).{0,20}(github|git hub)", re.I), "github_connected"),
+    # CYCLE-5: "adwi check github"
+    (re.compile(r"\badwi\b.{0,15}\bcheck\b.{0,20}\bgithub\b", re.I), "github_connected"),
 
     # ── Git status (Bug 7: broadened patterns) ────────────────────────────────────
     (re.compile(r"git\s+(status|diff|log|show|repos?)\b", re.I), "git_status"),
@@ -517,6 +539,8 @@ REGEX_INTENTS = [
     (re.compile(r"\b[a-z]+_[a-z_]+\b.{0,20}\b(?:function|handler|method|command)\b.{0,20}\bin\s+adwi\b", re.I), "inspect_code"),
     (re.compile(r"\b(?:show|find|where\s+is)\b.{0,15}\bthe\b.{0,15}\b[a-z]+_[a-z_]+\b.{0,10}\b(?:function|handler|method)\b", re.I), "inspect_code"),
     # ── Image generation ─────────────────────────────────────────────────────────
+    # CYCLE-5: bare "image" command
+    (re.compile(r"^image\s*$", re.I), "generate_image"),
     (re.compile(r"(generate|create|draw|make|design).{0,20}(an? )?(image|picture|photo|illustration|artwork)", re.I), "generate_image"),
 
     # ── Code execution ───────────────────────────────────────────────────────────
@@ -866,6 +890,8 @@ REGEX_INTENTS = [
     (re.compile(r"\bindex\b.{0,20}\b(terminal\s+history|history|session|conversation)\b", re.I), "memory_scan"),
     (re.compile(r"\bmemory\s+(scan|update|rescan|refresh|rebuild)\b", re.I), "memory_scan"),
     (re.compile(r"\bscan\s+mem\w*\b", re.I), "memory_scan"),
+    # CYCLE-5: embeddings generation → memory_scan
+    (re.compile(r"\bgenerate\b.{0,20}\bembeddings?\b", re.I), "memory_scan"),
     (re.compile(r"(what do you (remember|know|recall)|do you remember|tell me what you know).{0,40}(about|regarding)\b", re.I), "memory_recall"),
     (re.compile(r"(remember|recall|what do you know about|memory).{0,30}\?", re.I), "memory_recall"),
     (re.compile(r"memory (stats|status|ledger|database|db)\b", re.I), "memory_stats"),
@@ -899,6 +925,8 @@ REGEX_INTENTS = [
     (re.compile(r"\bwut\s+can\s+(u|you)\b.{0,15}(do|help|offer)\b", re.I), "capabilities"),
 
     # ── Sync knowledge base ──────────────────────────────────────────────────────
+    # CYCLE-5: bare "sync" anchor
+    (re.compile(r"^sync\s*$", re.I), "sync"),
     # FIX-S3-006: "sync/update knowledge to Open WebUI", "push notes to webui"
     (re.compile(r"\b(sync|update|push)\b.{0,20}\b(knowledge|notes?)\b.{0,20}\b(open.?webui|openwebui|webui)\b", re.I), "sync"),
     (re.compile(r"\bopen.?webui\b.{0,20}\b(sync|update|push|add|knowledge)\b", re.I), "sync"),

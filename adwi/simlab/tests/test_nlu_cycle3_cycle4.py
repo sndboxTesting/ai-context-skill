@@ -261,16 +261,20 @@ class TestCycle4WebSearch(unittest.TestCase):
 
 
 class TestCycle4Status(unittest.TestCase):
-    """CYCLE-4: status — is the model slow/unresponsive"""
+    """CYCLE-4/5: status — is the model slow/unresponsive (diagnostic, not advisory)"""
 
     def test_is_the_model_slow(self):
         self.assertEqual(_route("is the model slow"), "status")
 
-    def test_why_is_adwi_sluggish(self):
-        self.assertEqual(_route("why is adwi sluggish"), "status")
+    def test_why_is_adwi_sluggish_is_chat(self):
+        # "why is X slow" = advisory question → chat (CYCLE-5 moved this from status)
+        self.assertEqual(_route("why is adwi sluggish"), "chat")
 
     def test_is_ollama_unresponsive(self):
         self.assertEqual(_route("is ollama unresponsive"), "status")
+
+    def test_hows_my_ai_doing(self):
+        self.assertEqual(_route("how's my ai doing"), "status")
 
 
 class TestNoRegressionHardened(unittest.TestCase):

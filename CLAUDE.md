@@ -32,25 +32,21 @@ Adwi is a local AI operating system running on an Apple Silicon Mac. It is not a
 
 ## Current NLU quality (as of 2026-06-17)
 
-| Eval | Scenarios | Pre-NHR | Post-NHR (session 1) | Post-session-2 | Post-session-3 | Gmail burn-in | Stabilize sprint | Total gain |
-|------|-----------|---------|----------------------|----------------|----------------|---------------|------------------|------------|
-| Large eval P1 | ~1,808 | 78.0% | 83.7% | 88.6% | 90.7% | 92.0% | **92.6%** | +14.6pp |
-| Large eval P2 (weak-family targeting) | 561 | 68.6% | 77.6% | 81.4% | 83.9% | 87.2% | **88.8%** | +20.2pp |
-| **Combined** | **~2,369** | **75.8%** | **82.1%** | **86.0%** | **89.0%** | **90.7%** | **~91.7%** | **+15.9pp** |
+| Eval | Scenarios | Pre-NHR | Stabilize sprint | CYCLE-5 | CYCLE-6 | Total gain |
+|------|-----------|---------|------------------|---------|---------|------------|
+| Large eval P1 | ~1,808 | 78.0% | 92.6% | 96.3% | **96.7%** | +18.7pp |
+| Large eval P2 (weak-family targeting) | 561 | 68.6% | 88.8% | 97.0% | **98.2%** | +29.6pp |
+| **Combined** | **~2,369** | **75.8%** | **~91.7%** | **~96.5%** | **~97.0%** | **+21.2pp** |
 
-**All 10 NHR items (NHR-001 through NHR-010) applied 2026-06-16. 13 session-2 patches and 9 session-3 patches applied 2026-06-16. 8 session-4 code-review hardening fixes applied 2026-06-16. Gmail burn-in (Stages 1-3) applied 2026-06-17: 12 FIX-STRESS patterns (Phase B/C burn-in) + 4 FIX-STAGE3 patterns (Stage 3 repair). Stabilization sprint applied 2026-06-17: 9 regex fix groups + 4 _INTENT_SYSTEM additions + 6 test gap fixes.**
+**Stop Condition A reached 2026-06-17: combined >95%. All 10 NHR items applied 2026-06-16. Sessions 2-4 applied 2026-06-16. Gmail burn-in + stabilization sprint applied 2026-06-17. CYCLE-5 (2026-06-17): 13 bare-command anchors, chat advisory fixes, status/advisory boundary, memory_scan/github_connected/web_search additions — synced to all 3 files. CYCLE-6 (2026-06-17): PermissionError guard before CYCLE-1, run-aider before self-heal, organize before chat, use_local/large_files/gmail_list_attachments/capabilities/trusted_roots/tool_roadmap/test_adwi targeted fixes — synced to all 3 files.**
 
 Session-2 applied 11 regex patch groups (FIX-LF-001, FIX-OLD-001, FIX-DUP-001, FIX-ORG-002, FIX-CLEANUP-003, FIX-HEAL-001, FIX-BROWSE-001, FIX-WEB-001, FIX-ERR-002, FIX-EVAL-002, FIX-TEST-002, FIX-MEMSCAN-002) and 1 INTENT_SYSTEM clarification (FIX-BENCH-001).
 
 Session-3 applied 9 regex patch groups (FIX-CLEAN-004, FIX-NOTES-001, FIX-STATUS-002, FIX-WHAT-002, FIX-WEB-002, FIX-OBS-002, FIX-NIGHT-001, FIX-EVAL-003, FIX-PATCH-002, FIX-RC-001, FIX-GMAIL-002, FIX-MEMST-001, FIX-MEMCTX-001, FIX-FR-001) and S3 fixes (FIX-S3-001 through FIX-S3-009) and 4 INTENT_SYSTEM clarifications.
 
-Session-4 applied 8 false-positive hardening fixes identified by post-session-3 code review: FIX-S3-002 gap tightened, FIX-S3-008 `different` removed, FIX-STATUS-002 broad line deleted, FIX-NIGHT-001 context tightened, FIX-S3-001 bare `tps` removed, FIX-S3-006 bare `kb` removed, FIX-MEMCTX-001 negative lookahead added, FIX-S3-004 duplicate typo removed.
+Session-4 applied 8 false-positive hardening fixes. Gmail burn-in applied 12 FIX-STRESS patches + 4 FIX-STAGE3 patches. Stabilization sprint applied 9 regex fix groups + 4 _INTENT_SYSTEM additions + 6 test gap fixes. Total test suite after CYCLE-6: 897 tests.
 
-Gmail burn-in (2026-06-17) applied 12 FIX-STRESS patches (schedule/send/compose/draft/attachment/inbox/mutation coverage) and 4 FIX-STAGE3 patches (open-latest-message→gmail_read, which-draft→gmail_list_drafts, send-an-email-to-X→gmail_compose, send-the-email→gmail_send_draft). 317-test Gmail stress suite added at `adwi/simlab/tests/`.
-
-Stabilization sprint (2026-06-17) applied 9 regex fix groups: FIX-SPRINT-001(benchmark), FIX-SPRINT-002(what_next), FIX-SPRINT-003(inspect_code), FIX-SPRINT-004(cleanup), FIX-SPRINT-005(disk advisory), FIX-SPRINT-006(implement_idea), FIX-SPRINT-007(web_search), FIX-SPRINT-ORG(organize), FIX-SCHED-001(schedule weekday) + 4 _INTENT_SYSTEM additions (organize, cleanup, benchmark, status) + 6 test gap fixes (FIX-STAGE3-001 regression, status services?/everything/down, schedule-for-weekday). 75-test stabilization suite added at `adwi/simlab/tests/test_nlu_stabilize.py`. Total test suite: 823 tests.
-
-**Current baseline: ~91.7% combined.** Remaining targets: `chat` bleed (~28 P1 failures — advisory questions mislabeled), `__none__` (30 — irreducible safety blocks), `cleanup` (7 remaining), `gmail_confirm` (3 — unstable at 40%).
+**Current baseline: ~97.0% combined.** Remaining P1 failures (~40): ~11 LLM-routed chat bleed, irreducible __none__ safety blocks, scattered LLM variance. P2 has zero hard failures (551/561 pass, 10 warns).
 
 Changes are synchronized across all 3 files: `adwi/adwi_cli.py`, `logs/simeval/run_large_eval.py`, `logs/simeval/run_large_eval_p2.py`.
 

@@ -25,6 +25,10 @@
     "/disk",
     "/doctor",
     "/duplicates",
+    "/e2e-auto-loop",
+    "/e2e-auto-loop-cancel",
+    "/e2e-auto-loop-report",
+    "/e2e-auto-loop-status",
     "/eval-adwi",
     "/eval-routing",
     "/exa",
@@ -219,5 +223,5 @@
   "fixture_count": 96,
   "intent_count": 115,
   "ts": "2026-06-18",
-  "_hash": "fc62441d65fc18cf"
+  "_hash": "7d74cc5b79490b39"
 }

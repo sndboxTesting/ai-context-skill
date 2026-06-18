@@ -189,7 +189,7 @@ Dashboard: http://localhost:4000 (user: suneel)
 ## §3 Deterministic Capability Grid
 
 <!-- AUTO:COMMANDS -->
-**173 registered commands.** Key groups:
+**177 registered commands.** Key groups:
 
 **add**: `/add-capability-plan`  `/add-root`
 **assistant**: `/assistant-upgrade-status`
@@ -208,6 +208,7 @@ Dashboard: http://localhost:4000 (user: suneel)
 **disk**: `/disk`
 **doctor**: `/doctor`
 **duplicates**: `/duplicates`
+**e2e**: `/e2e-auto-loop`  `/e2e-auto-loop-cancel`  `/e2e-auto-loop-report`  `/e2e-auto-loop-status`
 **eval**: `/eval-adwi`  `/eval-routing`
 **exa**: `/exa`  `/exa-search`
 **export**: `/export-training-example`
@@ -997,7 +998,7 @@ python3 -m py_compile adwi/adwi_cli.py && echo "still compiles"
 | 2 | LangGraph Orchestration & Interactive Permission Surface | Planner→Executor→Critic state machine; Phase 2 boxed gate with WHY explanation | `adwi/reason_engine.py` |
 | 3 | Memory Lifecycle, Scoring & Safety Gate | importance_score, recency_decay, provenance columns; BLOCKED/REVIEW/SAFE classifier | `adwi/memory.py` |
 | 4 | Real-Time Self-Healing & Hermes Skill Compiling | aider non-interactive patch → pytest verify → skills/ SKILL.md; skill pre-flight match | `adwi/reason_engine.py · skills/` |
-| 5 | prompt_toolkit Slash-Command Autocomplete | 173-command registry; substring fuzzy scoring; Tab/arrow REPL overlay | `adwi/adwi_cli.py (SlashCommandCompleter)` |
+| 5 | prompt_toolkit Slash-Command Autocomplete | 177-command registry; substring fuzzy scoring; Tab/arrow REPL overlay | `adwi/adwi_cli.py (SlashCommandCompleter)` |
 | 6 | Chain-of-Intent Schema & Semantic Slot-Filling | analysis+confidence+intent+arguments JSON schema; 29 structured arg reads in dispatch | `adwi/adwi_cli.py (_INTENT_JSON_SCHEMA)` |
 | 7 | Qdrant-Driven Dynamic Few-Shot Routing | 96-fixture nlu_fixtures collection; top-3 injected into llama3.1:8b system prompt | `adwi/memory.py · Qdrant :6333` |
 | 8 | LLM-Priming Documentation Update Invariants | auto-update-readme always runs before backup; PHASES+NLU sections auto-injected | `bin/auto-update-readme · adwi/backup.py` |

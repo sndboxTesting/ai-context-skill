@@ -24,8 +24,12 @@ Phase 9 (draft management cluster): open-draft, delete-draft. Operate on
 _GMAIL_CTX["draft_list"] and _GMAIL_CTX["draft"]; use _resolve_draft_ref()
 for ordinal/name disambiguation. delete-draft requires y/n confirmation.
 
-Deferred to Phase 10+: draft-reply, schedule-send, cancel-scheduled,
-reschedule, followup-reminder, extract-tasks, triage, attachment mutations.
+Phase 10 (draft-reply): draft a reply to the current email. Requires
+_GMAIL_CTX["current_email"]; optionally uses current_thread for context-aware
+mode. LLM generates body, creates Gmail draft, shows preview — no live send.
+
+Deferred to Phase 11+: schedule-send, cancel-scheduled, reschedule,
+followup-reminder, extract-tasks, triage, attachment mutations.
 """
 
 from __future__ import annotations
@@ -138,6 +142,13 @@ def _cancel_draft(args: str, ctx: dict) -> None:
 
 def _forward(args: str, ctx: dict) -> None:
     _cli().cmd_gmail_forward(args)
+
+
+# ── Phase 10 handler (draft-reply) ────────────────────────────────────────────
+
+
+def _draft_reply(args: str, ctx: dict) -> None:
+    _cli().cmd_gmail_draft_reply(args)
 
 
 # ── Phase 9 handlers (draft management cluster) ───────────────────────────────
@@ -418,3 +429,13 @@ def register(registry: "CommandRegistry") -> None:
         intents=["gmail_delete_draft"],
         args_schema={"ref": "str?"},
     )(_delete_draft)
+
+    # Phase 10 — draft-reply
+
+    registry.register(
+        "/gmail-draft-reply",
+        description="Draft a reply to the current email; LLM generates body, shows preview, no send",
+        category="gmail",
+        intents=["gmail_draft_reply"],
+        args_schema={"instruction": "str?"},
+    )(_draft_reply)

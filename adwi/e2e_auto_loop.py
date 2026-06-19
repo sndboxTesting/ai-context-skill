@@ -1107,7 +1107,7 @@ KNOWN_REGEX_FIXES: list[dict] = [
     {
         "id":             "FIX-E2E-030a",
         "description":    "Add SQL examples to run_code NOT clause in run_large_eval.py",
-        "target_intents": ["run_code"],
+        "target_intents": ["chat", "__none__"],
         "target_file":    "adwi/logs/simeval/run_large_eval.py",
         "check_pattern":  r"NOT SQL/DB commands.*NOT 'run local model'.*\n.*NOT 'do it'",
         "old_str": (
@@ -1124,7 +1124,7 @@ KNOWN_REGEX_FIXES: list[dict] = [
     {
         "id":             "FIX-E2E-030b",
         "description":    "Add SQL examples to run_code NOT clause in run_large_eval_p2.py",
-        "target_intents": ["run_code"],
+        "target_intents": ["chat", "__none__"],
         "target_file":    "adwi/logs/simeval/run_large_eval_p2.py",
         "check_pattern":  r"NOT SQL/DB commands.*NOT 'run local model'.*\n.*NOT 'do it'",
         "old_str": (
@@ -1141,7 +1141,7 @@ KNOWN_REGEX_FIXES: list[dict] = [
     {
         "id":             "FIX-E2E-030c",
         "description":    "Add SQL examples to run_code NOT clause in adwi_cli.py",
-        "target_intents": ["run_code"],
+        "target_intents": ["chat", "__none__"],
         "target_file":    "adwi/adwi_cli.py",
         "check_pattern":  r"NOT SQL/DB commands.*NOT 'run local model'.*\n.*NOT 'do it'",
         "old_str": (

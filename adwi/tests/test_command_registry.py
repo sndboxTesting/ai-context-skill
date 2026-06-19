@@ -951,5 +951,127 @@ class TestPhase7GmailDraftLifecycleCommands(unittest.TestCase):
         self.assertGreaterEqual(len(set(self.reg.all_names())), 92)
 
 
+# ── Phase 8 wiring verification ───────────────────────────────────────────────
+
+
+class TestPhase8GmailDraftEditingCommands(unittest.TestCase):
+    """
+    Verify Phase 8 Gmail draft-editing commands are registered via discover()
+    and dispatch correctly.
+
+    Cluster: rewrite, update-subject, add-cc, add-bcc.
+    All 4 operate on _GMAIL_CTX["draft"] in-place via gh.update_draft():
+    - rewrite: calls _llm_generate() then gh.update_draft(); writes draft["body"]
+    - update-subject: calls _llm_generate() + input() confirm; writes draft["subject"]
+    - add-cc: contact resolution + gh.update_draft(); writes draft["cc"]
+    - add-bcc: contact resolution + gh.update_draft(); writes draft["bcc"]
+
+    No live send, no draft creation, no draft deletion in this cluster.
+    All safety gates (early-return on missing draft, input() fallbacks, y/n confirm)
+    are inside the function bodies and fully preserved by _cli() delegation.
+
+    Deferred to Phase 9+: draft-reply, open-draft, delete-draft, schedule-send,
+    cancel-scheduled, reschedule, followup-reminder, extract-tasks, triage,
+    attachment mutations.
+    """
+
+    PHASE8 = [
+        "/gmail-rewrite",
+        "/gmail-update-subject",
+        "/gmail-add-cc",
+        "/gmail-add-bcc",
+    ]
+
+    PHASE9_DEFERRED = [
+        "/gmail-followup",
+        "/gmail-cancel-scheduled",
+        "/gmail-draft-reply",
+    ]
+
+    @classmethod
+    def setUpClass(cls):
+        cls.reg = CommandRegistry()
+        cls.reg.discover("adwi.commands")
+
+    def test_all_phase8_commands_registered(self):
+        for cmd in self.PHASE8:
+            with self.subTest(cmd=cmd):
+                self.assertIsNotNone(self.reg.get(cmd), f"{cmd} must be registered")
+
+    def test_all_phase8_commands_dispatch_true(self):
+        for cmd in self.PHASE8:
+            with self.subTest(cmd=cmd):
+                self.assertTrue(
+                    self.reg.dispatch(cmd, {}),
+                    f"dispatch('{cmd}') must return True",
+                )
+
+    def test_all_phase8_commands_have_descriptions(self):
+        for cmd in self.PHASE8:
+            with self.subTest(cmd=cmd):
+                spec = self.reg.get(cmd)
+                self.assertIsNotNone(spec)
+                self.assertGreater(len(spec.description), 0)
+
+    def test_all_phase8_commands_in_gmail_category(self):
+        for cmd in self.PHASE8:
+            with self.subTest(cmd=cmd):
+                self.assertEqual(self.reg.get(cmd).category, "gmail")
+
+    def test_draft_editing_intents_wired(self):
+        expected = {
+            "gmail_rewrite_draft": "/gmail-rewrite",
+            "gmail_update_subject": "/gmail-update-subject",
+            "gmail_add_cc": "/gmail-add-cc",
+            "gmail_add_bcc": "/gmail-add-bcc",
+        }
+        for intent, cmd in expected.items():
+            with self.subTest(intent=intent):
+                self.assertIn(intent, self.reg.intent_map())
+                self.assertEqual(self.reg.intent_map()[intent], cmd)
+
+    def test_rewrite_passes_nl_args(self):
+        """/gmail-rewrite with instruction dispatches correctly."""
+        result = self.reg.dispatch("/gmail-rewrite make it shorter", {})
+        self.assertTrue(result)
+
+    def test_update_subject_passes_nl_args(self):
+        result = self.reg.dispatch("/gmail-update-subject make it clearer", {})
+        self.assertTrue(result)
+
+    def test_add_cc_passes_contact_args(self):
+        result = self.reg.dispatch("/gmail-add-cc Rahul", {})
+        self.assertTrue(result)
+
+    def test_add_bcc_passes_contact_args(self):
+        result = self.reg.dispatch("/gmail-add-bcc me", {})
+        self.assertTrue(result)
+
+    def test_rewrite_no_args_dispatches(self):
+        """/gmail-rewrite with no args dispatches (handler prompts via input())."""
+        result = self.reg.dispatch("/gmail-rewrite", {})
+        self.assertTrue(result)
+
+    def test_phase9_deferred_not_in_registry(self):
+        """Followup/schedule/draft-reply remain in elif chain (deferred to Phase 9+)."""
+        for cmd in self.PHASE9_DEFERRED:
+            with self.subTest(cmd=cmd):
+                self.assertIsNone(
+                    self.reg.get(cmd),
+                    f"{cmd} must remain deferred until Phase 9",
+                )
+
+    def test_phase9_deferred_still_return_false(self):
+        for cmd in self.PHASE9_DEFERRED:
+            with self.subTest(cmd=cmd):
+                self.assertFalse(
+                    self.reg.dispatch(cmd, {}),
+                    f"{cmd} must fall through to elif chain",
+                )
+
+    def test_total_unique_commands_at_phase8(self):
+        self.assertGreaterEqual(len(set(self.reg.all_names())), 96)
+
+
 if __name__ == "__main__":
     unittest.main()

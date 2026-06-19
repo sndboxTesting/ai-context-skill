@@ -16,9 +16,13 @@ Phase 7 (draft lifecycle cluster): compose, send-draft, cancel-draft, forward.
 Compose and forward accept NL text args; send-draft and cancel-draft take no
 args and use inline input() confirmations for safety.
 
-Deferred to Phase 8+: draft-reply, rewrite, update-subject, add-cc/bcc,
-open-draft, delete-draft, schedule-send, cancel-scheduled, reschedule,
-followup-reminder, extract-tasks, triage, attachment mutations.
+Phase 8 (draft-editing cluster): rewrite, update-subject, add-cc, add-bcc.
+All operate on the existing _GMAIL_CTX["draft"] in-place via gh.update_draft().
+No live send; no draft creation or deletion.
+
+Deferred to Phase 9+: draft-reply, open-draft, delete-draft, schedule-send,
+cancel-scheduled, reschedule, followup-reminder, extract-tasks, triage,
+attachment mutations.
 """
 
 from __future__ import annotations
@@ -131,6 +135,25 @@ def _cancel_draft(args: str, ctx: dict) -> None:
 
 def _forward(args: str, ctx: dict) -> None:
     _cli().cmd_gmail_forward(args)
+
+
+# ── Phase 8 handlers (draft-editing cluster) ──────────────────────────────────
+
+
+def _rewrite(args: str, ctx: dict) -> None:
+    _cli().cmd_gmail_rewrite_draft(args)
+
+
+def _update_subject(args: str, ctx: dict) -> None:
+    _cli().cmd_gmail_update_subject(args)
+
+
+def _add_cc(args: str, ctx: dict) -> None:
+    _cli().cmd_gmail_add_cc(args)
+
+
+def _add_bcc(args: str, ctx: dict) -> None:
+    _cli().cmd_gmail_add_bcc(args)
 
 
 # ── Phase 6B handlers (filter rule build→apply/cancel cluster) ────────────────
@@ -329,3 +352,37 @@ def register(registry: "CommandRegistry") -> None:
         intents=["gmail_forward"],
         args_schema={"target": "str?"},
     )(_forward)
+
+    # Phase 8 — draft-editing cluster
+
+    registry.register(
+        "/gmail-rewrite",
+        description="Rewrite the current draft body per instruction (shorter, more formal, etc.)",
+        category="gmail",
+        intents=["gmail_rewrite_draft"],
+        args_schema={"instruction": "str?"},
+    )(_rewrite)
+
+    registry.register(
+        "/gmail-update-subject",
+        description="Update the subject line of the current draft (LLM-generated or literal)",
+        category="gmail",
+        intents=["gmail_update_subject"],
+        args_schema={"instruction": "str?"},
+    )(_update_subject)
+
+    registry.register(
+        "/gmail-add-cc",
+        description="Add a CC recipient to the current draft (contact resolution + Gmail draft update)",
+        category="gmail",
+        intents=["gmail_add_cc"],
+        args_schema={"contact": "str?"},
+    )(_add_cc)
+
+    registry.register(
+        "/gmail-add-bcc",
+        description="Add a BCC recipient to the current draft (contact resolution + Gmail draft update)",
+        category="gmail",
+        intents=["gmail_add_bcc"],
+        args_schema={"contact": "str?"},
+    )(_add_bcc)

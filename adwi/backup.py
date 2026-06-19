@@ -376,7 +376,7 @@ def _run_auto_readme(quiet: bool = True, force: bool = True) -> bool:
     of snapshot hash — this ensures the README is always the authoritative system map.
     Returns True if the script ran without exception.
     """
-    readme_script = WORKSPACE / "bin" / "auto-update-readme"
+    readme_script = WORKSPACE / "adwi" / "bin" / "auto-update-readme"
     venv_py       = WORKSPACE / "adwi" / ".venv" / "bin" / "python3"
     if not readme_script.exists():
         return False

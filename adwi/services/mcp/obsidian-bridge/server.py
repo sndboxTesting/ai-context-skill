@@ -28,7 +28,7 @@ from urllib.parse import parse_qs, urlparse
 
 def _load_env():
     """Load config/.env into os.environ (setdefault — does not override shell env)."""
-    env_path = Path(__file__).parent.parent.parent / "config" / ".env"
+    env_path = Path(__file__).resolve().parents[3] / "config" / ".env"  # adwi/config/.env
     if not env_path.exists():
         return
     for raw in env_path.read_text(encoding="utf-8").splitlines():

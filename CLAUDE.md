@@ -25,7 +25,7 @@ Adwi is a local AI operating system running on an Apple Silicon Mac. It is not a
 | `adwi/path_validator.py` | Deny-first path guard — understand before any file operation |
 | `adwi/adwi_cli.py` lines 503–660 | `_REGEX_INTENTS` — NLU fast path, ordering is critical |
 | `adwi/adwi_cli.py` lines 865–1020 | `_INTENT_SYSTEM` — LLM classification prompt |
-| `adwi/logs/simeval/MASTER_REPORT_v2.md` | Refreshed 2026-06-19 (CYCLE-11, 98.3% combined dedup). Current state is in the table below. |
+| `adwi/logs/simeval/MASTER_REPORT_v2.md` | Refreshed 2026-06-19 (trust-baseline repair pass, 98.4% combined dedup). Current state is in the table below. |
 | `adwi/docs/NLU_REPAIR_BACKLOG.md` | Prioritized fix list with exact code proposals |
 
 ---
@@ -35,8 +35,8 @@ Adwi is a local AI operating system running on an Apple Silicon Mac. It is not a
 | Eval | Scenarios | Pre-NHR | Stabilize sprint | CYCLE-5 | CYCLE-6 | CYCLE-7 | CYCLE-11 | Total gain |
 |------|-----------|---------|------------------|---------|---------|---------|----------|------------|
 | Large eval P1 | 1,834 | 78.0% | 92.6% | 96.3% | 96.7% | 95.7% | **98.6%** | +20.6pp |
-| Large eval P2 (weak-family targeting) | 570 | 68.6% | 88.8% | 97.0% | 98.2% | 97.0% | **97.7%** | +29.1pp |
-| **Combined (dedup)** | **~2,283** | **75.8%** | **~91.7%** | **~96.5%** | **~97.0%** | **~95.8%** | **98.3%** | **+22.5pp** |
+| Large eval P2 (weak-family targeting) | 570 | 68.6% | 88.8% | 97.0% | 98.2% | 97.0% | **98.1%** | +29.5pp |
+| **Combined (dedup)** | **~2,283** | **75.8%** | **~91.7%** | **~96.5%** | **~97.0%** | **~95.8%** | **98.4%** | **+22.6pp** |
 
 **Stop Condition B reached 2026-06-19: combined >98%. All 10 NHR items applied 2026-06-16. Sessions 2-4 applied 2026-06-16. Gmail burn-in + stabilization sprint applied 2026-06-17. CYCLE-5 (2026-06-17): 13 bare-command anchors, chat advisory fixes, status/advisory boundary, memory_scan/github_connected/web_search additions — synced to all 3 files. CYCLE-6 (2026-06-17): PermissionError guard before CYCLE-1, run-aider before self-heal, organize before chat, use_local/large_files/gmail_list_attachments/capabilities/trusted_roots/tool_roadmap/test_adwi targeted fixes — synced to all 3 files.**
 
@@ -52,7 +52,9 @@ Session-4 applied 8 false-positive hardening fixes. Gmail burn-in applied 12 FIX
 
 **CYCLE-11 (2026-06-19): FIX-063 (rag_search regex BEFORE obsidian_search for "search my notes" + typo-tolerant sea?r?a?ch), FIX-064a–e (research, patch_adwi, nightly_status, github_connected typo, duplicates typo). P1: 98.6%, P2: 97.7%, Combined: 98.3%.**
 
-**Current baseline: 98.3% combined (dedup).** P1 failures (26): ~7 chat bleed, 5 __none__ LLM variance, scattered single-intent misroutes. P2 failures (7): LLM variance only. upgrade_pack: 100% (35/35). Regex fast-path: 66.7%.
+**Trust-baseline repair pass (2026-06-19): 3 NLU safety breaches fixed (~/Library/Passwords, /root/.bashrc, developer-mode social-engineering → __none__) + browse guard (fetch/summarize page). Patterns synced to P1+P2 harnesses. All env-path drift fixed (nightly.py, reason_engine.py, obsidian-bridge, adwi-sandbox, validate_adwi_env.py). reason_engine.py write guard expanded (12 entries). OpenTelemetry startup hang fixed (port-check gate). validate-docs paths fixed (now 20/20). MASTER_REPORT_v2.md regenerated from sessions large-20260619-103709 + large-p2-20260619-104828. P1: 98.6%, P2: 98.1%, Combined: 98.4%. Safety breaches: 0.**
+
+**Current baseline: 98.4% combined (dedup).** P1 failures (21): ~7 chat bleed, LLM variance, scattered single-intent misroutes. P2 failures (5): LLM variance only. upgrade_pack: 100% (35/35). Regex fast-path: 66.8%.
 
 Changes are synchronized across all 3 files: `adwi/adwi_cli.py`, `adwi/logs/simeval/run_large_eval.py`, `adwi/logs/simeval/run_large_eval_p2.py`.
 
@@ -74,7 +76,7 @@ Changes are synchronized across all 3 files: `adwi/adwi_cli.py`, `adwi/logs/sime
 
 | File | Owns |
 |------|------|
-| `adwi/adwi_cli.py` | REPL, 167 commands, NLU pipeline (`_REGEX_INTENTS`, `_INTENT_SYSTEM`, dispatch), Phase 3 risk classifier, Phase 4 live self-heal |
+| `adwi/adwi_cli.py` | REPL, 177 commands, NLU pipeline (`_REGEX_INTENTS`, `_INTENT_SYSTEM`, dispatch), Phase 3 risk classifier, Phase 4 live self-heal |
 | `adwi/reason_engine.py` | LangGraph Planner→Executor→Critic, permission gate, aider integration, AchievementLedger |
 | `adwi/memory.py` | SQLite memory store, nomic-embed cosine search, Qdrant NLU fixtures, knowledge.db |
 | `adwi/path_validator.py` | Deny-first path containment — blocks `~/.ssh`, `~/.aws`, `secrets/`, etc. |

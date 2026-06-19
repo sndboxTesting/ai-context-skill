@@ -24,7 +24,7 @@ SEARXNG_URL       = "http://127.0.0.1:8888"
 
 # Load config/.env for API keys
 def _load_env():
-    env_file = WORKSPACE / "config" / ".env"
+    env_file = ADWI_DIR / "config" / ".env"
     if not env_file.exists():
         return
     for raw in env_file.read_text(encoding="utf-8").splitlines():

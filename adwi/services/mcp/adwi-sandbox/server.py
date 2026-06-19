@@ -21,7 +21,7 @@ WORKSPACE = Path.home() / "SuneelWorkSpace"
 SAFE_API  = "http://127.0.0.1:5055"
 
 def _load_workspace_env():
-    env_path = WORKSPACE / "config" / ".env"
+    env_path = WORKSPACE / "adwi" / "config" / ".env"
     if not env_path.exists():
         return
     for raw in env_path.read_text(encoding="utf-8").splitlines():
@@ -46,7 +46,7 @@ _PATH_VALIDATOR = _PathValidator(
     allowed_roots=[WORKSPACE, _home / "Desktop", _home / "Documents", _home / "Downloads"],
     blocked_roots=[
         WORKSPACE / "secrets",
-        WORKSPACE / "config" / ".env",  # contains API keys — not safe to expose via MCP
+        WORKSPACE / "adwi" / "config" / ".env",  # contains API keys — not safe to expose via MCP
         _home / ".ssh",
         _home / ".gnupg",
         _home / ".aws",

@@ -25,6 +25,11 @@ from datetime import datetime
 from pathlib import Path
 from typing import Optional
 
+try:
+    from adwi.search_orchestrator import SearchOptions, SearchOrchestrator, metrics_summary
+except ModuleNotFoundError:
+    from search_orchestrator import SearchOptions, SearchOrchestrator, metrics_summary  # type: ignore
+
 # ── Constants ─────────────────────────────────────────────────────────────────
 OLLAMA_URL  = "http://127.0.0.1:11434"
 MODEL_MAIN  = "adwi:latest"
@@ -493,7 +498,7 @@ def _exec_file_read(path_str: str, ledger: AchievementLedger) -> tuple[bool, str
     blocked = [
         Path.home() / ".ssh", Path.home() / ".aws",
         WORKSPACE / "secrets", Path("/etc"), Path("/private"),
-        WORKSPACE / "config" / ".env",
+        ADWI_DIR / "config" / ".env",
     ]
     for b in blocked:
         try:
@@ -519,7 +524,13 @@ def _exec_file_write(spec: str, context: dict, ledger: AchievementLedger) -> tup
         path_str = spec
         content  = context.get("write_content", "")
     p = Path(path_str).expanduser()
-    blocked = [Path.home() / ".ssh", Path("/etc"), WORKSPACE / "secrets"]
+    _home = Path.home()
+    blocked = [
+        _home / ".ssh", _home / ".aws", _home / ".gnupg", _home / ".kube",
+        _home / "Library" / "Keychains", _home / "Library" / "Passwords",
+        WORKSPACE / "secrets", ADWI_DIR / "config" / ".env",
+        Path("/etc"), Path("/private"), Path("/System"), Path("/usr/lib"),
+    ]
     for b in blocked:
         try:
             p.resolve().relative_to(b.resolve())
@@ -551,18 +562,17 @@ def _exec_memory_query(query: str, ledger: AchievementLedger) -> tuple[bool, str
 
 
 def _exec_web_search(query: str, ledger: AchievementLedger) -> tuple[bool, str]:
-    import urllib.parse
     try:
-        params = urllib.parse.urlencode({"q": query, "format": "json", "language": "en"})
-        req = urllib.request.Request(
-            f"http://127.0.0.1:8888/search?{params}",
-            headers={"User-Agent": "Adwi-Reason/1.0"},
+        response = SearchOrchestrator().search(
+            query,
+            SearchOptions(max_results=5, mode="reason"),
         )
-        with urllib.request.urlopen(req, timeout=10) as r:
-            data = json.loads(r.read())
-        results = data.get("results", [])[:5]
         ledger.add_search(query)
-        lines = [f"- [{r.get('title','')}]: {r.get('content','')[:200]}" for r in results]
+        lines = [
+            f"- {r.title} ({r.source})\n  {r.url}\n  {r.snippet[:220]}"
+            for r in response.results
+        ]
+        lines.append(f"\nProvider metrics: {metrics_summary(response.metrics)}")
         return True, "\n".join(lines) if lines else "No results."
     except Exception as e:
         return False, f"Search error: {e}"

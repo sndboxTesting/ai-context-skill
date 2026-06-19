@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0.0",
-  "generated_at": "2026-06-18T14:54:40.995651+00:00",
+  "generated_at": "2026-06-19T15:12:22.738998+00:00",
   "generated_by": "bin/generate-manifest",
   "system_identity": {
     "name": "Adwi",
@@ -252,12 +252,12 @@
     ]
   },
   "command_registry": {
-    "total_commands": 173,
+    "total_commands": 177,
     "source_files": [
       "adwi/adwi_cli.py",
       "adwi/capabilities.json"
     ],
-    "last_counted": "2026-06-18",
+    "last_counted": "2026-06-19",
     "commands": [
       "/add-capability-plan",
       "/add-root",
@@ -284,6 +284,10 @@
       "/disk",
       "/doctor",
       "/duplicates",
+      "/e2e-auto-loop",
+      "/e2e-auto-loop-cancel",
+      "/e2e-auto-loop-report",
+      "/e2e-auto-loop-status",
       "/eval-adwi",
       "/eval-routing",
       "/exa",

@@ -1,21 +1,21 @@
 {
   "sessions": [
-    "large-20260619-033633",
-    "large-p2-20260619-034751"
+    "large-20260619-103709",
+    "large-p2-20260619-104828"
   ],
-  "generated": "2026-06-19 03:52",
+  "generated": "2026-06-19 10:53",
   "total": 2283,
-  "passed": 2244,
+  "passed": 2246,
   "warned": 11,
-  "failed": 28,
-  "pass_rate_pct": 98.3,
-  "regex_hits": 1523,
-  "regex_hit_pct": 66.7,
-  "llm_calls": 760,
-  "avg_latency_ms": 1993.9,
-  "p95_latency_ms": 7153.3,
+  "failed": 26,
+  "pass_rate_pct": 98.4,
+  "regex_hits": 1526,
+  "regex_hit_pct": 66.8,
+  "llm_calls": 756,
+  "avg_latency_ms": 3959.4,
+  "p95_latency_ms": 13846.4,
   "safety_probes": 66,
-  "safety_breaches": 3,
+  "safety_breaches": 0,
   "top_misroutes": [
     {
       "from": "chat",
@@ -25,11 +25,6 @@
     {
       "from": "chat",
       "to": "memory_recall",
-      "count": 2
-    },
-    {
-      "from": "__none__",
-      "to": "run_code",
       "count": 2
     },
     {
@@ -93,18 +88,23 @@
       "count": 1
     },
     {
-      "from": "nightly_run",
-      "to": "nightly_status",
-      "count": 1
-    },
-    {
       "from": "gmail",
       "to": "gmail_thread_intel",
       "count": 1
     },
     {
+      "from": "nightly_run",
+      "to": "nightly_status",
+      "count": 1
+    },
+    {
       "from": "use_local",
       "to": "use_cloud",
+      "count": 1
+    },
+    {
+      "from": "__none__",
+      "to": "__none__",
       "count": 1
     },
     {
@@ -114,12 +114,12 @@
     },
     {
       "from": "__none__",
-      "to": "__none__",
+      "to": "doctor",
       "count": 1
     },
     {
-      "from": "__none__",
-      "to": "doctor",
+      "from": "fix_error",
+      "to": "__none__",
       "count": 1
     },
     {
@@ -131,28 +131,24 @@
       "from": "obsidian_search",
       "to": "memory_recall",
       "count": 1
-    },
-    {
-      "from": "__none__",
-      "to": "file_read",
-      "count": 1
     }
   ],
   "fail_by_intent": {
     "chat": 7,
-    "__none__": 5,
     "old_files": 2,
     "file_search": 2,
+    "__none__": 2,
     "large_files": 1,
     "status": 1,
     "file_list": 1,
     "gmail_tasks_save": 1,
     "gmail_confirm": 1,
     "disk_usage": 1,
-    "nightly_run": 1,
     "gmail": 1,
+    "nightly_run": 1,
     "use_local": 1,
     "benchmark": 1,
+    "fix_error": 1,
     "web_search": 1,
     "obsidian_search": 1
   },

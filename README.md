@@ -17,7 +17,7 @@
 |---|---|---|
 | [§1](#1-system-dna--model-matrix) | System DNA & Model Matrix | Hardware, models, NLU pipeline |
 | [§2](#2-infrastructure-topography) | Infrastructure Topography | Every port, container, agent, data flow |
-| [§3](#3-deterministic-capability-grid) | Deterministic Capability Grid | All 167+ commands, args, behaviors |
+| [§3](#3-deterministic-capability-grid) | Deterministic Capability Grid | All 177+ commands, args, behaviors |
 | [§3a](#3a-gmail-capability-surface) | Gmail Capability Surface | Full Gmail feature inventory — read/write/draft/send/schedule/rules |
 | [§4](#4-agentic-lifecycle-flows) | Agentic Lifecycle Flows | ASCII diagrams of every execution path |
 | [§5](#5-security--boundary-invariants) | Security & Boundary Invariants | Hard blocks, credential isolation, API auth status |
@@ -315,8 +315,8 @@ Dashboard: http://localhost:4000 (user: suneel)
 | `/ask` | `<question>` | Chat | Streams answer from `adwi:latest` · 131K ctx |
 | `/chat` | `<message>` | Chat | Conversational mode with memory injection |
 | `/reason` | `<task>` | Agentic | LangGraph Planner→Executor→Critic · `reason_engine.py` · Achievement Summary on completion |
-| `/web-search` | `<query>` | Search | SearXNG+Tavily+Exa cascade · deduplicated by URL · synthesised by `adwi:latest` |
-| `/browse` | `<url> [question]` | Search | Firecrawl → Playwright → urllib fallback chain |
+| `/web-search` | `<query>` | Search | Shared orchestrator: SearXNG + optional Brave/Tavily/Exa · canonical dedupe · cache · rerank · synthesised by `adwi:latest` |
+| `/browse` | `<url> [question]` | Search | Shared fetch chain: Firecrawl → optional Jina Reader → Playwright → urllib |
 | `/exa` | `<query>` | Search | Neural/semantic via Exa API · requires `EXA_API_KEY` |
 | `/tavily` | `<query>` | Search | AI-curated via Tavily · requires `TAVILY_API_KEY` |
 | `/firecrawl` | `<url>` | Search | URL→clean markdown · requires `FIRECRAWL_API_KEY` |
@@ -565,7 +565,8 @@ adwi_cli.py: handle(line)
         │             │                │                    │
         │        search_web()   adwi:latest (local)  adwi:latest
         │             │         + memory context     streaming
-        │     SearXNG+Tavily+Exa
+        │     SearchOrchestrator
+        │     SearXNG + optional Brave/Tavily/Exa
         │             │
         │       adwi:latest synthesis
         │
@@ -861,7 +862,7 @@ Enforced by `_classify_cli_risk()` (adwi_cli.py) and `classify_risk()` (reason_e
 SuneelWorkSpace/
 │
 ├── adwi/                              # Core AI brain
-│   ├── adwi_cli.py                    # 5,100+ lines · 167 commands · REPL entry point
+│   ├── adwi_cli.py                    # 5,100+ lines · 177 commands · REPL entry point
 │   ├── reason_engine.py               # LangGraph: Planner→Executor→Critic (822 lines)
 │   ├── memory.py                      # AdwiMemory: SQLite + nomic-embed cosine search (96 NLU fixtures)
 │   ├── path_validator.py              # Deny-first path containment; hard-blocks credential dirs

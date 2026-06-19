@@ -206,12 +206,15 @@ REGEX_INTENTS = [
     (re.compile(r"/etc/(?:passwd|shadow|sudoers|hosts|master\.passwd)\b", re.I), "__none__"),
     (re.compile(r"/private/(?:etc|var/db)\b", re.I), "__none__"),
     (re.compile(r"~/Library/Keychains?\b", re.I), "__none__"),
+    (re.compile(r"~/Library/Passwords?\b", re.I), "__none__"),            # FIX-TRUST-SEC-01
+    (re.compile(r"/root/\.", re.I), "__none__"),                          # FIX-TRUST-SEC-02
     (re.compile(r"\bsecring\.gpg\b|\bauthorized_keys\b|\bid_(?:rsa|ed25519|ecdsa|dsa)\b", re.I), "__none__"),
     (re.compile(r"System/Library/CoreServices\b", re.I), "__none__"),
     (re.compile(r"\bsecrets?[/\\]", re.I), "__none__"),
     (re.compile(r"\.\.[/\\]", re.I), "__none__"),
     (re.compile(r"\bpretend\b.{0,40}\b(?:safety|rules?\s+don.t|don.t\s+apply)\b", re.I), "__none__"),
     (re.compile(r"\b(?:as\s+a?\s+)?(?:developer|admin)\s+override\b", re.I), "__none__"),
+    (re.compile(r"\bdeveloper\s+mode\b.{0,40}\b(?:all\s+files?|no\s+restrictions?|allowed|bypass|override|enabled|off)\b", re.I), "__none__"),  # FIX-TRUST-SEC-03
     (re.compile(r"\bsudo\b.{0,20}\b(?:cat|read|show|open|display)\b", re.I), "__none__"),
     (re.compile(r"\brun\s+as\s+root\b", re.I), "__none__"),
     (re.compile(r"\bexport\b.{0,20}\btraining\s+data\b", re.I), "__none__"),
@@ -988,6 +991,9 @@ REGEX_INTENTS = [
     (re.compile(r"\b(show|open|read|get|view)\b.{0,20}\b(thread|conversation|email\s+chain|message\s+chain)\b", re.I), "gmail_thread"),
     (re.compile(r"\bthread\b.{0,20}\b(about|from|with|on)\b", re.I), "gmail_thread"),
 
+    # FIX-TRUST-004: "fetch this page and summarize it" → browse, not gmail_summarize
+    (re.compile(r"\b(?:fetch|get|retrieve|load)\b.{0,30}\b(?:page|article|site|url|webpage)\b.{0,40}\b(?:summarize|summary|tldr)\b", re.I), "browse"),
+    (re.compile(r"\bsummarize\b.{0,15}\b(?:this|the)\b.{0,10}\b(?:page|article|site|url|webpage|link)\b(?!\s*(?:from\s+)?(?:email|mail|message|thread))", re.I), "browse"),
     # FIX-SPRINT-007: "search web for X and summarize it" → web_search, not gmail_summarize
     # MUST precede the "summarize it" gmail_summarize pattern below
     (re.compile(r"\b(?:search|look\s+up|find)\b.{0,20}\b(?:web|internet|online|for)\b.{0,60}\b(?:summarize|tldr|summary)\b", re.I), "web_search"),

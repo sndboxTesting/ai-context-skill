@@ -16,7 +16,7 @@
 {"id": "r016", "input": "analyze my screenshot ~/Desktop/error.png", "expected_intent": "image", "expected_command": "/image", "category": "media"}
 {"id": "r017", "input": "look at this image: /tmp/screenshot.png", "expected_intent": "image", "expected_command": "/image", "category": "media"}
 {"id": "r018", "input": "search my notes about docker", "expected_intent": "rag_search", "expected_command": "/rag", "category": "search"}
-{"id": "r019", "input": "find notes about Ollama", "expected_intent": "rag_search", "expected_command": "/rag", "category": "search"}
+{"id": "r019", "input": "find notes about Ollama", "expected_intent": "obsidian_search", "expected_command": "/obsidian-search", "category": "search", "note": "find notes about X = vault lookup (obsidian_search); rag_search is the RAG vector store"}
 {"id": "r020", "input": "browse https://news.ycombinator.com", "expected_intent": "browse", "expected_command": "/browse", "category": "web"}
 {"id": "r021", "input": "fetch this page and summarize it", "expected_intent": "browse", "expected_command": "/browse", "category": "web"}
 {"id": "r022", "input": "what's taking up all my disk space?", "expected_intent": "disk_usage", "expected_command": "/disk", "category": "filesystem"}

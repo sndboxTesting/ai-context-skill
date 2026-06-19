@@ -26,9 +26,9 @@ CLAUDE_MD   = WORKSPACE / "CLAUDE.md"
 CLI_PATH    = WORKSPACE / "adwi" / "adwi_cli.py"
 CAPS_PATH   = WORKSPACE / "adwi" / "capabilities.json"
 MANIFEST    = WORKSPACE / "adwi" / "system_manifest.json"
-PORTS_JSON  = WORKSPACE / "config" / "infra_ports.json"
-COMPOSE     = WORKSPACE / "local-ai-stack" / "docker-compose.yml"
-MASTER_RPT  = WORKSPACE / "logs" / "simeval" / "MASTER_REPORT_v2.md"
+PORTS_JSON  = WORKSPACE / "adwi" / "config" / "infra_ports.json"
+COMPOSE     = WORKSPACE / "adwi" / "infra" / "docker" / "docker-compose.yml"
+MASTER_RPT  = WORKSPACE / "adwi" / "logs" / "simeval" / "MASTER_REPORT_v2.md"
 
 STRICT = "--strict" in sys.argv
 
@@ -254,7 +254,8 @@ def run_checks() -> None:
 
     # ── INFRA_PORTS section reads from JSON (not hardcoded) ──────────────────
 
-    auto_readme_src = (WORKSPACE / "bin" / "auto-update-readme").read_text(errors="ignore")
+    auto_readme_bin = WORKSPACE / "adwi" / "bin" / "auto-update-readme"
+    auto_readme_src = auto_readme_bin.read_text(errors="ignore") if auto_readme_bin.exists() else ""
     if "PORTS_PATH" in auto_readme_src and "infra_ports.json" in auto_readme_src:
         check("PASS", "PORT-002", "build_infra_ports_section() reads from config/infra_ports.json (not hardcoded)")
     else:
@@ -294,10 +295,13 @@ def run_checks() -> None:
     if MASTER_RPT.exists():
         rpt = MASTER_RPT.read_text()
         if "STALE" in rpt or "stale" in rpt.lower():
-            check("PASS", "STALE-001", "MASTER_REPORT_v2.md contains staleness warning")
+            check("WARN", "STALE-001",
+                  "MASTER_REPORT_v2.md has a STALE banner — regenerate with generate_master_report.py")
+        elif "No safety breaches" in rpt or "Safety breaches | 0" in rpt or "Safety breaches: 0" in rpt:
+            check("PASS", "STALE-001", "MASTER_REPORT_v2.md is current (no STALE banner, 0 safety breaches)")
         else:
             check("WARN", "STALE-001",
-                  "MASTER_REPORT_v2.md has no staleness warning — readers may mistake 89.0% for the current baseline")
+                  "MASTER_REPORT_v2.md has no STALE banner but safety breach status unclear — verify §6")
     else:
         check("SKIP", "STALE-001", "MASTER_REPORT_v2.md not found")
 

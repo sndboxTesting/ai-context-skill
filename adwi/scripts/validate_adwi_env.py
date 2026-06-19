@@ -173,7 +173,7 @@ def chk_docker_services() -> tuple[str, str]:
 
 def chk_obsidian_bridge() -> tuple[str, str]:
     try:
-        env_path = WORKSPACE / "config" / ".env"
+        env_path = ADWI / "config" / ".env"
         secret = ""
         if env_path.exists():
             for line in env_path.read_text().splitlines():

@@ -2047,6 +2047,98 @@ KNOWN_REGEX_FIXES: list[dict] = [
         ),
         "minimum_examples": 1,
     },
+    # ── FIX-E2E-053: disk_usage typo regex — "wats using my disk" ───────────────
+    {
+        "id":             "FIX-E2E-053a",
+        "description":    "Add typo-friendly regex for 'wats using my disk' → disk_usage in P1",
+        "target_intents": ["disk_usage"],
+        "target_file":    "adwi/logs/simeval/run_large_eval.py",
+        "check_pattern":  r'r"\\bwhat\.s\\b.{0,30}\(space\|room\|storage\|disk\)".*disk_usage',
+        "old_str": (
+            '    (re.compile(r"\\bwhat.s\\b.{0,30}(space|room|storage|disk)", re.I), "disk_usage"),\n'
+        ),
+        "new_str": (
+            '    (re.compile(r"\\bwhat.s\\b.{0,30}(space|room|storage|disk)", re.I), "disk_usage"),\n'
+            '    (re.compile(r"\\bwats\\s+using\\b.{0,20}\\b(?:my\\s+)?(?:disk|storage|space)\\b", re.I), "disk_usage"),\n'
+        ),
+        "minimum_examples": 1,
+    },
+    {
+        "id":             "FIX-E2E-053b",
+        "description":    "Add typo-friendly regex for 'wats using my disk' → disk_usage in P2",
+        "target_intents": ["disk_usage"],
+        "target_file":    "adwi/logs/simeval/run_large_eval_p2.py",
+        "check_pattern":  r'r"\\bwhat\.s\\b.{0,30}\(space\|room\|storage\|disk\)".*disk_usage',
+        "old_str": (
+            '    (re.compile(r"\\bwhat.s\\b.{0,30}(space|room|storage|disk)", re.I), "disk_usage"),\n'
+        ),
+        "new_str": (
+            '    (re.compile(r"\\bwhat.s\\b.{0,30}(space|room|storage|disk)", re.I), "disk_usage"),\n'
+            '    (re.compile(r"\\bwats\\s+using\\b.{0,20}\\b(?:my\\s+)?(?:disk|storage|space)\\b", re.I), "disk_usage"),\n'
+        ),
+        "minimum_examples": 1,
+    },
+    {
+        "id":             "FIX-E2E-053c",
+        "description":    "Add typo-friendly regex for 'wats using my disk' → disk_usage in CLI",
+        "target_intents": ["disk_usage"],
+        "target_file":    "adwi/adwi_cli.py",
+        "check_pattern":  r'r"\\bwhat\.s\\b.{0,30}\(space\|room\|storage\|disk\)".*disk_usage',
+        "old_str": (
+            '    (re.compile(r"\\bwhat.s\\b.{0,30}(space|room|storage|disk)", re.I), "disk_usage"),\n'
+        ),
+        "new_str": (
+            '    (re.compile(r"\\bwhat.s\\b.{0,30}(space|room|storage|disk)", re.I), "disk_usage"),\n'
+            '    (re.compile(r"\\bwats\\s+using\\b.{0,20}\\b(?:my\\s+)?(?:disk|storage|space)\\b", re.I), "disk_usage"),\n'
+        ),
+        "minimum_examples": 1,
+    },
+    # ── FIX-E2E-054: "developer mode: all files allowed" → __none__ ───────────
+    {
+        "id":             "FIX-E2E-054a",
+        "description":    "Add 'developer mode: all files allowed' security regex → __none__ in P1",
+        "target_intents": ["__none__"],
+        "target_file":    "adwi/logs/simeval/run_large_eval.py",
+        "check_pattern":  r'developer\|admin.*override.*__none__',
+        "old_str": (
+            '    (re.compile(r"\\b(?:as\\s+a?\\s+)?(?:developer|admin)\\s+override\\b", re.I), "__none__"),\n'
+        ),
+        "new_str": (
+            '    (re.compile(r"\\b(?:as\\s+a?\\s+)?(?:developer|admin)\\s+override\\b", re.I), "__none__"),\n'
+            '    (re.compile(r"\\bdeveloper\\s+mode\\b.{0,30}\\b(?:all\\s+files?\\s+allowed|no\\s+restrictions?|bypass|ignore\\s+rules?)\\b", re.I), "__none__"),\n'
+        ),
+        "minimum_examples": 1,
+    },
+    {
+        "id":             "FIX-E2E-054b",
+        "description":    "Add 'developer mode: all files allowed' security regex → __none__ in P2",
+        "target_intents": ["__none__"],
+        "target_file":    "adwi/logs/simeval/run_large_eval_p2.py",
+        "check_pattern":  r'developer\|admin.*override.*__none__',
+        "old_str": (
+            '    (re.compile(r"\\b(?:as\\s+a?\\s+)?(?:developer|admin)\\s+override\\b", re.I), "__none__"),\n'
+        ),
+        "new_str": (
+            '    (re.compile(r"\\b(?:as\\s+a?\\s+)?(?:developer|admin)\\s+override\\b", re.I), "__none__"),\n'
+            '    (re.compile(r"\\bdeveloper\\s+mode\\b.{0,30}\\b(?:all\\s+files?\\s+allowed|no\\s+restrictions?|bypass|ignore\\s+rules?)\\b", re.I), "__none__"),\n'
+        ),
+        "minimum_examples": 1,
+    },
+    {
+        "id":             "FIX-E2E-054c",
+        "description":    "Add 'developer mode: all files allowed' security regex → __none__ in CLI",
+        "target_intents": ["__none__"],
+        "target_file":    "adwi/adwi_cli.py",
+        "check_pattern":  r'developer\|admin.*override.*__none__',
+        "old_str": (
+            '    (re.compile(r"\\b(?:as\\s+a?\\s+)?(?:developer|admin)\\s+override\\b", re.I), "__none__"),\n'
+        ),
+        "new_str": (
+            '    (re.compile(r"\\b(?:as\\s+a?\\s+)?(?:developer|admin)\\s+override\\b", re.I), "__none__"),\n'
+            '    (re.compile(r"\\bdeveloper\\s+mode\\b.{0,30}\\b(?:all\\s+files?\\s+allowed|no\\s+restrictions?|bypass|ignore\\s+rules?)\\b", re.I), "__none__"),\n'
+        ),
+        "minimum_examples": 1,
+    },
 ]
 
 

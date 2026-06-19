@@ -1,6 +1,0 @@
- M adwi/notes/e2e-auto-loop/status.json
-?? adwi/notes/e2e-auto-loop/e2e-20260618-181520/
-?? adwi/notes/e2e-auto-loop/e2e-20260618-205227/
-?? adwi/notes/e2e-auto-loop/e2e-20260618-213340/
-?? adwi/notes/e2e-auto-loop/e2e-20260619-004511/
-?? adwi/notes/git-backup-logs/20260619-011513-git-backup.md

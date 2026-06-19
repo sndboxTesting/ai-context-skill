@@ -1190,6 +1190,379 @@ KNOWN_REGEX_FIXES: list[dict] = [
         ),
         "minimum_examples": 1,
     },
+    # ── FIX-E2E-032a: fix implement_idea P1 — add NOT for patch_adwi/what_next ───
+    {
+        "id":             "FIX-E2E-032a",
+        "description":    "Narrow implement_idea in run_large_eval.py — NOT for code-improvement (patch_adwi) or what-next",
+        "target_intents": ["patch_adwi", "what_next"],
+        "target_file":    "adwi/logs/simeval/run_large_eval.py",
+        "check_pattern":  r"NOT run_code\. NOT vague.*\n.*'backup_now'",
+        "old_str": (
+            '    "   \'implement_idea\' : user wants to add/build/implement a specific feature or improvement.\\n"\n'
+            '    "                      \'add this feature to adwi\', \'implement: better error handling\',\\n"\n'
+            '    "                      \'build X for adwi\', \'make adwi do X\'. NOT run_code. NOT vague (→ chat).\\n"\n'
+            '    "   \'backup_now\'     : backup workspace to GitHub, push backup. Includes \'push to github\',\\n"\n'
+        ),
+        "new_str": (
+            '    "   \'implement_idea\' : user wants to add/build/implement a specific NEW feature (not improve existing).\\n"\n'
+            '    "                      \'add this feature to adwi\', \'implement: better error handling\'.\\n"\n'
+            '    "                      NOT \'improve adwi code\', \'enhance adwi\' (→ patch_adwi).\\n"\n'
+            '    "                      NOT \'what feature should i add\', \'what should i build next\' (→ what_next).\\n"\n'
+            '    "   \'backup_now\'     : backup workspace to GitHub, push backup. Includes \'push to github\',\\n"\n'
+        ),
+        "minimum_examples": 2,
+    },
+    # ── FIX-E2E-032b: same for P2 ────────────────────────────────────────────────
+    {
+        "id":             "FIX-E2E-032b",
+        "description":    "Narrow implement_idea in run_large_eval_p2.py — NOT for patch_adwi/what_next",
+        "target_intents": ["patch_adwi", "what_next"],
+        "target_file":    "adwi/logs/simeval/run_large_eval_p2.py",
+        "check_pattern":  r"NOT run_code\. NOT vague.*\n.*'backup_now'",
+        "old_str": (
+            '    "   \'implement_idea\' : user wants to add/build/implement a specific feature or improvement.\\n"\n'
+            '    "                      \'add this feature to adwi\', \'implement: better error handling\',\\n"\n'
+            '    "                      \'build X for adwi\', \'make adwi do X\'. NOT run_code. NOT vague (→ chat).\\n"\n'
+            '    "   \'backup_now\'     : backup to GitHub. Includes \'push to github\', \'push my changes\',\\n"\n'
+        ),
+        "new_str": (
+            '    "   \'implement_idea\' : user wants to add/build/implement a specific NEW feature (not improve existing).\\n"\n'
+            '    "                      \'add this feature to adwi\', \'implement: better error handling\'.\\n"\n'
+            '    "                      NOT \'improve adwi code\', \'enhance adwi\' (→ patch_adwi).\\n"\n'
+            '    "                      NOT \'what feature should i add\', \'what should i build next\' (→ what_next).\\n"\n'
+            '    "   \'backup_now\'     : backup to GitHub. Includes \'push to github\', \'push my changes\',\\n"\n'
+        ),
+        "minimum_examples": 1,
+    },
+    # ── FIX-E2E-032c: same for adwi_cli.py ───────────────────────────────────────
+    {
+        "id":             "FIX-E2E-032c",
+        "description":    "Narrow implement_idea in adwi_cli.py — NOT for patch_adwi/what_next",
+        "target_intents": ["patch_adwi", "what_next"],
+        "target_file":    "adwi/adwi_cli.py",
+        "check_pattern":  r"NOT run_code\. NOT vague.*\n.*'backup_now'",
+        "old_str": (
+            '    "   \'implement_idea\' : user wants to add/build/implement a specific feature or improvement.\\n"\n'
+            '    "                      \'add this feature to adwi\', \'implement: better error handling\',\\n"\n'
+            '    "                      \'build X for adwi\', \'make adwi do X\'. NOT run_code. NOT vague (→ chat).\\n"\n'
+            '    "   \'backup_now\'     : backup workspace to GitHub, push backup. Includes \'push to github\',\\n"\n'
+        ),
+        "new_str": (
+            '    "   \'implement_idea\' : user wants to add/build/implement a specific NEW feature (not improve existing).\\n"\n'
+            '    "                      \'add this feature to adwi\', \'implement: better error handling\'.\\n"\n'
+            '    "                      NOT \'improve adwi code\', \'enhance adwi\' (→ patch_adwi).\\n"\n'
+            '    "                      NOT \'what feature should i add\', \'what should i build next\' (→ what_next).\\n"\n'
+            '    "   \'backup_now\'     : backup workspace to GitHub, push backup. Includes \'push to github\',\\n"\n'
+        ),
+        "minimum_examples": 1,
+    },
+    # ── FIX-E2E-033a: expand disk_usage P1 — add "wats using my disk" examples ───
+    {
+        "id":             "FIX-E2E-033a",
+        "description":    "Expand disk_usage in run_large_eval.py — add 'wats using my disk' example",
+        "target_intents": ["disk_usage"],
+        "target_file":    "adwi/logs/simeval/run_large_eval.py",
+        "check_pattern":  r"'disk_usage'.*storage/disk space questions ONLY.*\n.*'large_files'",
+        "old_str": (
+            '    "   \'disk_usage\'     : storage/disk space questions ONLY\\n"\n'
+            '    "   \'large_files\'    : find files exceeding a size threshold. \'show disk hogs\',\\n"\n'
+        ),
+        "new_str": (
+            '    "   \'disk_usage\'     : storage/disk space questions ONLY. \'wats using my disk\', \'disk usage\',\\n"\n'
+            '    "                      \'how much disk space\', \'df -h\', \'storage stats\'.\\n"\n'
+            '    "   \'large_files\'    : find files exceeding a size threshold. \'show disk hogs\',\\n"\n'
+        ),
+        "minimum_examples": 2,
+    },
+    # ── FIX-E2E-033b: same for P2 ────────────────────────────────────────────────
+    {
+        "id":             "FIX-E2E-033b",
+        "description":    "Expand disk_usage in run_large_eval_p2.py — add 'wats using my disk' example",
+        "target_intents": ["disk_usage"],
+        "target_file":    "adwi/logs/simeval/run_large_eval_p2.py",
+        "check_pattern":  r"'disk_usage'.*storage/disk space questions ONLY.*\n.*'large_files'",
+        "old_str": (
+            '    "   \'disk_usage\'     : storage/disk space questions ONLY\\n"\n'
+            '    "   \'large_files\'    : find files exceeding a size threshold. \'show disk hogs\',\\n"\n'
+        ),
+        "new_str": (
+            '    "   \'disk_usage\'     : storage/disk space questions ONLY. \'wats using my disk\', \'disk usage\',\\n"\n'
+            '    "                      \'how much disk space\', \'df -h\', \'storage stats\'.\\n"\n'
+            '    "   \'large_files\'    : find files exceeding a size threshold. \'show disk hogs\',\\n"\n'
+        ),
+        "minimum_examples": 1,
+    },
+    # ── FIX-E2E-034a: expand what_next P1 — add "what feature should i add" ──────
+    {
+        "id":             "FIX-E2E-034a",
+        "description":    "Expand what_next in run_large_eval.py — add 'what feature should i add'",
+        "target_intents": ["what_next"],
+        "target_file":    "adwi/logs/simeval/run_large_eval.py",
+        "check_pattern":  r"'what_next'.*what should I build next.*\n.*suggest adwi improvements",
+        "old_str": (
+            '    "   \'what_next\'      : user asks for AI-suggested next improvements or features. \'what should I build next\',\\n"\n'
+            '    "                      \'suggest adwi improvements\', \'adwi roadmap\', \'next feature ideas\',\\n"\n'
+        ),
+        "new_str": (
+            '    "   \'what_next\'      : user asks for AI-suggested next improvements or features. \'what should I build next\',\\n"\n'
+            '    "                      \'suggest adwi improvements\', \'adwi roadmap\', \'next feature ideas\',\\n"\n'
+            '    "                      \'what feature should i add\', \'next thing to add\', \'what capability is missing\'.\\n"\n'
+        ),
+        "minimum_examples": 1,
+    },
+    # FIX-E2E-034b: skipped — what_next has no INTENT_SYSTEM description in P2
+    # ── FIX-E2E-035a: expand daily_improve P1 — add run-improvement-loop example ─
+    {
+        "id":             "FIX-E2E-035a",
+        "description":    "Expand daily_improve in run_large_eval.py — add run-improvement-loop example",
+        "target_intents": ["daily_improve"],
+        "target_file":    "adwi/logs/simeval/run_large_eval.py",
+        "check_pattern":  r"'daily_improve'.*daily improve.*\n.*NOT patch_adwi",
+        "old_str": (
+            '    "   \'daily_improve\'  : run the daily self-improvement routine. \'daily improve\', \'daily improvement\',\\n"\n'
+            '    "                      \'daily routine\', \'run daily maintenance\'. NOT patch_adwi (code changes via aider).\\n"\n'
+        ),
+        "new_str": (
+            '    "   \'daily_improve\'  : run the daily self-improvement routine. \'daily improve\', \'daily improvement\',\\n"\n'
+            '    "                      \'daily routine\', \'run daily maintenance\', \'run the improvement loop\',\\n"\n'
+            '    "                      \'daily enhance adwi\'. NOT patch_adwi (aider code changes). NOT run_code.\\n"\n'
+        ),
+        "minimum_examples": 2,
+    },
+    # ── FIX-E2E-035b: expand daily_improve P2 (P2 has 1-line format) ───────────
+    {
+        "id":             "FIX-E2E-035b",
+        "description":    "Expand daily_improve in run_large_eval_p2.py — add run-improvement-loop example",
+        "target_intents": ["daily_improve"],
+        "target_file":    "adwi/logs/simeval/run_large_eval_p2.py",
+        "check_pattern":  r"'daily_improve'.*run the daily self-improvement.*NOT patch_adwi.*\n.*'patch_adwi'",
+        "old_str": (
+            '    "   \'daily_improve\'  : run the daily self-improvement routine. NOT patch_adwi (code changes via aider).\\n"\n'
+            '    "   \'patch_adwi\'     : apply code-level changes to adwi source via aider. ONLY \'aider\', \'patch adwi\',\\n"\n'
+        ),
+        "new_str": (
+            '    "   \'daily_improve\'  : run the daily self-improvement routine. \'run the improvement loop\',\\n"\n'
+            '    "                      \'daily improve\', \'daily enhance adwi\'. NOT patch_adwi. NOT run_code.\\n"\n'
+            '    "   \'patch_adwi\'     : apply code-level changes to adwi source via aider. ONLY \'aider\', \'patch adwi\',\\n"\n'
+        ),
+        "minimum_examples": 1,
+    },
+    # ── FIX-E2E-036a: nightly_status P1 — add "what did nightly do" ──────────────
+    {
+        "id":             "FIX-E2E-036a",
+        "description":    "Expand nightly_status P1 — add 'what did nightly do', 'what happened last night'",
+        "target_intents": ["nightly_status"],
+        "target_file":    "adwi/logs/simeval/run_large_eval.py",
+        "check_pattern":  r"'nightly_status' : check when.*\n.*'show me the logs'.*\n.*'nightly status', 'when did nightly last run'\.",
+        "old_str": (
+            '    "   \'nightly_status\' : check when the nightly maintenance last ran and what it produced.\\n"\n'
+            '    "                      \'show me the logs\', \'what was the last thing that ran\',\\n"\n'
+            '    "                      \'nightly status\', \'when did nightly last run\'.\\n"\n'
+        ),
+        "new_str": (
+            '    "   \'nightly_status\' : check when the nightly maintenance last ran and what it produced.\\n"\n'
+            '    "                      \'show me the logs\', \'what was the last thing that ran\',\\n"\n'
+            '    "                      \'nightly status\', \'when did nightly last run\',\\n"\n'
+            '    "                      \'what did nightly do\', \'what happened last night\', \'nightly log\'.\\n"\n'
+            '    "                      NOT \'status\' (service health). NOT \'memory_curate\'.\\n"\n'
+        ),
+        "minimum_examples": 1,
+    },
+    # ── FIX-E2E-036c: nightly_status CLI (different 2-line format) ───────────────
+    {
+        "id":             "FIX-E2E-036c",
+        "description":    "Expand nightly_status CLI — add 'what did nightly do'",
+        "target_intents": ["nightly_status"],
+        "target_file":    "adwi/adwi_cli.py",
+        "check_pattern":  r"'nightly_status' : check when.*\n.*'nightly status', 'when did nightly last run', 'show nightly log'\.",
+        "old_str": (
+            '    "   \'nightly_status\' : check when the nightly maintenance last ran and what it produced.\\n"\n'
+            '    "                      \'nightly status\', \'when did nightly last run\', \'show nightly log\'.\\n"\n'
+        ),
+        "new_str": (
+            '    "   \'nightly_status\' : check when the nightly maintenance last ran and what it produced.\\n"\n'
+            '    "                      \'nightly status\', \'when did nightly last run\', \'show nightly log\',\\n"\n'
+            '    "                      \'what did nightly do\', \'what happened last night\'. NOT \'status\'.\\n"\n'
+        ),
+        "minimum_examples": 1,
+    },
+    # ── FIX-E2E-037a: use_cloud P1 — add "use gpt" examples ─────────────────────
+    {
+        "id":             "FIX-E2E-037a",
+        "description":    "Expand use_cloud P1 — add 'use gpt', 'use claude', 'switch to cloud' examples",
+        "target_intents": ["use_cloud"],
+        "target_file":    "adwi/logs/simeval/run_large_eval.py",
+        "check_pattern":  r"'use_cloud'.*switch to a cloud API model.*\n.*'voice_in'",
+        "old_str": (
+            '    "   \'use_cloud\'      : switch to a cloud API model (gemini, gpt, openai, claude).\\n"\n'
+            '    "   \'voice_in\'       : activate voice/microphone input, start listening, speech-to-text.\\n"\n'
+        ),
+        "new_str": (
+            '    "   \'use_cloud\'      : switch to a cloud API model (gemini, gpt, openai, claude).\\n"\n'
+            '    "                      \'use gpt\', \'use claude\', \'use openai\', \'switch to cloud\', \'go cloud\'.\\n"\n'
+            '    "                      NOT web_search. NOT use_local (which is Ollama/local only).\\n"\n'
+            '    "   \'voice_in\'       : activate voice/microphone input, start listening, speech-to-text.\\n"\n'
+        ),
+        "minimum_examples": 1,
+    },
+    # ── FIX-E2E-037b: use_cloud P2 ───────────────────────────────────────────────
+    {
+        "id":             "FIX-E2E-037b",
+        "description":    "Expand use_cloud P2 — add 'use gpt', 'use claude' examples",
+        "target_intents": ["use_cloud"],
+        "target_file":    "adwi/logs/simeval/run_large_eval_p2.py",
+        "check_pattern":  r"'use_cloud'.*switch to a cloud API model.*\n.*'git_status'",
+        "old_str": (
+            '    "   \'use_cloud\'      : switch to a cloud API model (gemini, gpt, openai, claude).\\n"\n'
+            '    "   \'git_status\'     : git queries — branches, commits, diffs, staged/unstaged changes.\\n"\n'
+        ),
+        "new_str": (
+            '    "   \'use_cloud\'      : switch to a cloud API model (gemini, gpt, openai, claude).\\n"\n'
+            '    "                      \'use gpt\', \'use claude\', \'use openai\', \'switch to cloud\'.\\n"\n'
+            '    "                      NOT web_search. NOT use_local.\\n"\n'
+            '    "   \'git_status\'     : git queries — branches, commits, diffs, staged/unstaged changes.\\n"\n'
+        ),
+        "minimum_examples": 1,
+    },
+    # ── FIX-E2E-038a: file_read P1 — add yml/json/yaml extension examples ────────
+    {
+        "id":             "FIX-E2E-038a",
+        "description":    "Expand file_read P1 — add yml/json/yaml file examples to distinguish from file_search",
+        "target_intents": ["file_read"],
+        "target_file":    "adwi/logs/simeval/run_large_eval.py",
+        "check_pattern":  r"'file_read'.*read and display.*\n.*'show me X\.py'.*\n.*NOT inspect_code.*\. 'display X file'",
+        "old_str": (
+            '    "   \'file_read\'      : read and display the contents of a specific file path.\\n"\n'
+            '    "                      \'show me X.py\', \'display adwi main file\', \'print the contents of X\'.\\n"\n'
+            '    "                      NOT inspect_code (which analyzes). \'display X file\' → file_read.\\n"\n'
+        ),
+        "new_str": (
+            '    "   \'file_read\'      : read and display the contents of a specific file path.\\n"\n'
+            '    "                      \'show me X.py\', \'display adwi main file\', \'print the contents of X\'.\\n"\n'
+            '    "                      \'show me the docker-compose.yml\', \'show me config.json\', \'show me file.yaml\'.\\n"\n'
+            '    "                      NOT inspect_code (which analyzes). NOT file_search (use file_read when\\n"\n'
+            '    "                      the EXACT filename is mentioned and user wants to see contents).\\n"\n'
+        ),
+        "minimum_examples": 1,
+    },
+    # ── FIX-E2E-038c: file_read CLI ──────────────────────────────────────────────
+    {
+        "id":             "FIX-E2E-038c",
+        "description":    "Expand file_read CLI — add yml/json file examples",
+        "target_intents": ["file_read"],
+        "target_file":    "adwi/adwi_cli.py",
+        "check_pattern":  r"'file_read'.*read and display.*\n.*'read adwi_cli\.py'.*\n.*'file_list'",
+        "old_str": (
+            '    "   \'file_read\'      : read and display the contents of a specific file path.\\n"\n'
+            '    "                      \'read adwi_cli.py\', \'show contents of README.md\', \'cat this file\'.\\n"\n'
+            '    "   \'file_list\'      : list files in a specific directory (like ls). NOT a search.\\n"\n'
+        ),
+        "new_str": (
+            '    "   \'file_read\'      : read and display the contents of a specific file path.\\n"\n'
+            '    "                      \'read adwi_cli.py\', \'show contents of README.md\', \'cat this file\'.\\n"\n'
+            '    "                      \'show me the docker-compose.yml\', \'show me config.json\'.\\n"\n'
+            '    "                      NOT file_search (file_read = show contents, file_search = find by name).\\n"\n'
+            '    "   \'file_list\'      : list files in a specific directory (like ls). NOT a search.\\n"\n'
+        ),
+        "minimum_examples": 1,
+    },
+    # ── FIX-E2E-039a: gmail_list_category P1 — add to gmail desc ─────────────────
+    {
+        "id":             "FIX-E2E-039a",
+        "description":    "Add gmail_list_category examples to gmail desc in P1 INTENT_SYSTEM",
+        "target_intents": ["gmail_list_category"],
+        "target_file":    "adwi/logs/simeval/run_large_eval.py",
+        "check_pattern":  r"'gmail'.*questions about email.*\n.*'any emails from X'.*\n.*'generate_image'",
+        "old_str": (
+            '    "   \'gmail\'          : questions about email, inbox, messages. \'new messages?\', \'check my email\',\\n"\n'
+            '    "                      \'any emails from X\', \'check my email then search for action items\'.\\n"\n'
+            '    "   \'generate_image\' : ONLY when creating a brand-new image/picture/artwork/visual output.\\n"\n'
+        ),
+        "new_str": (
+            '    "   \'gmail\'          : questions about email, inbox, messages. \'new messages?\', \'check my email\',\\n"\n'
+            '    "                      \'any emails from X\', \'check my email then search for action items\'.\\n"\n'
+            '    "   \'gmail_list_category\' : list emails in a Gmail category tab.\\n"\n'
+            '    "                      \'show my promotions\', \'what\'s in my promotions\', \'check my spam\',\\n"\n'
+            '    "                      \'show spam\', \'social tab\', \'list my updates\'. NOT \'gmail\' (general).\\n"\n'
+            '    "   \'generate_image\' : ONLY when creating a brand-new image/picture/artwork/visual output.\\n"\n'
+        ),
+        "minimum_examples": 1,
+    },
+    # ── FIX-E2E-039c: gmail_list_category CLI ────────────────────────────────────
+    {
+        "id":             "FIX-E2E-039c",
+        "description":    "Add gmail_list_category to CLI INTENT_SYSTEM",
+        "target_intents": ["gmail_list_category"],
+        "target_file":    "adwi/adwi_cli.py",
+        "check_pattern":  r"'gmail'.*general email questions.*\n.*'gmail_read'",
+        "old_str": (
+            '    "   \'gmail\'          : general email questions, list inbox, check unread, search messages\\n"\n'
+            '    "   \'gmail_read\'     : read a specific email by position number, \'latest\', or \'this email\'\\n"\n'
+        ),
+        "new_str": (
+            '    "   \'gmail\'          : general email questions, list inbox, check unread, search messages\\n"\n'
+            '    "   \'gmail_list_category\' : list Gmail category tabs. \'show my promotions\', \'what\'s in my promotions\',\\n"\n'
+            '    "                      \'check my spam\', \'social tab\'. NOT \'gmail\' (general inbox).\\n"\n'
+            '    "   \'gmail_read\'     : read a specific email by position number, \'latest\', or \'this email\'\\n"\n'
+        ),
+        "minimum_examples": 1,
+    },
+    # ── FIX-E2E-040a: backup_now P2 — add "adwi quick backup" ───────────────────
+    {
+        "id":             "FIX-E2E-040a",
+        "description":    "Expand backup_now P2 — add 'adwi quick backup', 'quick backup' examples",
+        "target_intents": ["backup_now"],
+        "target_file":    "adwi/logs/simeval/run_large_eval_p2.py",
+        "check_pattern":  r"'backup_now'.*backup to GitHub.*\n.*'commit and backup'.*NOT git_status",
+        "old_str": (
+            '    "   \'backup_now\'     : backup to GitHub. Includes \'push to github\', \'push my changes\',\\n"\n'
+            '    "                      \'commit and backup\', \'commit and push everything\'. NOT git_status (read-only).\\n"\n'
+        ),
+        "new_str": (
+            '    "   \'backup_now\'     : backup to GitHub. Includes \'push to github\', \'push my changes\',\\n"\n'
+            '    "                      \'commit and backup\', \'commit and push everything\', \'quick backup\',\\n"\n'
+            '    "                      \'adwi quick backup\', \'adwi backup\'. NOT git_status (read-only).\\n"\n'
+        ),
+        "minimum_examples": 1,
+    },
+    # ── FIX-E2E-041a: capabilities P1 — soften "must mention" requirement ────────
+    {
+        "id":             "FIX-E2E-041a",
+        "description":    "Expand capabilities P1 — add examples without 'adwi' mention: show help, list commands",
+        "target_intents": ["capabilities"],
+        "target_file":    "adwi/logs/simeval/run_large_eval.py",
+        "check_pattern":  r"'capabilities'.*EXPLICITLY asks.*'you', 'adwi', 'your features', 'your commands'\.",
+        "old_str": (
+            '    "   \'capabilities\'   : user EXPLICITLY asks what ADWI/YOU can do — must mention \'you\', \'adwi\', \'your features\', \'your commands\'.\\n"\n'
+        ),
+        "new_str": (
+            '    "   \'capabilities\'   : user asks what adwi/the assistant can do. \'what can you do\', \'show help\',\\n"\n'
+            '    "                      \'list all commands\', \'show all commands\', \'show the command list\',\\n"\n'
+            '    "                      \'your skills\', \'your features\', \'your commands\'. NOT file_list.\\n"\n'
+        ),
+        "minimum_examples": 1,
+    },
+    # FIX-E2E-041b: skipped — capabilities has no INTENT_SYSTEM description in P2
+    # ── FIX-E2E-041c: capabilities CLI ───────────────────────────────────────────
+    {
+        "id":             "FIX-E2E-041c",
+        "description":    "Expand capabilities CLI — add 'show help', 'list all commands' examples",
+        "target_intents": ["capabilities"],
+        "target_file":    "adwi/adwi_cli.py",
+        "check_pattern":  r"'capabilities'.*EXPLICITLY asks what ADWI/YOU can do.*\n.*'your features'.*\n.*alternatives",
+        "old_str": (
+            '    "   \'capabilities\'   : user EXPLICITLY asks what ADWI/YOU can do — must mention \'you\', \'adwi\',\\n"\n'
+            '    "                      \'your features\', \'your commands\', or \'show help\'. Questions about\\n"\n'
+            '    "                      alternatives, comparisons, recommendations, or subscriptions are NOT this.\\n"\n'
+        ),
+        "new_str": (
+            '    "   \'capabilities\'   : user asks what adwi/the assistant can do. \'what can you do\', \'show help\',\\n"\n'
+            '    "                      \'list all commands\', \'show all commands\', \'show the command list\',\\n"\n'
+            '    "                      \'your skills\', \'your features\', \'your commands\'. NOT file_list.\\n"\n'
+            '    "                      Questions about alternatives or subscriptions are NOT this → chat.\\n"\n'
+        ),
+        "minimum_examples": 1,
+    },
 ]
 
 

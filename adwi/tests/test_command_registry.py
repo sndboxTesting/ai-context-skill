@@ -1073,5 +1073,120 @@ class TestPhase8GmailDraftEditingCommands(unittest.TestCase):
         self.assertGreaterEqual(len(set(self.reg.all_names())), 96)
 
 
+# ── Phase 9 wiring verification ───────────────────────────────────────────────
+
+
+class TestPhase9GmailDraftManagementCommands(unittest.TestCase):
+    """
+    Verify Phase 9 Gmail draft-management commands are registered via discover()
+    and dispatch correctly.
+
+    Cluster: open-draft, delete-draft.
+    - open-draft: uses _resolve_draft_ref(text) for ordinal/name disambiguation;
+      auto-populates _GMAIL_CTX["draft_list"] if empty; sets _GMAIL_CTX["draft"].
+      No input() calls — returns disambiguation message if ambiguous. Internally
+      calls cmd_gmail_send_draft() when text contains "send".
+    - delete-draft: uses _resolve_draft_ref(text) or falls back to current draft;
+      shows preview + "Permanently delete? y/n" input() before gh.delete_draft().
+      Clears _GMAIL_CTX["draft_list"] entry and _GMAIL_CTX["draft"] if current.
+
+    All draft-list population, disambiguation, and API calls are inside function
+    bodies — fully preserved by _cli() delegation.
+
+    Deferred to Phase 10+: draft-reply, schedule-send, cancel-scheduled,
+    reschedule, followup-reminder, extract-tasks, triage, attachment mutations.
+    """
+
+    PHASE9 = [
+        "/gmail-open-draft",
+        "/gmail-delete-draft",
+    ]
+
+    PHASE10_DEFERRED = [
+        "/gmail-followup",
+        "/gmail-cancel-scheduled",
+        "/gmail-draft-reply",
+    ]
+
+    @classmethod
+    def setUpClass(cls):
+        cls.reg = CommandRegistry()
+        cls.reg.discover("adwi.commands")
+
+    def test_all_phase9_commands_registered(self):
+        for cmd in self.PHASE9:
+            with self.subTest(cmd=cmd):
+                self.assertIsNotNone(self.reg.get(cmd), f"{cmd} must be registered")
+
+    def test_all_phase9_commands_dispatch_true(self):
+        for cmd in self.PHASE9:
+            with self.subTest(cmd=cmd):
+                self.assertTrue(
+                    self.reg.dispatch(cmd, {}),
+                    f"dispatch('{cmd}') must return True",
+                )
+
+    def test_all_phase9_commands_have_descriptions(self):
+        for cmd in self.PHASE9:
+            with self.subTest(cmd=cmd):
+                spec = self.reg.get(cmd)
+                self.assertIsNotNone(spec)
+                self.assertGreater(len(spec.description), 0)
+
+    def test_all_phase9_commands_in_gmail_category(self):
+        for cmd in self.PHASE9:
+            with self.subTest(cmd=cmd):
+                self.assertEqual(self.reg.get(cmd).category, "gmail")
+
+    def test_draft_management_intents_wired(self):
+        expected = {
+            "gmail_open_draft": "/gmail-open-draft",
+            "gmail_delete_draft": "/gmail-delete-draft",
+        }
+        for intent, cmd in expected.items():
+            with self.subTest(intent=intent):
+                self.assertIn(intent, self.reg.intent_map())
+                self.assertEqual(self.reg.intent_map()[intent], cmd)
+
+    def test_open_draft_passes_ref_args(self):
+        """/gmail-open-draft with ordinal ref dispatches correctly."""
+        result = self.reg.dispatch("/gmail-open-draft 2", {})
+        self.assertTrue(result)
+
+    def test_open_draft_no_args_dispatches(self):
+        """/gmail-open-draft with no args dispatches (handler handles empty ref)."""
+        result = self.reg.dispatch("/gmail-open-draft", {})
+        self.assertTrue(result)
+
+    def test_delete_draft_passes_ref_args(self):
+        result = self.reg.dispatch("/gmail-delete-draft 1", {})
+        self.assertTrue(result)
+
+    def test_delete_draft_no_args_dispatches(self):
+        """/gmail-delete-draft with no args dispatches (handler falls back to current draft)."""
+        result = self.reg.dispatch("/gmail-delete-draft", {})
+        self.assertTrue(result)
+
+    def test_phase10_deferred_not_in_registry(self):
+        """Draft-reply/schedule/followup remain in elif chain (deferred to Phase 10+)."""
+        for cmd in self.PHASE10_DEFERRED:
+            with self.subTest(cmd=cmd):
+                self.assertIsNone(
+                    self.reg.get(cmd),
+                    f"{cmd} must remain deferred until Phase 10",
+                )
+
+    def test_phase10_deferred_still_return_false(self):
+        for cmd in self.PHASE10_DEFERRED:
+            with self.subTest(cmd=cmd):
+                self.assertFalse(
+                    self.reg.dispatch(cmd, {}),
+                    f"{cmd} must fall through to elif chain",
+                )
+
+    def test_total_unique_commands_at_phase9(self):
+        self.assertGreaterEqual(len(set(self.reg.all_names())), 98)
+
+
 if __name__ == "__main__":
     unittest.main()

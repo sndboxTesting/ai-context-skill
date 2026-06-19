@@ -20,9 +20,12 @@ Phase 8 (draft-editing cluster): rewrite, update-subject, add-cc, add-bcc.
 All operate on the existing _GMAIL_CTX["draft"] in-place via gh.update_draft().
 No live send; no draft creation or deletion.
 
-Deferred to Phase 9+: draft-reply, open-draft, delete-draft, schedule-send,
-cancel-scheduled, reschedule, followup-reminder, extract-tasks, triage,
-attachment mutations.
+Phase 9 (draft management cluster): open-draft, delete-draft. Operate on
+_GMAIL_CTX["draft_list"] and _GMAIL_CTX["draft"]; use _resolve_draft_ref()
+for ordinal/name disambiguation. delete-draft requires y/n confirmation.
+
+Deferred to Phase 10+: draft-reply, schedule-send, cancel-scheduled,
+reschedule, followup-reminder, extract-tasks, triage, attachment mutations.
 """
 
 from __future__ import annotations
@@ -135,6 +138,17 @@ def _cancel_draft(args: str, ctx: dict) -> None:
 
 def _forward(args: str, ctx: dict) -> None:
     _cli().cmd_gmail_forward(args)
+
+
+# ── Phase 9 handlers (draft management cluster) ───────────────────────────────
+
+
+def _open_draft(args: str, ctx: dict) -> None:
+    _cli().cmd_gmail_open_draft(args)
+
+
+def _delete_draft(args: str, ctx: dict) -> None:
+    _cli().cmd_gmail_delete_draft(args)
 
 
 # ── Phase 8 handlers (draft-editing cluster) ──────────────────────────────────
@@ -386,3 +400,21 @@ def register(registry: "CommandRegistry") -> None:
         intents=["gmail_add_bcc"],
         args_schema={"contact": "str?"},
     )(_add_bcc)
+
+    # Phase 9 — draft management cluster
+
+    registry.register(
+        "/gmail-open-draft",
+        description="Switch active draft context to a specific draft by ordinal or name",
+        category="gmail",
+        intents=["gmail_open_draft"],
+        args_schema={"ref": "str?"},
+    )(_open_draft)
+
+    registry.register(
+        "/gmail-delete-draft",
+        description="Delete a draft by ordinal, name, or current draft (shows preview + confirm)",
+        category="gmail",
+        intents=["gmail_delete_draft"],
+        args_schema={"ref": "str?"},
+    )(_delete_draft)

@@ -313,10 +313,167 @@ class TestPhase1WiringCommands(unittest.TestCase):
                 self.assertGreater(len(spec.description), 0)
 
     def test_discover_count_covers_all_plugin_modules(self):
-        """discover() must load at least the 3 known modules."""
+        """discover() must load at least the 4 known modules (including eval)."""
         fresh = CommandRegistry()
         count = fresh.discover("adwi.commands")
-        self.assertGreaterEqual(count, 3, "system + knowledge + disk must all load")
+        self.assertGreaterEqual(count, 4, "system + knowledge + disk + eval must all load")
+
+
+# ── Phase 2 wiring verification ───────────────────────────────────────────────
+
+
+class TestPhase2EvalCommands(unittest.TestCase):
+    """
+    Verify Phase 2 eval/backup/routing commands are registered via discover()
+    and that dispatch() returns True for each.
+
+    These are read-only inspection commands migrated to registry-first dispatch.
+    The elif chain remains as fallback.
+    """
+
+    @classmethod
+    def setUpClass(cls):
+        cls.reg = CommandRegistry()
+        cls.reg.discover("adwi.commands")
+
+    def test_eval_routing_registered(self):
+        self.assertIsNotNone(self.reg.get("/eval-routing"))
+
+    def test_test_adwi_registered(self):
+        self.assertIsNotNone(self.reg.get("/test-adwi"))
+
+    def test_backup_status_registered(self):
+        self.assertIsNotNone(self.reg.get("/backup-status"))
+
+    def test_backup_log_registered(self):
+        self.assertIsNotNone(self.reg.get("/backup-log"))
+
+    def test_backup_audit_registered(self):
+        self.assertIsNotNone(self.reg.get("/backup-audit"))
+
+    def test_route_registered(self):
+        self.assertIsNotNone(self.reg.get("/route"))
+
+    def test_watcher_status_registered(self):
+        self.assertIsNotNone(self.reg.get("/watcher-status"))
+
+    def test_phase2_commands_have_descriptions(self):
+        phase2 = [
+            "/eval-routing", "/test-adwi", "/backup-status",
+            "/backup-log", "/backup-audit", "/route", "/watcher-status",
+        ]
+        for cmd in phase2:
+            with self.subTest(cmd=cmd):
+                spec = self.reg.get(cmd)
+                self.assertIsNotNone(spec)
+                self.assertGreater(len(spec.description), 0)
+
+    def test_phase2_commands_dispatch_true(self):
+        """dispatch() returns True (found + called) for all Phase 2 commands."""
+        phase2 = [
+            "/eval-routing", "/test-adwi", "/backup-status",
+            "/backup-log", "/backup-audit", "/route", "/watcher-status",
+        ]
+        for cmd in phase2:
+            with self.subTest(cmd=cmd):
+                result = self.reg.dispatch(cmd, {})
+                self.assertTrue(result, f"dispatch('{cmd}') must return True")
+
+    def test_eval_routing_intent_wired(self):
+        self.assertIn("eval_routing", self.reg.intent_map())
+
+    def test_test_adwi_intent_wired(self):
+        self.assertIn("test_adwi", self.reg.intent_map())
+
+    def test_backup_status_intent_wired(self):
+        self.assertIn("backup_status", self.reg.intent_map())
+
+    def test_eval_module_loaded_via_discover(self):
+        """discover() must find all 4 modules including the new eval module."""
+        fresh = CommandRegistry()
+        count = fresh.discover("adwi.commands")
+        self.assertGreaterEqual(count, 4, "eval module must be auto-discovered")
+        self.assertIsNotNone(fresh.get("/eval-routing"), "eval module commands must register")
+
+
+# ── Phase 3 wiring verification ───────────────────────────────────────────────
+
+
+class TestPhase3DiagnosticsCommands(unittest.TestCase):
+    """
+    Verify Phase 3 system-diagnostics commands are registered via discover()
+    and that dispatch() returns True for each.
+
+    All Phase 3 commands are read-only inspection commands.
+    /eval-adwi and /capability-audit are intentionally excluded (they auto-write
+    to capabilities.json via update_capabilities_json()).
+    """
+
+    PHASE3 = [
+        "/models",
+        "/mcp",
+        "/inspect-system",
+        "/trusted-roots",
+        "/tool-roadmap",
+        "/trace-log",
+        "/training-plan",
+    ]
+
+    @classmethod
+    def setUpClass(cls):
+        cls.reg = CommandRegistry()
+        cls.reg.discover("adwi.commands")
+
+    def test_all_phase3_commands_registered(self):
+        for cmd in self.PHASE3:
+            with self.subTest(cmd=cmd):
+                self.assertIsNotNone(self.reg.get(cmd), f"{cmd} must be registered")
+
+    def test_all_phase3_commands_dispatch_true(self):
+        for cmd in self.PHASE3:
+            with self.subTest(cmd=cmd):
+                result = self.reg.dispatch(cmd, {})
+                self.assertTrue(result, f"dispatch('{cmd}') must return True")
+
+    def test_all_phase3_commands_have_descriptions(self):
+        for cmd in self.PHASE3:
+            with self.subTest(cmd=cmd):
+                spec = self.reg.get(cmd)
+                self.assertIsNotNone(spec)
+                self.assertGreater(len(spec.description), 0)
+
+    def test_trusted_roots_intent_wired(self):
+        self.assertIn("trusted_roots", self.reg.intent_map())
+        self.assertEqual(self.reg.intent_map()["trusted_roots"], "/trusted-roots")
+
+    def test_tool_roadmap_intent_wired(self):
+        self.assertIn("tool_roadmap", self.reg.intent_map())
+        self.assertEqual(self.reg.intent_map()["tool_roadmap"], "/tool-roadmap")
+
+    def test_trace_log_passes_numeric_args(self):
+        """dispatch('/trace-log 2', {}) must reach the handler (returns True)."""
+        result = self.reg.dispatch("/trace-log 2", {})
+        self.assertTrue(result)
+
+    def test_diagnostics_module_loaded_via_discover(self):
+        fresh = CommandRegistry()
+        count = fresh.discover("adwi.commands")
+        self.assertGreaterEqual(count, 5, "5 modules: system + knowledge + disk + eval + diagnostics")
+        self.assertIsNotNone(fresh.get("/models"), "diagnostics module must register /models")
+
+    def test_total_unique_commands_grows(self):
+        """Registry must now cover at least 61 unique command names."""
+        self.assertGreaterEqual(len(set(self.reg.all_names())), 61)
+
+    def test_mutating_commands_not_in_phase3(self):
+        """eval-adwi and capability-audit were intentionally excluded (they write capabilities.json)."""
+        # They may be registered by a future phase — this test just confirms Phase 3 didn't add them
+        # (they are absent from the diagnostics module)
+        import adwi.commands.diagnostics as diag_mod
+        import inspect
+        source = inspect.getsource(diag_mod)
+        self.assertNotIn("cmd_eval_adwi", source)
+        self.assertNotIn("cmd_capability_audit", source)
 
 
 if __name__ == "__main__":

@@ -2139,6 +2139,131 @@ KNOWN_REGEX_FIXES: list[dict] = [
         ),
         "minimum_examples": 1,
     },
+    # ── FIX-E2E-055: expand web_search + add rag_search INTENT_SYSTEM ───────────
+    {
+        "id":             "FIX-E2E-055a",
+        "description":    "Expand web_search + add rag_search INTENT_SYSTEM in P1",
+        "target_intents": ["web_search", "rag_search"],
+        "target_file":    "adwi/logs/simeval/run_large_eval.py",
+        "check_pattern":  r"'web_search'.*explicit request for internet.*\n.*'status'",
+        "old_str": (
+            '    "   \'web_search\'     : explicit request for internet/web search\\n"\n'
+            '    "   \'status\'         : asks if services/systems are running or healthy (shallow check).\\n"\n'
+        ),
+        "new_str": (
+            '    "   \'web_search\'     : explicit request for internet/web search.\\n"\n'
+            '    "                      Examples: \'what\'s new in X\', \'look up X\', \'search for X online\',\\n"\n'
+            '    "                      \'find X on the web\', \'google X\', \'latest news on X\'.\\n"\n'
+            '    "                      NOT \'chat\' (opinion/advice). Use web_search when user needs\\n"\n'
+            '    "                      external/current info not available in local knowledge.\\n"\n'
+            '    "   \'rag_search\'     : search adwi\'s LOCAL knowledge base (RAG / vector store).\\n"\n'
+            '    "                      Examples: \'what do you know about X\', \'recall info about X\',\\n"\n'
+            '    "                      \'search my notes on X\', \'summarize stored info on X\'.\\n"\n'
+            '    "                      NOT obsidian_search (vault files). NOT web_search (internet).\\n"\n'
+            '    "   \'status\'         : asks if services/systems are running or healthy (shallow check).\\n"\n'
+        ),
+        "minimum_examples": 3,
+    },
+    {
+        "id":             "FIX-E2E-055b",
+        "description":    "Expand web_search + add rag_search INTENT_SYSTEM in P2",
+        "target_intents": ["web_search", "rag_search"],
+        "target_file":    "adwi/logs/simeval/run_large_eval_p2.py",
+        "check_pattern":  r"'web_search'.*explicit request for internet.*\n.*'status'",
+        "old_str": (
+            '    "   \'web_search\'     : explicit request for internet/web search\\n"\n'
+            '    "   \'status\'         : asks if services/systems are running or healthy (shallow check).\\n"\n'
+        ),
+        "new_str": (
+            '    "   \'web_search\'     : explicit request for internet/web search.\\n"\n'
+            '    "                      Examples: \'what\'s new in X\', \'look up X\', \'search for X online\',\\n"\n'
+            '    "                      \'find X on the web\', \'google X\', \'latest news on X\'.\\n"\n'
+            '    "                      NOT \'chat\' (opinion/advice). Use web_search when user needs\\n"\n'
+            '    "                      external/current info not available in local knowledge.\\n"\n'
+            '    "   \'rag_search\'     : search adwi\'s LOCAL knowledge base (RAG / vector store).\\n"\n'
+            '    "                      Examples: \'what do you know about X\', \'recall info about X\',\\n"\n'
+            '    "                      \'search my notes on X\', \'summarize stored info on X\'.\\n"\n'
+            '    "                      NOT obsidian_search (vault files). NOT web_search (internet).\\n"\n'
+            '    "   \'status\'         : asks if services/systems are running or healthy (shallow check).\\n"\n'
+        ),
+        "minimum_examples": 3,
+    },
+    {
+        "id":             "FIX-E2E-055c",
+        "description":    "Expand web_search + add rag_search INTENT_SYSTEM in CLI",
+        "target_intents": ["web_search", "rag_search"],
+        "target_file":    "adwi/adwi_cli.py",
+        "check_pattern":  r"'web_search'.*explicit request for internet.*\n.*'status'",
+        "old_str": (
+            '    "   \'web_search\'     : explicit request for internet/web search\\n"\n'
+            '    "   \'status\'         : asks if services/systems are running or healthy (shallow check).\\n"\n'
+        ),
+        "new_str": (
+            '    "   \'web_search\'     : explicit request for internet/web search.\\n"\n'
+            '    "                      Examples: \'what\'s new in X\', \'look up X\', \'search for X online\',\\n"\n'
+            '    "                      \'find X on the web\', \'google X\', \'latest news on X\'.\\n"\n'
+            '    "                      NOT \'chat\' (opinion/advice). Use web_search when user needs\\n"\n'
+            '    "                      external/current info not available in local knowledge.\\n"\n'
+            '    "   \'rag_search\'     : search adwi\'s LOCAL knowledge base (RAG / vector store).\\n"\n'
+            '    "                      Examples: \'what do you know about X\', \'recall info about X\',\\n"\n'
+            '    "                      \'search my notes on X\', \'summarize stored info on X\'.\\n"\n'
+            '    "                      NOT obsidian_search (vault files). NOT web_search (internet).\\n"\n'
+            '    "   \'status\'         : asks if services/systems are running or healthy (shallow check).\\n"\n'
+        ),
+        "minimum_examples": 3,
+    },
+    # ── FIX-E2E-056: capabilities regex for "list/show all your commands" ────────
+    {
+        "id":             "FIX-E2E-056a",
+        "description":    "Add regex for 'list/show all your commands' → capabilities in P1",
+        "target_intents": ["capabilities"],
+        "target_file":    "adwi/logs/simeval/run_large_eval.py",
+        "check_pattern":  r'r"\\badwi\\b.{0,20}\\bfeature\\s\+list\\b".*capabilities',
+        "old_str": (
+            '    (re.compile(r"\\badwi\\b.{0,20}\\bfeature\\s+list\\b", re.I), "capabilities"),\n'
+        ),
+        "new_str": (
+            '    (re.compile(r"\\badwi\\b.{0,20}\\bfeature\\s+list\\b", re.I), "capabilities"),\n'
+            '    (re.compile(r"\\blist\\s+(?:all\\s+)?(?:your|adwi.?s?)\\s+commands?\\b", re.I), "capabilities"),\n'
+            '    (re.compile(r"\\bshow\\s+(?:all\\s+)?(?:your|adwi.?s?)\\s+commands?\\b", re.I), "capabilities"),\n'
+            '    (re.compile(r"\\b(?:show|display|list)\\s+(?:all\\s+)?(?:available\\s+)?commands?\\b", re.I), "capabilities"),\n'
+        ),
+        "minimum_examples": 3,
+    },
+    {
+        "id":             "FIX-E2E-056b",
+        "description":    "Add regex for 'list/show all your commands' → capabilities in P2",
+        "target_intents": ["capabilities"],
+        "target_file":    "adwi/logs/simeval/run_large_eval_p2.py",
+        "check_pattern":  r'r"\\badwi\\b.{0,20}\\bfeature\\s\+list\\b".*capabilities',
+        "old_str": (
+            '    (re.compile(r"\\badwi\\b.{0,20}\\bfeature\\s+list\\b", re.I), "capabilities"),\n'
+        ),
+        "new_str": (
+            '    (re.compile(r"\\badwi\\b.{0,20}\\bfeature\\s+list\\b", re.I), "capabilities"),\n'
+            '    (re.compile(r"\\blist\\s+(?:all\\s+)?(?:your|adwi.?s?)\\s+commands?\\b", re.I), "capabilities"),\n'
+            '    (re.compile(r"\\bshow\\s+(?:all\\s+)?(?:your|adwi.?s?)\\s+commands?\\b", re.I), "capabilities"),\n'
+            '    (re.compile(r"\\b(?:show|display|list)\\s+(?:all\\s+)?(?:available\\s+)?commands?\\b", re.I), "capabilities"),\n'
+        ),
+        "minimum_examples": 3,
+    },
+    {
+        "id":             "FIX-E2E-056c",
+        "description":    "Add regex for 'list/show all your commands' → capabilities in CLI",
+        "target_intents": ["capabilities"],
+        "target_file":    "adwi/adwi_cli.py",
+        "check_pattern":  r'r"\\badwi\\b.{0,20}\\bfeature\\s\+list\\b".*capabilities',
+        "old_str": (
+            '    (re.compile(r"\\badwi\\b.{0,20}\\bfeature\\s+list\\b", re.I), "capabilities"),\n'
+        ),
+        "new_str": (
+            '    (re.compile(r"\\badwi\\b.{0,20}\\bfeature\\s+list\\b", re.I), "capabilities"),\n'
+            '    (re.compile(r"\\blist\\s+(?:all\\s+)?(?:your|adwi.?s?)\\s+commands?\\b", re.I), "capabilities"),\n'
+            '    (re.compile(r"\\bshow\\s+(?:all\\s+)?(?:your|adwi.?s?)\\s+commands?\\b", re.I), "capabilities"),\n'
+            '    (re.compile(r"\\b(?:show|display|list)\\s+(?:all\\s+)?(?:available\\s+)?commands?\\b", re.I), "capabilities"),\n'
+        ),
+        "minimum_examples": 3,
+    },
 ]
 
 

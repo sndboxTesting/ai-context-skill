@@ -79,6 +79,18 @@ INTENT_SYSTEM = (
     "   'gmail_list_category' : list emails in a Gmail category tab.\n"
     "                      'show my promotions', 'what's in my promotions', 'check my spam',\n"
     "                      'show spam', 'social tab', 'list my updates'. NOT 'gmail' (general).\n"
+    "   'gmail_add_cc'    : add a CC recipient to a draft/email being composed.\n"
+    "                      'also cc X', 'add X to CC', 'cc my assistant', 'copy X on this'.\n"
+    "                      Context: user is composing/editing an email. NOT 'gmail' (inbox).\n"
+    "   'gmail_add_bcc'   : add a BCC recipient to a draft/email being composed.\n"
+    "                      'also bcc X', 'add X to BCC', 'bcc my boss', 'blind copy X'.\n"
+    "                      Context: user is composing/editing an email. NOT 'gmail' (inbox).\n"
+    "   'gmail_save_attachment' : save/download an email attachment to disk.\n"
+    "                      'save the attached file', 'download the attachment', 'save that pdf',\n"
+    "                      'download the invoice'. NOT 'file_save' (unrelated files).\n"
+    "   'gmail_tasks_save' : save email-extracted tasks/action-items to Obsidian or daily note.\n"
+    "                      'save those tasks to my daily note', 'add those to my daily note',\n"
+    "                      'export those action items'. Context: following gmail_extract_tasks.\n"
     "   'generate_image' : ONLY when creating a brand-new image/picture/artwork/visual output.\n"
     "                      NEVER for explanations, comparisons, or code/model concepts.\n"
     "                      NEVER for: 'generate a summary', 'generate a report', 'generate a plan',\n"
@@ -205,10 +217,15 @@ INTENT_SYSTEM = (
     "                      'what new tech should I try', 'technology radar'.\n"
     "   'memory_curate'  : review logs and propose durable memories. 'curate memories',\n"
     "                      'memory curation', 'propose new memories'. NOT 'memory_scan' or 'memory_recall'.\n"
+    "   'memory_stats'   : show memory database statistics (count, size, categories).\n"
+    "                      'memory stats', 'memory summary stats', 'how many memories', 'memory database size'.\n"
+    "                      NOT 'memory_recall' (recall facts). NOT 'memory_scan' (scan/update).\n"
     "   'assistant_upgrade_status': show Assistant Upgrade Pack status. 'upgrade pack status',\n"
     "                      'assistant upgrade status', 'show research status'.\n"
     "   'chat'           : DEFAULT for everything else — use this for:\n"
     "                      • advisory/recommendation questions ('what is the best...', 'should I...')\n"
+    "                      • 'list all installed packages', 'generate insights from my logs' (no adwi action)\n"
+    "                      • 'how do I debug my python', 'my model is slow', 'better AI responses' (advice)\n"
     "                      • questions about tools, services, subscriptions NOT directly about adwi\n"
     "                      • comparisons ('X vs Y', 'which is better')\n"
     "                      • how-to questions, explanations, general knowledge\n"
@@ -749,10 +766,10 @@ REGEX_INTENTS = [
 
     # ── Gmail Phase 5: add-cc / add-bcc — MUST precede Phase 3 (avoid cc/bcc in compose hitting here) ──
     # gmail_add_cc — "add cc Priya", "cc Priya to the draft", "cc Priya on this email"
-    (re.compile(r"\badd\s+cc\b", re.I), "gmail_add_cc"),
+    (re.compile(r"\b(?:add|also)\s+cc\b|\bcc\s+(?:my|the)\b", re.I), "gmail_add_cc"),
     (re.compile(r"\bcc\b.{0,40}\b(?:to\s+(?:the\s+)?(?:draft|email|message)|on\s+(?:this|the\s+(?:draft|email|message)))\b", re.I), "gmail_add_cc"),
     # gmail_add_bcc — "add bcc me", "bcc Rahul on this draft", "bcc me on the email"
-    (re.compile(r"\badd\s+bcc\b", re.I), "gmail_add_bcc"),
+    (re.compile(r"\b(?:add|also)\s+bcc\b|\bbcc\s+(?:my|the)\b", re.I), "gmail_add_bcc"),
     (re.compile(r"\bbcc\b.{0,40}\b(?:to\s+(?:the\s+)?(?:draft|email|message)|on\s+(?:this|the\s+(?:draft|email|message)))\b", re.I), "gmail_add_bcc"),
 
     # ── Gmail Phase 13: reschedule/open scheduled sends — MUST precede Phase 6 (attachments) ──
@@ -769,7 +786,7 @@ REGEX_INTENTS = [
     # FIX-STRESS-009d: "what does the attached document say"
     (re.compile(r"\bwhat\b.{0,30}\b(?:attached|attachment)\b.{0,30}\b(?:document|pdf|file|spreadsheet|invoice)?\b.{0,15}\bsay\b", re.I), "gmail_summarize_attachment"),
     # gmail_save_attachment — "save/download/open the PDF/attachment/invoice"
-    (re.compile(r"\b(?:save|download|open)\b.{0,30}\b(?:the\s+)?(?:attached\s+)?(?:attachment|pdf|document|invoice|receipt|image|spreadsheet)\b", re.I), "gmail_save_attachment"),
+    (re.compile(r"\b(?:save|download|open)\b.{0,30}\b(?:the\s+)?(?:attached\s+)?(?:attachment|pdf|document|invoice|receipt|image|spreadsheet|file)\b", re.I), "gmail_save_attachment"),
     (re.compile(r"\b(?:save|download)\b.{0,25}\b(?:that|this|first|second|third)\b.{0,20}\b(?:attachment|file|pdf|document)\b", re.I), "gmail_save_attachment"),
     # FIX-STAGE3-002: "which draft has the PDF attached" → list_drafts, not list_attachments
     (re.compile(r"\bwhich\s+draft\b", re.I), "gmail_list_drafts"),

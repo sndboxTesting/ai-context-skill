@@ -1,0 +1,24 @@
+ M adwi/adwi_cli.py
+ M adwi/e2e_auto_loop.py
+ M adwi/logs/simeval/run_large_eval.py
+ M adwi/logs/simeval/run_large_eval_p2.py
+ M adwi/notes/e2e-auto-loop/status.json
+?? adwi/notes/e2e-auto-loop/e2e-20260618-181520/
+?? adwi/notes/e2e-auto-loop/e2e-20260618-205227/
+?? adwi/notes/e2e-auto-loop/e2e-20260618-213340/
+?? adwi/notes/e2e-auto-loop/e2e-20260618-221850/
+?? adwi/notes/e2e-auto-loop/e2e-20260618-230407/
+?? adwi/notes/e2e-auto-loop/e2e-20260618-235447/
+?? adwi/notes/git-backup-logs/20260618-181509-git-backup.md
+?? adwi/notes/git-backup-logs/20260618-184510-git-backup.md
+?? adwi/notes/git-backup-logs/20260618-191510-git-backup.md
+?? adwi/notes/git-backup-logs/20260618-194510-git-backup.md
+?? adwi/notes/git-backup-logs/20260618-201510-git-backup.md
+?? adwi/notes/git-backup-logs/20260618-204510-git-backup.md
+?? adwi/notes/git-backup-logs/20260618-211510-git-backup.md
+?? adwi/notes/git-backup-logs/20260618-214511-git-backup.md
+?? adwi/notes/git-backup-logs/20260618-221511-git-backup.md
+?? adwi/notes/git-backup-logs/20260618-224511-git-backup.md
+?? adwi/notes/git-backup-logs/20260618-231511-git-backup.md
+?? adwi/notes/git-backup-logs/20260618-234511-git-backup.md
+?? adwi/notes/git-backup-logs/20260619-001511-git-backup.md

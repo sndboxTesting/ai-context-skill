@@ -1046,10 +1046,10 @@ _REGEX_INTENTS = [
 
     # ── Gmail Phase 5: add-cc / add-bcc — MUST precede Phase 3 (avoid cc/bcc in compose hitting here) ──
     # gmail_add_cc — "add cc Priya", "cc Priya to the draft", "cc Priya on this email"
-    (re.compile(r"\badd\s+cc\b", re.I), "gmail_add_cc"),
+    (re.compile(r"\b(?:add|also)\s+cc\b|\bcc\s+(?:my|the)\b", re.I), "gmail_add_cc"),
     (re.compile(r"\bcc\b.{0,40}\b(?:to\s+(?:the\s+)?(?:draft|email|message)|on\s+(?:this|the\s+(?:draft|email|message)))\b", re.I), "gmail_add_cc"),
     # gmail_add_bcc — "add bcc me", "bcc Rahul on this draft", "bcc me on the email"
-    (re.compile(r"\badd\s+bcc\b", re.I), "gmail_add_bcc"),
+    (re.compile(r"\b(?:add|also)\s+bcc\b|\bbcc\s+(?:my|the)\b", re.I), "gmail_add_bcc"),
     (re.compile(r"\bbcc\b.{0,40}\b(?:to\s+(?:the\s+)?(?:draft|email|message)|on\s+(?:this|the\s+(?:draft|email|message)))\b", re.I), "gmail_add_bcc"),
 
     # ── Gmail Phase 13: reschedule/open scheduled sends — MUST precede Phase 6 (attachments) ──
@@ -1066,7 +1066,7 @@ _REGEX_INTENTS = [
     # FIX-STRESS-009d: "what does the attached document say"
     (re.compile(r"\bwhat\b.{0,30}\b(?:attached|attachment)\b.{0,30}\b(?:document|pdf|file|spreadsheet|invoice)?\b.{0,15}\bsay\b", re.I), "gmail_summarize_attachment"),
     # gmail_save_attachment — "save/download/open the PDF/attachment/invoice"
-    (re.compile(r"\b(?:save|download|open)\b.{0,30}\b(?:the\s+)?(?:attached\s+)?(?:attachment|pdf|document|invoice|receipt|image|spreadsheet)\b", re.I), "gmail_save_attachment"),
+    (re.compile(r"\b(?:save|download|open)\b.{0,30}\b(?:the\s+)?(?:attached\s+)?(?:attachment|pdf|document|invoice|receipt|image|spreadsheet|file)\b", re.I), "gmail_save_attachment"),
     (re.compile(r"\b(?:save|download)\b.{0,25}\b(?:that|this|first|second|third)\b.{0,20}\b(?:attachment|file|pdf|document)\b", re.I), "gmail_save_attachment"),
     # FIX-STAGE3-002: "which draft has the PDF attached" → list_drafts, not list_attachments
     (re.compile(r"\bwhich\s+draft\b", re.I), "gmail_list_drafts"),

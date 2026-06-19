@@ -1,0 +1,2 @@
+ M adwi/notes/e2e-auto-loop/status.json
+?? adwi/notes/git-backup-logs/20260618-181509-git-backup.md

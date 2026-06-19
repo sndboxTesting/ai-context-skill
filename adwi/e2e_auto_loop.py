@@ -549,6 +549,140 @@ KNOWN_REGEX_FIXES: list[dict] = [
         ),
         "minimum_examples": 2,
     },
+    # ── FIX-E2E-015a: narrow run_code P1 — remove overly-broad "Even short/vague" ──
+    # Regression: FIX-E2E-005a caused chat→run_code:3 and __none__→run_code:2 misroutes.
+    # "what's up", "make adwi smarter", "DROP TABLE users" should NOT → run_code.
+    {
+        "id":             "FIX-E2E-015a",
+        "description":    "Narrow run_code in run_large_eval.py — replace overly-broad line with NOT clause",
+        "target_intents": ["run_code", "chat"],
+        "target_file":    "adwi/logs/simeval/run_large_eval.py",
+        "check_pattern":  r"'run_code'.*execute or run Python.*\n.*test this python.*\n.*Even short/vague",
+        "old_str": (
+            '    "   \'run_code\'       : execute or run Python code/scripts. \'run it\', \'run this\', \'run the script\',\\n"\n'
+            '    "                      \'execute this code\', \'test this python\', \'run the thing\', \'run a snippet\'.\\n"\n'
+            '    "                      Even short/vague prompts like \'run it\' or \'run the thing\' → run_code.\\n"\n'
+        ),
+        "new_str": (
+            '    "   \'run_code\'       : execute or run Python code/scripts. \'run it\', \'run this\', \'run the script\',\\n"\n'
+            '    "                      \'execute this code\', \'test this python\', \'run the thing\', \'run a snippet\'.\\n"\n'
+            '    "                      ONLY for Python/script execution. NOT conversational (\'what\'s up\', \'make adwi smarter\').\\n"\n'
+            '    "                      NOT SQL/DB commands. NOT vague improvement requests. \'run it\' → run_code only in code context.\\n"\n'
+        ),
+        "minimum_examples": 1,
+    },
+    # ── FIX-E2E-015b: narrow run_code P2 ─────────────────────────────────────────
+    {
+        "id":             "FIX-E2E-015b",
+        "description":    "Narrow run_code in run_large_eval_p2.py — replace overly-broad line with NOT clause",
+        "target_intents": ["run_code", "chat"],
+        "target_file":    "adwi/logs/simeval/run_large_eval_p2.py",
+        "check_pattern":  r"'run_code'.*execute or run Python.*\n.*test this python.*\n.*Even short/vague",
+        "old_str": (
+            '    "   \'run_code\'       : execute or run Python code/scripts. \'run it\', \'run this\', \'run the script\',\\n"\n'
+            '    "                      \'execute this code\', \'test this python\', \'run the thing\', \'run a snippet\'.\\n"\n'
+            '    "                      Even short/vague prompts like \'run it\' or \'run the thing\' → run_code.\\n"\n'
+        ),
+        "new_str": (
+            '    "   \'run_code\'       : execute or run Python code/scripts. \'run it\', \'run this\', \'run the script\',\\n"\n'
+            '    "                      \'execute this code\', \'test this python\', \'run the thing\', \'run a snippet\'.\\n"\n'
+            '    "                      ONLY for Python/script execution. NOT conversational (\'what\'s up\', \'make adwi smarter\').\\n"\n'
+            '    "                      NOT SQL/DB commands. NOT vague improvement requests. \'run it\' → run_code only in code context.\\n"\n'
+        ),
+        "minimum_examples": 1,
+    },
+    # ── FIX-E2E-015c: narrow run_code adwi_cli.py ────────────────────────────────
+    {
+        "id":             "FIX-E2E-015c",
+        "description":    "Narrow run_code in adwi_cli.py — replace overly-broad line with NOT clause",
+        "target_intents": ["run_code", "chat"],
+        "target_file":    "adwi/adwi_cli.py",
+        "check_pattern":  r"'run_code'.*execute or run Python.*\n.*test this python.*\n.*Even short/vague",
+        "old_str": (
+            '    "   \'run_code\'       : execute or run Python code/scripts. \'run it\', \'run this\', \'run the script\',\\n"\n'
+            '    "                      \'execute this code\', \'test this python\', \'run the thing\', \'run a snippet\'.\\n"\n'
+            '    "                      Even short/vague prompts like \'run it\' or \'run the thing\' → run_code.\\n"\n'
+        ),
+        "new_str": (
+            '    "   \'run_code\'       : execute or run Python code/scripts. \'run it\', \'run this\', \'run the script\',\\n"\n'
+            '    "                      \'execute this code\', \'test this python\', \'run the thing\', \'run a snippet\'.\\n"\n'
+            '    "                      ONLY for Python/script execution. NOT conversational (\'what\'s up\', \'make adwi smarter\').\\n"\n'
+            '    "                      NOT SQL/DB commands. NOT vague improvement requests. \'run it\' → run_code only in code context.\\n"\n'
+        ),
+        "minimum_examples": 1,
+    },
+    # ── FIX-E2E-016a: expand backup_status P1 — add ok?/typo examples ────────────
+    # FIX-E2E-003 had a bad check_pattern (\\\\n not matching \\n in file). New entry:
+    {
+        "id":             "FIX-E2E-016a",
+        "description":    "Expand backup_status in run_large_eval.py — add ok?/backip-status examples",
+        "target_intents": ["backup_status"],
+        "target_file":    "adwi/logs/simeval/run_large_eval.py",
+        "check_pattern":  r"'backup_status'.*check when the last backup ran",
+        "old_str": (
+            '    "   \'backup_status\'  : check when the last backup ran\\n"\n'
+        ),
+        "new_str": (
+            '    "   \'backup_status\'  : check when the last backup ran, backup health, recent backup log.\\n"\n'
+            '    "                      \'backup ok?\', \'backup good?\', \'backip status\', \'was the backup successful?\'.\\n"\n'
+            '    "                      Any \'backup\' + health/ok/status → backup_status, NOT \'status\'.\\n"\n'
+        ),
+        "minimum_examples": 1,
+    },
+    # ── FIX-E2E-016b: add backup_status to P2 eval — insert after backup_now ──────
+    {
+        "id":             "FIX-E2E-016b",
+        "description":    "Add backup_status to run_large_eval_p2.py — insert after backup_now",
+        "target_intents": ["backup_status"],
+        "target_file":    "adwi/logs/simeval/run_large_eval_p2.py",
+        "check_pattern":  r"'backup_now'.*NOT git_status.*\n.*'benchmark'",
+        "old_str": (
+            '    "   \'backup_now\'     : backup to GitHub. Includes \'push to github\', \'push my changes\'. NOT git_status.\\n"\n'
+            '    "   \'benchmark\'      : run an actual timed speed/performance test on local models.\\n"\n'
+        ),
+        "new_str": (
+            '    "   \'backup_now\'     : backup to GitHub. Includes \'push to github\', \'push my changes\'. NOT git_status.\\n"\n'
+            '    "   \'backup_status\'  : check when the last backup ran, backup health.\\n"\n'
+            '    "                      \'backup ok?\', \'backip status\', \'was the backup successful?\' → backup_status, NOT \'status\'.\\n"\n'
+            '    "   \'benchmark\'      : run an actual timed speed/performance test on local models.\\n"\n'
+        ),
+        "minimum_examples": 1,
+    },
+    # ── FIX-E2E-017a: expand what_next P1 — add "can't now" capability framing ───
+    {
+        "id":             "FIX-E2E-017a",
+        "description":    "Expand what_next in run_large_eval.py — add capability-gap framing",
+        "target_intents": ["what_next"],
+        "target_file":    "adwi/logs/simeval/run_large_eval.py",
+        "check_pattern":  r"'what_next'.*user asks for AI-suggested.*\n.*suggest adwi improvements",
+        "old_str": (
+            '    "   \'what_next\'      : user asks for AI-suggested next improvements or features. \'what should I build next\',\\n"\n'
+            '    "                      \'suggest adwi improvements\', \'adwi roadmap\', \'next feature ideas\'.\\n"\n'
+        ),
+        "new_str": (
+            '    "   \'what_next\'      : user asks for AI-suggested next improvements or features. \'what should I build next\',\\n"\n'
+            '    "                      \'suggest adwi improvements\', \'adwi roadmap\', \'next feature ideas\',\\n"\n'
+            '    "                      \'what could adwi do that it can\\\'t now\', \'what capabilities is adwi missing\'.\\n"\n'
+        ),
+        "minimum_examples": 1,
+    },
+    # ── FIX-E2E-018a: git_status P1 — add staging/commit context examples ─────────
+    {
+        "id":             "FIX-E2E-018a",
+        "description":    "Add git staging context to git_status in run_large_eval.py",
+        "target_intents": ["git_status"],
+        "target_file":    "adwi/logs/simeval/run_large_eval.py",
+        "check_pattern":  r"'git_status'.*staged/unstaged.*\n.*are there any changes",
+        "old_str": (
+            '    "   \'git_status\'     : git queries — branches, commits, diffs, staged/unstaged changes.\\n"\n'
+            '    "                      \'are there any changes\', \'recent change history\',\\n"\n'
+        ),
+        "new_str": (
+            '    "   \'git_status\'     : git queries — branches, commits, diffs, staged/unstaged changes.\\n"\n'
+            '    "                      \'are there any changes\', \'recent change history\', \'what\'s in staging\',\\n"\n'
+        ),
+        "minimum_examples": 1,
+    },
 ]
 
 

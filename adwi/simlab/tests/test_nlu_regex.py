@@ -1884,5 +1884,73 @@ class TestReliabilityCycle2Regressions(unittest.TestCase):
         self.assertEqual(_classify("use local inference"), "use_local")
 
 
+class TestReliabilityCycle3BenchmarkGuard(unittest.TestCase):
+    """
+    FIX-REL-014: benchmark guard added before FIX-REL-012 use_local patterns.
+    "benchmark my local model" was being misrouted to use_local.
+    """
+
+    def test_benchmark_local_model(self):
+        self.assertEqual(_classify("benchmark my local model please"), "benchmark")
+
+    def test_latency_on_local_model(self):
+        self.assertEqual(_classify("what's the latency on local model calls"), "benchmark")
+
+    def test_local_model_speed_test(self):
+        self.assertEqual(_classify("local model speed test"), "benchmark")
+
+    # Regression: use_local must still work for non-benchmark context
+    def test_local_llm_still_use_local(self):
+        self.assertEqual(_classify("local llm please"), "use_local")
+
+    def test_run_local_model_still_use_local(self):
+        self.assertEqual(_classify("run local model"), "use_local")
+
+    def test_switch_model_to_local_still_use_local(self):
+        self.assertEqual(_classify("switch model to local"), "use_local")
+
+
+class TestReliabilityCycle3Regressions(unittest.TestCase):
+    """
+    Regression suite for FIX-REL-013: fix_error coverage for P2 weak families.
+
+    Previously these LLM-path scenarios timed out when Ollama was under load.
+    Now caught by regex:
+    - Missing exception types: UnicodeDecodeError, OverflowError (extended list)
+    - "how do I fix X raised" pattern (no colon after exception name)
+    - "help: X" prefix pattern
+    """
+
+    def test_how_to_fix_unicode_decode_error(self):
+        self.assertEqual(_classify("how do i fix UnicodeDecodeError: 'utf-8' codec can't decode byte 0x80"), "fix_error")
+
+    def test_help_stopiteration_raised(self):
+        self.assertEqual(_classify("help: StopIteration raised inside generator"), "fix_error")
+
+    def test_help_unicode_decode_error(self):
+        self.assertEqual(_classify("help: UnicodeDecodeError: 'utf-8' codec can't decode byte 0x80"), "fix_error")
+
+    def test_how_to_fix_stopiteration_raised(self):
+        self.assertEqual(_classify("how do i fix StopIteration raised inside generator"), "fix_error")
+
+    def test_help_overflow_error(self):
+        self.assertEqual(_classify("help: OverflowError: int too large to convert to float"), "fix_error")
+
+    def test_how_to_fix_overflow_error(self):
+        self.assertEqual(_classify("how do i fix OverflowError: int too large to convert to float"), "fix_error")
+
+    def test_unicode_decode_error_with_colon(self):
+        self.assertEqual(_classify("UnicodeDecodeError: 'utf-8' codec can't decode"), "fix_error")
+
+    def test_overflow_error_with_colon(self):
+        self.assertEqual(_classify("OverflowError: int too large to convert to float"), "fix_error")
+
+    def test_how_to_fix_attribute_error(self):
+        self.assertEqual(_classify("how to fix AttributeError in my script"), "fix_error")
+
+    def test_help_runtime_error(self):
+        self.assertEqual(_classify("help: RuntimeError: maximum recursion depth exceeded"), "fix_error")
+
+
 if __name__ == "__main__":
     unittest.main(verbosity=2)

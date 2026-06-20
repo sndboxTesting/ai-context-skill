@@ -648,6 +648,9 @@ REGEX_INTENTS = [
     # CYCLE-6: "switch to a local one" / "switch from cloud to local"
     (re.compile(r"\b(switch|change|move)\b.{0,20}\bto\b.{0,15}\b(?:a\s+)?local\b.{0,20}\b(?:one|model|llm|ai)\b", re.I), "use_local"),
     (re.compile(r"\buse\b.{0,10}\b(qwen|llama|mistral|phi|gemma)\b", re.I), "use_local"),
+    # FIX-REL-014: benchmark guard — "benchmark my local model" must beat "local model" → use_local
+    (re.compile(r"\b(benchmark|speed.?test|latency)\b.{0,30}\blocal\b.{0,20}\b(model|llm)\b", re.I), "benchmark"),
+    (re.compile(r"\blocal\b.{0,20}\b(model|llm)\b.{0,20}\b(speed|latency|benchmark)\b", re.I), "benchmark"),
     # FIX-REL-012: "local llm please", "run local model", "switch model to local"
     (re.compile(r"\blocal\s+(llm|model)\b", re.I), "use_local"),
     (re.compile(r"\b(run|use|launch)\b.{0,10}\blocal\b.{0,10}\b(model|llm|ai|inference)\b", re.I), "use_local"),
@@ -688,7 +691,10 @@ REGEX_INTENTS = [
     (re.compile(r"\b(find bugs in|check for bugs in|code review).{0,20}\badwi\b", re.I), "inspect_code"),
 
     # ── Fix error / exception — catches pasted tracebacks and HTTP error codes ────
-    (re.compile(r"\b(TypeError|ValueError|KeyError|AttributeError|SyntaxError|ImportError|ModuleNotFoundError|NameError|RuntimeError|IndexError|OSError|IOError|FileNotFoundError|PermissionError|ZeroDivisionError|StopIteration|AssertionError|RecursionError|MemoryError|TimeoutError|ConnectionError|UnicodeError|ValidationError)\b\s*:", re.I), "fix_error"),
+    (re.compile(r"\b(TypeError|ValueError|KeyError|AttributeError|SyntaxError|ImportError|ModuleNotFoundError|NameError|RuntimeError|IndexError|OSError|IOError|FileNotFoundError|PermissionError|ZeroDivisionError|StopIteration|AssertionError|RecursionError|MemoryError|TimeoutError|ConnectionError|UnicodeError|ValidationError|UnicodeDecodeError|UnicodeEncodeError|OverflowError|LookupError|ArithmeticError)\b\s*:", re.I), "fix_error"),
+    # FIX-REL-013: "how do I fix StopIteration raised" — no-colon pattern + missing types
+    (re.compile(r"\bhow\s+(do\s+i|to)\s+fix\b.{0,60}\b(StopIteration|\w*(?:Error|Exception))\b", re.I), "fix_error"),
+    (re.compile(r"\bhelp\s*:\s*(StopIteration|\w*(?:Error|Exception))\b", re.I), "fix_error"),
     # FIX-S3-003: exception class name without colon (e.g. "getting ModuleNotFoundError when I run")
     (re.compile(r"\b(getting|seeing|got|had)\s+(a\s+)?(ModuleNotFoundError|TypeError|ValueError|KeyError|AttributeError|SyntaxError|ImportError|NameError|RuntimeError|IndexError|OSError|FileNotFoundError|PermissionError|ConnectionError|TimeoutError|ValidationError)\b", re.I), "fix_error"),
     (re.compile(r"\b(getting|seeing|got)\b.{0,20}\b(error|exception|traceback)\b", re.I), "fix_error"),

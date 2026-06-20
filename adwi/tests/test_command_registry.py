@@ -2072,5 +2072,117 @@ class TestPhase19E2ELoopCluster(unittest.TestCase):
         self.assertGreaterEqual(len(set(self.reg.all_names())), 123)
 
 
+# ── Phase 17 wiring verification ──────────────────────────────────────────────
+
+
+class TestPhase17VoiceIOCluster(unittest.TestCase):
+    """
+    Verify Phase 17 Voice I/O cluster is registered via discover() and
+    dispatches correctly.
+
+    Commands migrated in this phase (new module: adwi/commands/voice.py):
+      /voice-in  (+ /voice, /listen aliases) — record mic → faster-whisper
+                  transcription → dispatch_natural(). Local hardware only.
+      /voice-out — text → piper-tts → afplay. input() fallback preserved via
+                  _cli() delegation. Local audio only.
+      /voice-brief — reads ~/Desktop/morning_brief.md, strips markdown, calls
+                  cmd_voice_out() internally (within adwi_cli.py). Local only.
+
+    All three are subprocess-isolated, local-device only. No network calls.
+    No external state mutation. Side effects bounded to mic recording + audio
+    playback — unchanged from the elif chain behavior.
+
+    NLU intents voice_in and voice_out exist in the live intent dispatch path
+    (adwi_cli.py lines ~10492-10494) and are now also registered in the
+    registry intent map for future dispatch_intent() wiring.
+    """
+
+    PHASE17 = [
+        "/voice-in",
+        "/voice-out",
+        "/voice-brief",
+    ]
+
+    VOICE_ALIASES = ["/voice", "/listen"]
+
+    @classmethod
+    def setUpClass(cls):
+        cls.reg = CommandRegistry()
+        cls.reg.discover("adwi.commands")
+
+    def test_all_phase17_commands_registered(self):
+        for cmd in self.PHASE17:
+            with self.subTest(cmd=cmd):
+                self.assertIsNotNone(self.reg.get(cmd), f"{cmd} must be registered")
+
+    def test_all_phase17_commands_dispatch_true(self):
+        for cmd in self.PHASE17:
+            with self.subTest(cmd=cmd):
+                self.assertTrue(
+                    self.reg.dispatch(cmd, {}),
+                    f"dispatch('{cmd}') must return True",
+                )
+
+    def test_all_phase17_commands_have_descriptions(self):
+        for cmd in self.PHASE17:
+            with self.subTest(cmd=cmd):
+                spec = self.reg.get(cmd)
+                self.assertIsNotNone(spec)
+                self.assertGreater(len(spec.description), 0)
+
+    def test_all_phase17_commands_in_voice_category(self):
+        for cmd in self.PHASE17:
+            with self.subTest(cmd=cmd):
+                self.assertEqual(self.reg.get(cmd).category, "voice")
+
+    def test_voice_in_intent_wired(self):
+        self.assertIn("voice_in", self.reg.intent_map())
+        self.assertEqual(self.reg.intent_map()["voice_in"], "/voice-in")
+
+    def test_voice_out_intent_wired(self):
+        self.assertIn("voice_out", self.reg.intent_map())
+        self.assertEqual(self.reg.intent_map()["voice_out"], "/voice-out")
+
+    def test_voice_brief_intent_wired(self):
+        self.assertIn("voice_brief", self.reg.intent_map())
+        self.assertEqual(self.reg.intent_map()["voice_brief"], "/voice-brief")
+
+    def test_voice_aliases_registered(self):
+        """/voice and /listen must resolve to the same spec as /voice-in."""
+        spec_canonical = self.reg.get("/voice-in")
+        for alias in self.VOICE_ALIASES:
+            with self.subTest(alias=alias):
+                spec_alias = self.reg.get(alias)
+                self.assertIsNotNone(spec_alias, f"{alias} must be registered as alias")
+                self.assertIs(spec_alias, spec_canonical)
+
+    def test_voice_alias_dispatches_true(self):
+        self.assertTrue(self.reg.dispatch("/voice", {}))
+
+    def test_listen_alias_dispatches_true(self):
+        self.assertTrue(self.reg.dispatch("/listen", {}))
+
+    def test_voice_out_with_text_dispatches_true(self):
+        """/voice-out with inline text must dispatch (args passed to handler)."""
+        self.assertTrue(self.reg.dispatch("/voice-out hello world", {}))
+
+    def test_voice_out_no_args_dispatches_true(self):
+        """/voice-out with no args dispatches (input() fallback is in adwi_cli.py handler)."""
+        self.assertTrue(self.reg.dispatch("/voice-out", {}))
+
+    def test_voice_brief_dispatches_true(self):
+        self.assertTrue(self.reg.dispatch("/voice-brief", {}))
+
+    def test_voice_module_loaded_via_discover(self):
+        fresh = CommandRegistry()
+        count = fresh.discover("adwi.commands")
+        self.assertIsNotNone(fresh.get("/voice-in"), "voice module must register /voice-in")
+
+    def test_total_unique_commands_at_phase17(self):
+        # Phase 19 had ≥123; Phase 17 adds /voice-in, /voice-out, /voice-brief
+        # + aliases /voice and /listen (counted in all_names)
+        self.assertGreaterEqual(len(set(self.reg.all_names())), 128)
+
+
 if __name__ == "__main__":
     unittest.main()

@@ -59,6 +59,14 @@ def _watcher_status(args: str, ctx: dict) -> None:
     _cli().run_cmd("watcher", ["status-openwebui-knowledge-watcher"])
 
 
+def _eval_adwi(args: str, ctx: dict) -> None:
+    _cli().cmd_eval_adwi()
+
+
+def _export_training_example(args: str, ctx: dict) -> None:
+    _cli().cmd_export_training_example(args)
+
+
 # ── Registration ──────────────────────────────────────────────────────────────
 
 
@@ -108,3 +116,18 @@ def register(registry: "CommandRegistry") -> None:
         description="Check Open WebUI knowledge watcher service status",
         category="system",
     )(_watcher_status)
+
+    registry.register(
+        "/eval-adwi",
+        description="Run the full Adwi capability evaluation",
+        category="eval",
+        intents=["eval_adwi"],
+    )(_eval_adwi)
+
+    registry.register(
+        "/export-training-example",
+        description="Export a labeled training example from the last interaction",
+        category="eval",
+        intents=["export_training"],
+        args_schema={"query": "str?"},
+    )(_export_training_example)

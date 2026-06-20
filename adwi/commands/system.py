@@ -155,7 +155,7 @@ def register(registry: "CommandRegistry") -> None:
     registry.register(
         "/capabilities",
         description="List all Adwi capabilities",
-        aliases=["/caps"],
+        aliases=["/caps", "/capability-status"],
         category="system",
         intents=["capabilities"],
     )(_capabilities)

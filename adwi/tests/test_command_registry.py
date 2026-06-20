@@ -2347,5 +2347,227 @@ class TestPhase18RemoteHACluster(unittest.TestCase):
         self.assertGreaterEqual(len(set(self.reg.all_names())), 133)
 
 
+class TestPhase23DiagnosticsViewerCluster(unittest.TestCase):
+    """
+    Verify Phase 23 diagnostics + viewer cluster is registered via discover()
+    and dispatches correctly.
+
+    Commands added to adwi/commands/diagnostics.py (Phase 23):
+      /capability-audit      — Audit registered capabilities (read-only)
+      /memory-curate         — Propose durable memories (read-only)
+      /mcp-setup             — Auto-configure MCP servers (local config only)
+      /repair-adwi           — Full system repair (bounded local subprocess)
+      /run-safe              — Safety-gated executor (bounded local)
+      /learn-from-last-error — Analyze last error log (read-only)
+      /secrets-status        — Check secrets presence (never reveals values)
+      /journal               — Last 60 lines of JOURNAL_FILE (read-only)
+      /mistakes              — Last 60 lines of MISTAKES_FILE (read-only)
+      /nightly-log           — Nightly run log viewer (read-only)
+      /inspect-code          — Read and explain an Adwi source file (read-only)
+
+    Commands added to adwi/commands/eval.py (Phase 23):
+      /eval-adwi             — Run full Adwi capability evaluation (bounded subprocess)
+      /export-training-example — Export labeled training example (bounded file write)
+
+    Alias fix applied to adwi/commands/system.py:
+      /capability-status     — Added as alias for /capabilities
+
+    Deferred (unchanged):
+      /e2e-auto-loop         — subprocess launcher; may patch adwi_cli.py
+      /notify                — HTTP POST to iPhone; externally visible
+    """
+
+    PHASE23_DIAGNOSTICS = [
+        "/capability-audit",
+        "/memory-curate",
+        "/mcp-setup",
+        "/repair-adwi",
+        "/run-safe",
+        "/learn-from-last-error",
+        "/secrets-status",
+        "/journal",
+        "/mistakes",
+        "/nightly-log",
+        "/inspect-code",
+    ]
+
+    PHASE23_EVAL = [
+        "/eval-adwi",
+        "/export-training-example",
+    ]
+
+    PHASE23_ALL = PHASE23_DIAGNOSTICS + PHASE23_EVAL
+
+    PHASE23_DEFERRED = [
+        "/e2e-auto-loop",
+        "/notify",
+    ]
+
+    @classmethod
+    def setUpClass(cls):
+        cls.reg = CommandRegistry()
+        cls.reg.discover("adwi.commands")
+
+    def test_all_phase23_commands_registered(self):
+        for cmd in self.PHASE23_ALL:
+            with self.subTest(cmd=cmd):
+                self.assertIsNotNone(self.reg.get(cmd), f"{cmd} must be registered")
+
+    def test_all_phase23_commands_dispatch_true(self):
+        for cmd in self.PHASE23_ALL:
+            with self.subTest(cmd=cmd):
+                self.assertTrue(
+                    self.reg.dispatch(cmd, {}),
+                    f"dispatch('{cmd}') must return True",
+                )
+
+    def test_all_phase23_commands_have_descriptions(self):
+        for cmd in self.PHASE23_ALL:
+            with self.subTest(cmd=cmd):
+                spec = self.reg.get(cmd)
+                self.assertIsNotNone(spec)
+                self.assertGreater(len(spec.description), 0)
+
+    def test_diagnostics_commands_in_system_category(self):
+        for cmd in self.PHASE23_DIAGNOSTICS:
+            with self.subTest(cmd=cmd):
+                spec = self.reg.get(cmd)
+                self.assertIsNotNone(spec)
+                self.assertEqual(spec.category, "system", f"{cmd} must be in 'system' category")
+
+    def test_eval_commands_in_eval_category(self):
+        for cmd in self.PHASE23_EVAL:
+            with self.subTest(cmd=cmd):
+                spec = self.reg.get(cmd)
+                self.assertIsNotNone(spec)
+                self.assertEqual(spec.category, "eval", f"{cmd} must be in 'eval' category")
+
+    # ── Intent wiring ─────────────────────────────────────────────────────────
+
+    def test_memory_curate_intent_wired(self):
+        self.assertIn("memory_curate", self.reg.intent_map())
+        self.assertEqual(self.reg.intent_map()["memory_curate"], "/memory-curate")
+
+    def test_learn_from_error_intent_wired(self):
+        self.assertIn("learn_from_error", self.reg.intent_map())
+        self.assertEqual(self.reg.intent_map()["learn_from_error"], "/learn-from-last-error")
+
+    def test_eval_adwi_intent_wired(self):
+        self.assertIn("eval_adwi", self.reg.intent_map())
+        self.assertEqual(self.reg.intent_map()["eval_adwi"], "/eval-adwi")
+
+    def test_export_training_intent_wired(self):
+        self.assertIn("export_training", self.reg.intent_map())
+        self.assertEqual(self.reg.intent_map()["export_training"], "/export-training-example")
+
+    def test_inspect_code_intent_wired(self):
+        self.assertIn("inspect_code", self.reg.intent_map())
+        self.assertEqual(self.reg.intent_map()["inspect_code"], "/inspect-code")
+
+    # ── Per-command dispatch checks ───────────────────────────────────────────
+
+    def test_capability_audit_dispatches_true(self):
+        self.assertTrue(self.reg.dispatch("/capability-audit", {}))
+
+    def test_memory_curate_dispatches_true(self):
+        self.assertTrue(self.reg.dispatch("/memory-curate", {}))
+
+    def test_mcp_setup_dispatches_true(self):
+        self.assertTrue(self.reg.dispatch("/mcp-setup", {}))
+
+    def test_repair_adwi_dispatches_true(self):
+        self.assertTrue(self.reg.dispatch("/repair-adwi", {}))
+
+    def test_run_safe_with_action_dispatches_true(self):
+        self.assertTrue(self.reg.dispatch("/run-safe git-backup", {}))
+
+    def test_run_safe_no_args_dispatches_true(self):
+        self.assertTrue(self.reg.dispatch("/run-safe", {}))
+
+    def test_learn_from_last_error_dispatches_true(self):
+        self.assertTrue(self.reg.dispatch("/learn-from-last-error", {}))
+
+    def test_secrets_status_dispatches_true(self):
+        self.assertTrue(self.reg.dispatch("/secrets-status", {}))
+
+    def test_journal_dispatches_true(self):
+        self.assertTrue(self.reg.dispatch("/journal", {}))
+
+    def test_mistakes_dispatches_true(self):
+        self.assertTrue(self.reg.dispatch("/mistakes", {}))
+
+    def test_nightly_log_no_args_dispatches_true(self):
+        self.assertTrue(self.reg.dispatch("/nightly-log", {}))
+
+    def test_nightly_log_with_n_dispatches_true(self):
+        self.assertTrue(self.reg.dispatch("/nightly-log 3", {}))
+
+    def test_inspect_code_with_path_dispatches_true(self):
+        self.assertTrue(self.reg.dispatch("/inspect-code adwi/adwi_cli.py", {}))
+
+    def test_inspect_code_no_args_dispatches_true(self):
+        # bare /inspect-code: registry dispatches (returns True), handler prints usage
+        self.assertTrue(self.reg.dispatch("/inspect-code", {}))
+
+    def test_eval_adwi_dispatches_true(self):
+        self.assertTrue(self.reg.dispatch("/eval-adwi", {}))
+
+    def test_export_training_example_no_args_dispatches_true(self):
+        self.assertTrue(self.reg.dispatch("/export-training-example", {}))
+
+    def test_export_training_example_with_label_dispatches_true(self):
+        self.assertTrue(self.reg.dispatch("/export-training-example good", {}))
+
+    # ── Alias fix: /capability-status ────────────────────────────────────────
+
+    def test_capability_status_alias_registered(self):
+        """/capability-status must resolve to the same spec as /capabilities."""
+        spec_canonical = self.reg.get("/capabilities")
+        spec_alias = self.reg.get("/capability-status")
+        self.assertIsNotNone(spec_alias, "/capability-status must be registered as alias")
+        self.assertIs(spec_alias, spec_canonical)
+
+    def test_capability_status_dispatches_true(self):
+        self.assertTrue(self.reg.dispatch("/capability-status", {}))
+
+    # ── Deferred commands remain unregistered ─────────────────────────────────
+
+    def test_deferred_commands_not_registered(self):
+        for cmd in self.PHASE23_DEFERRED:
+            with self.subTest(cmd=cmd):
+                self.assertIsNone(
+                    self.reg.get(cmd),
+                    f"{cmd} must remain deferred",
+                )
+
+    def test_deferred_commands_fall_through_to_elif(self):
+        for cmd in self.PHASE23_DEFERRED:
+            with self.subTest(cmd=cmd):
+                self.assertFalse(
+                    self.reg.dispatch(cmd, {}),
+                    f"dispatch('{cmd}') must return False — fallback to elif chain",
+                )
+
+    # ── Module loading ────────────────────────────────────────────────────────
+
+    def test_diagnostics_module_loaded_via_discover(self):
+        fresh = CommandRegistry()
+        fresh.discover("adwi.commands")
+        self.assertIsNotNone(fresh.get("/capability-audit"),
+                             "diagnostics module must register /capability-audit")
+
+    def test_eval_module_extended_via_discover(self):
+        fresh = CommandRegistry()
+        fresh.discover("adwi.commands")
+        self.assertIsNotNone(fresh.get("/eval-adwi"),
+                             "eval module must register /eval-adwi")
+
+    # ── Registry total after Phase 23 ─────────────────────────────────────────
+
+    def test_total_unique_commands_at_phase23(self):
+        # Phase 18 had ≥133; Phase 23 adds 13 commands + 1 alias = 14 new names
+        self.assertGreaterEqual(len(set(self.reg.all_names())), 147)
+
+
 if __name__ == "__main__":
     unittest.main()

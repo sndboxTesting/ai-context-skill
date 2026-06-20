@@ -44,9 +44,11 @@ None are required — every command degrades safely to local Ollama.
 
 | Variable | Purpose | Without it |
 |---|---|---|
-| `EXA_API_KEY` | Exa neural search for `/research` | SearXNG-only results |
-| `TAVILY_API_KEY` | Tavily web search for `/research` + `/daily-brief` | SearXNG-only results |
-| `FIRECRAWL_API_KEY` | Full-page markdown extraction | Skips deep-fetch step |
+| `EXA_API_KEY` | Exa neural search for `/research` | Uses SearXNG plus other configured providers |
+| `TAVILY_API_KEY` | Tavily web search for `/research` + `/daily-brief` | Uses SearXNG plus other configured providers |
+| `BRAVE_SEARCH_API_KEY` | Brave Search API independent web index | Brave provider is skipped |
+| `FIRECRAWL_API_KEY` | Full-page markdown extraction | Falls back to Jina if configured, then browser/urllib |
+| `JINA_API_KEY` | Jina Reader fallback page extraction | Jina fetch provider is skipped |
 | `OPENWEBUI_API_KEY` | Cloud LLM for synthesis and brief writing | Falls back to local `adwi:latest` |
 
 See `adwi/config/.env.example` for the variable names (values are gitignored).
@@ -143,7 +145,7 @@ Gmail `available: false` means the token is missing or Gmail threw an error; the
 
 | Capability | Safety gate |
 |---|---|
-| `/research` | Read-only web search + local LLM. No writes except to approved `notes/` path. |
+| `/research` | Read-only orchestrated web search + local/cloud LLM. No writes except to approved `notes/` path. Citations are grounded only in fetched page text. |
 | `/browser-delegate` | Regex screens task for risky verbs (submit, sign up, login, purchase, delete). Stops and asks confirmation. Detects auth/paywall walls and halts. Dry-run mode takes no action at all. |
 | `/daily-brief` | Gmail read-only. No emails sent. Obsidian write via Bridge. `notes/` write only. |
 | `/memory-curate` | Every proposed memory requires explicit `Y` confirmation. `N` skips. Aborts cleanly on any error. |
@@ -153,7 +155,7 @@ Gmail `available: false` means the token is missing or Gmail threw an error; the
 
 ## Known gaps
 
-- `/research`: no follow-up question flow (one-shot only).
+- `/research`: follow-up-style modes are command-prefix driven (`dig deeper`, `verify`, `compare sources`), not an interactive multi-turn research session yet.
 - `/browser-delegate`: form-filling and click actions not implemented (blocked by safety design; requires additional confirmation gates before enabling).
 - `/daily-brief --n8n`: service probe uses a 2-second HTTP timeout — slow/hanging services may show `"down"` if they take >2s to respond. Increase `timeout` in `_svc_probe()` if needed.
 - Safe Command API server (`:5055`) must be manually restarted to pick up the `/adwi-daily-brief-n8n` route: `adwi/bin/stop-command-api && adwi/bin/start-command-api`.

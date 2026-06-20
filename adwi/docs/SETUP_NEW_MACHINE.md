@@ -127,9 +127,11 @@ Fill in at minimum:
 - `TAVILY_API_KEY` — free at https://tavily.com (web search)
 - `HA_TOKEN` + `HA_URL` — if you use Home Assistant
 - `EXA_API_KEY` — optional, for Exa neural search
+- `BRAVE_SEARCH_API_KEY` — optional, for Brave Search API web results
 - `FIRECRAWL_API_KEY` — optional, for clean web scraping
+- `JINA_API_KEY` — optional, for Jina Reader fallback page extraction
 
-**Adwi will work in reduced mode without these.** Core functionality (local models, file ops, git, memory) works without any API keys. Search falls back to SearXNG only.
+**Adwi will work in reduced mode without these.** Core functionality (local models, file ops, git, memory) works without any API keys. Search falls back to SearXNG and local fetch fallbacks only.
 
 **Validate:** `adwi → /secrets-status` (after full setup)
 

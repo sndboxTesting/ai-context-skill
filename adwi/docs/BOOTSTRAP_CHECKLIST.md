@@ -40,6 +40,7 @@ Check each item before proceeding to the next. See `docs/SETUP_NEW_MACHINE.md` f
 - [ ] `TAVILY_API_KEY` set (or accepted as missing — optional)
 - [ ] `HA_TOKEN` + `HA_URL` set (or accepted as missing — optional)
 - [ ] `EXA_API_KEY` set (or accepted as missing — optional)
+- [ ] `BRAVE_SEARCH_API_KEY` set (or accepted as missing — optional)
 - [ ] `secrets/` directory exists and is gitignored (`git check-ignore secrets/`)
 
 ## Phase 5 — Docker services

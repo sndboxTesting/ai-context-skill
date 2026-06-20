@@ -1,6 +1,6 @@
 {
   "version": "1.0",
-  "updated": "2026-06-14",
+  "updated": "2026-06-20",
   "workspace": "/Users/MAC/SuneelWorkSpace",
   "capabilities": [
     {
@@ -659,9 +659,17 @@
       "command": "/research <question>  or  /research-save <question>",
       "description": "Deep multi-source research (SearXNG + Exa/Tavily/Firecrawl optional). Produces a cited brief saved to notes/research/. /research-save also appends to Obsidian daily note.",
       "risk": "low",
-      "allowed_paths": ["notes/research", "obsidian-vault"],
+      "allowed_paths": [
+        "notes/research",
+        "obsidian-vault"
+      ],
       "uses_secrets": false,
-      "optional_env": ["EXA_API_KEY", "TAVILY_API_KEY", "FIRECRAWL_API_KEY", "OPENWEBUI_API_KEY"],
+      "optional_env": [
+        "EXA_API_KEY",
+        "TAVILY_API_KEY",
+        "FIRECRAWL_API_KEY",
+        "OPENWEBUI_API_KEY"
+      ],
       "logs": "notes/adwi-action-logs",
       "status": "active"
     },
@@ -670,7 +678,9 @@
       "command": "/browser-delegate <task>  or  /browser-delegate-dry-run <task>",
       "description": "Safe browser agent using Playwright. Stops and asks confirmation before any account-changing, form-submit, payment, or delete action. Dry-run mode shows what it would do without acting. Saves results to notes/browser-tasks/.",
       "risk": "medium",
-      "allowed_paths": ["notes/browser-tasks"],
+      "allowed_paths": [
+        "notes/browser-tasks"
+      ],
       "uses_secrets": false,
       "logs": "notes/adwi-action-logs",
       "status": "active"
@@ -680,9 +690,14 @@
       "command": "/daily-brief",
       "description": "Proactive daily assistant brief: service status, Gmail inbox snapshot, today's priorities, a learning suggestion, and one setup improvement. Saves to notes/daily-briefs/ and Obsidian daily note. Callable from n8n.",
       "risk": "low",
-      "allowed_paths": ["notes/daily-briefs", "obsidian-vault"],
+      "allowed_paths": [
+        "notes/daily-briefs",
+        "obsidian-vault"
+      ],
       "uses_secrets": false,
-      "optional_env": ["OPENWEBUI_API_KEY"],
+      "optional_env": [
+        "OPENWEBUI_API_KEY"
+      ],
       "logs": "notes/adwi-action-logs",
       "status": "active"
     },
@@ -691,9 +706,15 @@
       "command": "/tech-radar",
       "description": "Scans 6 AI/dev technology areas (OpenAI Agents, MCP, Ollama, browser agents, LangGraph, local voice/vision/RAG). Categorises each as try-now / watch / ignore with reasoning. Saves to notes/tech-radar/.",
       "risk": "low",
-      "allowed_paths": ["notes/tech-radar"],
+      "allowed_paths": [
+        "notes/tech-radar"
+      ],
       "uses_secrets": false,
-      "optional_env": ["EXA_API_KEY", "TAVILY_API_KEY", "OPENWEBUI_API_KEY"],
+      "optional_env": [
+        "EXA_API_KEY",
+        "TAVILY_API_KEY",
+        "OPENWEBUI_API_KEY"
+      ],
       "logs": "notes/adwi-action-logs",
       "status": "active"
     },
@@ -702,7 +723,9 @@
       "command": "/memory-curate",
       "description": "Reviews recent action logs and proposes 3-5 durable personal memories (preferences, project facts, patterns). Each proposal requires explicit Y/N confirmation before storage. Never auto-stores.",
       "risk": "low",
-      "allowed_paths": ["notes/adwi-action-logs"],
+      "allowed_paths": [
+        "notes/adwi-action-logs"
+      ],
       "uses_secrets": false,
       "logs": "notes/adwi-action-logs",
       "status": "active"
@@ -716,6 +739,986 @@
       "uses_secrets": false,
       "logs": "notes/adwi-action-logs",
       "status": "active"
+    },
+    {
+      "name": "Backup Audit",
+      "command": "/backup-audit",
+      "description": "Adwi command /backup-audit",
+      "risk": "low",
+      "files_touched": [],
+      "uses_secrets": false,
+      "logs": "notes/adwi-action-logs",
+      "test_command": "/test-adwi"
+    },
+    {
+      "name": "Backup Disable",
+      "command": "/backup-disable",
+      "description": "Adwi command /backup-disable",
+      "risk": "low",
+      "files_touched": [],
+      "uses_secrets": false,
+      "logs": "notes/adwi-action-logs",
+      "test_command": "/test-adwi"
+    },
+    {
+      "name": "Backup Enable",
+      "command": "/backup-enable",
+      "description": "Adwi command /backup-enable",
+      "risk": "low",
+      "files_touched": [],
+      "uses_secrets": false,
+      "logs": "notes/adwi-action-logs",
+      "test_command": "/test-adwi"
+    },
+    {
+      "name": "Backup Log",
+      "command": "/backup-log",
+      "description": "Adwi command /backup-log",
+      "risk": "low",
+      "files_touched": [],
+      "uses_secrets": false,
+      "logs": "notes/adwi-action-logs",
+      "test_command": "/test-adwi"
+    },
+    {
+      "name": "Backup Now",
+      "command": "/backup-now",
+      "description": "Adwi command /backup-now",
+      "risk": "low",
+      "files_touched": [],
+      "uses_secrets": false,
+      "logs": "notes/adwi-action-logs",
+      "test_command": "/test-adwi"
+    },
+    {
+      "name": "Backup Status",
+      "command": "/backup-status",
+      "description": "Adwi command /backup-status",
+      "risk": "low",
+      "files_touched": [],
+      "uses_secrets": false,
+      "logs": "notes/adwi-action-logs",
+      "test_command": "/test-adwi"
+    },
+    {
+      "name": "Browser Delegate Dry Run",
+      "command": "/browser-delegate-dry-run",
+      "description": "Adwi command /browser-delegate-dry-run",
+      "risk": "low",
+      "files_touched": [],
+      "uses_secrets": false,
+      "logs": "notes/adwi-action-logs",
+      "test_command": "/test-adwi"
+    },
+    {
+      "name": "Cmd",
+      "command": "/cmd",
+      "description": "Adwi command /cmd",
+      "risk": "low",
+      "files_touched": [],
+      "uses_secrets": false,
+      "logs": "notes/adwi-action-logs",
+      "test_command": "/test-adwi"
+    },
+    {
+      "name": "Context Size",
+      "command": "/context-size",
+      "description": "Adwi command /context-size",
+      "risk": "low",
+      "files_touched": [],
+      "uses_secrets": false,
+      "logs": "notes/adwi-action-logs",
+      "test_command": "/test-adwi"
+    },
+    {
+      "name": "Doctor",
+      "command": "/doctor",
+      "description": "Adwi command /doctor",
+      "risk": "low",
+      "files_touched": [],
+      "uses_secrets": false,
+      "logs": "notes/adwi-action-logs",
+      "test_command": "/test-adwi"
+    },
+    {
+      "name": "E2E Auto Loop",
+      "command": "/e2e-auto-loop",
+      "description": "Adwi command /e2e-auto-loop",
+      "risk": "low",
+      "files_touched": [],
+      "uses_secrets": false,
+      "logs": "notes/adwi-action-logs",
+      "test_command": "/test-adwi"
+    },
+    {
+      "name": "E2E Auto Loop Cancel",
+      "command": "/e2e-auto-loop-cancel",
+      "description": "Adwi command /e2e-auto-loop-cancel",
+      "risk": "low",
+      "files_touched": [],
+      "uses_secrets": false,
+      "logs": "notes/adwi-action-logs",
+      "test_command": "/test-adwi"
+    },
+    {
+      "name": "E2E Auto Loop Report",
+      "command": "/e2e-auto-loop-report",
+      "description": "Adwi command /e2e-auto-loop-report",
+      "risk": "low",
+      "files_touched": [],
+      "uses_secrets": false,
+      "logs": "notes/adwi-action-logs",
+      "test_command": "/test-adwi"
+    },
+    {
+      "name": "E2E Auto Loop Status",
+      "command": "/e2e-auto-loop-status",
+      "description": "Adwi command /e2e-auto-loop-status",
+      "risk": "low",
+      "files_touched": [],
+      "uses_secrets": false,
+      "logs": "notes/adwi-action-logs",
+      "test_command": "/test-adwi"
+    },
+    {
+      "name": "Eval Adwi",
+      "command": "/eval-adwi",
+      "description": "Adwi command /eval-adwi",
+      "risk": "low",
+      "files_touched": [],
+      "uses_secrets": false,
+      "logs": "notes/adwi-action-logs",
+      "test_command": "/test-adwi"
+    },
+    {
+      "name": "Eval Routing",
+      "command": "/eval-routing",
+      "description": "Adwi command /eval-routing",
+      "risk": "low",
+      "files_touched": [],
+      "uses_secrets": false,
+      "logs": "notes/adwi-action-logs",
+      "test_command": "/test-adwi"
+    },
+    {
+      "name": "Exa",
+      "command": "/exa",
+      "description": "Adwi command /exa",
+      "risk": "low",
+      "files_touched": [],
+      "uses_secrets": false,
+      "logs": "notes/adwi-action-logs",
+      "test_command": "/test-adwi"
+    },
+    {
+      "name": "Exa Search",
+      "command": "/exa-search",
+      "description": "Adwi command /exa-search",
+      "risk": "low",
+      "files_touched": [],
+      "uses_secrets": false,
+      "logs": "notes/adwi-action-logs",
+      "test_command": "/test-adwi"
+    },
+    {
+      "name": "Export Training Example",
+      "command": "/export-training-example",
+      "description": "Adwi command /export-training-example",
+      "risk": "low",
+      "files_touched": [],
+      "uses_secrets": false,
+      "logs": "notes/adwi-action-logs",
+      "test_command": "/test-adwi"
+    },
+    {
+      "name": "Extract Ideas",
+      "command": "/extract-ideas",
+      "description": "Adwi command /extract-ideas",
+      "risk": "low",
+      "files_touched": [],
+      "uses_secrets": false,
+      "logs": "notes/adwi-action-logs",
+      "test_command": "/test-adwi"
+    },
+    {
+      "name": "Firecrawl",
+      "command": "/firecrawl",
+      "description": "Adwi command /firecrawl",
+      "risk": "low",
+      "files_touched": [],
+      "uses_secrets": false,
+      "logs": "notes/adwi-action-logs",
+      "test_command": "/test-adwi"
+    },
+    {
+      "name": "Gemini",
+      "command": "/gemini",
+      "description": "Adwi command /gemini",
+      "risk": "low",
+      "files_touched": [],
+      "uses_secrets": false,
+      "logs": "notes/adwi-action-logs",
+      "test_command": "/test-adwi"
+    },
+    {
+      "name": "Gmail Add Bcc",
+      "command": "/gmail-add-bcc",
+      "description": "Adwi command /gmail-add-bcc",
+      "risk": "low",
+      "files_touched": [],
+      "uses_secrets": false,
+      "logs": "notes/adwi-action-logs",
+      "test_command": "/test-adwi"
+    },
+    {
+      "name": "Gmail Add Cc",
+      "command": "/gmail-add-cc",
+      "description": "Adwi command /gmail-add-cc",
+      "risk": "low",
+      "files_touched": [],
+      "uses_secrets": false,
+      "logs": "notes/adwi-action-logs",
+      "test_command": "/test-adwi"
+    },
+    {
+      "name": "Gmail Archive",
+      "command": "/gmail-archive",
+      "description": "Adwi command /gmail-archive",
+      "risk": "low",
+      "files_touched": [],
+      "uses_secrets": false,
+      "logs": "notes/adwi-action-logs",
+      "test_command": "/test-adwi"
+    },
+    {
+      "name": "Gmail Attach",
+      "command": "/gmail-attach",
+      "description": "Adwi command /gmail-attach",
+      "risk": "low",
+      "files_touched": [],
+      "uses_secrets": false,
+      "logs": "notes/adwi-action-logs",
+      "test_command": "/test-adwi"
+    },
+    {
+      "name": "Gmail Attachments",
+      "command": "/gmail-attachments",
+      "description": "Adwi command /gmail-attachments",
+      "risk": "low",
+      "files_touched": [],
+      "uses_secrets": false,
+      "logs": "notes/adwi-action-logs",
+      "test_command": "/test-adwi"
+    },
+    {
+      "name": "Gmail Cancel",
+      "command": "/gmail-cancel",
+      "description": "Adwi command /gmail-cancel",
+      "risk": "low",
+      "files_touched": [],
+      "uses_secrets": false,
+      "logs": "notes/adwi-action-logs",
+      "test_command": "/test-adwi"
+    },
+    {
+      "name": "Gmail Cancel Draft",
+      "command": "/gmail-cancel-draft",
+      "description": "Adwi command /gmail-cancel-draft",
+      "risk": "low",
+      "files_touched": [],
+      "uses_secrets": false,
+      "logs": "notes/adwi-action-logs",
+      "test_command": "/test-adwi"
+    },
+    {
+      "name": "Gmail Cancel Followup",
+      "command": "/gmail-cancel-followup",
+      "description": "Adwi command /gmail-cancel-followup",
+      "risk": "low",
+      "files_touched": [],
+      "uses_secrets": false,
+      "logs": "notes/adwi-action-logs",
+      "test_command": "/test-adwi"
+    },
+    {
+      "name": "Gmail Cancel Scheduled",
+      "command": "/gmail-cancel-scheduled",
+      "description": "Adwi command /gmail-cancel-scheduled",
+      "risk": "low",
+      "files_touched": [],
+      "uses_secrets": false,
+      "logs": "notes/adwi-action-logs",
+      "test_command": "/test-adwi"
+    },
+    {
+      "name": "Gmail Category",
+      "command": "/gmail-category",
+      "description": "Adwi command /gmail-category",
+      "risk": "low",
+      "files_touched": [],
+      "uses_secrets": false,
+      "logs": "notes/adwi-action-logs",
+      "test_command": "/test-adwi"
+    },
+    {
+      "name": "Gmail Compose",
+      "command": "/gmail-compose",
+      "description": "Adwi command /gmail-compose",
+      "risk": "low",
+      "files_touched": [],
+      "uses_secrets": false,
+      "logs": "notes/adwi-action-logs",
+      "test_command": "/test-adwi"
+    },
+    {
+      "name": "Gmail Delete Draft",
+      "command": "/gmail-delete-draft",
+      "description": "Adwi command /gmail-delete-draft",
+      "risk": "low",
+      "files_touched": [],
+      "uses_secrets": false,
+      "logs": "notes/adwi-action-logs",
+      "test_command": "/test-adwi"
+    },
+    {
+      "name": "Gmail Draft Reply",
+      "command": "/gmail-draft-reply",
+      "description": "Adwi command /gmail-draft-reply",
+      "risk": "low",
+      "files_touched": [],
+      "uses_secrets": false,
+      "logs": "notes/adwi-action-logs",
+      "test_command": "/test-adwi"
+    },
+    {
+      "name": "Gmail Drafts",
+      "command": "/gmail-drafts",
+      "description": "Adwi command /gmail-drafts",
+      "risk": "low",
+      "files_touched": [],
+      "uses_secrets": false,
+      "logs": "notes/adwi-action-logs",
+      "test_command": "/test-adwi"
+    },
+    {
+      "name": "Gmail Extract Tasks",
+      "command": "/gmail-extract-tasks",
+      "description": "Adwi command /gmail-extract-tasks",
+      "risk": "low",
+      "files_touched": [],
+      "uses_secrets": false,
+      "logs": "notes/adwi-action-logs",
+      "test_command": "/test-adwi"
+    },
+    {
+      "name": "Gmail Followup",
+      "command": "/gmail-followup",
+      "description": "Adwi command /gmail-followup",
+      "risk": "low",
+      "files_touched": [],
+      "uses_secrets": false,
+      "logs": "notes/adwi-action-logs",
+      "test_command": "/test-adwi"
+    },
+    {
+      "name": "Gmail Followups",
+      "command": "/gmail-followups",
+      "description": "Adwi command /gmail-followups",
+      "risk": "low",
+      "files_touched": [],
+      "uses_secrets": false,
+      "logs": "notes/adwi-action-logs",
+      "test_command": "/test-adwi"
+    },
+    {
+      "name": "Gmail Forward",
+      "command": "/gmail-forward",
+      "description": "Adwi command /gmail-forward",
+      "risk": "low",
+      "files_touched": [],
+      "uses_secrets": false,
+      "logs": "notes/adwi-action-logs",
+      "test_command": "/test-adwi"
+    },
+    {
+      "name": "Gmail Mark Read",
+      "command": "/gmail-mark-read",
+      "description": "Adwi command /gmail-mark-read",
+      "risk": "low",
+      "files_touched": [],
+      "uses_secrets": false,
+      "logs": "notes/adwi-action-logs",
+      "test_command": "/test-adwi"
+    },
+    {
+      "name": "Gmail Mark Unread",
+      "command": "/gmail-mark-unread",
+      "description": "Adwi command /gmail-mark-unread",
+      "risk": "low",
+      "files_touched": [],
+      "uses_secrets": false,
+      "logs": "notes/adwi-action-logs",
+      "test_command": "/test-adwi"
+    },
+    {
+      "name": "Gmail Open",
+      "command": "/gmail-open",
+      "description": "Adwi command /gmail-open",
+      "risk": "low",
+      "files_touched": [],
+      "uses_secrets": false,
+      "logs": "notes/adwi-action-logs",
+      "test_command": "/test-adwi"
+    },
+    {
+      "name": "Gmail Open Draft",
+      "command": "/gmail-open-draft",
+      "description": "Adwi command /gmail-open-draft",
+      "risk": "low",
+      "files_touched": [],
+      "uses_secrets": false,
+      "logs": "notes/adwi-action-logs",
+      "test_command": "/test-adwi"
+    },
+    {
+      "name": "Gmail Open Scheduled",
+      "command": "/gmail-open-scheduled",
+      "description": "Adwi command /gmail-open-scheduled",
+      "risk": "low",
+      "files_touched": [],
+      "uses_secrets": false,
+      "logs": "notes/adwi-action-logs",
+      "test_command": "/test-adwi"
+    },
+    {
+      "name": "Gmail Promos",
+      "command": "/gmail-promos",
+      "description": "Adwi command /gmail-promos",
+      "risk": "low",
+      "files_touched": [],
+      "uses_secrets": false,
+      "logs": "notes/adwi-action-logs",
+      "test_command": "/test-adwi"
+    },
+    {
+      "name": "Gmail Remove Attachment",
+      "command": "/gmail-remove-attachment",
+      "description": "Adwi command /gmail-remove-attachment",
+      "risk": "low",
+      "files_touched": [],
+      "uses_secrets": false,
+      "logs": "notes/adwi-action-logs",
+      "test_command": "/test-adwi"
+    },
+    {
+      "name": "Gmail Reschedule",
+      "command": "/gmail-reschedule",
+      "description": "Adwi command /gmail-reschedule",
+      "risk": "low",
+      "files_touched": [],
+      "uses_secrets": false,
+      "logs": "notes/adwi-action-logs",
+      "test_command": "/test-adwi"
+    },
+    {
+      "name": "Gmail Rewrite",
+      "command": "/gmail-rewrite",
+      "description": "Adwi command /gmail-rewrite",
+      "risk": "low",
+      "files_touched": [],
+      "uses_secrets": false,
+      "logs": "notes/adwi-action-logs",
+      "test_command": "/test-adwi"
+    },
+    {
+      "name": "Gmail Rule",
+      "command": "/gmail-rule",
+      "description": "Adwi command /gmail-rule",
+      "risk": "low",
+      "files_touched": [],
+      "uses_secrets": false,
+      "logs": "notes/adwi-action-logs",
+      "test_command": "/test-adwi"
+    },
+    {
+      "name": "Gmail Rule Apply",
+      "command": "/gmail-rule-apply",
+      "description": "Adwi command /gmail-rule-apply",
+      "risk": "low",
+      "files_touched": [],
+      "uses_secrets": false,
+      "logs": "notes/adwi-action-logs",
+      "test_command": "/test-adwi"
+    },
+    {
+      "name": "Gmail Rule Cancel",
+      "command": "/gmail-rule-cancel",
+      "description": "Adwi command /gmail-rule-cancel",
+      "risk": "low",
+      "files_touched": [],
+      "uses_secrets": false,
+      "logs": "notes/adwi-action-logs",
+      "test_command": "/test-adwi"
+    },
+    {
+      "name": "Gmail Rules",
+      "command": "/gmail-rules",
+      "description": "Adwi command /gmail-rules",
+      "risk": "low",
+      "files_touched": [],
+      "uses_secrets": false,
+      "logs": "notes/adwi-action-logs",
+      "test_command": "/test-adwi"
+    },
+    {
+      "name": "Gmail Save Attachment",
+      "command": "/gmail-save-attachment",
+      "description": "Adwi command /gmail-save-attachment",
+      "risk": "low",
+      "files_touched": [],
+      "uses_secrets": false,
+      "logs": "notes/adwi-action-logs",
+      "test_command": "/test-adwi"
+    },
+    {
+      "name": "Gmail Schedule",
+      "command": "/gmail-schedule",
+      "description": "Adwi command /gmail-schedule",
+      "risk": "low",
+      "files_touched": [],
+      "uses_secrets": false,
+      "logs": "notes/adwi-action-logs",
+      "test_command": "/test-adwi"
+    },
+    {
+      "name": "Gmail Scheduled",
+      "command": "/gmail-scheduled",
+      "description": "Adwi command /gmail-scheduled",
+      "risk": "low",
+      "files_touched": [],
+      "uses_secrets": false,
+      "logs": "notes/adwi-action-logs",
+      "test_command": "/test-adwi"
+    },
+    {
+      "name": "Gmail Send Draft",
+      "command": "/gmail-send-draft",
+      "description": "Adwi command /gmail-send-draft",
+      "risk": "low",
+      "files_touched": [],
+      "uses_secrets": false,
+      "logs": "notes/adwi-action-logs",
+      "test_command": "/test-adwi"
+    },
+    {
+      "name": "Gmail Show Draft",
+      "command": "/gmail-show-draft",
+      "description": "Adwi command /gmail-show-draft",
+      "risk": "low",
+      "files_touched": [],
+      "uses_secrets": false,
+      "logs": "notes/adwi-action-logs",
+      "test_command": "/test-adwi"
+    },
+    {
+      "name": "Gmail Social",
+      "command": "/gmail-social",
+      "description": "Adwi command /gmail-social",
+      "risk": "low",
+      "files_touched": [],
+      "uses_secrets": false,
+      "logs": "notes/adwi-action-logs",
+      "test_command": "/test-adwi"
+    },
+    {
+      "name": "Gmail Spam",
+      "command": "/gmail-spam",
+      "description": "Adwi command /gmail-spam",
+      "risk": "low",
+      "files_touched": [],
+      "uses_secrets": false,
+      "logs": "notes/adwi-action-logs",
+      "test_command": "/test-adwi"
+    },
+    {
+      "name": "Gmail Summarize",
+      "command": "/gmail-summarize",
+      "description": "Adwi command /gmail-summarize",
+      "risk": "low",
+      "files_touched": [],
+      "uses_secrets": false,
+      "logs": "notes/adwi-action-logs",
+      "test_command": "/test-adwi"
+    },
+    {
+      "name": "Gmail Summarize Attachment",
+      "command": "/gmail-summarize-attachment",
+      "description": "Adwi command /gmail-summarize-attachment",
+      "risk": "low",
+      "files_touched": [],
+      "uses_secrets": false,
+      "logs": "notes/adwi-action-logs",
+      "test_command": "/test-adwi"
+    },
+    {
+      "name": "Gmail Tasks Remind",
+      "command": "/gmail-tasks-remind",
+      "description": "Adwi command /gmail-tasks-remind",
+      "risk": "low",
+      "files_touched": [],
+      "uses_secrets": false,
+      "logs": "notes/adwi-action-logs",
+      "test_command": "/test-adwi"
+    },
+    {
+      "name": "Gmail Tasks Save",
+      "command": "/gmail-tasks-save",
+      "description": "Adwi command /gmail-tasks-save",
+      "risk": "low",
+      "files_touched": [],
+      "uses_secrets": false,
+      "logs": "notes/adwi-action-logs",
+      "test_command": "/test-adwi"
+    },
+    {
+      "name": "Gmail Thread",
+      "command": "/gmail-thread",
+      "description": "Adwi command /gmail-thread",
+      "risk": "low",
+      "files_touched": [],
+      "uses_secrets": false,
+      "logs": "notes/adwi-action-logs",
+      "test_command": "/test-adwi"
+    },
+    {
+      "name": "Gmail Thread Intel",
+      "command": "/gmail-thread-intel",
+      "description": "Adwi command /gmail-thread-intel",
+      "risk": "low",
+      "files_touched": [],
+      "uses_secrets": false,
+      "logs": "notes/adwi-action-logs",
+      "test_command": "/test-adwi"
+    },
+    {
+      "name": "Gmail Trash",
+      "command": "/gmail-trash",
+      "description": "Adwi command /gmail-trash",
+      "risk": "low",
+      "files_touched": [],
+      "uses_secrets": false,
+      "logs": "notes/adwi-action-logs",
+      "test_command": "/test-adwi"
+    },
+    {
+      "name": "Gmail Triage",
+      "command": "/gmail-triage",
+      "description": "Adwi command /gmail-triage",
+      "risk": "low",
+      "files_touched": [],
+      "uses_secrets": false,
+      "logs": "notes/adwi-action-logs",
+      "test_command": "/test-adwi"
+    },
+    {
+      "name": "Gmail Undo",
+      "command": "/gmail-undo",
+      "description": "Adwi command /gmail-undo",
+      "risk": "low",
+      "files_touched": [],
+      "uses_secrets": false,
+      "logs": "notes/adwi-action-logs",
+      "test_command": "/test-adwi"
+    },
+    {
+      "name": "Gmail Update Subject",
+      "command": "/gmail-update-subject",
+      "description": "Adwi command /gmail-update-subject",
+      "risk": "low",
+      "files_touched": [],
+      "uses_secrets": false,
+      "logs": "notes/adwi-action-logs",
+      "test_command": "/test-adwi"
+    },
+    {
+      "name": "Ha",
+      "command": "/ha",
+      "description": "Adwi command /ha",
+      "risk": "low",
+      "files_touched": [],
+      "uses_secrets": false,
+      "logs": "notes/adwi-action-logs",
+      "test_command": "/test-adwi"
+    },
+    {
+      "name": "Implement Idea",
+      "command": "/implement-idea",
+      "description": "Adwi command /implement-idea",
+      "risk": "low",
+      "files_touched": [],
+      "uses_secrets": false,
+      "logs": "notes/adwi-action-logs",
+      "test_command": "/test-adwi"
+    },
+    {
+      "name": "Inspect System",
+      "command": "/inspect-system",
+      "description": "Adwi command /inspect-system",
+      "risk": "low",
+      "files_touched": [],
+      "uses_secrets": false,
+      "logs": "notes/adwi-action-logs",
+      "test_command": "/test-adwi"
+    },
+    {
+      "name": "Memory Context",
+      "command": "/memory-context",
+      "description": "Adwi command /memory-context",
+      "risk": "low",
+      "files_touched": [],
+      "uses_secrets": false,
+      "logs": "notes/adwi-action-logs",
+      "test_command": "/test-adwi"
+    },
+    {
+      "name": "Memory Recall",
+      "command": "/memory-recall",
+      "description": "Adwi command /memory-recall",
+      "risk": "low",
+      "files_touched": [],
+      "uses_secrets": false,
+      "logs": "notes/adwi-action-logs",
+      "test_command": "/test-adwi"
+    },
+    {
+      "name": "Memory Scan",
+      "command": "/memory-scan",
+      "description": "Adwi command /memory-scan",
+      "risk": "low",
+      "files_touched": [],
+      "uses_secrets": false,
+      "logs": "notes/adwi-action-logs",
+      "test_command": "/test-adwi"
+    },
+    {
+      "name": "Memory Stats",
+      "command": "/memory-stats",
+      "description": "Adwi command /memory-stats",
+      "risk": "low",
+      "files_touched": [],
+      "uses_secrets": false,
+      "logs": "notes/adwi-action-logs",
+      "test_command": "/test-adwi"
+    },
+    {
+      "name": "Nightly Log",
+      "command": "/nightly-log",
+      "description": "Adwi command /nightly-log",
+      "risk": "low",
+      "files_touched": [],
+      "uses_secrets": false,
+      "logs": "notes/adwi-action-logs",
+      "test_command": "/test-adwi"
+    },
+    {
+      "name": "Nightly Run",
+      "command": "/nightly-run",
+      "description": "Adwi command /nightly-run",
+      "risk": "low",
+      "files_touched": [],
+      "uses_secrets": false,
+      "logs": "notes/adwi-action-logs",
+      "test_command": "/test-adwi"
+    },
+    {
+      "name": "Nightly Status",
+      "command": "/nightly-status",
+      "description": "Adwi command /nightly-status",
+      "risk": "low",
+      "files_touched": [],
+      "uses_secrets": false,
+      "logs": "notes/adwi-action-logs",
+      "test_command": "/test-adwi"
+    },
+    {
+      "name": "Notify",
+      "command": "/notify",
+      "description": "Adwi command /notify",
+      "risk": "low",
+      "files_touched": [],
+      "uses_secrets": false,
+      "logs": "notes/adwi-action-logs",
+      "test_command": "/test-adwi"
+    },
+    {
+      "name": "Obsidian Daily",
+      "command": "/obsidian-daily",
+      "description": "Adwi command /obsidian-daily",
+      "risk": "low",
+      "files_touched": [],
+      "uses_secrets": false,
+      "logs": "notes/adwi-action-logs",
+      "test_command": "/test-adwi"
+    },
+    {
+      "name": "Obsidian Read",
+      "command": "/obsidian-read",
+      "description": "Adwi command /obsidian-read",
+      "risk": "low",
+      "files_touched": [],
+      "uses_secrets": false,
+      "logs": "notes/adwi-action-logs",
+      "test_command": "/test-adwi"
+    },
+    {
+      "name": "Obsidian Search",
+      "command": "/obsidian-search",
+      "description": "Adwi command /obsidian-search",
+      "risk": "low",
+      "files_touched": [],
+      "uses_secrets": false,
+      "logs": "notes/adwi-action-logs",
+      "test_command": "/test-adwi"
+    },
+    {
+      "name": "Obsidian Write",
+      "command": "/obsidian-write",
+      "description": "Adwi command /obsidian-write",
+      "risk": "low",
+      "files_touched": [],
+      "uses_secrets": false,
+      "logs": "notes/adwi-action-logs",
+      "test_command": "/test-adwi"
+    },
+    {
+      "name": "Owui",
+      "command": "/owui",
+      "description": "Adwi command /owui",
+      "risk": "low",
+      "files_touched": [],
+      "uses_secrets": false,
+      "logs": "notes/adwi-action-logs",
+      "test_command": "/test-adwi"
+    },
+    {
+      "name": "Research Save",
+      "command": "/research-save",
+      "description": "Adwi command /research-save",
+      "risk": "low",
+      "files_touched": [],
+      "uses_secrets": false,
+      "logs": "notes/adwi-action-logs",
+      "test_command": "/test-adwi"
+    },
+    {
+      "name": "Route",
+      "command": "/route",
+      "description": "Adwi command /route",
+      "risk": "low",
+      "files_touched": [],
+      "uses_secrets": false,
+      "logs": "notes/adwi-action-logs",
+      "test_command": "/test-adwi"
+    },
+    {
+      "name": "Session History",
+      "command": "/session-history",
+      "description": "Adwi command /session-history",
+      "risk": "low",
+      "files_touched": [],
+      "uses_secrets": false,
+      "logs": "notes/adwi-action-logs",
+      "test_command": "/test-adwi"
+    },
+    {
+      "name": "Tavily",
+      "command": "/tavily",
+      "description": "Adwi command /tavily",
+      "risk": "low",
+      "files_touched": [],
+      "uses_secrets": false,
+      "logs": "notes/adwi-action-logs",
+      "test_command": "/test-adwi"
+    },
+    {
+      "name": "Tool Roadmap",
+      "command": "/tool-roadmap",
+      "description": "Adwi command /tool-roadmap",
+      "risk": "low",
+      "files_touched": [],
+      "uses_secrets": false,
+      "logs": "notes/adwi-action-logs",
+      "test_command": "/test-adwi"
+    },
+    {
+      "name": "Trace Log",
+      "command": "/trace-log",
+      "description": "Adwi command /trace-log",
+      "risk": "low",
+      "files_touched": [],
+      "uses_secrets": false,
+      "logs": "notes/adwi-action-logs",
+      "test_command": "/test-adwi"
+    },
+    {
+      "name": "Training Plan",
+      "command": "/training-plan",
+      "description": "Adwi command /training-plan",
+      "risk": "low",
+      "files_touched": [],
+      "uses_secrets": false,
+      "logs": "notes/adwi-action-logs",
+      "test_command": "/test-adwi"
+    },
+    {
+      "name": "Trust Root",
+      "command": "/trust-root",
+      "description": "Adwi command /trust-root",
+      "risk": "low",
+      "files_touched": [],
+      "uses_secrets": false,
+      "logs": "notes/adwi-action-logs",
+      "test_command": "/test-adwi"
+    },
+    {
+      "name": "Trusted Roots",
+      "command": "/trusted-roots",
+      "description": "Adwi command /trusted-roots",
+      "risk": "low",
+      "files_touched": [],
+      "uses_secrets": false,
+      "logs": "notes/adwi-action-logs",
+      "test_command": "/test-adwi"
+    },
+    {
+      "name": "Voice Brief",
+      "command": "/voice-brief",
+      "description": "Adwi command /voice-brief",
+      "risk": "low",
+      "files_touched": [],
+      "uses_secrets": false,
+      "logs": "notes/adwi-action-logs",
+      "test_command": "/test-adwi"
+    },
+    {
+      "name": "Voice Out",
+      "command": "/voice-out",
+      "description": "Adwi command /voice-out",
+      "risk": "low",
+      "files_touched": [],
+      "uses_secrets": false,
+      "logs": "notes/adwi-action-logs",
+      "test_command": "/test-adwi"
+    },
+    {
+      "name": "Web Search",
+      "command": "/web-search",
+      "description": "Adwi command /web-search",
+      "risk": "low",
+      "files_touched": [],
+      "uses_secrets": false,
+      "logs": "notes/adwi-action-logs",
+      "test_command": "/test-adwi"
     }
   ]
 }

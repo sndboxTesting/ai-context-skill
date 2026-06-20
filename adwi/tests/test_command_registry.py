@@ -601,7 +601,7 @@ class TestPhase5GmailReadOnlyCommands(unittest.TestCase):
 
     # Commands still deferred after Phase 7 (Phase 8+)
     PHASE8_DEFERRED = [
-        "/gmail-extract-tasks",
+        "/gmail-triage",
         "/gmail-triage",
     ]
 
@@ -727,7 +727,7 @@ class TestPhase6GmailMutatingCommands(unittest.TestCase):
 
     # Commands still deferred after Phase 7 (Phase 8+)
     PHASE8_DEFERRED = [
-        "/gmail-extract-tasks",
+        "/gmail-triage",
         "/gmail-triage",
     ]
 
@@ -865,7 +865,7 @@ class TestPhase7GmailDraftLifecycleCommands(unittest.TestCase):
     ]
 
     PHASE8_DEFERRED = [
-        "/gmail-extract-tasks",
+        "/gmail-triage",
         "/gmail-triage",
     ]
 
@@ -983,7 +983,7 @@ class TestPhase8GmailDraftEditingCommands(unittest.TestCase):
     ]
 
     PHASE12_DEFERRED = [
-        "/gmail-extract-tasks",
+        "/gmail-triage",
         "/gmail-triage",
     ]
 
@@ -1102,7 +1102,7 @@ class TestPhase9GmailDraftManagementCommands(unittest.TestCase):
     ]
 
     PHASE12_DEFERRED = [
-        "/gmail-extract-tasks",
+        "/gmail-triage",
         "/gmail-triage",
     ]
 
@@ -1209,7 +1209,7 @@ class TestPhase10GmailDraftReply(unittest.TestCase):
     """
 
     PHASE12_DEFERRED = [
-        "/gmail-extract-tasks",
+        "/gmail-triage",
         "/gmail-triage",
     ]
 
@@ -1298,7 +1298,7 @@ class TestPhase11GmailScheduleCluster(unittest.TestCase):
     ]
 
     PHASE12_DEFERRED = [
-        "/gmail-extract-tasks",
+        "/gmail-triage",
         "/gmail-triage",
     ]
 
@@ -1429,7 +1429,7 @@ class TestPhase12GmailFollowupCluster(unittest.TestCase):
     ]
 
     PHASE13_DEFERRED = [
-        "/gmail-extract-tasks",
+        "/gmail-triage",
         "/gmail-triage",
     ]
 
@@ -1518,6 +1518,119 @@ class TestPhase12GmailFollowupCluster(unittest.TestCase):
 
     def test_total_unique_commands_at_phase12(self):
         self.assertGreaterEqual(len(set(self.reg.all_names())), 105)
+
+
+# ── Phase 13 wiring verification ──────────────────────────────────────────────
+
+
+class TestPhase13GmailExtractTasksCluster(unittest.TestCase):
+    """
+    Verify Phase 13 extract-tasks cluster is registered via discover() and
+    dispatches correctly.
+
+    Commands migrated in this phase:
+      /gmail-extract-tasks  — LLM extraction of action items/deadlines/decisions/asks
+                              from current email or thread; stages result in
+                              _GMAIL_CTX["pending_tasks"]; no live Gmail API call
+      /gmail-tasks-save     — append extracted tasks to Obsidian daily note via
+                              local Bridge HTTP (preview + confirm, no Gmail API)
+      /gmail-tasks-remind   — create follow-up reminders from staged task deadlines
+                              or action items (confirm required, local store only)
+
+    Deferred to Phase 14+: triage, attachment mutations.
+    """
+
+    PHASE13 = [
+        "/gmail-extract-tasks",
+        "/gmail-tasks-save",
+        "/gmail-tasks-remind",
+    ]
+
+    PHASE14_DEFERRED = [
+        "/gmail-triage",
+        "/gmail-attachment-save",
+    ]
+
+    @classmethod
+    def setUpClass(cls):
+        cls.reg = CommandRegistry()
+        cls.reg.discover("adwi.commands")
+
+    def test_all_phase13_commands_registered(self):
+        for cmd in self.PHASE13:
+            with self.subTest(cmd=cmd):
+                self.assertIsNotNone(self.reg.get(cmd), f"{cmd} must be registered")
+
+    def test_all_phase13_commands_dispatch_true(self):
+        for cmd in self.PHASE13:
+            with self.subTest(cmd=cmd):
+                self.assertTrue(
+                    self.reg.dispatch(cmd, {}),
+                    f"dispatch('{cmd}') must return True",
+                )
+
+    def test_all_phase13_commands_have_descriptions(self):
+        for cmd in self.PHASE13:
+            with self.subTest(cmd=cmd):
+                spec = self.reg.get(cmd)
+                self.assertIsNotNone(spec)
+                self.assertGreater(len(spec.description), 0)
+
+    def test_all_phase13_commands_in_gmail_category(self):
+        for cmd in self.PHASE13:
+            with self.subTest(cmd=cmd):
+                self.assertEqual(self.reg.get(cmd).category, "gmail")
+
+    def test_extract_tasks_cluster_intents_wired(self):
+        expected = {
+            "gmail_extract_tasks": "/gmail-extract-tasks",
+            "gmail_tasks_save":    "/gmail-tasks-save",
+            "gmail_tasks_remind":  "/gmail-tasks-remind",
+        }
+        for intent, cmd in expected.items():
+            with self.subTest(intent=intent):
+                self.assertIn(intent, self.reg.intent_map())
+                self.assertEqual(self.reg.intent_map()[intent], cmd)
+
+    def test_extract_tasks_passes_filter_args(self):
+        """/gmail-extract-tasks with mode filter dispatches correctly."""
+        result = self.reg.dispatch("/gmail-extract-tasks deadlines only", {})
+        self.assertTrue(result)
+
+    def test_extract_tasks_no_args_dispatches(self):
+        """/gmail-extract-tasks with no args dispatches (handler uses full mode)."""
+        result = self.reg.dispatch("/gmail-extract-tasks", {})
+        self.assertTrue(result)
+
+    def test_tasks_save_no_args_dispatches(self):
+        """/gmail-tasks-save dispatches (handler checks pending_tasks context)."""
+        result = self.reg.dispatch("/gmail-tasks-save", {})
+        self.assertTrue(result)
+
+    def test_tasks_remind_no_args_dispatches(self):
+        """/gmail-tasks-remind dispatches (handler checks pending_tasks context)."""
+        result = self.reg.dispatch("/gmail-tasks-remind", {})
+        self.assertTrue(result)
+
+    def test_phase14_deferred_not_in_registry(self):
+        """Triage and attachment commands remain in elif chain (deferred to Phase 14+)."""
+        for cmd in self.PHASE14_DEFERRED:
+            with self.subTest(cmd=cmd):
+                self.assertIsNone(
+                    self.reg.get(cmd),
+                    f"{cmd} must remain deferred until Phase 14",
+                )
+
+    def test_phase14_deferred_still_return_false(self):
+        for cmd in self.PHASE14_DEFERRED:
+            with self.subTest(cmd=cmd):
+                self.assertFalse(
+                    self.reg.dispatch(cmd, {}),
+                    f"{cmd} must fall through to elif chain",
+                )
+
+    def test_total_unique_commands_at_phase13(self):
+        self.assertGreaterEqual(len(set(self.reg.all_names())), 108)
 
 
 if __name__ == "__main__":

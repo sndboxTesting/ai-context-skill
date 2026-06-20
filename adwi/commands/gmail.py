@@ -37,7 +37,13 @@ Phase 12 (follow-up reminder cluster): followup, cancel-followup. Both operate
 on the local follow-up reminder store (_load/_save_followup_reminders); no live
 send. List-followups was already migrated in Phase 5A as /gmail-followups.
 
-Deferred to Phase 13+: extract-tasks, triage, attachment mutations.
+Phase 13 (extract-tasks cluster): extract-tasks, tasks-save, tasks-remind.
+extract-tasks runs an LLM extraction (no Gmail API) and stages results in
+_GMAIL_CTX["pending_tasks"]. tasks-save appends to Obsidian daily note via
+local Bridge HTTP (confirm required). tasks-remind creates follow-up reminders
+from staged tasks (confirm required, local store only).
+
+Deferred to Phase 14+: triage, attachment mutations.
 """
 
 from __future__ import annotations
@@ -187,6 +193,21 @@ def _followup(args: str, ctx: dict) -> None:
 
 def _cancel_followup(args: str, ctx: dict) -> None:
     _cli().cmd_gmail_cancel_followup(args)
+
+
+# ── Phase 13 handlers (extract-tasks cluster) ─────────────────────────────────
+
+
+def _extract_tasks(args: str, ctx: dict) -> None:
+    _cli().cmd_gmail_extract_tasks(args)
+
+
+def _tasks_save(args: str, ctx: dict) -> None:
+    _cli().cmd_gmail_tasks_save(args)
+
+
+def _tasks_remind(args: str, ctx: dict) -> None:
+    _cli().cmd_gmail_tasks_remind(args)
 
 
 # ── Phase 9 handlers (draft management cluster) ───────────────────────────────
@@ -529,3 +550,27 @@ def register(registry: "CommandRegistry") -> None:
         intents=["gmail_cancel_followup"],
         args_schema={"ref": "str?"},
     )(_cancel_followup)
+
+    # Phase 13 — extract-tasks cluster
+
+    registry.register(
+        "/gmail-extract-tasks",
+        description="Extract action items, deadlines, decisions, asks from current email or thread",
+        category="gmail",
+        intents=["gmail_extract_tasks"],
+        args_schema={"filter": "str?"},
+    )(_extract_tasks)
+
+    registry.register(
+        "/gmail-tasks-save",
+        description="Save extracted tasks/checklist to Obsidian daily note (preview + confirm)",
+        category="gmail",
+        intents=["gmail_tasks_save"],
+    )(_tasks_save)
+
+    registry.register(
+        "/gmail-tasks-remind",
+        description="Create follow-up reminders from extracted task deadlines/action items (confirm required)",
+        category="gmail",
+        intents=["gmail_tasks_remind"],
+    )(_tasks_remind)

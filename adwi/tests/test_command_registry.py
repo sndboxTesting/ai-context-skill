@@ -1714,5 +1714,119 @@ class TestPhase14GmailTriage(unittest.TestCase):
         self.assertGreaterEqual(len(set(self.reg.all_names())), 109)
 
 
+# ── Phase 15 wiring verification ──────────────────────────────────────────────
+
+
+class TestPhase15GmailAttachmentCluster(unittest.TestCase):
+    """
+    Verify Phase 15 attachment cluster is registered via discover() and
+    dispatches correctly.
+
+    Commands migrated in this phase:
+      /gmail-save-attachment      — download attachment to ATTACH_SAVE_DIR; safe_to_read()
+                                    path guard is inside handler; no input()
+      /gmail-summarize-attachment — save (if needed) + LLM summarize; no input()
+      /gmail-attach               — attach local file to current draft via safe_to_read()
+                                    check + gh.update_draft(); no input()
+      /gmail-remove-attachment    — remove outbound attachment from draft via
+                                    gh.update_draft(); no input()
+
+    Note: /gmail-attachments (list) was already registered in Phase 5A.
+    All path safety and Gmail draft integrity semantics are preserved via _cli()
+    delegation to adwi_cli.py handlers.
+
+    This is the final major Gmail command family — the entire Gmail cluster is
+    now in registry-first dispatch across Phases 5A–15.
+    """
+
+    PHASE15 = [
+        "/gmail-save-attachment",
+        "/gmail-summarize-attachment",
+        "/gmail-attach",
+        "/gmail-remove-attachment",
+    ]
+
+    @classmethod
+    def setUpClass(cls):
+        cls.reg = CommandRegistry()
+        cls.reg.discover("adwi.commands")
+
+    def test_all_phase15_commands_registered(self):
+        for cmd in self.PHASE15:
+            with self.subTest(cmd=cmd):
+                self.assertIsNotNone(self.reg.get(cmd), f"{cmd} must be registered")
+
+    def test_all_phase15_commands_dispatch_true(self):
+        for cmd in self.PHASE15:
+            with self.subTest(cmd=cmd):
+                self.assertTrue(
+                    self.reg.dispatch(cmd, {}),
+                    f"dispatch('{cmd}') must return True",
+                )
+
+    def test_all_phase15_commands_have_descriptions(self):
+        for cmd in self.PHASE15:
+            with self.subTest(cmd=cmd):
+                spec = self.reg.get(cmd)
+                self.assertIsNotNone(spec)
+                self.assertGreater(len(spec.description), 0)
+
+    def test_all_phase15_commands_in_gmail_category(self):
+        for cmd in self.PHASE15:
+            with self.subTest(cmd=cmd):
+                self.assertEqual(self.reg.get(cmd).category, "gmail")
+
+    def test_attachment_cluster_intents_wired(self):
+        expected = {
+            "gmail_save_attachment":    "/gmail-save-attachment",
+            "gmail_summarize_attachment": "/gmail-summarize-attachment",
+            "gmail_attach_file":        "/gmail-attach",
+            "gmail_remove_attachment":  "/gmail-remove-attachment",
+        }
+        for intent, cmd in expected.items():
+            with self.subTest(intent=intent):
+                self.assertIn(intent, self.reg.intent_map())
+                self.assertEqual(self.reg.intent_map()[intent], cmd)
+
+    def test_save_attachment_passes_ref_args(self):
+        result = self.reg.dispatch("/gmail-save-attachment the PDF", {})
+        self.assertTrue(result)
+
+    def test_save_attachment_no_args_dispatches(self):
+        result = self.reg.dispatch("/gmail-save-attachment", {})
+        self.assertTrue(result)
+
+    def test_summarize_attachment_passes_ref_args(self):
+        result = self.reg.dispatch("/gmail-summarize-attachment first", {})
+        self.assertTrue(result)
+
+    def test_summarize_attachment_no_args_dispatches(self):
+        result = self.reg.dispatch("/gmail-summarize-attachment", {})
+        self.assertTrue(result)
+
+    def test_attach_passes_path_args(self):
+        result = self.reg.dispatch("/gmail-attach report.pdf", {})
+        self.assertTrue(result)
+
+    def test_attach_no_args_dispatches(self):
+        result = self.reg.dispatch("/gmail-attach", {})
+        self.assertTrue(result)
+
+    def test_remove_attachment_passes_ref_args(self):
+        result = self.reg.dispatch("/gmail-remove-attachment 1", {})
+        self.assertTrue(result)
+
+    def test_remove_attachment_no_args_dispatches(self):
+        result = self.reg.dispatch("/gmail-remove-attachment", {})
+        self.assertTrue(result)
+
+    def test_attachments_list_still_registered_from_phase5(self):
+        """/gmail-attachments was registered in Phase 5A and must remain registered."""
+        self.assertIsNotNone(self.reg.get("/gmail-attachments"))
+
+    def test_total_unique_commands_at_phase15(self):
+        self.assertGreaterEqual(len(set(self.reg.all_names())), 113)
+
+
 if __name__ == "__main__":
     unittest.main()

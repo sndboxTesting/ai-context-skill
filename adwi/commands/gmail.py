@@ -48,7 +48,12 @@ via gh.list_inbox_for_triage(), classifies into reply_needed/action_needed/fyi/
 noise buckets, populates _GMAIL_CTX["candidates"] + ["triage_results"]. No
 input(), no mailbox mutation.
 
-Deferred to Phase 15+: attachment mutations.
+Phase 15 (attachment cluster): save-attachment, summarize-attachment, attach,
+remove-attachment. /gmail-attachments (list) was already migrated in Phase 5A.
+save-attachment and summarize-attachment download from Gmail to ATTACH_SAVE_DIR
+(path safety enforced in handler). attach reads a local file (safe_to_read()
+check in handler) and updates Gmail draft. remove-attachment updates Gmail draft
+to remove an outbound attachment. No input() on any path.
 """
 
 from __future__ import annotations
@@ -220,6 +225,25 @@ def _tasks_remind(args: str, ctx: dict) -> None:
 
 def _triage(args: str, ctx: dict) -> None:
     _cli().cmd_gmail_triage(args)
+
+
+# ── Phase 15 handlers (attachment cluster) ────────────────────────────────────
+
+
+def _save_attachment(args: str, ctx: dict) -> None:
+    _cli().cmd_gmail_save_attachment(args)
+
+
+def _summarize_attachment(args: str, ctx: dict) -> None:
+    _cli().cmd_gmail_summarize_attachment(args)
+
+
+def _attach_file(args: str, ctx: dict) -> None:
+    _cli().cmd_gmail_attach_file(args)
+
+
+def _remove_attachment(args: str, ctx: dict) -> None:
+    _cli().cmd_gmail_remove_attachment(args)
 
 
 # ── Phase 9 handlers (draft management cluster) ───────────────────────────────
@@ -596,3 +620,37 @@ def register(registry: "CommandRegistry") -> None:
         intents=["gmail_triage"],
         args_schema={"filter": "str?"},
     )(_triage)
+
+    # Phase 15 — attachment cluster
+
+    registry.register(
+        "/gmail-save-attachment",
+        description="Save a selected attachment from the current email to the workspace",
+        category="gmail",
+        intents=["gmail_save_attachment"],
+        args_schema={"ref": "str?"},
+    )(_save_attachment)
+
+    registry.register(
+        "/gmail-summarize-attachment",
+        description="Save and LLM-summarize a text-extractable attachment from the current email",
+        category="gmail",
+        intents=["gmail_summarize_attachment"],
+        args_schema={"ref": "str?"},
+    )(_summarize_attachment)
+
+    registry.register(
+        "/gmail-attach",
+        description="Attach a local file to the current draft (safe path check, updates Gmail draft)",
+        category="gmail",
+        intents=["gmail_attach_file"],
+        args_schema={"path": "str?"},
+    )(_attach_file)
+
+    registry.register(
+        "/gmail-remove-attachment",
+        description="Remove an outbound attachment from the current draft by name or ordinal",
+        category="gmail",
+        intents=["gmail_remove_attachment"],
+        args_schema={"ref": "str?"},
+    )(_remove_attachment)

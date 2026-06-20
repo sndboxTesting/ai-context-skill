@@ -60,6 +60,10 @@ def _e2e_report(args: str, ctx: dict) -> None:
     _cli().cmd_e2e_auto_loop_report()
 
 
+def _e2e_cancel(args: str, ctx: dict) -> None:
+    _cli().cmd_e2e_auto_loop_cancel()
+
+
 # ── Registration ──────────────────────────────────────────────────────────────
 
 
@@ -112,3 +116,10 @@ def register(registry: "CommandRegistry") -> None:
         description="Show the latest E2E auto-loop cycle or final report",
         category="eval",
     )(_e2e_report)
+
+    registry.register(
+        "/e2e-auto-loop-cancel",
+        description="Write cancel sentinel to stop a running E2E auto-loop job (local file write only)",
+        category="eval",
+        intents=["e2e_auto_loop_cancel"],
+    )(_e2e_cancel)

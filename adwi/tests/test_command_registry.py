@@ -1973,5 +1973,104 @@ class TestPhase16BGmailInboxNavigation(unittest.TestCase):
         self.assertGreaterEqual(len(set(self.reg.all_names())), 122)
 
 
+# ── Phase 19 wiring verification ──────────────────────────────────────────────
+
+
+class TestPhase19E2ELoopCluster(unittest.TestCase):
+    """
+    Verify the complete E2E loop cluster is registered via discover().
+
+    Audit findings:
+      /e2e-auto-loop-status   — already registered in Phase 4 (assistant.py)
+      /e2e-auto-loop-report   — already registered in Phase 4 (assistant.py)
+      /e2e-auto-loop-cancel   — added in Phase 19 (local sentinel write, no subprocess)
+      /e2e-auto-loop          — DEFERRED: spawns subprocess, may patch adwi_cli.py
+
+    /e2e-auto-loop-cancel writes `notes/e2e-auto-loop/cancel` (a local control
+    file) — no network calls, no code mutation, no subprocess. Trivially safe.
+
+    /e2e-auto-loop is deferred because it may spawn a background process that
+    runs eval cycles and applies code patches to adwi_cli.py. It will be
+    migrated in a separate phase after the slot-mapping / dispatch_intent()
+    audit, where flag-passing behavior can be validated end-to-end.
+    """
+
+    E2E_COMPLETE = [
+        "/e2e-auto-loop-status",
+        "/e2e-auto-loop-report",
+        "/e2e-auto-loop-cancel",
+    ]
+
+    E2E_DEFERRED = [
+        "/e2e-auto-loop",
+    ]
+
+    @classmethod
+    def setUpClass(cls):
+        cls.reg = CommandRegistry()
+        cls.reg.discover("adwi.commands")
+
+    def test_all_e2e_cluster_commands_registered(self):
+        for cmd in self.E2E_COMPLETE:
+            with self.subTest(cmd=cmd):
+                self.assertIsNotNone(self.reg.get(cmd), f"{cmd} must be registered")
+
+    def test_all_e2e_cluster_commands_dispatch_true(self):
+        for cmd in self.E2E_COMPLETE:
+            with self.subTest(cmd=cmd):
+                self.assertTrue(
+                    self.reg.dispatch(cmd, {}),
+                    f"dispatch('{cmd}') must return True",
+                )
+
+    def test_all_e2e_cluster_commands_have_descriptions(self):
+        for cmd in self.E2E_COMPLETE:
+            with self.subTest(cmd=cmd):
+                spec = self.reg.get(cmd)
+                self.assertIsNotNone(spec)
+                self.assertGreater(len(spec.description), 0)
+
+    def test_all_e2e_cluster_commands_in_eval_category(self):
+        for cmd in self.E2E_COMPLETE:
+            with self.subTest(cmd=cmd):
+                self.assertEqual(self.reg.get(cmd).category, "eval")
+
+    def test_e2e_cancel_intent_wired(self):
+        self.assertIn("e2e_auto_loop_cancel", self.reg.intent_map())
+        self.assertEqual(
+            self.reg.intent_map()["e2e_auto_loop_cancel"], "/e2e-auto-loop-cancel"
+        )
+
+    def test_e2e_cancel_dispatches_true(self):
+        self.assertTrue(self.reg.dispatch("/e2e-auto-loop-cancel", {}))
+
+    def test_e2e_status_dispatches_true(self):
+        self.assertTrue(self.reg.dispatch("/e2e-auto-loop-status", {}))
+
+    def test_e2e_report_dispatches_true(self):
+        self.assertTrue(self.reg.dispatch("/e2e-auto-loop-report", {}))
+
+    def test_e2e_launcher_still_deferred(self):
+        """/e2e-auto-loop (the subprocess launcher) must remain in the elif chain."""
+        for cmd in self.E2E_DEFERRED:
+            with self.subTest(cmd=cmd):
+                self.assertIsNone(
+                    self.reg.get(cmd),
+                    f"{cmd} must remain deferred (spawns subprocess, may patch adwi_cli.py)",
+                )
+
+    def test_e2e_launcher_falls_through_to_elif(self):
+        for cmd in self.E2E_DEFERRED:
+            with self.subTest(cmd=cmd):
+                self.assertFalse(
+                    self.reg.dispatch(cmd, {}),
+                    f"dispatch('{cmd}') must return False — fallback to elif chain",
+                )
+
+    def test_total_unique_commands_at_phase19(self):
+        # Phase 16B had ≥122; Phase 19 adds /e2e-auto-loop-cancel (1 new)
+        self.assertGreaterEqual(len(set(self.reg.all_names())), 123)
+
+
 if __name__ == "__main__":
     unittest.main()

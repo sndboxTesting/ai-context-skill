@@ -2184,5 +2184,132 @@ class TestPhase17VoiceIOCluster(unittest.TestCase):
         self.assertGreaterEqual(len(set(self.reg.all_names())), 128)
 
 
+# ── Phase 18 wiring verification ──────────────────────────────────────────────
+
+
+class TestPhase18RemoteHACluster(unittest.TestCase):
+    """
+    Verify Phase 18 Remote/HA read-only cluster is registered via discover()
+    and dispatches correctly.
+
+    Commands migrated in this phase (new module: adwi/commands/remote.py):
+      /remote-status (+ /remote, /tailscale aliases)
+                    — Tailscale status (subprocess), cloudflared docker ps
+                      (subprocess), HA HTTP GET ping. Purely read-only.
+      /ha           — HA API HTTP GET for states/services/config/entity.
+                      All GETs; no HA mutations.
+
+    Deferred from this phase:
+      /notify       — HTTP POST to HA notify service; sends real push
+                      notification to iPhone. Externally visible; deferred
+                      until dispatch_intent() slot-mapping is audited and
+                      test-time HA_TOKEN gate behaviour is confirmed safe.
+
+    Safety classification:
+      /remote-status : read-only network (status check only)
+      /ha            : read-only network (all GET endpoints)
+      /notify        : DEFERRED — externally visible HTTP POST
+    """
+
+    PHASE18 = [
+        "/remote-status",
+        "/ha",
+    ]
+
+    REMOTE_ALIASES = ["/remote", "/tailscale"]
+
+    PHASE18_DEFERRED = [
+        "/notify",
+    ]
+
+    @classmethod
+    def setUpClass(cls):
+        cls.reg = CommandRegistry()
+        cls.reg.discover("adwi.commands")
+
+    def test_all_phase18_commands_registered(self):
+        for cmd in self.PHASE18:
+            with self.subTest(cmd=cmd):
+                self.assertIsNotNone(self.reg.get(cmd), f"{cmd} must be registered")
+
+    def test_all_phase18_commands_dispatch_true(self):
+        for cmd in self.PHASE18:
+            with self.subTest(cmd=cmd):
+                self.assertTrue(
+                    self.reg.dispatch(cmd, {}),
+                    f"dispatch('{cmd}') must return True",
+                )
+
+    def test_all_phase18_commands_have_descriptions(self):
+        for cmd in self.PHASE18:
+            with self.subTest(cmd=cmd):
+                spec = self.reg.get(cmd)
+                self.assertIsNotNone(spec)
+                self.assertGreater(len(spec.description), 0)
+
+    def test_all_phase18_commands_in_remote_category(self):
+        for cmd in self.PHASE18:
+            with self.subTest(cmd=cmd):
+                self.assertEqual(self.reg.get(cmd).category, "remote")
+
+    def test_remote_status_intent_wired(self):
+        self.assertIn("remote_status", self.reg.intent_map())
+        self.assertEqual(self.reg.intent_map()["remote_status"], "/remote-status")
+
+    def test_ha_query_intent_wired(self):
+        self.assertIn("ha_query", self.reg.intent_map())
+        self.assertEqual(self.reg.intent_map()["ha_query"], "/ha")
+
+    def test_remote_aliases_registered(self):
+        """/remote and /tailscale must resolve to the same spec as /remote-status."""
+        spec_canonical = self.reg.get("/remote-status")
+        for alias in self.REMOTE_ALIASES:
+            with self.subTest(alias=alias):
+                spec_alias = self.reg.get(alias)
+                self.assertIsNotNone(spec_alias, f"{alias} must be registered as alias")
+                self.assertIs(spec_alias, spec_canonical)
+
+    def test_remote_alias_dispatches_true(self):
+        self.assertTrue(self.reg.dispatch("/remote", {}))
+
+    def test_tailscale_alias_dispatches_true(self):
+        self.assertTrue(self.reg.dispatch("/tailscale", {}))
+
+    def test_ha_with_query_dispatches_true(self):
+        self.assertTrue(self.reg.dispatch("/ha states", {}))
+
+    def test_ha_with_entity_id_dispatches_true(self):
+        self.assertTrue(self.reg.dispatch("/ha light.living_room", {}))
+
+    def test_ha_no_args_dispatches_true(self):
+        self.assertTrue(self.reg.dispatch("/ha", {}))
+
+    def test_notify_deferred_not_registered(self):
+        """/notify must remain deferred (externally visible HTTP POST to iPhone)."""
+        for cmd in self.PHASE18_DEFERRED:
+            with self.subTest(cmd=cmd):
+                self.assertIsNone(
+                    self.reg.get(cmd),
+                    f"{cmd} must remain deferred — externally visible side effect",
+                )
+
+    def test_notify_falls_through_to_elif(self):
+        for cmd in self.PHASE18_DEFERRED:
+            with self.subTest(cmd=cmd):
+                self.assertFalse(
+                    self.reg.dispatch(cmd, {}),
+                    f"dispatch('{cmd}') must return False — fallback to elif chain",
+                )
+
+    def test_remote_module_loaded_via_discover(self):
+        fresh = CommandRegistry()
+        fresh.discover("adwi.commands")
+        self.assertIsNotNone(fresh.get("/remote-status"), "remote module must register /remote-status")
+
+    def test_total_unique_commands_at_phase18(self):
+        # Phase 17 had ≥128; Phase 18 adds /remote-status, /ha + 2 aliases
+        self.assertGreaterEqual(len(set(self.reg.all_names())), 133)
+
+
 if __name__ == "__main__":
     unittest.main()

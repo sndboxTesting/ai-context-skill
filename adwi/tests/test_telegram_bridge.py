@@ -494,6 +494,42 @@ class TestWave2Commands(unittest.TestCase):
         self.assertIn("/eval-status", replies[0])
 
 
+# ── Wave 3 commands (/ports, /nightly-status, /uptime, /version) ─────────────
+
+class TestWave3Commands(unittest.TestCase):
+    """Verify Wave 3 commands route correctly to Safe Command API."""
+
+    _WAVE3 = {
+        "/ports":          "/adwi-ports",
+        "/nightly-status": "/adwi-nightly-status",
+        "/uptime":         "/adwi-uptime",
+        "/version":        "/adwi-version",
+    }
+
+    def test_wave3_commands_in_table(self):
+        for cmd, route in self._WAVE3.items():
+            with self.subTest(cmd=cmd):
+                self.assertIn(cmd, bridge.TELEGRAM_COMMANDS)
+                self.assertEqual(bridge.TELEGRAM_COMMANDS[cmd], route)
+
+    def test_wave3_commands_reach_api(self):
+        for cmd in self._WAVE3:
+            with self.subTest(cmd=cmd):
+                calls = _api_calls(_make_update(ALLOWED_UID, cmd))
+                self.assertEqual(len(calls), 1, f"{cmd} must dispatch exactly one API call")
+
+    def test_wave3_commands_listed_in_help(self):
+        replies = _replies(_make_update(ALLOWED_UID, "/help"))
+        for cmd in self._WAVE3:
+            with self.subTest(cmd=cmd):
+                self.assertIn(cmd, replies[0])
+
+    def test_total_command_count_after_wave3(self):
+        # Regression guard: ensures help message reflects expected command count
+        self.assertGreaterEqual(len(bridge.TELEGRAM_COMMANDS), 14,
+                                "Should have at least 14 commands after Wave 3")
+
+
 # ── 10. /ping local handler ───────────────────────────────────────────────────
 
 class TestPingCommand(unittest.TestCase):

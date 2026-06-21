@@ -77,12 +77,16 @@ TELEGRAM_COMMANDS: dict[str, str | None] = {
     "/doctor":         "/adwi-doctor",
     "/brief":          "/adwi-brief",
     "/daily-brief":    "/adwi-daily-brief-n8n",
-    "/disk":           "/adwi-disk-summary",           # disk usage for key Adwi paths
-    "/eval-status":    "/adwi-eval-status",            # NLU eval pass rate from MASTER_REPORT
-    "/git-status":     "/git-status-workspace",
-    "/models":         "/adwi-models",
-    "/watcher-status": "/adwi-watcher-status",
-    "/e2e-status":     "/adwi-e2e-auto-loop-status",   # read-only: shows running/idle + last result
+    "/disk":            "/adwi-disk-summary",           # disk usage for key Adwi paths
+    "/eval-status":     "/adwi-eval-status",            # NLU eval pass rate from MASTER_REPORT
+    "/git-status":      "/git-status-workspace",
+    "/models":          "/adwi-models",
+    "/nightly-status":  "/adwi-nightly-status",         # last nightly run timestamp + outcome
+    "/ports":           "/adwi-ports",                  # Adwi service ports + listen status
+    "/uptime":          "/adwi-uptime",                 # Mac uptime + load average
+    "/version":         "/adwi-version",                # current git commit + branch
+    "/watcher-status":  "/adwi-watcher-status",
+    "/e2e-status":      "/adwi-e2e-auto-loop-status",   # read-only: shows running/idle + last result
 }
 
 _LOCAL_RESPONSES: dict[str, str] = {

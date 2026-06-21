@@ -1,0 +1,82 @@
+#!/usr/bin/env python3
+"""
+adwi-nightly-status — show last nightly run timestamp and outcome.
+
+Reads the most recent nightly log from adwi/notes/nightly-improvement-logs/.
+No network, no subprocess, no shell. Safe for Telegram / Safe Command API.
+"""
+import re
+import sys
+from pathlib import Path
+
+WORKSPACE    = Path.home() / "SuneelWorkSpace"
+NIGHTLY_DIR  = WORKSPACE / "adwi" / "notes" / "nightly-improvement-logs"
+MAINTENANCE_DIR = WORKSPACE / "adwi" / "notes" / "maintenance-logs"
+SYSTEM_LOG   = WORKSPACE / "logs" / "adwi_system_log.md"
+
+
+def _latest_nightly() -> tuple[str, str]:
+    """Return (date_str, content) of the most recent nightly log."""
+    if not NIGHTLY_DIR.exists():
+        return "", ""
+    files = sorted(NIGHTLY_DIR.glob("nightly-*.md"))
+    if not files:
+        return "", ""
+    f = files[-1]
+    return f.stem.replace("nightly-", ""), f.read_text(encoding="utf-8")
+
+
+def _latest_maintenance() -> tuple[str, str]:
+    """Return (timestamp_str, first_line) of the most recent auto-maintenance log."""
+    if not MAINTENANCE_DIR.exists():
+        return "", ""
+    files = sorted(MAINTENANCE_DIR.glob("*-auto-ai-maintenance.md"))
+    if not files:
+        return "", ""
+    f = files[-1]
+    content = f.read_text(encoding="utf-8")
+    m = re.search(r"Generated:\s*(.+)", content)
+    return f.stem.split("-auto-ai-maintenance")[0], (m.group(1).strip() if m else "")
+
+
+def main() -> int:
+    lines = ["Nightly Status"]
+
+    # Nightly log
+    date, content = _latest_nightly()
+    if date:
+        # Extract step outcomes from nightly log
+        steps = re.findall(r"Step\s+\d+.*?(?:✓|✗|OK|FAIL|skip)", content, re.IGNORECASE)
+        lines.append(f"Last nightly: {date}")
+        if steps:
+            lines.extend(f"  {s.strip()}" for s in steps[:5])
+        elif content.strip():
+            lines.append(f"  {content.strip()[:120]}")
+        else:
+            lines.append("  (log empty)")
+    else:
+        lines.append("Last nightly: no log found")
+        lines.append(f"  (checked: {NIGHTLY_DIR})")
+
+    # Maintenance log
+    ts, gen = _latest_maintenance()
+    if ts:
+        lines.append(f"Last maintenance: {ts}")
+        if gen:
+            lines.append(f"  Generated: {gen}")
+    else:
+        lines.append("Last maintenance: no log found")
+
+    # Quick system log tail
+    if SYSTEM_LOG.exists():
+        sys_lines = SYSTEM_LOG.read_text(encoding="utf-8").strip().splitlines()
+        last = [l for l in sys_lines[-20:] if l.strip() and not l.startswith("#")]
+        if last:
+            lines.append(f"System log (last entry): {last[-1][:100]}")
+
+    print("\n".join(lines))
+    return 0
+
+
+if __name__ == "__main__":
+    sys.exit(main())

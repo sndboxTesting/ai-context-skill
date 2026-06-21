@@ -1,0 +1,54 @@
+#!/usr/bin/env python3
+"""
+adwi-ports — show Adwi service ports and their current listen status.
+
+Reads from adwi/config/infra_ports.json (authoritative registry).
+Probes each port with a quick TCP connect to detect up/down.
+Safe for Telegram bridge / Safe Command API — no shell, no user input.
+"""
+import json
+import socket
+import sys
+from pathlib import Path
+
+WORKSPACE = Path.home() / "SuneelWorkSpace"
+PORTS_FILE = WORKSPACE / "adwi" / "config" / "infra_ports.json"
+PROBE_TIMEOUT = 0.5   # seconds per port
+
+
+def _probe(port: int) -> str:
+    try:
+        with socket.create_connection(("127.0.0.1", port), timeout=PROBE_TIMEOUT):
+            return "up"
+    except (ConnectionRefusedError, OSError):
+        return "down"
+
+
+def main() -> int:
+    if not PORTS_FILE.exists():
+        print(f"[error] {PORTS_FILE} not found")
+        return 1
+
+    data  = json.loads(PORTS_FILE.read_text(encoding="utf-8"))
+    ports = data.get("ports", [])
+
+    lines = ["Adwi Service Ports"]
+    up_count = 0
+    for entry in ports:
+        port    = entry["port"]
+        service = entry["service"]
+        layer   = entry["layer"]
+        status  = _probe(port)
+        if status == "up":
+            up_count += 1
+        mark = "✓" if status == "up" else "✗"
+        lines.append(f"  {mark} :{port:<5}  {service:<20} ({layer})")
+
+    lines.append("")
+    lines.append(f"{up_count}/{len(ports)} services reachable on 127.0.0.1")
+    print("\n".join(lines))
+    return 0
+
+
+if __name__ == "__main__":
+    sys.exit(main())

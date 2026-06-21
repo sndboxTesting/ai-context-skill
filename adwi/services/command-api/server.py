@@ -57,6 +57,10 @@ ALLOWED_COMMANDS = {
     # ── Observability / quick-status routes ──────────────────────────────────
     "/adwi-eval-status":          [os.path.join(BIN, "adwi-eval-status")],
     "/adwi-disk-summary":         [os.path.join(BIN, "adwi-disk-summary")],
+    "/adwi-ports":                [os.path.join(BIN, "adwi-ports")],
+    "/adwi-nightly-status":       [os.path.join(BIN, "adwi-nightly-status")],
+    "/adwi-version":              [os.path.join(BIN, "adwi-version")],
+    "/adwi-uptime":               ["/usr/bin/uptime"],
     # ── E2E Auto Loop (read-only routes use existing subprocess.run pattern) ────
     "/adwi-e2e-auto-loop-status": [VENV_PY, E2E_STATUS_READER, "--status"],
     "/adwi-e2e-auto-loop-report": [VENV_PY, E2E_STATUS_READER, "--report"],

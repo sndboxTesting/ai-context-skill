@@ -46,6 +46,7 @@ logging.basicConfig(
     datefmt="%Y-%m-%dT%H:%M:%S",
 )
 log = logging.getLogger(__name__)
+log.setLevel(logging.INFO)  # explicit — basicConfig is no-op if root already has handlers (pytest)
 
 HOME      = Path.home()
 WORKSPACE = HOME / "SuneelWorkSpace"

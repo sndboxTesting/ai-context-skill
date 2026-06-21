@@ -1,0 +1,45 @@
+#!/usr/bin/env python3
+"""
+adwi-config-check — show which expected env vars are configured (names only).
+
+Reads os.environ — does NOT read config/.env directly.
+The Safe Command API server loads .env into the environment before spawning subprocesses,
+so this shows the effective configuration. Values are never printed.
+Safe for Telegram / Safe Command API.
+"""
+import os
+import sys
+
+# Hardcoded allowlist — do not enumerate all env vars.
+EXPECTED = {
+    "ADWI_LOCAL_SECRET":       "Safe Command API + Telegram auth",
+    "TELEGRAM_BOT_TOKEN":      "Telegram bridge",
+    "TELEGRAM_ALLOWED_USER_ID": "Telegram sender allowlist",
+    "TAVILY_API_KEY":          "Web search (Tavily)",
+    "EXA_API_KEY":             "Web search (Exa)",
+    "BRAVE_SEARCH_API_KEY":    "Web search (Brave)",
+    "FIRECRAWL_API_KEY":       "Web scraping (Firecrawl)",
+    "HOME_ASSISTANT_TOKEN":    "Home Assistant control",
+    "HOME_ASSISTANT_URL":      "Home Assistant URL",
+}
+
+def main() -> int:
+    lines = ["Config Status (names only — values never shown)"]
+    set_count = 0
+    for key, desc in EXPECTED.items():
+        val = os.environ.get(key, "")
+        if val and val != "REPLACE_ME":
+            lines.append(f"  SET      {key:<30} {desc}")
+            set_count += 1
+        else:
+            lines.append(f"  MISSING  {key:<30} {desc}")
+
+    lines.append("")
+    lines.append(f"{set_count}/{len(EXPECTED)} expected vars configured")
+    if set_count < len(EXPECTED):
+        lines.append("Edit adwi/config/.env to fill missing values")
+    print("\n".join(lines))
+    return 0
+
+if __name__ == "__main__":
+    sys.exit(main())

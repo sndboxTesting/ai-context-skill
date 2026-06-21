@@ -87,7 +87,13 @@ def chk_key_files() -> tuple[str, str]:
         ADWI / "infra" / "docker" / "docker-compose.yml",
         ADWI / "bin" / "adwi",
     ]
-    missing = [str(p.relative_to(WORKSPACE)) for p in required if not p.exists()]
+    missing = []
+    for p in required:
+        if not p.exists():
+            try:
+                missing.append(str(p.relative_to(WORKSPACE)))
+            except ValueError:
+                missing.append(str(p))
     if missing:
         return "fail", f"Missing: {', '.join(missing)}"
     return "pass", f"{len(required)} core files present"

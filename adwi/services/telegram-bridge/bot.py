@@ -77,6 +77,7 @@ TELEGRAM_COMMANDS: dict[str, str | None] = {
     "/doctor":         "/adwi-doctor",
     "/brief":          "/adwi-brief",
     "/daily-brief":    "/adwi-daily-brief-n8n",
+    "/config":          "/adwi-config-check",            # env var config status (names only)
     "/disk":            "/adwi-disk-summary",           # disk usage for key Adwi paths
     "/eval-status":     "/adwi-eval-status",            # NLU eval pass rate from MASTER_REPORT
     "/git-status":      "/git-status-workspace",

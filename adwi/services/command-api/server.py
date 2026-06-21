@@ -55,6 +55,7 @@ ALLOWED_COMMANDS = {
     # Parse response: response.body.stdout (trim trailing whitespace, parse as JSON)
     "/adwi-daily-brief-n8n":   [VENV_PY, ADWI_CLI, "/daily-brief", "--n8n"],
     # ── Observability / quick-status routes ──────────────────────────────────
+    "/adwi-config-check":         [os.path.join(BIN, "adwi-config-check")],
     "/adwi-eval-status":          [os.path.join(BIN, "adwi-eval-status")],
     "/adwi-disk-summary":         [os.path.join(BIN, "adwi-disk-summary")],
     "/adwi-ports":                [os.path.join(BIN, "adwi-ports")],

@@ -409,6 +409,26 @@ class TestKeyFiles(unittest.TestCase):
         self.assertEqual(status, "fail")
         self.assertIn("Missing", detail)
 
+    def test_adwi_outside_workspace_does_not_crash(self):
+        """If ADWI is outside WORKSPACE, relative_to() raises ValueError.
+        chk_key_files() must not propagate it — return fail with a safe message."""
+        import tempfile
+        with tempfile.TemporaryDirectory() as tmp:
+            tmp_path = Path(tmp)
+            # ADWI inside tmp_path, WORKSPACE is a different unrelated directory
+            adwi_path = tmp_path / "adwi"
+            adwi_path.mkdir()
+            other_workspace = tmp_path / "other"
+            other_workspace.mkdir()
+            with patch.object(venv, "ADWI", adwi_path), \
+                 patch.object(venv, "WORKSPACE", other_workspace):
+                try:
+                    status, detail = venv.chk_key_files()
+                    # Either fails gracefully (no crash) or pass/warn is OK
+                    self.assertIn(status, ("fail", "warn", "pass"))
+                except ValueError as e:
+                    self.fail(f"chk_key_files() must not propagate ValueError: {e}")
+
 
 # ── 9. chk_syntax — py_compile check ─────────────────────────────────────────
 

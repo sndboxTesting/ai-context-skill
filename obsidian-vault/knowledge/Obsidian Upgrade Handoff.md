@@ -42,12 +42,12 @@ Summary of what was built in the 2026-06-22 Obsidian upgrade session. Read this 
 | `/obsidian-plan [days]` | Generate daily plan from captures — writes `ADWI:DAILY-PLAN` block |
 | `/obsidian-plan-clear` | Blank the `ADWI:DAILY-PLAN` block in today's note |
 | `/obsidian-capture <type> <text>` | Append to today's daily note under matching section |
-| `/obsidian-daily` | Open/append today's daily note |
+| `/obsidian-daily [entry]` | Quick-append to today's daily note |
 | `/obsidian-review [days]` | Grouped summary of last N days of captures |
 | `/obsidian-review-save [days]` | Save review to `reviews/YYYY-MM-DD-weekly-review.md` |
 | `/obsidian-promote-idea Title -- desc` | Create idea note from template; link in Ideas Index |
-| `/obsidian-read [date]` | Read a daily note |
-| `/obsidian-write <text>` | Write/append to a note |
+| `/obsidian-read <path>` | Read a vault note by relative path |
+| `/obsidian-write <path> -- <content>` | Append content to a vault note |
 | `/obsidian-search <query>` | Full-text search across vault |
 | `/obsidian-validate` | Run 8-check vault validator; exit 0 = all pass |
 | `/obsidian-help` | Print command cheat sheet |

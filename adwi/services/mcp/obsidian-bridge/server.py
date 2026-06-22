@@ -210,6 +210,36 @@ class Handler(BaseHTTPRequestHandler):
             p.write_text(existing + header + "\n" + content + "\n", encoding="utf-8")
             self._json(200, {"daily_note": rel, "total_bytes": p.stat().st_size})
 
+        elif route == "/daily-note-update":
+            # Marker-replace route — prevents duplicate generated sections.
+            # body: {"marker": "ADWI:DAILY-BRIEF", "content": "..."}
+            marker   = body.get("marker", "")
+            content  = body.get("content", "")
+            if not marker:
+                self._json(400, {"error": "marker field required"}); return
+            today    = datetime.now().strftime("%Y-%m-%d")
+            rel      = f"daily-notes/{today}.md"
+            p        = VAULT / "daily-notes" / f"{today}.md"
+            p.parent.mkdir(parents=True, exist_ok=True)
+            _TEMPLATE = (
+                f"# {today}\n\n## Current Focus\n\n\n"
+                "## Decisions\n\n\n## Ideas\n\n\n"
+                "## Bugs / Fixes\n\n\n## Pending Approval\n\n\n"
+            )
+            existing = p.read_text(encoding="utf-8") if p.exists() else _TEMPLATE
+            start_tag = f"<!-- {marker}:START -->"
+            end_tag   = f"<!-- {marker}:END -->"
+            new_block = f"{start_tag}\n{content}\n{end_tag}"
+            if start_tag in existing and end_tag in existing:
+                updated = re.sub(
+                    re.escape(start_tag) + r".*?" + re.escape(end_tag),
+                    new_block, existing, flags=re.DOTALL,
+                )
+            else:
+                updated = existing.rstrip("\n") + "\n\n" + new_block + "\n"
+            p.write_text(updated, encoding="utf-8")
+            self._json(200, {"daily_note": rel, "total_bytes": p.stat().st_size})
+
         else:
             self._json(404, {"error": f"unknown route: {route}"})
 

@@ -2911,10 +2911,11 @@ def cmd_daily_brief(n8n_mode: bool = False) -> None:
     if not n8n_mode:
         cprint("  [4/4] Saving to Obsidian daily note", BOLD)
     entry = f"# Daily Brief\n\n{brief}\n\n---\n\n{gmail_snippet}"
-    obs_result = _obsidian_api("POST", "/daily-note", {"content": f"\n## Daily Brief {now.strftime('%H:%M')}\n{brief}\n"})
-    if "error" in obs_result:
-        _warn.append(f"Obsidian save skipped: {obs_result.get('error','unknown')}")
-    elif not n8n_mode:
+    _block_body = f"*{now.strftime('%H:%M')}*\n\n{brief}"
+    if gmail_snippet:
+        _block_body += f"\n\n---\n\n{gmail_snippet}"
+    _obsidian_daily_write_block("ADWI:DAILY-BRIEF", _block_body)
+    if not n8n_mode:
         cprint(f"  {GREEN}✓ Saved to Obsidian daily note{RESET}", "")
     brief_dir = NOTES / "daily-briefs"
     brief_dir.mkdir(parents=True, exist_ok=True)
@@ -3488,6 +3489,48 @@ def _obsidian_api(method: str, route: str, body: dict | None = None) -> dict:
         return {"error": f"Obsidian Bridge not reachable at {OBSIDIAN_BRIDGE} — run: bin/start-obsidian-bridge"}
     except Exception as e:
         return {"error": str(e)}
+
+
+_DAILY_NOTE_TEMPLATE = (
+    "# {date}\n\n"
+    "## Current Focus\n\n\n"
+    "## Decisions\n\n\n"
+    "## Ideas\n\n\n"
+    "## Bugs / Fixes\n\n\n"
+    "## Pending Approval\n\n\n"
+)
+
+
+def _replace_vault_block(text: str, marker: str, block_body: str) -> str:
+    """Replace a marker-delimited block in-place, or append if absent.
+
+    Prevents duplicate generated sections in daily notes.
+    marker example: 'ADWI:DAILY-BRIEF'
+    """
+    import re as _re
+    start_tag = f"<!-- {marker}:START -->"
+    end_tag   = f"<!-- {marker}:END -->"
+    new_block = f"{start_tag}\n{block_body}\n{end_tag}"
+    if start_tag in text and end_tag in text:
+        return _re.sub(
+            _re.escape(start_tag) + r".*?" + _re.escape(end_tag),
+            new_block, text, flags=_re.DOTALL,
+        )
+    return text.rstrip("\n") + "\n\n" + new_block + "\n"
+
+
+def _obsidian_daily_write_block(marker: str, block_body: str) -> bool:
+    """Write a marked block directly to today's vault daily note. Returns True on success."""
+    today = datetime.now().strftime("%Y-%m-%d")
+    note_path = OBSIDIAN_VAULT / "daily-notes" / f"{today}.md"
+    note_path.parent.mkdir(parents=True, exist_ok=True)
+    existing = (
+        note_path.read_text(encoding="utf-8")
+        if note_path.exists()
+        else _DAILY_NOTE_TEMPLATE.format(date=today)
+    )
+    note_path.write_text(_replace_vault_block(existing, marker, block_body), encoding="utf-8")
+    return True
 
 
 def _obsidian_local_search(query: str, max_results: int = 15) -> list:

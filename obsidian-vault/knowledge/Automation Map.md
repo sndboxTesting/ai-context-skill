@@ -14,9 +14,9 @@ How a command or natural-language input flows through Adwi.
 ```
 User types a sentence
     → Stage 0: YouTube URL / image path regex (0 ms)
-    �� Stage 1: _REGEX_INTENTS fast-path (67.8% of queries, <1 ms)
+→ Stage 1: _REGEX_INTENTS fast-path (67.8% of queries, <1 ms)
     → Stage 2: Qdrant few-shot injection (top-3 from nlu_fixtures, 768-dim)
-    �� Stage 3: llama3.1:8b JSON decode → intent + confidence + arguments
+→ Stage 3: llama3.1:8b JSON decode → intent + confidence + arguments
     → Stage 4: dispatch to handler
     → Stage 5: fallback qwen3:0.6b if llama offline
 ```

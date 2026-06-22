@@ -43,7 +43,7 @@ iPhone / Telegram / Browser
 | Port | Service | Layer | Notes |
 |------|---------|-------|-------|
 | :5055 | Safe Command API | Host | 26 routes + 1 E2E Popen; auth required |
-| :5056 | Obsidian Bridge | Host (LaunchAgent) | Vault CRUD; no auth yet |
+| :5056 | Obsidian Bridge | Host (LaunchAgent) | Vault CRUD; auth supported via ADWI_LOCAL_SECRET when configured |
 | :5678 | n8n | Docker | Workflow automation |
 | :3000 | Open WebUI | Docker | Browser chat |
 | :6333 | Qdrant | Docker (LaunchAgent) | Vector DB |
@@ -86,7 +86,7 @@ iPhone / Telegram / Browser
 
 ## Next Improvements
 
-- [ ] Add Obsidian Bridge auth (same X-Adwi-Secret header pattern)
+- [x] Obsidian Bridge auth supported via ADWI_LOCAL_SECRET (set to enable)
 - [ ] Bind Docker host ports to 127.0.0.1 to remove LAN exposure
 - [ ] Harden Grafana password
 - [ ] Disable Open WebUI signup

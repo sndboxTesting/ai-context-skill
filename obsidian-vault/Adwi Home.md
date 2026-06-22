@@ -51,7 +51,7 @@ Quick orientation — what runs where.
 | Monitoring | Grafana / Prometheus / Loki | Docker :4000/:9090/:3100 |
 | Remote control | Telegram Bridge | outbound long-poll |
 
-→ Full diagram: [[knowledge/System Map]]
+→ Full diagram: [[knowledge/System Map]] · [[System Map.canvas]]
 → Automation flows: [[knowledge/Automation Map]]
 → Memory layer: [[knowledge/Memory and Knowledge Map]]
 
@@ -76,12 +76,9 @@ Quick orientation — what runs where.
 
 ## Daily Notes
 
-- [[daily-notes/2026-06-21]]
-- [[daily-notes/2026-06-20]]
-- [[daily-notes/2026-06-19]]
-- [[daily-notes/2026-06-18]]
-- [[daily-notes/2026-06-17]]
-- [[daily-notes/2026-06-16]]
+<!-- ADWI:HOME-STATUS:START -->
+*Not yet refreshed — run nightly loop or `/daily-brief` to populate.*
+<!-- ADWI:HOME-STATUS:END -->
 
 *New daily notes are written automatically by `adwi/nightly.py` at 2 AM and by `/daily-brief` during the day.*
 

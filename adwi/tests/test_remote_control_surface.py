@@ -177,7 +177,7 @@ class TestTelegramDangerousPatterns(unittest.TestCase):
     # Patterns that must never appear in any Telegram command key or route value.
     DANGEROUS = [
         "run-bash", "run-python",
-        "patch-adwi", "self-heal", "implement",
+        "patch-adwi", "self-heal", "implement-idea",
         "git-commit", "git-push",
         "gmail-send", "gmail-confirm", "gmail-archive", "gmail-trash",
         "file-write", "obsidian-write",

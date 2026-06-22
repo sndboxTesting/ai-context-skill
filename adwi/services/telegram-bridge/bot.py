@@ -180,6 +180,12 @@ TELEGRAM_COMMANDS: dict[str, str | None] = {
     "/jobs":              None,
     "/job":               None,
     "/cancel":            None,
+    # ── Learn / implement loop (local, gated) ────────────────────────────────
+    "/learn_plan":        None,
+    "/learn_ok":          None,
+    "/implement_plan":    None,
+    "/implement_ok":      None,
+    "/loop_status":       None,
 }
 
 _HELP_LINES = [
@@ -221,6 +227,13 @@ REPAIR (confirmation required)
 GIT BACKUP (confirmation required)
   /git_backup   →  shows plan + token
   /backup_ok <token>
+
+LEARN LOOP (confirmation required)
+  /learn_plan       →  shows NLU backlog + token
+  /learn_ok <token>
+  /implement_plan <goal>  →  shows plan + token
+  /implement_ok <token>
+  /loop_status      →  recent learn/implement jobs
 
 INFO
   /brief  /daily-brief  /config  /watcher-status  /help  /ping"""
@@ -418,12 +431,11 @@ _TEST_JOBS: dict[str, tuple[str, list[str]]] = {
         "test-quick",
         [VENV_PY, "-m", "unittest",
          "adwi.tests.test_telegram_bridge",
-         "adwi.tests.test_remote_control_surface",
-         "--tb=short"],
+         "adwi.tests.test_remote_control_surface"],
     ),
     "/test_nlu": (
         "test-nlu",
-        [VENV_PY, "-m", "unittest", "adwi.simlab.tests.test_nlu_regex", "--tb=short"],
+        [VENV_PY, "-m", "unittest", "adwi.simlab.tests.test_nlu_regex"],
     ),
     "/test_obsidian": (
         "test-obsidian",
@@ -432,7 +444,7 @@ _TEST_JOBS: dict[str, tuple[str, list[str]]] = {
     "/test_all": (
         "test-all",
         [VENV_PY, "-m", "unittest", "discover", "-s", str(WORKSPACE / "adwi"),
-         "-p", "test_*.py", "--tb=short"],
+         "-p", "test_*.py"],
     ),
 }
 
@@ -647,6 +659,113 @@ def _do_backup_confirm(token_val: str, tg_token: str, chat_id: int) -> None:
                 f"Backup job started.\nID: {job_id}\nCheck: /job {job_id}")
 
 
+# ── Learn / implement loop helpers ───────────────────────────────────────────
+
+def _do_learn_plan(tg_token: str, chat_id: int) -> None:
+    backlog_path = WORKSPACE / "adwi" / "docs" / "NLU_REPAIR_BACKLOG.md"
+    snippet = ""
+    try:
+        lines      = backlog_path.read_text(encoding="utf-8").splitlines()
+        open_items = [l.strip() for l in lines if "Open" in l][:5]
+        snippet    = "\n".join(open_items) if open_items else "(no open items found)"
+    except Exception as exc:
+        snippet = f"(could not read backlog: {exc})"
+
+    token_val = _make_token("learn", {})
+    _send_reply(tg_token, chat_id, "\n".join([
+        "Learn Plan",
+        "Top open NLU repair items:",
+        snippet,
+        "",
+        "Action: run NLU regression test suite (no code changes)",
+        "",
+        f"Confirm: /learn_ok {token_val}",
+        "Expires in 5 minutes.",
+    ]))
+
+
+def _do_learn_confirm(token_val: str, tg_token: str, chat_id: int) -> None:
+    if not token_val:
+        _send_reply(tg_token, chat_id, "Usage: /learn_ok <token>  (get token from /learn_plan)")
+        return
+    entry = _consume_token(token_val)
+    if entry is None:
+        _send_reply(tg_token, chat_id, "Invalid or expired token. Run /learn_plan for a new one.")
+        return
+    if entry["action"] != "learn":
+        _send_reply(tg_token, chat_id, "Token is for a different action.")
+        return
+    if _JOB_RUNNER is None:
+        _send_reply(tg_token, chat_id, "[error] Job runner not available.")
+        return
+    job_id = _JOB_RUNNER.submit(
+        "learn-nlu",
+        [VENV_PY, "-m", "unittest", "adwi.simlab.tests.test_nlu_regex"],
+    )
+    _send_reply(tg_token, chat_id,
+                f"Learn job started (NLU regression suite).\nID: {job_id}\n"
+                f"Check: /job {job_id}  or  /loop_status")
+
+
+def _do_implement_plan(goal: str, tg_token: str, chat_id: int) -> None:
+    if not goal:
+        _send_reply(tg_token, chat_id, "Usage: /implement_plan <goal text>")
+        return
+    goal = _sanitize_text(goal)
+    token_val = _make_token("implement", {"goal": goal})
+    _send_reply(tg_token, chat_id, "\n".join([
+        "Implement Plan",
+        f"Goal: {goal}",
+        "",
+        "Action: record goal to Obsidian Pending Approval",
+        "(no code changes — human review required before implementation)",
+        "",
+        f"Confirm: /implement_ok {token_val}",
+        "Expires in 5 minutes.",
+    ]))
+
+
+def _do_implement_confirm(token_val: str, tg_token: str, chat_id: int) -> None:
+    if not token_val:
+        _send_reply(tg_token, chat_id,
+                    "Usage: /implement_ok <token>  (get token from /implement_plan)")
+        return
+    entry = _consume_token(token_val)
+    if entry is None:
+        _send_reply(tg_token, chat_id,
+                    "Invalid or expired token. Run /implement_plan for a new one.")
+        return
+    if entry["action"] != "implement":
+        _send_reply(tg_token, chat_id, "Token is for a different action.")
+        return
+    if _JOB_RUNNER is None:
+        _send_reply(tg_token, chat_id, "[error] Job runner not available.")
+        return
+    goal   = entry.get("meta", {}).get("goal", "(no goal)")
+    job_id = _JOB_RUNNER.submit(
+        "implement-capture",
+        [VENV_PY, ADWI_CLI, "/obsidian-capture", "approval", f"IMPLEMENT: {goal}"],
+    )
+    _send_reply(tg_token, chat_id,
+                f"Implement request captured to Obsidian Pending Approval.\n"
+                f"ID: {job_id}\nCheck: /job {job_id}")
+
+
+def _format_loop_status() -> str:
+    if _JOB_RUNNER is None:
+        return "[error] Job runner not available."
+    jobs = [j for j in _JOB_RUNNER.list_recent(20)
+            if j.get("type", "").startswith(("learn-", "implement-"))]
+    if not jobs:
+        return "No learn or implement jobs yet.\n/learn_plan to start a learn cycle."
+    lines = ["Learn / Implement jobs (newest first):"]
+    for j in jobs[:6]:
+        start = (j.get("start_time") or "?")[:16]
+        lines.append(f"  {j['status']:<10} {j['type']:<22} {start}  id={j['id']}")
+    lines.append("\n/job <id> for details")
+    return "\n".join(lines)
+
+
 # ── Main local command dispatcher ────────────────────────────────────────────
 
 def _handle_local_cmd(
@@ -781,6 +900,28 @@ def _handle_local_cmd(
 
     if cmd == "/backup_ok":
         _do_backup_confirm(args.strip(), tg_token, chat_id)
+        return
+
+    # ── Learn / implement loop ────────────────────────────────────────────────
+
+    if cmd == "/learn_plan":
+        _do_learn_plan(tg_token, chat_id)
+        return
+
+    if cmd == "/learn_ok":
+        _do_learn_confirm(args.strip(), tg_token, chat_id)
+        return
+
+    if cmd == "/implement_plan":
+        _do_implement_plan(args.strip(), tg_token, chat_id)
+        return
+
+    if cmd == "/implement_ok":
+        _do_implement_confirm(args.strip(), tg_token, chat_id)
+        return
+
+    if cmd == "/loop_status":
+        _send_reply(tg_token, chat_id, _format_loop_status())
         return
 
     # Fallback — should not be reachable if TELEGRAM_COMMANDS is correct

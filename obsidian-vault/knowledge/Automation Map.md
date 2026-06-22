@@ -55,12 +55,12 @@ LaunchAgent fires → adwi/nightly.py
     Step 10: Write morning_brief.md
 ```
 
-## Flow D — Telegram Bridge (Wave 4, 41 commands)
+## Flow D — Telegram Bridge (Wave 5, 47 commands)
 
 ```
 /cmd on Telegram
     → sender allowlist (TELEGRAM_ALLOWED_USER_ID)
-    → command allowlist (TELEGRAM_COMMANDS — 41 entries)
+    → command allowlist (TELEGRAM_COMMANDS — 47 entries)
     ├── route = None (locally handled):
     │     /help /menu /ping → static reply
     │     /test_* /obsidian_* /memory_scan → job_runner.submit()
@@ -69,6 +69,11 @@ LaunchAgent fires → adwi/nightly.py
     │     /repair_ok <token> → _consume_token() → job_runner.submit(adwi-self-heal)
     │     /git_backup → plan + _make_token("git_backup")
     │     /backup_ok <token> → _consume_token() → job_runner.submit(adwi-git-backup)
+    │     /learn_plan → NLU backlog + _make_token("learn")
+    │     /learn_ok <token> → _consume_token() → job_runner.submit(NLU test suite)
+    │     /implement_plan <goal> → plan + _make_token("implement")
+    │     /implement_ok <token> → _consume_token() → job_runner.submit(obsidian-capture approval)
+    │     /loop_status → job_runner.list_recent() filtered to learn-/implement- jobs
     │     /jobs /job /cancel → job_runner.status() / list_recent() / cancel()
     └── route = "/adwi-*" (Safe Command API):
           POST http://127.0.0.1:5055/<route> + X-Adwi-Secret

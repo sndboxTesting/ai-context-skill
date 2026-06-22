@@ -99,6 +99,16 @@ Token expires in **5 minutes**. Each token is single-use.
 1. `/git_backup` — shows pending changes + generates token
 2. `/backup_ok <token>` — validates token, starts `adwi-git-backup` background job
 
+### Learn Loop (locally handled, gated)
+
+| Command | What it does |
+|---------|-------------|
+| `/learn_plan` | Shows top open NLU repair items + generates token |
+| `/learn_ok <token>` | Validates token → runs NLU regression test suite (background) |
+| `/implement_plan <goal>` | Shows goal + plan + generates token (no code changes yet) |
+| `/implement_ok <token>` | Validates token → captures goal to Obsidian Pending Approval |
+| `/loop_status` | Recent learn/implement job status |
+
 ### Job Management
 
 | Command | What it does |
@@ -223,7 +233,10 @@ Or via LaunchAgent (see `adwi/docs/TELEGRAM_BRIDGE_SETUP.md`).
 python3 -m unittest adwi.tests.test_telegram_bridge \
                     adwi.tests.test_remote_control_surface \
                     adwi.tests.test_telegram_upgrade
-# Ran 208 tests — OK
+# Ran 235+ tests — OK
+
+# Job runner smoke test (no Telegram token needed)
+python3 adwi/scripts/smoke_telegram_jobs.py
 ```
 
 ---

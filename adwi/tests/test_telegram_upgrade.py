@@ -806,12 +806,12 @@ class TestJobRunner(unittest.TestCase):
         self.tmpdir.cleanup()
 
     def test_submit_returns_job_id(self):
-        job_id = self.runner.submit("echo-test", ["/bin/echo", "hello"])
+        job_id = self.runner.submit("echo-test", [sys.executable, "-c", "print('hello')"])
         self.assertIsInstance(job_id, str)
         self.assertTrue(job_id.startswith("echo-test-"))
 
     def test_submit_creates_job_record(self):
-        job_id = self.runner.submit("mytest", ["/usr/bin/true"])
+        job_id = self.runner.submit("mytest", [sys.executable, "-c", "pass"])
         time.sleep(0.2)
         j = self.runner.status(job_id)
         self.assertIsNotNone(j)
@@ -819,8 +819,7 @@ class TestJobRunner(unittest.TestCase):
         self.assertIn(j["status"], ("queued", "running", "succeeded", "failed"))
 
     def test_successful_job_status(self):
-        job_id = self.runner.submit("true-test", ["/usr/bin/true"])
-        # Wait for completion
+        job_id = self.runner.submit("true-test", [sys.executable, "-c", "pass"])
         for _ in range(40):
             time.sleep(0.1)
             j = self.runner.status(job_id)
@@ -831,7 +830,7 @@ class TestJobRunner(unittest.TestCase):
         self.assertEqual(j["returncode"], 0)
 
     def test_failed_job_status(self):
-        job_id = self.runner.submit("false-test", ["/usr/bin/false"])
+        job_id = self.runner.submit("false-test", [sys.executable, "-c", "import sys; sys.exit(1)"])
         for _ in range(40):
             time.sleep(0.1)
             j = self.runner.status(job_id)
@@ -842,7 +841,7 @@ class TestJobRunner(unittest.TestCase):
         self.assertNotEqual(j["returncode"], 0)
 
     def test_job_output_in_log(self):
-        job_id = self.runner.submit("echo-test", ["/bin/echo", "hello world"])
+        job_id = self.runner.submit("echo-test", [sys.executable, "-c", "print('hello world')"])
         for _ in range(30):
             time.sleep(0.1)
             j = self.runner.status(job_id)
@@ -852,8 +851,8 @@ class TestJobRunner(unittest.TestCase):
         self.assertIn("hello world", tail)
 
     def test_list_recent_returns_jobs(self):
-        self.runner.submit("j1", ["/bin/true"])
-        self.runner.submit("j2", ["/bin/true"])
+        self.runner.submit("j1", [sys.executable, "-c", "pass"])
+        self.runner.submit("j2", [sys.executable, "-c", "pass"])
         time.sleep(0.3)
         jobs = self.runner.list_recent(5)
         self.assertGreaterEqual(len(jobs), 2)
@@ -871,7 +870,7 @@ class TestJobRunner(unittest.TestCase):
         self.assertFalse(result)
 
     def test_state_persists_to_json(self):
-        job_id = self.runner.submit("persist-test", ["/bin/true"])
+        job_id = self.runner.submit("persist-test", [sys.executable, "-c", "pass"])
         time.sleep(0.3)
         self.assertTrue(jr.JOBS_FILE.exists())
         data = json.loads(jr.JOBS_FILE.read_text())
@@ -879,6 +878,209 @@ class TestJobRunner(unittest.TestCase):
 
 
 import json   # already imported at top — needed here for test_state_persists_to_json
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# Test job argv sanity (Wave 5 regression — prevents pytest-only flags in unittest jobs)
+# ═══════════════════════════════════════════════════════════════════════════════
+
+class TestTestJobArgvSanity(unittest.TestCase):
+    """Ensure _TEST_JOBS argv lists contain no pytest-only flags."""
+
+    # Flags that are valid for pytest but cause "unrecognized arguments" in python -m unittest
+    PYTEST_ONLY_FLAGS = ("--tb=", "--cov=", "--cov-report", "--cache-show",
+                         "--lf", "--ff", "--sw", "--randomly")
+
+    def test_no_pytest_flags_in_any_test_job(self):
+        for cmd, (name, argv) in bridge._TEST_JOBS.items():
+            for arg in argv:
+                for flag in self.PYTEST_ONLY_FLAGS:
+                    self.assertFalse(
+                        arg.startswith(flag),
+                        f"_TEST_JOBS[{cmd!r}] argv contains pytest-only flag "
+                        f"{arg!r} (would fail python -m unittest)",
+                    )
+
+    def test_unittest_jobs_use_unittest_runner(self):
+        for cmd, (name, argv) in bridge._TEST_JOBS.items():
+            if "-m" in argv:
+                m_idx = argv.index("-m")
+                runner = argv[m_idx + 1] if m_idx + 1 < len(argv) else ""
+                self.assertEqual(runner, "unittest",
+                                 f"_TEST_JOBS[{cmd!r}] uses -m {runner!r}, expected 'unittest'")
+
+    def test_all_test_job_argv_are_lists(self):
+        for cmd, (name, argv) in bridge._TEST_JOBS.items():
+            self.assertIsInstance(argv, list,
+                                  f"_TEST_JOBS[{cmd!r}] argv must be a list, not {type(argv)}")
+            self.assertGreater(len(argv), 0,
+                               f"_TEST_JOBS[{cmd!r}] argv must be non-empty")
+
+    def test_test_job_argv_smoke_via_subprocess(self):
+        """Quick real subprocess: python -c 'import unittest; unittest.main()' with --help exits 0."""
+        import tempfile
+        import subprocess as _sp
+        # Verify that python3 -m unittest --help succeeds (exit 0) — proves runner invocation works
+        result = _sp.run(
+            [sys.executable, "-m", "unittest", "--help"],
+            capture_output=True, timeout=10,
+        )
+        self.assertEqual(result.returncode, 0,
+                         f"python -m unittest --help failed: {result.stderr.decode()[:200]}")
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# Loop foundation commands (Wave 5)
+# ═══════════════════════════════════════════════════════════════════════════════
+
+class TestLoopCommands(unittest.TestCase):
+    def setUp(self):
+        self.mock_runner = MagicMock()
+        self.mock_runner.submit.return_value = "learn-nlu-20260622-ab12"
+        bridge._PENDING.clear()
+
+    def _run(self, text: str) -> list[str]:
+        sent: list[str] = []
+        with patch.object(bridge, "_JOB_RUNNER", self.mock_runner), \
+             patch.object(bridge, "_send_reply", lambda t, c, msg: sent.append(msg)):
+            bridge._handle_update(_make_update(ALLOWED_UID, text), TOKEN, ALLOWED_UID, SECRET)
+        return sent
+
+    def test_learn_plan_in_table(self):
+        self.assertIn("/learn_plan", bridge.TELEGRAM_COMMANDS)
+        self.assertIsNone(bridge.TELEGRAM_COMMANDS["/learn_plan"])
+
+    def test_learn_ok_in_table(self):
+        self.assertIn("/learn_ok", bridge.TELEGRAM_COMMANDS)
+        self.assertIsNone(bridge.TELEGRAM_COMMANDS["/learn_ok"])
+
+    def test_implement_plan_in_table(self):
+        self.assertIn("/implement_plan", bridge.TELEGRAM_COMMANDS)
+        self.assertIsNone(bridge.TELEGRAM_COMMANDS["/implement_plan"])
+
+    def test_implement_ok_in_table(self):
+        self.assertIn("/implement_ok", bridge.TELEGRAM_COMMANDS)
+        self.assertIsNone(bridge.TELEGRAM_COMMANDS["/implement_ok"])
+
+    def test_loop_status_in_table(self):
+        self.assertIn("/loop_status", bridge.TELEGRAM_COMMANDS)
+        self.assertIsNone(bridge.TELEGRAM_COMMANDS["/loop_status"])
+
+    def test_learn_plan_generates_token(self):
+        replies = self._run("/learn_plan")
+        combined = " ".join(replies)
+        self.assertIn("/learn_ok", combined)
+        import re
+        tokens = re.findall(r'/learn_ok\s+([0-9a-f]{8})', combined)
+        self.assertTrue(len(tokens) > 0, f"No token found in: {combined!r}")
+
+    def test_learn_ok_invalid_token_rejected(self):
+        replies = self._run("/learn_ok deadbeef")
+        combined = " ".join(replies).lower()
+        self.assertTrue("invalid" in combined or "expired" in combined)
+
+    def test_learn_ok_no_token_shows_usage(self):
+        replies = self._run("/learn_ok")
+        combined = " ".join(replies).lower()
+        self.assertTrue("usage" in combined or "token" in combined)
+
+    def test_learn_ok_valid_token_starts_job(self):
+        sent_plan: list[str] = []
+        with patch.object(bridge, "_JOB_RUNNER", self.mock_runner), \
+             patch.object(bridge, "_send_reply", lambda t, c, msg: sent_plan.append(msg)):
+            bridge._handle_update(_make_update(ALLOWED_UID, "/learn_plan"),
+                                  TOKEN, ALLOWED_UID, SECRET)
+        import re
+        tokens = re.findall(r'/learn_ok\s+([0-9a-f]{8})', " ".join(sent_plan))
+        self.assertTrue(tokens, "learn_plan did not produce a token")
+
+        sent_confirm: list[str] = []
+        with patch.object(bridge, "_JOB_RUNNER", self.mock_runner), \
+             patch.object(bridge, "_send_reply", lambda t, c, msg: sent_confirm.append(msg)):
+            bridge._handle_update(_make_update(ALLOWED_UID, f"/learn_ok {tokens[0]}"),
+                                  TOKEN, ALLOWED_UID, SECRET)
+        self.mock_runner.submit.assert_called_once()
+        name, argv = self.mock_runner.submit.call_args[0]
+        self.assertEqual(name, "learn-nlu")
+        self.assertNotIn("--tb=short", argv)
+
+    def test_implement_plan_no_goal_shows_usage(self):
+        replies = self._run("/implement_plan")
+        combined = " ".join(replies).lower()
+        self.assertTrue("usage" in combined or "goal" in combined)
+
+    def test_implement_plan_generates_token(self):
+        replies = self._run("/implement_plan Build a voice input feature")
+        combined = " ".join(replies)
+        self.assertIn("/implement_ok", combined)
+        import re
+        tokens = re.findall(r'/implement_ok\s+([0-9a-f]{8})', combined)
+        self.assertTrue(len(tokens) > 0)
+
+    def test_implement_ok_valid_token_records_to_obsidian(self):
+        sent_plan: list[str] = []
+        with patch.object(bridge, "_JOB_RUNNER", self.mock_runner), \
+             patch.object(bridge, "_send_reply", lambda t, c, msg: sent_plan.append(msg)):
+            bridge._handle_update(
+                _make_update(ALLOWED_UID, "/implement_plan Add voice input"),
+                TOKEN, ALLOWED_UID, SECRET,
+            )
+        import re
+        tokens = re.findall(r'/implement_ok\s+([0-9a-f]{8})', " ".join(sent_plan))
+        self.assertTrue(tokens)
+
+        with patch.object(bridge, "_JOB_RUNNER", self.mock_runner), \
+             patch.object(bridge, "_send_reply", lambda *a: None):
+            bridge._handle_update(_make_update(ALLOWED_UID, f"/implement_ok {tokens[0]}"),
+                                  TOKEN, ALLOWED_UID, SECRET)
+        self.mock_runner.submit.assert_called()
+        name, argv = self.mock_runner.submit.call_args[0]
+        self.assertEqual(name, "implement-capture")
+        self.assertIn("/obsidian-capture", argv)
+        self.assertIn("approval", argv)
+        self.assertTrue(any("IMPLEMENT:" in a for a in argv))
+
+    def test_implement_ok_token_single_use(self):
+        sent_plan: list[str] = []
+        with patch.object(bridge, "_JOB_RUNNER", self.mock_runner), \
+             patch.object(bridge, "_send_reply", lambda t, c, msg: sent_plan.append(msg)):
+            bridge._handle_update(
+                _make_update(ALLOWED_UID, "/implement_plan Test goal"),
+                TOKEN, ALLOWED_UID, SECRET,
+            )
+        import re
+        tokens = re.findall(r'/implement_ok\s+([0-9a-f]{8})', " ".join(sent_plan))
+        self.assertTrue(tokens)
+        tok = tokens[0]
+
+        with patch.object(bridge, "_JOB_RUNNER", self.mock_runner), \
+             patch.object(bridge, "_send_reply", lambda *a: None):
+            bridge._handle_update(_make_update(ALLOWED_UID, f"/implement_ok {tok}"),
+                                  TOKEN, ALLOWED_UID, SECRET)
+
+        sent2: list[str] = []
+        with patch.object(bridge, "_JOB_RUNNER", self.mock_runner), \
+             patch.object(bridge, "_send_reply", lambda t, c, msg: sent2.append(msg)):
+            bridge._handle_update(_make_update(ALLOWED_UID, f"/implement_ok {tok}"),
+                                  TOKEN, ALLOWED_UID, SECRET)
+        combined = " ".join(sent2).lower()
+        self.assertTrue("invalid" in combined or "expired" in combined)
+
+    def test_loop_status_returns_reply(self):
+        self.mock_runner.list_recent.return_value = []
+        replies = self._run("/loop_status")
+        self.assertGreater(len(replies), 0)
+
+    def test_loop_commands_do_not_call_safe_api(self):
+        for cmd in ["/learn_plan", "/loop_status"]:
+            with self.subTest(cmd=cmd):
+                routes = _api_calls(_make_update(ALLOWED_UID, cmd))
+                self.assertEqual(routes, [])
+
+    def test_implement_plan_sanitizes_goal(self):
+        replies = self._run("/implement_plan hello\x00world\x01test")
+        combined = " ".join(replies)
+        self.assertNotIn("\x00", combined)
 
 
 # ═══════════════════════════════════════════════════════════════════════════════
@@ -924,6 +1126,7 @@ class TestExistingInvariantsStillHold(unittest.TestCase):
             "/menu", "/test_quick", "/test_nlu", "/test_obsidian", "/test_all",
             "/tests_status", "/jobs", "/repair_plan", "/repair_ok",
             "/git_backup", "/backup_ok",
+            "/learn_plan", "/loop_status",
         ]
         for cmd in locally_handled:
             with self.subTest(cmd=cmd):

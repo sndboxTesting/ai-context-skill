@@ -53,7 +53,7 @@
 | `MODEL_MAIN` | `adwi:latest` |
 | `MODEL_NLU_FALLBACK` | `qwen3:0.6b` |
 | `MODEL_VISION` | `minicpm-v:latest` |
-*Auto-updated: 2026-06-21*
+*Auto-updated: 2026-06-22*
 <!-- /AUTO:MODELS -->
 
 ### Model Role Matrix
@@ -98,7 +98,7 @@ SYSTEM You are Adwi, a cautious local AI assistant. Never read secrets, never co
 - `arguments` — typed key-value slots fed straight into command handlers
 
 **Qdrant few-shot collection:** `nlu_fixtures` · 96 seed fixtures · scored at `score_threshold=0.5` · provisioned via `python3 adwi/memory.py provision-nlu`
-*Auto-updated: 2026-06-21*
+*Auto-updated: 2026-06-22*
 <!-- /AUTO:NLU -->
 
 ---
@@ -126,7 +126,7 @@ SYSTEM You are Adwi, a cautious local AI assistant. Never read secrets, never co
 | :9101 | cAdvisor | Docker | Container metrics |
 | :4317 | Phoenix gRPC | Host (LaunchAgent) | OTLP gRPC ingestion |
 | :4318 | Phoenix HTTP | Host (LaunchAgent) | OTLP HTTP ingestion |
-*Auto-updated: 2026-06-21*
+*Auto-updated: 2026-06-22*
 <!-- /AUTO:INFRA_PORTS -->
 
 ### Docker Container Inventory
@@ -142,7 +142,7 @@ SYSTEM You are Adwi, a cautious local AI assistant. Never read secrets, never co
 | grafana | :4000 | ✓ running |
 | node-exporter | :9100 | ✓ running |
 | cadvisor | :9101 | ✓ running |
-*Auto-updated: 2026-06-21*
+*Auto-updated: 2026-06-22*
 <!-- /AUTO:SERVICES -->
 
 ### macOS LaunchAgents
@@ -160,7 +160,7 @@ All managed at `~/Library/LaunchAgents/com.suneel.*.plist`.
 | `openwebui-knowledge-watcher` | KeepAlive |
 | `phoenix` | KeepAlive |
 | `qdrant` | on demand |
-*Auto-updated: 2026-06-21*
+*Auto-updated: 2026-06-22*
 <!-- /AUTO:AGENTS -->
 
 ### Data Flow Topology
@@ -206,7 +206,7 @@ External World
 
 Start: `cd local-ai-stack && docker compose up -d prometheus loki promtail grafana node-exporter cadvisor`
 Dashboard: http://localhost:4000 (user: suneel)
-*Auto-updated: 2026-06-21*
+*Auto-updated: 2026-06-22*
 <!-- /AUTO:MONITORING -->
 
 ---
@@ -214,7 +214,7 @@ Dashboard: http://localhost:4000 (user: suneel)
 ## §3 Deterministic Capability Grid
 
 <!-- AUTO:COMMANDS -->
-**184 registered commands.** Key groups:
+**188 registered commands.** Key groups:
 
 **add**: `/add-capability-plan`  `/add-root`
 **assistant**: `/assistant-upgrade-status`
@@ -267,7 +267,7 @@ Dashboard: http://localhost:4000 (user: suneel)
 **new**: `/new-session`
 **nightly**: `/nightly-log`  `/nightly-run`  `/nightly-status`
 **notify**: `/notify`
-**obsidian**: `/obsidian-daily`  `/obsidian-read`  `/obsidian-search`  `/obsidian-write`
+**obsidian**: `/obsidian-capture`  `/obsidian-daily`  `/obsidian-promote-idea`  `/obsidian-read`  `/obsidian-review`  `/obsidian-review-save`  `/obsidian-search`  `/obsidian-write`
 **old**: `/old-files`
 **organize**: `/organize`
 **owui**: `/owui`
@@ -309,7 +309,7 @@ Dashboard: http://localhost:4000 (user: suneel)
 **web**: `/web-search`
 **what**: `/what-next`
 **youtube**: `/youtube`
-*Auto-updated: 2026-06-21*
+*Auto-updated: 2026-06-22*
 <!-- /AUTO:COMMANDS -->
 
 ### Full Command Reference
@@ -1112,15 +1112,15 @@ python3 -m py_compile adwi/adwi_cli.py && echo "still compiles"
 | 2 | LangGraph Orchestration & Interactive Permission Surface | Planner→Executor→Critic state machine; Phase 2 boxed gate with WHY explanation | `adwi/reason_engine.py` |
 | 3 | Memory Lifecycle, Scoring & Safety Gate | importance_score, recency_decay, provenance columns; BLOCKED/REVIEW/SAFE classifier | `adwi/memory.py` |
 | 4 | Real-Time Self-Healing & Hermes Skill Compiling | aider non-interactive patch → pytest verify → skills/ SKILL.md; skill pre-flight match | `adwi/reason_engine.py · skills/` |
-| 5 | prompt_toolkit Slash-Command Autocomplete | 184-command registry; substring fuzzy scoring; Tab/arrow REPL overlay | `adwi/adwi_cli.py (SlashCommandCompleter)` |
+| 5 | prompt_toolkit Slash-Command Autocomplete | 188-command registry; substring fuzzy scoring; Tab/arrow REPL overlay | `adwi/adwi_cli.py (SlashCommandCompleter)` |
 | 6 | Chain-of-Intent Schema & Semantic Slot-Filling | analysis+confidence+intent+arguments JSON schema; 29 structured arg reads in dispatch | `adwi/adwi_cli.py (_INTENT_JSON_SCHEMA)` |
 | 7 | Qdrant-Driven Dynamic Few-Shot Routing | 96-fixture nlu_fixtures collection; top-3 injected into llama3.1:8b system prompt | `adwi/memory.py · Qdrant :6333` |
 | 8 | LLM-Priming Documentation Update Invariants | auto-update-readme always runs before backup; PHASES+NLU sections auto-injected | `bin/auto-update-readme · adwi/backup.py` |
 | 9 | Security Core: PathValidator, OTel Telemetry, Fast NLU Bypass | deny-first path containment; OTLP→Phoenix traces with credential redaction; Qdrant ≥0.88 score skip of 8B LLM (43 ms → <5 ms fast path) | `adwi/path_validator.py · adwi/telemetry.py · adwi/nlu_fast_path.py` |
 | 10 | SimLab: Bounded Continuous Eval & Self-Improvement Harness | hardware/thermal gates; ephemeral sandbox; SHA-256 failure fingerprinting; Tier A/B/C improvement proposals; immutable golden baseline (100% required); auto git-rollback on regression; 41 unit tests, 0 warnings | `adwi/simlab/ (11 modules)` |
 
-All 10 phases verified on 2026-06-21. Each phase committed atomically as an independent transactional unit.
-*Auto-updated: 2026-06-21*
+All 10 phases verified on 2026-06-22. Each phase committed atomically as an independent transactional unit.
+*Auto-updated: 2026-06-22*
 <!-- /AUTO:PHASES -->
 
 ### CommandRegistry Migration (Phases 11–23, 2026-06-19/20)

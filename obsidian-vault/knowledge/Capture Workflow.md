@@ -64,6 +64,7 @@ Works even when the Obsidian Bridge is offline — writes directly to the vault 
 
 - [[knowledge/Review Workflow]]
 - [[knowledge/Planning Workflow]]
+- [[knowledge/Template Guide]]
 - [[Adwi Home]]
 - [[knowledge/Obsidian Maintenance]]
 - [[knowledge/Ideas Index]]

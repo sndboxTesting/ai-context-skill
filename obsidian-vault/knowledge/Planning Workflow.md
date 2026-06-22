@@ -127,5 +127,6 @@ This keeps the brief short — the plan itself is the detail.
 
 - [[knowledge/Capture Workflow]]
 - [[knowledge/Review Workflow]]
+- [[knowledge/Template Guide]]
 - [[knowledge/Obsidian Maintenance]]
 - [[Adwi Home]]

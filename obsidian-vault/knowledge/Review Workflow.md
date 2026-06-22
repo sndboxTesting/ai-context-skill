@@ -123,6 +123,7 @@ Also inserts a row in `knowledge/Ideas Index.md → ## Active Ideas` table if no
 
 - [[knowledge/Planning Workflow]]
 - [[knowledge/Capture Workflow]]
+- [[knowledge/Template Guide]]
 - [[knowledge/Obsidian Maintenance]]
 - [[knowledge/Ideas Index]]
 - [[knowledge/Pending Approval]]

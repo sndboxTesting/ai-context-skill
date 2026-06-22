@@ -3879,20 +3879,33 @@ def cmd_obsidian_promote_idea(args: str = "") -> None:
         cprint(f"  {GRAY}projects/ideas/{safe_title}.md{RESET}", "")
     else:
         idea_path.parent.mkdir(parents=True, exist_ok=True)
-        idea_path.write_text(
-            f"---\ntype: idea\nstatus: planned\ntags: [idea, roadmap]\n"
-            f"updated: {today}\n---\n\n"
-            f"# {title}\n\n#idea #roadmap\n\n"
-            f"## Status\n🔵 Planned — not started\n\n"
-            f"## Why It Matters\n{description}\n\n"
-            f"## Existing Related Files\n\n*Add relevant files here.*\n\n"
-            f"## Implementation Sketch\n\n1. *Add steps here.*\n\n"
-            f"## Risks\n\n*Add risks here.*\n\n"
-            f"## Next Action\n\n*Add next action here.*\n\n"
-            f"## Related Notes\n\n"
-            f"- [[knowledge/Ideas Index]]\n- [[projects/Adwi]]\n",
-            encoding="utf-8",
-        )
+        # Read from shared template; fall back to inline default if absent.
+        _tmpl_path = OBSIDIAN_VAULT / "templates" / "Idea Note.md"
+        if _tmpl_path.exists():
+            _raw = _tmpl_path.read_text(encoding="utf-8")
+            note_content = (
+                _raw
+                .replace("{{title}}", title)
+                .replace("{{description}}", description)
+                .replace("{{date:YYYY-MM-DD}}", today)
+                .replace("{{date}}", today)
+            )
+        else:
+            note_content = (
+                f"---\ntype: idea\nstatus: planned\ntags: [idea, roadmap]\n"
+                f"created: {today}\nupdated: {today}\n---\n\n"
+                f"# {title}\n\n"
+                f"## Status\n🔵 Planned — not started\n\n"
+                f"## Why It Matters\n{description}\n\n"
+                f"## Existing Related Files\n\n*Add relevant files here.*\n\n"
+                f"## Implementation Sketch\n\n1. *Add steps here.*\n\n"
+                f"## Risks\n\n*Add risks here.*\n\n"
+                f"## Next Action\n\n*Add next action here.*\n\n"
+                f"## Related Notes\n\n"
+                f"- [[knowledge/Ideas Index]]\n- [[projects/Adwi]]\n\n"
+                f"## Captured Updates\n"
+            )
+        idea_path.write_text(note_content, encoding="utf-8")
         cprint(f"\n  {GREEN}✓ Created → projects/ideas/{safe_title}.md{RESET}", "")
 
     # Link in Ideas Index under Active Ideas table.

@@ -107,14 +107,35 @@ Obsidian stores its internal config in `obsidian-vault/.obsidian/`. Most of thes
 | `app.json` | gitignored | empty default, not meaningful |
 | `appearance.json` | gitignored | empty default |
 | `core-plugins.json` | **tracked** | stable — list of enabled built-in plugins |
+| `templates.json` | **tracked** | stable — sets templates folder to `templates/` |
+| `daily-notes.json` | **tracked** | stable — sets daily note folder, format, and template |
 
-If you add a community plugin, its config appears in `.obsidian/plugins/` — those are also gitignored by the pattern above.
+**`templates.json`** tells Obsidian's built-in Templates plugin where to find templates:
+```json
+{ "folder": "templates" }
+```
+
+**`daily-notes.json`** configures the Daily Notes core plugin:
+```json
+{
+  "folder": "daily-notes",
+  "format": "YYYY-MM-DD",
+  "template": "templates/Daily Note"
+}
+```
+
+With these in place, opening Obsidian and pressing `Cmd+P → "Daily notes: Open today's daily note"` creates `daily-notes/YYYY-MM-DD.md` using `templates/Daily Note.md` — the same structure that Adwi generates at 2 AM.
+
+**Using templates manually:** Open any note → `Cmd+P → "Templates: Insert template"` → pick a template. Obsidian fills `{{title}}` (note filename), `{{date}}`, and `{{time}}` automatically. See [[knowledge/Template Guide]] for a full list.
+
+If you add a community plugin, its config appears in `.obsidian/plugins/` — those are not explicitly gitignored but also not tracked.
 
 ---
 
 ## Related Notes
 
 - [[Adwi Home]]
+- [[knowledge/Template Guide]]
 - [[knowledge/Pending Approval]]
 - [[knowledge/System Map]]
 - [adwi/obsidian_utils.py](../../adwi/obsidian_utils.py)

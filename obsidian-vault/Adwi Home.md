@@ -84,6 +84,7 @@ Quick orientation — what runs where.
 *See [[knowledge/Obsidian Maintenance]] for how marker blocks work and recovery steps.*
 *Review captured items weekly: [[knowledge/Review Workflow]]*
 *Generate today's plan: [[knowledge/Planning Workflow]] · `/obsidian-plan`*
+*Use templates when creating notes manually: [[knowledge/Template Guide]]*
 
 ---
 

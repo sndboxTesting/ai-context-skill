@@ -186,6 +186,8 @@ TELEGRAM_COMMANDS: dict[str, str | None] = {
     "/implement_plan":    None,
     "/implement_ok":      None,
     "/loop_status":       None,
+    # ── Operational health (local) ────────────────────────────────────────────
+    "/telegram_smoke":    None,
 }
 
 _HELP_LINES = [
@@ -234,6 +236,11 @@ LEARN LOOP (confirmation required)
   /implement_plan <goal>  →  shows plan + token
   /implement_ok <token>
   /loop_status      →  recent learn/implement jobs
+
+OPERATIONAL HEALTH
+  /telegram_smoke  →  run bridge smoke test (all 4 test-job argv, background)
+  /tests_status    →  latest test job status
+  /loop_status     →  latest learn/implement job status
 
 INFO
   /brief  /daily-brief  /config  /watcher-status  /help  /ping"""
@@ -922,6 +929,22 @@ def _handle_local_cmd(
 
     if cmd == "/loop_status":
         _send_reply(tg_token, chat_id, _format_loop_status())
+        return
+
+    # ── Operational health ────────────────────────────────────────────────────
+
+    if cmd == "/telegram_smoke":
+        if _JOB_RUNNER is None:
+            _send_reply(tg_token, chat_id, "[error] Job runner not available.")
+            return
+        smoke_script = str(WORKSPACE / "adwi" / "scripts" / "smoke_telegram_jobs.py")
+        job_id = _JOB_RUNNER.submit(
+            "telegram-smoke",
+            [VENV_PY, smoke_script, "--quick"],
+        )
+        _send_reply(tg_token, chat_id,
+                    f"Bridge smoke test started (--quick, skips /test_all).\n"
+                    f"ID: {job_id}\nCheck: /job {job_id}  or  /tests_status")
         return
 
     # Fallback — should not be reachable if TELEGRAM_COMMANDS is correct

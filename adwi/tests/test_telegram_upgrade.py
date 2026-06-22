@@ -18,6 +18,8 @@ Covers:
 from __future__ import annotations
 
 import importlib.util
+import json
+import re
 import sys
 import time
 import unittest
@@ -546,7 +548,6 @@ class TestRepairGate(unittest.TestCase):
         combined = " ".join(sent)
         self.assertIn("/repair_ok", combined)
         # Should contain an 8-char hex token
-        import re
         tokens = re.findall(r'/repair_ok\s+([0-9a-f]{8})', combined)
         self.assertTrue(len(tokens) > 0, f"No token found in: {combined!r}")
 
@@ -583,7 +584,6 @@ class TestRepairGate(unittest.TestCase):
             bridge._handle_update(_make_update(ALLOWED_UID, "/repair_plan"),
                                   TOKEN, ALLOWED_UID, SECRET)
 
-        import re
         tokens = re.findall(r'/repair_ok\s+([0-9a-f]{8})', " ".join(sent_plan))
         self.assertTrue(tokens, "repair_plan did not produce a token")
         token = tokens[0]
@@ -610,7 +610,6 @@ class TestRepairGate(unittest.TestCase):
             bridge._handle_update(_make_update(ALLOWED_UID, "/repair_plan"),
                                   TOKEN, ALLOWED_UID, SECRET)
 
-        import re
         tokens = re.findall(r'/repair_ok\s+([0-9a-f]{8})', " ".join(sent_plan))
         self.assertTrue(tokens)
         token = tokens[0]
@@ -805,10 +804,22 @@ class TestJobRunner(unittest.TestCase):
         jr.JOBS_FILE = self._orig_jobs_file
         self.tmpdir.cleanup()
 
+    @staticmethod
+    def _wait_done(runner, job_id: str, timeout: float = 5.0) -> dict | None:
+        """Poll until a job leaves queued/running. Prevents tearDown tmpdir race."""
+        deadline = time.time() + timeout
+        while time.time() < deadline:
+            j = runner.status(job_id)
+            if j and j["status"] not in ("queued", "running"):
+                return j
+            time.sleep(0.05)
+        return runner.status(job_id)
+
     def test_submit_returns_job_id(self):
         job_id = self.runner.submit("echo-test", [sys.executable, "-c", "print('hello')"])
         self.assertIsInstance(job_id, str)
         self.assertTrue(job_id.startswith("echo-test-"))
+        self._wait_done(self.runner, job_id)  # let thread finish before tmpdir cleanup
 
     def test_submit_creates_job_record(self):
         job_id = self.runner.submit("mytest", [sys.executable, "-c", "pass"])
@@ -851,9 +862,10 @@ class TestJobRunner(unittest.TestCase):
         self.assertIn("hello world", tail)
 
     def test_list_recent_returns_jobs(self):
-        self.runner.submit("j1", [sys.executable, "-c", "pass"])
-        self.runner.submit("j2", [sys.executable, "-c", "pass"])
-        time.sleep(0.3)
+        j1 = self.runner.submit("j1", [sys.executable, "-c", "pass"])
+        j2 = self.runner.submit("j2", [sys.executable, "-c", "pass"])
+        self._wait_done(self.runner, j1)
+        self._wait_done(self.runner, j2)
         jobs = self.runner.list_recent(5)
         self.assertGreaterEqual(len(jobs), 2)
 
@@ -871,13 +883,10 @@ class TestJobRunner(unittest.TestCase):
 
     def test_state_persists_to_json(self):
         job_id = self.runner.submit("persist-test", [sys.executable, "-c", "pass"])
-        time.sleep(0.3)
+        self._wait_done(self.runner, job_id)
         self.assertTrue(jr.JOBS_FILE.exists())
         data = json.loads(jr.JOBS_FILE.read_text())
         self.assertIn(job_id, data)
-
-
-import json   # already imported at top — needed here for test_state_persists_to_json
 
 
 # ═══════════════════════════════════════════════════════════════════════════════
@@ -970,7 +979,6 @@ class TestLoopCommands(unittest.TestCase):
         replies = self._run("/learn_plan")
         combined = " ".join(replies)
         self.assertIn("/learn_ok", combined)
-        import re
         tokens = re.findall(r'/learn_ok\s+([0-9a-f]{8})', combined)
         self.assertTrue(len(tokens) > 0, f"No token found in: {combined!r}")
 
@@ -990,7 +998,6 @@ class TestLoopCommands(unittest.TestCase):
              patch.object(bridge, "_send_reply", lambda t, c, msg: sent_plan.append(msg)):
             bridge._handle_update(_make_update(ALLOWED_UID, "/learn_plan"),
                                   TOKEN, ALLOWED_UID, SECRET)
-        import re
         tokens = re.findall(r'/learn_ok\s+([0-9a-f]{8})', " ".join(sent_plan))
         self.assertTrue(tokens, "learn_plan did not produce a token")
 
@@ -1013,7 +1020,6 @@ class TestLoopCommands(unittest.TestCase):
         replies = self._run("/implement_plan Build a voice input feature")
         combined = " ".join(replies)
         self.assertIn("/implement_ok", combined)
-        import re
         tokens = re.findall(r'/implement_ok\s+([0-9a-f]{8})', combined)
         self.assertTrue(len(tokens) > 0)
 
@@ -1025,7 +1031,6 @@ class TestLoopCommands(unittest.TestCase):
                 _make_update(ALLOWED_UID, "/implement_plan Add voice input"),
                 TOKEN, ALLOWED_UID, SECRET,
             )
-        import re
         tokens = re.findall(r'/implement_ok\s+([0-9a-f]{8})', " ".join(sent_plan))
         self.assertTrue(tokens)
 
@@ -1048,7 +1053,6 @@ class TestLoopCommands(unittest.TestCase):
                 _make_update(ALLOWED_UID, "/implement_plan Test goal"),
                 TOKEN, ALLOWED_UID, SECRET,
             )
-        import re
         tokens = re.findall(r'/implement_ok\s+([0-9a-f]{8})', " ".join(sent_plan))
         self.assertTrue(tokens)
         tok = tokens[0]
@@ -1081,6 +1085,121 @@ class TestLoopCommands(unittest.TestCase):
         replies = self._run("/implement_plan hello\x00world\x01test")
         combined = " ".join(replies)
         self.assertNotIn("\x00", combined)
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# /telegram_smoke command (Wave 6)
+# ═══════════════════════════════════════════════════════════════════════════════
+
+class TestTelegramSmokeCommand(unittest.TestCase):
+    """Tests for the /telegram_smoke background command."""
+
+    def setUp(self):
+        self.mock_runner = MagicMock()
+        self.mock_runner.submit.return_value = "telegram-smoke-20260622-ab12"
+
+    def _run(self, text: str) -> list[str]:
+        sent: list[str] = []
+        with patch.object(bridge, "_JOB_RUNNER", self.mock_runner), \
+             patch.object(bridge, "_send_reply", lambda t, c, msg: sent.append(msg)):
+            bridge._handle_update(_make_update(ALLOWED_UID, text), TOKEN, ALLOWED_UID, SECRET)
+        return sent
+
+    def test_telegram_smoke_in_table(self):
+        self.assertIn("/telegram_smoke", bridge.TELEGRAM_COMMANDS)
+        self.assertIsNone(bridge.TELEGRAM_COMMANDS["/telegram_smoke"])
+
+    def test_telegram_smoke_submits_job(self):
+        self._run("/telegram_smoke")
+        self.mock_runner.submit.assert_called_once()
+        name, argv = self.mock_runner.submit.call_args[0]
+        self.assertEqual(name, "telegram-smoke")
+        self.assertIsInstance(argv, list)
+
+    def test_telegram_smoke_argv_includes_smoke_script(self):
+        self._run("/telegram_smoke")
+        _, argv = self.mock_runner.submit.call_args[0]
+        script_arg = " ".join(argv)
+        self.assertIn("smoke_telegram_jobs.py", script_arg)
+
+    def test_telegram_smoke_uses_quick_mode(self):
+        """Default Telegram invocation uses --quick so /test_all doesn't block for 3 min."""
+        self._run("/telegram_smoke")
+        _, argv = self.mock_runner.submit.call_args[0]
+        self.assertIn("--quick", argv)
+
+    def test_telegram_smoke_reply_contains_job_id(self):
+        replies = self._run("/telegram_smoke")
+        job_id = self.mock_runner.submit.return_value
+        self.assertTrue(any(job_id in r for r in replies),
+                        f"No reply contained job ID {job_id!r}")
+
+    def test_telegram_smoke_no_runner_returns_error(self):
+        sent: list[str] = []
+        with patch.object(bridge, "_JOB_RUNNER", None), \
+             patch.object(bridge, "_send_reply", lambda t, c, msg: sent.append(msg)):
+            bridge._handle_update(_make_update(ALLOWED_UID, "/telegram_smoke"),
+                                  TOKEN, ALLOWED_UID, SECRET)
+        self.assertTrue(any("error" in r.lower() for r in sent))
+
+    def test_telegram_smoke_does_not_call_safe_api(self):
+        routes = _api_calls(_make_update(ALLOWED_UID, "/telegram_smoke"))
+        self.assertEqual(routes, [])
+
+    def test_telegram_smoke_in_menu(self):
+        self.assertIn("/telegram_smoke", bridge.MENU_TEXT)
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# Smoke script structural checks (Wave 6)
+# ═══════════════════════════════════════════════════════════════════════════════
+
+class TestSmokeScriptStructure(unittest.TestCase):
+    """Verify smoke_telegram_jobs.py loads real _TEST_JOBS and has correct structure."""
+
+    _SMOKE_PATH = _ROOT / "adwi" / "scripts" / "smoke_telegram_jobs.py"
+
+    def test_smoke_script_exists(self):
+        self.assertTrue(self._SMOKE_PATH.exists(),
+                        f"smoke_telegram_jobs.py not found at {self._SMOKE_PATH}")
+
+    def test_smoke_script_compiles(self):
+        import py_compile
+        try:
+            py_compile.compile(str(self._SMOKE_PATH), doraise=True)
+        except py_compile.PyCompileError as exc:
+            self.fail(f"smoke_telegram_jobs.py has syntax error: {exc}")
+
+    def test_smoke_script_references_test_jobs(self):
+        """The smoke script must load _TEST_JOBS from bot.py, not use synthetic argv."""
+        source = self._SMOKE_PATH.read_text(encoding="utf-8")
+        self.assertIn("_TEST_JOBS", source,
+                      "smoke script must reference _TEST_JOBS from bot.py")
+        self.assertIn("BOT_PATH", source,
+                      "smoke script must load bot.py to read _TEST_JOBS")
+
+    def test_smoke_script_uses_tmpdir(self):
+        """Must redirect jobs to tmpdir to avoid polluting adwi/logs/telegram-jobs/."""
+        source = self._SMOKE_PATH.read_text(encoding="utf-8")
+        self.assertIn("TemporaryDirectory", source,
+                      "smoke script must redirect JobRunner to a temp dir")
+
+    def test_smoke_script_has_phase2(self):
+        source = self._SMOKE_PATH.read_text(encoding="utf-8")
+        self.assertIn("Phase 2", source,
+                      "smoke script must have a Phase 2 section that exercises _TEST_JOBS")
+
+    def test_smoke_script_supports_quick_flag(self):
+        source = self._SMOKE_PATH.read_text(encoding="utf-8")
+        self.assertIn("--quick", source,
+                      "smoke script must support --quick to skip /test_all")
+
+    def test_test_jobs_all_referenced_in_smoke_timeouts(self):
+        """Every _TEST_JOBS key should have an explicit timeout in the smoke script."""
+        source = self._SMOKE_PATH.read_text(encoding="utf-8")
+        for tg_cmd in bridge._TEST_JOBS:
+            self.assertIn(tg_cmd, source,
+                          f"smoke script missing explicit handling for {tg_cmd!r}")
 
 
 # ═══════════════════════════════════════════════════════════════════════════════
@@ -1126,7 +1245,7 @@ class TestExistingInvariantsStillHold(unittest.TestCase):
             "/menu", "/test_quick", "/test_nlu", "/test_obsidian", "/test_all",
             "/tests_status", "/jobs", "/repair_plan", "/repair_ok",
             "/git_backup", "/backup_ok",
-            "/learn_plan", "/loop_status",
+            "/learn_plan", "/loop_status", "/telegram_smoke",
         ]
         for cmd in locally_handled:
             with self.subTest(cmd=cmd):

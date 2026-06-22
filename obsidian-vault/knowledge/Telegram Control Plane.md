@@ -126,6 +126,24 @@ Token expires in **5 minutes**. Each token is single-use.
 | `/daily-brief` | Full formatted morning brief |
 | `/config` | Env var names present (no values printed) |
 
+### Operational Health
+
+| Command | What it does |
+|---------|-------------|
+| `/telegram_smoke` | Run bridge smoke test (Phase 1: runner plumbing; Phase 2: real test-job argv; uses `--quick` so `/test_all` is skipped) |
+| `/tests_status` | Latest test job status + log tail |
+| `/loop_status` | Latest learn/implement job status |
+
+**Difference between `/test_*` and `/telegram_smoke`:**
+- `/test_quick`, `/test_nlu`, etc. submit each test suite directly. Use these when you want to run one specific suite.
+- `/telegram_smoke` validates all four test-job argv in sequence, loading `_TEST_JOBS` from bot.py itself. Use this to verify the bridge is wired correctly after an upgrade.
+
+**Recommended Telegram health workflow:**
+1. `/telegram_smoke` — proves all test-job argv still work end-to-end
+2. `/tests_status` — check whether the smoke job succeeded
+3. `/job <id>` — full log if something failed
+4. `/loop_status` — check learn/implement loop status
+
 ### UX
 
 | Command | What it does |
@@ -230,13 +248,17 @@ Or via LaunchAgent (see `adwi/docs/TELEGRAM_BRIDGE_SETUP.md`).
 ## Testing
 
 ```bash
-python3 -m unittest adwi.tests.test_telegram_bridge \
-                    adwi.tests.test_remote_control_surface \
-                    adwi.tests.test_telegram_upgrade
-# Ran 235+ tests — OK
+adwi/.venv/bin/python3 -m unittest adwi.tests.test_telegram_bridge \
+                                    adwi.tests.test_remote_control_surface \
+                                    adwi.tests.test_telegram_upgrade
+# Ran 243 tests — OK
 
-# Job runner smoke test (no Telegram token needed)
-python3 adwi/scripts/smoke_telegram_jobs.py
+# Smoke test: validates real _TEST_JOBS argv through JobRunner (no Telegram token needed)
+adwi/.venv/bin/python3 adwi/scripts/smoke_telegram_jobs.py --quick
+# 7/7 checks passed  PASS
+
+# Full smoke (includes /test_all — ~2 min):
+adwi/.venv/bin/python3 adwi/scripts/smoke_telegram_jobs.py
 ```
 
 ---

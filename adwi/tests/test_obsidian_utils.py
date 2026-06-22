@@ -19,6 +19,8 @@ append_under_heading    = _mod.append_under_heading
 append_to_daily_section = _mod.append_to_daily_section
 extract_sections        = _mod.extract_sections
 collect_daily_entries   = _mod.collect_daily_entries
+write_daily_plan        = _mod.write_daily_plan
+read_daily_plan         = _mod.read_daily_plan
 
 
 class TestReplaceMarkerBlock(unittest.TestCase):
@@ -237,6 +239,68 @@ class TestAppendToDailySection(unittest.TestCase):
         self.assertIsInstance(msg, str)
         self.assertTrue(ok)
         self.assertIn("2026-01-02", msg)
+
+
+class TestDailyPlan(unittest.TestCase):
+
+    def setUp(self):
+        import tempfile
+        self._tmp   = Path(tempfile.mkdtemp())
+        self._vault = self._tmp / "vault"
+        (self._vault / "daily-notes").mkdir(parents=True)
+
+    def tearDown(self):
+        import shutil
+        shutil.rmtree(self._tmp, ignore_errors=True)
+
+    def test_write_creates_marker_block(self):
+        ok, path = write_daily_plan(self._vault, "2026-01-01", "### Top Focus\n- finish task")
+        self.assertTrue(ok)
+        content = (self._vault / "daily-notes" / "2026-01-01.md").read_text()
+        self.assertIn("<!-- ADWI:DAILY-PLAN:START -->", content)
+        self.assertIn("<!-- ADWI:DAILY-PLAN:END -->", content)
+        self.assertIn("finish task", content)
+
+    def test_write_updates_in_place(self):
+        write_daily_plan(self._vault, "2026-01-01", "v1 content")
+        write_daily_plan(self._vault, "2026-01-01", "v2 content")
+        content = (self._vault / "daily-notes" / "2026-01-01.md").read_text()
+        self.assertIn("v2 content", content)
+        self.assertNotIn("v1 content", content)
+        self.assertEqual(content.count("ADWI:DAILY-PLAN:START"), 1)
+
+    def test_write_preserves_manual_sections(self):
+        note_path = self._vault / "daily-notes" / "2026-01-01.md"
+        note_path.write_text("# 2026-01-01\n\n## Ideas\n\n- my manual idea\n")
+        write_daily_plan(self._vault, "2026-01-01", "plan body")
+        content = note_path.read_text()
+        self.assertIn("my manual idea", content)
+        self.assertIn("plan body", content)
+
+    def test_read_returns_none_when_absent(self):
+        self.assertIsNone(read_daily_plan(self._vault, "2026-01-01"))
+
+    def test_read_returns_none_for_missing_file(self):
+        self.assertIsNone(read_daily_plan(self._vault, "1999-12-31"))
+
+    def test_read_returns_plan_body(self):
+        write_daily_plan(self._vault, "2026-01-01", "### Top Focus\n- get things done")
+        body = read_daily_plan(self._vault, "2026-01-01")
+        self.assertIsNotNone(body)
+        self.assertIn("get things done", body)
+
+    def test_read_returns_none_after_clear(self):
+        # Writing an empty-ish body and reading back
+        write_daily_plan(self._vault, "2026-01-01", "")
+        result = read_daily_plan(self._vault, "2026-01-01")
+        self.assertIsNone(result)
+
+    def test_write_creates_note_from_template_if_absent(self):
+        ok, _ = write_daily_plan(self._vault, "2026-02-01", "test plan")
+        self.assertTrue(ok)
+        content = (self._vault / "daily-notes" / "2026-02-01.md").read_text()
+        self.assertIn("# 2026-02-01", content)
+        self.assertIn("## Current Focus", content)
 
 
 class TestTimestampDedup(unittest.TestCase):

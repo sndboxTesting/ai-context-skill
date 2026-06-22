@@ -1607,6 +1607,30 @@
       "test_command": "/test-adwi"
     },
     {
+      "name": "Obsidian Plan",
+      "command": "/obsidian-plan [days]",
+      "description": "Generate or update today's ADWI:DAILY-PLAN marker block from last N days of captures (default 7). Deterministic — no LLM. Sections: Top Focus, Carryover Tasks, Decisions, Ideas, Bugs/Fixes, Pending Approval.",
+      "risk": "low",
+      "files_touched": [
+        "obsidian-vault/daily-notes/YYYY-MM-DD.md"
+      ],
+      "uses_secrets": false,
+      "logs": "notes/adwi-action-logs",
+      "test_command": "/test-adwi"
+    },
+    {
+      "name": "Obsidian Plan Clear",
+      "command": "/obsidian-plan-clear",
+      "description": "Clear (blank) the ADWI:DAILY-PLAN block in today's daily note. Manual sections and other generated blocks are preserved.",
+      "risk": "low",
+      "files_touched": [
+        "obsidian-vault/daily-notes/YYYY-MM-DD.md"
+      ],
+      "uses_secrets": false,
+      "logs": "notes/adwi-action-logs",
+      "test_command": "/test-adwi"
+    },
+    {
       "name": "Obsidian Read",
       "command": "/obsidian-read",
       "description": "Adwi command /obsidian-read",

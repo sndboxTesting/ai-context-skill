@@ -2946,6 +2946,10 @@ def cmd_daily_brief(n8n_mode: bool = False) -> None:
     log_action("daily-brief", brief[:500])
     if not n8n_mode:
         cprint(f"  {GREEN}✓ Saved to notes/daily-briefs/{now.strftime('%Y-%m-%d')}.md{RESET}", "")
+        _plan_body = _read_daily_plan(OBSIDIAN_VAULT, now.strftime("%Y-%m-%d"))
+        if _plan_body:
+            cprint(f"  {CYAN}→ Today's plan exists in daily-notes/{now.strftime('%Y-%m-%d')}.md "
+                   f"(ADWI:DAILY-PLAN){RESET}", "")
 
     # ── n8n JSON output ───────────────────────────────────────────────────────
     if n8n_mode:
@@ -3524,6 +3528,8 @@ _append_under_heading    = _ou_mod.append_under_heading
 _append_to_daily_section = _ou_mod.append_to_daily_section
 _extract_sections        = _ou_mod.extract_sections
 _collect_daily_entries   = _ou_mod.collect_daily_entries
+_write_daily_plan        = _ou_mod.write_daily_plan
+_read_daily_plan         = _ou_mod.read_daily_plan
 del _ilu_ou, _ou_spec, _ou_mod
 # ──────────────────────────────────────────────────────────────────────────────
 
@@ -3917,6 +3923,131 @@ def cmd_obsidian_promote_idea(args: str = "") -> None:
                         encoding="utf-8",
                     )
                     cprint(f"  {GREEN}✓ Linked in knowledge/Ideas Index.md → Active Ideas{RESET}", "")
+
+
+def cmd_obsidian_plan(args: str = "") -> None:
+    """Generate or update today's ADWI:DAILY-PLAN block from recent captures.
+
+    Usage: /obsidian-plan [days]  (default 7, max 30)
+    Deterministic — no LLM required.
+    """
+    from datetime import date as _dt, timedelta as _td
+    try:
+        days = max(1, min(30, int(args.strip()))) if args.strip() else 7
+    except ValueError:
+        cprint(f"  {YELLOW}Usage: /obsidian-plan [days]{RESET}", ""); return
+
+    today   = _dt.today()
+    today_s = today.isoformat()
+    start_s = (today - _td(days=days - 1)).isoformat()
+
+    records = _collect_daily_entries(OBSIDIAN_VAULT, start_s, today_s)
+
+    by_sec: dict = {}
+    for rec in records:
+        by_sec.setdefault(rec["section"], [])
+        for entry in rec["entries"]:
+            by_sec[rec["section"]].append((rec["date"], entry))
+
+    # Dedup by body text, most-recent first, capped.
+    _strip_ts = lambda s: re.sub(r"^-\s*\d{2}:\d{2}\s*[—–-]+\s*", "", s.strip()).strip()
+
+    def _dedup(pairs, cap=5):
+        seen, out = set(), []
+        for d, e in reversed(pairs):
+            b = _strip_ts(e)
+            if b and b not in seen:
+                seen.add(b); out.append((d, e))
+                if len(out) >= cap:
+                    break
+        return out
+
+    # Split Current Focus into recent (≤2 days ago) and carryover (>2 days ago).
+    focus_all     = by_sec.get("## Current Focus", [])
+    cutoff        = (today - _td(days=2)).isoformat()
+    top_focus     = _dedup([(d, e) for d, e in focus_all if d >= cutoff], cap=3)
+    carryover     = _dedup([(d, e) for d, e in focus_all if d < cutoff],  cap=3)
+
+    def _fmt_section(label, pairs, cap=5):
+        items = _dedup(pairs, cap)
+        if not items:
+            return []
+        lines = [f"### {label}", ""]
+        for d, entry in items:
+            lines.append(f"{entry}  *(from {d})*")
+        lines.append("")
+        return lines
+
+    plan_lines = [
+        "## Daily Plan",
+        f"*Generated {today_s} — last {days} day(s) of captures*",
+        "",
+    ]
+
+    if top_focus:
+        plan_lines += ["### Top Focus", ""]
+        for d, entry in top_focus:
+            plan_lines.append(f"{entry}  *(from {d})*")
+        plan_lines.append("")
+
+    if carryover:
+        plan_lines += ["### Carryover Tasks", ""]
+        for d, entry in carryover:
+            plan_lines.append(f"{entry}  *(from {d})*")
+        plan_lines.append("")
+
+    plan_lines += _fmt_section("Decisions to Remember",     by_sec.get("## Decisions", []))
+    plan_lines += _fmt_section("Ideas Worth Promoting",      by_sec.get("## Ideas", []))
+    plan_lines += _fmt_section("Bugs / Fixes to Follow Up",  by_sec.get("## Bugs / Fixes", []))
+    plan_lines += _fmt_section("Pending Approval",           by_sec.get("## Pending Approval", []))
+    plan_lines += _fmt_section("Notes",                      by_sec.get("## Notes", []))
+
+    if not plan_lines[3:]:  # nothing beyond the header
+        plan_lines += [
+            "### No Captures Yet", "",
+            "*Use /obsidian-capture to log focus items, decisions, ideas, bugs.*", "",
+        ]
+
+    plan_body = "\n".join(plan_lines)
+    ok, msg   = _write_daily_plan(OBSIDIAN_VAULT, today_s, plan_body)
+    if not ok:
+        cprint(f"\n  {RED}✗ Failed to write plan: {msg}{RESET}", ""); return
+
+    adwi_head(f"Daily Plan — {today_s}")
+
+    _PLAN_LABELS = [
+        ("top_focus",      "Top Focus",                  top_focus),
+        ("carryover",      "Carryover Tasks",             carryover),
+        ("## Decisions",   "Decisions to Remember",       None),
+        ("## Ideas",       "Ideas Worth Promoting",       None),
+        ("## Bugs / Fixes","Bugs / Fixes to Follow Up",   None),
+        ("## Pending Approval", "Pending Approval",       None),
+    ]
+    for key, label, precomputed in _PLAN_LABELS:
+        items = precomputed if precomputed is not None else _dedup(by_sec.get(key, []))
+        if not items:
+            continue
+        cprint(f"\n  {BOLD}{label}{RESET}", "")
+        for d, entry in items:
+            cprint(f"    {entry}  {GRAY}[{d}]{RESET}", "")
+
+    total = sum(len(v) for v in [top_focus, carryover] + [
+        _dedup(by_sec.get(s, [])) for s in
+        ["## Decisions", "## Ideas", "## Bugs / Fixes", "## Pending Approval"]
+    ])
+    cprint(f"\n  {GREEN}✓ Plan saved ({total} item(s)) → {today_s}.md{RESET}", "")
+    cprint(f"  {GRAY}Clear: /obsidian-plan-clear  |  Full review: /obsidian-review{RESET}", "")
+
+
+def cmd_obsidian_plan_clear() -> None:
+    """Remove (blank) the ADWI:DAILY-PLAN block from today's daily note."""
+    from datetime import date as _dt
+    today_s = _dt.today().isoformat()
+    ok, msg = _write_daily_plan(OBSIDIAN_VAULT, today_s, "*Plan cleared.*")
+    if ok:
+        cprint(f"\n  {GREEN}✓ ADWI:DAILY-PLAN cleared in {today_s}.md{RESET}", "")
+    else:
+        cprint(f"\n  {RED}✗ {msg}{RESET}", "")
 
 
 # ── import for obsidian URL quoting ──────────────────────────────────────────
@@ -11091,6 +11222,9 @@ def handle(line: str) -> bool:
     elif line == "/obsidian-review": cmd_obsidian_review()
     elif line.startswith("/obsidian-promote-idea "): cmd_obsidian_promote_idea(line[23:].strip())
     elif line == "/obsidian-promote-idea": cmd_obsidian_promote_idea()
+    elif line.startswith("/obsidian-plan "): cmd_obsidian_plan(line[15:].strip())
+    elif line == "/obsidian-plan": cmd_obsidian_plan()
+    elif line == "/obsidian-plan-clear": cmd_obsidian_plan_clear()
     elif line.startswith("/run-python"): cmd_run_python(line[11:].strip())
     elif line.startswith("/run-bash "): cmd_run_bash(line[10:].strip())
     elif line in ("/github-status", "/github", "/gh-status"): cmd_github_connected()
@@ -11423,6 +11557,8 @@ You can say things like:
                                    types: focus, decision, idea, task, bug, fix, approval, note
                                    idea → also logs to knowledge/Ideas Index.md
                                    approval → also logs to knowledge/Pending Approval.md
+  /obsidian-plan [days]            Generate today's ADWI:DAILY-PLAN block from last N days
+  /obsidian-plan-clear             Clear today's ADWI:DAILY-PLAN block
   /obsidian-review [days]          Print review of last N daily notes (default 7, read-only)
   /obsidian-review-save [days]     Save review to reviews/YYYY-MM-DD-weekly-review.md
   /obsidian-promote-idea <Title> -- <desc>  Create idea note in projects/ideas/ + link in index

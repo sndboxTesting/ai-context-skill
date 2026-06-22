@@ -922,13 +922,30 @@ def step_update_obsidian_home(data: dict) -> None:
         pending.append("  - **Self-heal FAILED** — manual fix required")
     pending_str = "\n".join(pending) if pending else "  - Nothing pending ✓"
 
+    # Weekly review reminder: show if today is Sunday or no review in last 7 days.
+    reviews_dir = OBSIDIAN_VAULT / "reviews"
+    has_recent_review = False
+    if reviews_dir.exists():
+        from datetime import timedelta as _td
+        week_ago = (datetime.now() - _td(days=7)).strftime("%Y-%m-%d")
+        for rf in reviews_dir.glob("????-??-??-weekly-review.md"):
+            if rf.stem[:10] >= week_ago:
+                has_recent_review = True
+                break
+    is_sunday = datetime.now().weekday() == 6
+    review_reminder = (
+        "\n\n**⚑ Weekly review due:** Run `/obsidian-review-save 7`"
+        if (is_sunday or not has_recent_review) else ""
+    )
+
     block = (
         f"*Updated {DATE_STR} {TIME_STR} by nightly loop*\n\n"
         f"**Today:** [[daily-notes/{DATE_STR}]]\n\n"
         f"**Recent notes:**\n{notes_links}\n\n"
         f"**Status:**\n{nlu_line}\n"
         f"- Disk: {health.get('disk_used','?')} used / {health.get('disk_avail','?')} free\n\n"
-        f"**Pending approval:**\n{pending_str}\n\n"
+        f"**Pending approval:**\n{pending_str}"
+        f"{review_reminder}\n\n"
         f"→ [[knowledge/Pending Approval]] · [[knowledge/Eval and Reliability Map]] · [[System Map.canvas]]"
     )
 

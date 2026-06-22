@@ -151,6 +151,42 @@ def extract_sections(text: str, sections: list | None = None) -> dict:
     return result
 
 
+def write_daily_plan(vault: Path, date: str, plan_body: str) -> tuple:
+    """Write or update the ADWI:DAILY-PLAN marker block in *date*'s daily note.
+
+    Returns (success: bool, message: str).
+    """
+    try:
+        note_path = vault / "daily-notes" / f"{date}.md"
+        note_path.parent.mkdir(parents=True, exist_ok=True)
+        existing = (
+            note_path.read_text(encoding="utf-8")
+            if note_path.exists()
+            else daily_note_template(date)
+        )
+        note_path.write_text(
+            replace_marker_block(existing, "ADWI:DAILY-PLAN", plan_body),
+            encoding="utf-8",
+        )
+        return True, str(note_path)
+    except Exception as exc:
+        return False, str(exc)
+
+
+def read_daily_plan(vault: Path, date: str) -> str | None:
+    """Return the body of the ADWI:DAILY-PLAN block, or None if absent/blank."""
+    note_path = vault / "daily-notes" / f"{date}.md"
+    if not note_path.exists():
+        return None
+    text      = note_path.read_text(encoding="utf-8")
+    start_tag = "<!-- ADWI:DAILY-PLAN:START -->"
+    end_tag   = "<!-- ADWI:DAILY-PLAN:END -->"
+    if start_tag not in text or end_tag not in text:
+        return None
+    body = text.split(start_tag, 1)[1].split(end_tag, 1)[0].strip()
+    return body if body else None
+
+
 def collect_daily_entries(vault: Path, start_date: str, end_date: str,
                            sections: list | None = None) -> list:
     """Scan daily notes from *start_date* to *end_date* inclusive (YYYY-MM-DD).

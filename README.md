@@ -19,7 +19,7 @@
 | [§2](#2-infrastructure-topography) | Infrastructure Topography | Every port, container, agent, data flow |
 | [§3](#3-deterministic-capability-grid) | Deterministic Capability Grid | All 184+ commands, args, behaviors |
 | [§3a](#3a-gmail-capability-surface) | Gmail Capability Surface | Full Gmail feature inventory — read/write/draft/send/schedule/rules |
-| [§4](#4-agentic-lifecycle-flows) | Agentic Lifecycle Flows | ASCII diagrams of every execution path |
+| [§4](#4-agentic-lifecycle-flows) | Agentic Lifecycle Flows | ASCII diagrams of every execution path (Flows A–G) |
 | [§5](#5-security--boundary-invariants) | Security & Boundary Invariants | Hard blocks, credential isolation, API auth status |
 | [§6](#6-directory-structure) | Directory Structure | Annotated file tree |
 | [§7](#7-rollback--recovery) | Rollback & Recovery | Operational runbooks |
@@ -112,7 +112,7 @@ SYSTEM You are Adwi, a cautious local AI assistant. Never read secrets, never co
 |---|---|---|---|
 | :11434 | Ollama | Host (brew) | Local LLM inference API |
 | :3000 | Open WebUI | Docker | Browser chat UI + model switcher |
-| :5055 | Safe Command API | Host | n8n→shell bridge (8 allowlisted routes) |
+| :5055 | Safe Command API | Host | n8n→Telegram→shell bridge (26 allowlisted routes + 1 background E2E Popen) |
 | :5056 | Obsidian Bridge | Host (LaunchAgent) | Vault HTTP CRUD API |
 | :5678 | n8n | Docker | Workflow automation / webhooks |
 | :6006 | Arize Phoenix | Host (LaunchAgent) | Agent observability UI (OTel) |
@@ -160,6 +160,7 @@ All managed at `~/Library/LaunchAgents/com.suneel.*.plist`.
 | `openwebui-knowledge-watcher` | KeepAlive |
 | `phoenix` | KeepAlive |
 | `qdrant` | on demand |
+| `telegram-bridge` | KeepAlive (optional — manual start or LaunchAgent) |
 *Auto-updated: 2026-06-21*
 <!-- /AUTO:AGENTS -->
 
@@ -176,6 +177,8 @@ External World
      │                                                              │
      ├── Tailscale VPN ─────────────── Home Assistant :8123         │
      │                                                              │
+     ├── Telegram (outbound poll) ──── telegram-bridge/bot.py ──────┤
+     │                                (sender + command allowlist)  │
      └── Direct LAN ────────────────────────────────────────────────┘
                                                                      │
                                                        adwi_cli.py (REPL)
@@ -676,8 +679,8 @@ n8n :5678  (webhook node)
         │
         ▼
 POST http://localhost:5055/<route>
-        │  Safe Command API — 19 allowlisted routes (+ 1 background E2E Popen route)
-        │  No arbitrary command execution
+        │  Safe Command API — 26 allowlisted routes (+ 1 background E2E Popen route)
+        │  X-Adwi-Secret header required; no arbitrary command execution
         │
         ├── /status-ai · /daily-ai-status-report · /index-ai-notes ──► shell scripts
         ├── /auto-ai-maintenance · /adwi-self-heal · /rag-index ──────► shell scripts
@@ -685,11 +688,47 @@ POST http://localhost:5055/<route>
         ├── /adwi-status · /adwi-doctor · /adwi-brief ─────────────────► adwi_cli.py
         ├── /adwi-backup · /adwi-nightly · /adwi-models ───────────────► adwi_cli.py
         ├── /adwi-watcher-status · /adwi-daily-brief-n8n ──────────────► adwi_cli.py
+        ├── /adwi-config-check · /adwi-eval-status · /adwi-disk-summary ► bin scripts (observability)
+        ├── /adwi-ports · /adwi-nightly-status · /adwi-version · /adwi-uptime ► bin scripts
         ├── /adwi-e2e-auto-loop-status · -report · -cancel ────────────► status reader
         └── /adwi-e2e-auto-loop-start ──────────────────────────────────► Popen (background)
                 │
                 ▼
         JSON response → n8n → Siri → iPhone notification
+```
+
+### Flow G — Telegram Bridge (Telegram → adwi)
+
+```
+Telegram app on any device
+        │
+        ▼  (outbound HTTPS long-poll to api.telegram.org:443 — no public endpoint)
+bot.py: getUpdates loop
+        │
+        ├── Sender check ──────── not in TELEGRAM_ALLOWED_USER_ID → silently drop
+        │
+        ├── Command parse ─────── not in TELEGRAM_COMMANDS dict → usage hint
+        │
+        └── 9 commands mapped to Safe Command API routes:
+              /ping          → local pong (no API call)
+              /help          → list all commands
+              /daily-brief   → /adwi-daily-brief-n8n  (plain-text formatted)
+              /config        → /adwi-config-check      (env var names only)
+              /disk          → /adwi-disk-summary
+              /eval-status   → /adwi-eval-status       (NLU pass rate)
+              /nightly-status → /adwi-nightly-status
+              /ports         → /adwi-ports
+              /uptime        → /adwi-uptime
+              /version       → /adwi-version
+                │
+                ▼
+        POST http://127.0.0.1:5055/<route>   ← X-Adwi-Secret header attached
+                │
+                ▼
+        Safe Command API (:5055) executes allowlisted command
+                │
+                ▼
+        Response truncated to 4000 chars → sendMessage → Telegram
 ```
 
 ### Flow E — Nightly 10-Step Maintenance (2 AM)
@@ -773,6 +812,7 @@ subprocess.run(cmd) or python tempfile exec
 | Service | Port | Auth state | Mechanism | Remaining work |
 |---|---|---|---|---|
 | Safe Command API | :5055 | **✅ LIVE** | `X-Adwi-Secret` header (64-char hex from `config/.env`); 401 without correct header | — |
+| Telegram Bridge | outbound | **✅ LIVE** | Sender allowlist (`TELEGRAM_ALLOWED_USER_ID`) + command allowlist (9 cmds) + Safe Command API gate; unknown senders silently dropped | — |
 | Obsidian Bridge | :5056 | ⚠️ No auth | stdlib HTTP, loopback-only | Auth header pending (same pattern) |
 | Ollama | :11434 | No auth | Loopback-only by default | — |
 | Grafana | :4000 | Weak | Default fallback password set | Harden password |
@@ -864,8 +904,8 @@ Enforced by `_classify_cli_risk()` (adwi_cli.py) and `classify_risk()` (reason_e
 SuneelWorkSpace/
 │
 ├── adwi/                              # Core AI brain
-│   ├── adwi_cli.py                    # 5,200+ lines · 184 commands · REPL entry point
-│   ├── reason_engine.py               # LangGraph: Planner→Executor→Critic (822 lines)
+│   ├── adwi_cli.py                    # 11,296 lines · 184 commands · REPL entry point
+│   ├── reason_engine.py               # LangGraph: Planner→Executor→Critic (861 lines)
 │   ├── memory.py                      # AdwiMemory: SQLite + nomic-embed cosine search (96 NLU fixtures)
 │   ├── path_validator.py              # Deny-first path containment; hard-blocks credential dirs
 │   ├── telemetry.py                   # OTel tracing → Arize Phoenix; credential-safe redaction
@@ -896,9 +936,10 @@ SuneelWorkSpace/
 │   │   ├── test_path_validator.py     # PathValidator containment tests
 │   │   ├── test_search_orchestrator.py # Search orchestrator tests
 │   │   ├── test_telemetry.py          # OTel credential redaction tests
-│   │   ├── test_telegram_bridge.py    # 52 tests — Telegram bridge safety and routing
+│   │   ├── test_telegram_bridge.py    # 80 tests — Telegram bridge safety, routing, /daily-brief formatting
 │   │   ├── test_reason_engine_paths.py # 19 tests — PathValidator integration in reason_engine
-│   │   └── test_remote_control_surface.py # 17 tests — static surface guard for Safe Command API + Telegram
+│   │   ├── test_remote_control_surface.py # 17 tests — static surface guard for Safe Command API + Telegram
+│   │   └── test_validate_env.py       # 45 tests — validate_adwi_env.py bootstrap checker
 │   ├── simlab/                        # Bounded eval & self-improvement harness (Phase 10)
 │   │   ├── schemas.py                 # Dataclasses + SHA-256[:16] failure fingerprinting
 │   │   ├── golden_baseline.jsonl      # 20 immutable scenarios — never auto-modified
@@ -922,12 +963,19 @@ SuneelWorkSpace/
 │   │   └── fix_backlog_v2.json        # Remaining failure clusters + repair proposals
 │   ├── docs/
 │   │   ├── NLU_REPAIR_BACKLOG.md      # Prioritized fix list with exact code proposals
-│   │   └── SETUP_NEW_MACHINE.md       # Bootstrap guide for new machines
+│   │   ├── SETUP_NEW_MACHINE.md       # Bootstrap guide for new machines
+│   │   ├── BOOTSTRAP_CHECKLIST.md     # Step-by-step new machine checklist
+│   │   ├── OPERATOR_HANDBOOK.md       # Day-to-day operator reference
+│   │   ├── COMMAND_REGISTRY_WIRING_PLAN.md # Phase migration plan for CommandRegistry
+│   │   ├── LLM_SYSTEM_PRIMING.md      # Compact unambiguous priming reference (115 intents, 184 commands)
+│   │   ├── TELEGRAM_BRIDGE_SETUP.md   # Telegram bridge config and launch guide
+│   │   ├── TELEGRAM_COMMAND_REFERENCE.md # All 9 Telegram commands with examples
+│   │   └── CODEX_COLLABORATION.md     # How to use Codex as a reviewer alongside Claude
 │   ├── .venv/                         # [gitignored] Python 3.14 virtualenv (uv)
 │   ├── memory.db                      # [gitignored] Semantic memory (380+ items)
 │   └── knowledge.db                   # [gitignored] Q&A pairs (1,565+) + chunks
 │
-├── adwi/bin/                          # 41 scripts (auto-update-readme counts authoritative)
+├── adwi/bin/                          # 51 scripts (auto-update-readme counts authoritative)
 │   ├── adwi                           # Launcher (uses .venv python if available)
 │   ├── auto-update-readme             # README auto-injection pipeline
 │   ├── start-obsidian-bridge          # Start bridge (:5056)
@@ -936,14 +984,21 @@ SuneelWorkSpace/
 │   ├── start-homeassistant            # Start Home Assistant (:8123)
 │   ├── status-ai                      # All service statuses
 │   ├── adwi-git-backup                # 30-min auto-backup script
-│   └── ...                            # 33 more scripts
+│   ├── adwi-config-check              # Env var config status (names only, no values)
+│   ├── adwi-disk-summary              # Disk usage for key Adwi paths
+│   ├── adwi-eval-status               # NLU eval pass rate from MASTER_REPORT_v2.md
+│   ├── adwi-nightly-status            # Last nightly run timestamp + outcome
+│   ├── adwi-ports                     # Adwi service ports + listen status
+│   ├── adwi-version                   # Current git commit + branch
+│   └── ...                            # 45 more scripts
 │
 ├── adwi/infra/docker/
 │   ├── docker-compose.yml             # 11 compose services + Qdrant (LaunchAgent) = 12 containers (§2)
 │   └── monitoring/                    # Prometheus, Loki, Promtail, Grafana configs
 │
 ├── adwi/services/
-│   ├── command-api/server.py          # Safe Command API (:5055) · 19 allowlisted routes
+│   ├── command-api/server.py          # Safe Command API (:5055) · 26 allowlisted routes + 1 background E2E Popen
+│   ├── telegram-bridge/bot.py         # Telegram long-poll bridge · 9 cmds · sender+command allowlist · no public port
 │   └── mcp/obsidian-bridge/
 │       ├── server.py                  # stdlib-only vault HTTP API (:5056)
 │       └── start.sh / stop.sh
@@ -963,8 +1018,10 @@ SuneelWorkSpace/
 │   ├── adwi-trace-logs/               # Per-action execution traces
 │   ├── git-backup-logs/               # Per-backup git logs
 │   ├── adwi-repair-logs/              # aider pre-flight records
+│   ├── codex-reviews/                 # Codex second-opinion review artifacts (severity-ranked)
 │   ├── daily-briefs/                  # Daily AI-generated briefs
 │   ├── research/                      # Research note saves
+│   ├── system-inspections/            # /inspect-system reports
 │   └── tech-radar/                    # Tech radar snapshots
 │
 ├── logs/

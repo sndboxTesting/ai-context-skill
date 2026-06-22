@@ -171,4 +171,6 @@ python3 -m unittest adwi/simlab/tests/test_nlu_regex.py
 - [[knowledge/Obsidian Operator Guide]]
 - [[knowledge/Obsidian Maintenance]]
 - [[knowledge/Template Guide]]
+- [[knowledge/Workspace Organization]]
+- [[knowledge/Master Ideas Index]]
 - [[Adwi Home]]

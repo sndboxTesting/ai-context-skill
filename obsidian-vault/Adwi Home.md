@@ -69,8 +69,21 @@ Quick orientation — what runs where.
 | Mistake pattern detection | 🔵 Planned | [[projects/ideas/Mistake Pattern Detection]] |
 | Conversation memory | 🔵 Planned | [[projects/ideas/Conversation Memory]] |
 
-→ All ideas: [[knowledge/Ideas Index]]
+→ All Adwi ideas: [[knowledge/Ideas Index]]
+→ All projects + life ideas: [[knowledge/Master Ideas Index]]
 → Full roadmap: [adwi/notes/adwi-capability-roadmap.md](../adwi/notes/adwi-capability-roadmap.md)
+
+---
+
+## Ideas & Planning
+
+How this workspace handles ideas, prioritization, and new projects.
+
+→ **Master Index:** [[knowledge/Master Ideas Index]] — all projects, ideas, implemented, parked
+→ **Ideas OS:** [[knowledge/Ideas Operating System]] — capture → brainstorm → score → promote → build
+→ **Workspace structure:** [[knowledge/Workspace Organization]] — what goes where, lifecycle, naming
+→ **Implementation guide:** [[knowledge/Implementation Workflow]] — MVP approach, decision docs, archiving
+→ **Life automation brainstorm:** [[projects/life-automation/Life Automation Ideas]]
 
 ---
 

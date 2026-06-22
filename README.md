@@ -112,7 +112,7 @@ SYSTEM You are Adwi, a cautious local AI assistant. Never read secrets, never co
 |---|---|---|---|
 | :11434 | Ollama | Host (brew) | Local LLM inference API |
 | :3000 | Open WebUI | Docker | Browser chat UI + model switcher |
-| :5055 | Safe Command API | Host | n8n→Telegram→shell bridge (26 allowlisted routes + 1 background E2E Popen) |
+| :5055 | Safe Command API | Host | n8n→shell bridge (8 allowlisted routes) |
 | :5056 | Obsidian Bridge | Host (LaunchAgent) | Vault HTTP CRUD API |
 | :5678 | n8n | Docker | Workflow automation / webhooks |
 | :6006 | Arize Phoenix | Host (LaunchAgent) | Agent observability UI (OTel) |
@@ -160,7 +160,6 @@ All managed at `~/Library/LaunchAgents/com.suneel.*.plist`.
 | `openwebui-knowledge-watcher` | KeepAlive |
 | `phoenix` | KeepAlive |
 | `qdrant` | on demand |
-| `telegram-bridge` | KeepAlive (optional — manual start or LaunchAgent) |
 *Auto-updated: 2026-06-21*
 <!-- /AUTO:AGENTS -->
 

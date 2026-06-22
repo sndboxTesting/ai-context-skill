@@ -205,6 +205,8 @@ TELEGRAM_COMMANDS: dict[str, str | None] = {
     "/telegram_smoke":      None,   # quick smoke — skips /test_all
     "/telegram_smoke_full": None,   # full smoke  — includes /test_all (~2 min)
     "/telegram_validate":   None,   # static bridge validator
+    "/e2e_preflight":       None,   # E2E readiness check (paths, Ollama, loop state)
+    "/control_center":      None,   # read-only ops dashboard
 }
 
 _HELP_LINES = [
@@ -252,7 +254,7 @@ LEARN LOOP (confirmation required)
   /learn_ok <token>
   /implement_plan <goal>  →  shows plan + token
   /implement_ok <token>
-  /loop_status      →  recent learn/implement/e2e jobs
+  /loop_status      →  recent learn/implement/E2E jobs
 
 E2E EVAL LOOP (confirmation required)
   /e2e_plan [analyze|dry-run|full] [target] [max_cycles]
@@ -267,8 +269,10 @@ OPERATIONAL HEALTH
   /telegram_smoke       →  quick smoke (/test_quick, /test_nlu, /test_obsidian — skips /test_all)
   /telegram_smoke_full  →  full smoke including /test_all (~2 min; use after upgrades)
   /telegram_validate    →  static validator (structure, routes, argv — fast, no subprocesses)
+  /e2e_preflight        →  E2E readiness check (paths, Ollama, loop state — read-only)
+  /control_center       →  ops dashboard (jobs, E2E status, suggested actions — read-only)
   /tests_status         →  latest test job status
-  /loop_status          →  latest learn/implement job status
+  /loop_status          →  latest learn/implement/E2E job status
 
 INFO
   /brief  /daily-brief  /config  /watcher-status  /help  /ping"""
@@ -788,6 +792,168 @@ def _do_implement_confirm(token_val: str, tg_token: str, chat_id: int) -> None:
 
 # ── E2E loop helpers ─────────────────────────────────────────────────────────
 
+_E2E_STATUS_DIR = WORKSPACE / "adwi" / "notes" / "e2e-auto-loop"
+_OLLAMA_HOST    = "127.0.0.1"
+_OLLAMA_PORT    = 11434
+_OLLAMA_MODEL   = "llama3.1:8b"
+
+
+def _e2e_preflight_checks() -> list[tuple[str, str, str]]:
+    """
+    Run E2E readiness checks. Fast, read-only, no mutations.
+    Returns list of (status, label, detail) where status ∈ {"PASS", "WARN", "FAIL"}.
+    """
+    results: list[tuple[str, str, str]] = []
+
+    # 1–4. Key files exist
+    for label, path in [
+        ("e2e_auto_loop.py",        WORKSPACE / "adwi" / "e2e_auto_loop.py"),
+        ("adwi-e2e-status-reader",  WORKSPACE / "adwi" / "bin" / "adwi-e2e-status-reader"),
+        ("telegram_e2e_summary.py", WORKSPACE / "adwi" / "scripts" / "telegram_e2e_summary.py"),
+        ("VENV_PY",                 Path(VENV_PY)),
+    ]:
+        ok = path.exists()
+        results.append(("PASS" if ok else "FAIL", label, "" if ok else f"not found: {path}"))
+
+    # 5. Loop already running?
+    status_f = _E2E_STATUS_DIR / "status.json"
+    loop_state = "no_job"
+    if status_f.exists():
+        try:
+            loop_state = json.loads(status_f.read_text(encoding="utf-8")).get("status", "unknown")
+        except Exception:
+            loop_state = "unreadable"
+    if loop_state == "running":
+        results.append(("WARN", "Loop running", "status=running — cancel first if needed"))
+    else:
+        results.append(("PASS", "Loop not running", f"status={loop_state}"))
+
+    # 6. Ollama reachable
+    ollama_ok    = False
+    ollama_names: list[str] = []
+    try:
+        conn = http.client.HTTPConnection(_OLLAMA_HOST, _OLLAMA_PORT, timeout=3)
+        conn.request("GET", "/api/tags")
+        resp = conn.getresponse()
+        if resp.status == 200:
+            data         = json.loads(resp.read().decode("utf-8", errors="replace"))
+            ollama_ok    = True
+            ollama_names = [m.get("name", "") for m in data.get("models", [])]
+        conn.close()
+    except Exception:
+        pass
+
+    if ollama_ok:
+        results.append(("PASS", "Ollama reachable", f"{len(ollama_names)} model(s)"))
+    else:
+        results.append(("WARN", "Ollama not reachable", "start Ollama before eval/full mode"))
+
+    # 7. llama3.1:8b present
+    if ollama_ok:
+        has_model = any(_OLLAMA_MODEL in n for n in ollama_names)
+        results.append(("PASS" if has_model else "WARN", _OLLAMA_MODEL,
+                        "present" if has_model else "not found — required for NLU eval"))
+    else:
+        results.append(("WARN", _OLLAMA_MODEL, "cannot check — Ollama not reachable"))
+
+    # 8. Git dirty file count (info — WARN only, not FAIL)
+    try:
+        gs = subprocess.run(
+            ["git", "status", "--short"],
+            capture_output=True, text=True, timeout=5, cwd=str(WORKSPACE),
+        )
+        dirty = len([ln for ln in gs.stdout.splitlines() if ln.strip()])
+        if dirty == 0:
+            results.append(("PASS", "Git dirty files", "clean"))
+        else:
+            results.append(("WARN", "Git dirty files",
+                            f"{dirty} file(s) — commit before full mode"))
+    except Exception:
+        results.append(("WARN", "Git dirty files", "could not check"))
+
+    # 9. Command registry size (always PASS — informational)
+    results.append(("PASS", "Command registry",
+                    f"{len(TELEGRAM_COMMANDS)} commands registered"))
+
+    return results
+
+
+def _e2e_preflight_summary() -> str:
+    """One-line preflight summary: 'OK', 'WARN — <reason>', or 'FAIL — <reason>'."""
+    checks = _e2e_preflight_checks()
+    fails  = [(lbl, det) for s, lbl, det in checks if s == "FAIL"]
+    warns  = [(lbl, det) for s, lbl, det in checks if s == "WARN"]
+    if fails:
+        return f"FAIL — {fails[0][0]}"
+    if warns:
+        return f"WARN — {warns[0][0]}"
+    return "OK"
+
+
+def _format_e2e_preflight() -> str:
+    """Full preflight report formatted for Telegram."""
+    checks = _e2e_preflight_checks()
+    lines  = ["E2E Preflight"]
+    for status, label, detail in checks:
+        suffix = f"  {detail}" if detail else ""
+        lines.append(f"  {status:<4}  {label}{suffix}")
+
+    has_fail = any(s == "FAIL" for s, _, _ in checks)
+    has_warn = any(s == "WARN" for s, _, _ in checks)
+    lines.append("")
+    if has_fail:
+        lines.append("Result: FAIL — resolve before running E2E")
+    elif has_warn:
+        lines.append("Result: WARN — OK for analyze/dry-run; fix warnings before full mode")
+    else:
+        lines.append("Result: OK — ready to run E2E")
+    lines.append("Next:   /e2e_plan analyze 98 1")
+    return "\n".join(lines)
+
+
+def _format_control_center() -> str:
+    """Read-only ops dashboard — compact, Telegram-safe."""
+    lines = [f"Adwi Control Center — {len(TELEGRAM_COMMANDS)} commands"]
+
+    # Recent jobs (last 5)
+    lines.append("")
+    if _JOB_RUNNER is not None:
+        jobs = _JOB_RUNNER.list_recent(5)
+        if jobs:
+            lines.append("Recent jobs:")
+            for j in jobs[:5]:
+                start = (j.get("start_time") or "?")[:16]
+                lines.append(f"  {j['status']:<10}  {j['type']:<20}  {start}")
+        else:
+            lines.append("Recent jobs: none yet")
+    else:
+        lines.append("[job runner unavailable]")
+
+    # E2E status
+    lines.append("")
+    status_f = _E2E_STATUS_DIR / "status.json"
+    if status_f.exists():
+        try:
+            data      = json.loads(status_f.read_text(encoding="utf-8"))
+            e2e_state = data.get("status", "?")
+            e2e_job   = (data.get("job_id") or "?")[:40]
+            lines.append(f"E2E: {e2e_state}  ({e2e_job})")
+        except Exception:
+            lines.append("E2E: [unreadable status.json]")
+    else:
+        lines.append("E2E: no loop run yet")
+
+    # Suggested next commands
+    lines.append("")
+    lines.append("Suggested:")
+    lines.append("  /telegram_validate  →  12-check bridge validator")
+    lines.append("  /telegram_smoke     →  test-job smoke")
+    lines.append("  /e2e_preflight      →  E2E readiness check")
+    lines.append("  /e2e_report         →  E2E analysis result")
+    lines.append("  /loop_status        →  all loop jobs")
+    return "\n".join(lines)
+
+
 def _parse_e2e_args(args: str) -> tuple[str, float, int]:
     """Parse '[mode] [target] [max_cycles]' from args. Returns (mode, target, max_cycles)."""
     tokens = args.strip().split()
@@ -823,6 +989,7 @@ def _do_e2e_plan(args: str, tg_token: str, chat_id: int) -> None:
         "full":    "FULL LOOP   — applies NLU patches and reruns eval (MUTATING)",
     }
 
+    preflight = _e2e_preflight_summary()
     token_val = _make_token("e2e", {"mode": mode, "target": target, "max_cycles": max_cycles})
 
     lines = [
@@ -830,14 +997,17 @@ def _do_e2e_plan(args: str, tg_token: str, chat_id: int) -> None:
         f"  {_MODE_LABELS[mode]}",
         f"  Target:     {target}%",
         f"  Max cycles: {max_cycles}",
+        f"  Preflight:  {preflight}",
         "",
     ]
     if mode == "full":
         lines += [
             "WARNING: full mode applies code patches to adwi_cli.py.",
             "Only run after reviewing analyze or dry-run output.",
-            "",
         ]
+        if preflight != "OK":
+            lines.append(f"STRONG WARNING: preflight is {preflight}. Full mode may fail.")
+        lines.append("")
     lines += [
         f"Confirm: /e2e_ok {token_val}",
         "Expires in 5 minutes.",
@@ -1125,6 +1295,16 @@ def _handle_local_cmd(
 
     if cmd == "/e2e_cancel_ok":
         _do_e2e_cancel_confirm(args.strip(), tg_token, chat_id)
+        return
+
+    # ── E2E preflight + control center ───────────────────────────────────────
+
+    if cmd == "/e2e_preflight":
+        _send_reply(tg_token, chat_id, _format_e2e_preflight())
+        return
+
+    if cmd == "/control_center":
+        _send_reply(tg_token, chat_id, _format_control_center())
         return
 
     # ── Operational health ────────────────────────────────────────────────────

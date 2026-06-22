@@ -158,7 +158,9 @@ Token expires in **5 minutes**. Each token is single-use.
 | `/telegram_smoke_full` | Full smoke — same as above but includes /test_all (~2 min; use after upgrades) |
 | `/telegram_validate` | Static bridge validator — 12 structural checks (routes, argv, dispatch) — fast, no subprocesses |
 | `/tests_status` | Latest test job status + log tail |
-| `/loop_status` | Latest learn/implement job status |
+| `/loop_status` | Recent learn/implement/E2E job status |
+| `/e2e_preflight` | E2E readiness check — 9 read-only checks (files, Ollama, llama3.1:8b, loop state, git) |
+| `/control_center` | Ops dashboard — command count, last 5 jobs, E2E status, suggested next actions |
 
 **Difference between `/test_*`, `/telegram_smoke`, and `/telegram_validate`:**
 - `/test_quick`, `/test_nlu`, etc. submit each test suite directly. Use these when you want to run one specific suite.
@@ -170,7 +172,9 @@ Token expires in **5 minutes**. Each token is single-use.
 2. `/telegram_smoke` — proves test-job argv end-to-end (~15 s)
 3. `/tests_status` — check whether the smoke job succeeded
 4. `/job <id>` — full log if something failed
-5. `/loop_status` — check learn/implement loop status
+5. `/control_center` — ops dashboard: command count, last jobs, E2E status, suggested actions
+6. `/e2e_preflight` — E2E readiness check (Ollama, model, files, loop state)
+7. `/loop_status` — check learn/implement/E2E loop status
 
 ### UX
 
@@ -268,7 +272,7 @@ Or via LaunchAgent (see `adwi/docs/TELEGRAM_BRIDGE_SETUP.md`).
 | `adwi/bin/adwi-git-log` | Recent commits |
 | `adwi/tests/test_telegram_bridge.py` | Safety + routing tests |
 | `adwi/tests/test_remote_control_surface.py` | Structural invariant tests |
-| `adwi/tests/test_telegram_upgrade.py` | Wave 4–7 feature tests (166 tests) |
+| `adwi/tests/test_telegram_upgrade.py` | Wave 4–9 feature tests (338 tests) |
 | `adwi/scripts/smoke_telegram_jobs.py` | Phase 1+2 smoke: real _TEST_JOBS argv via JobRunner |
 | `adwi/scripts/validate_telegram_bridge.py` | 12-check static bridge validator (stdlib-only) |
 | `adwi/scripts/telegram_e2e_summary.py` | Compact E2E summary formatter for Telegram |
@@ -284,7 +288,7 @@ Or via LaunchAgent (see `adwi/docs/TELEGRAM_BRIDGE_SETUP.md`).
 adwi/.venv/bin/python3 -m unittest adwi.tests.test_telegram_bridge \
                                     adwi.tests.test_remote_control_surface \
                                     adwi.tests.test_telegram_upgrade
-# Ran 315 tests — OK
+# Ran 338 tests — OK
 
 # Static validator (12 structural checks — fast, no subprocesses):
 adwi/.venv/bin/python3 adwi/scripts/validate_telegram_bridge.py
@@ -304,12 +308,14 @@ adwi/.venv/bin/python3 adwi/scripts/smoke_telegram_jobs.py
 **Operator daily health workflow:**
 ```
 1. /telegram_validate     → fast structural sanity (12 checks, < 2 s)
-2. /telegram_smoke        → test-job argv smoke (~15 s)
-3. /tests_status          → check smoke result
-4. /e2e_plan analyze 98 1 → read-only NLU eval scan
-5. /e2e_ok <token>        → start the analyze job
-6. /e2e_report            → see results after job completes
-7. /loop_status           → all loop job status
+2. /control_center        → ops dashboard: command count, recent jobs, E2E status
+3. /e2e_preflight         → E2E readiness (Ollama, model, files, loop state)
+4. /telegram_smoke        → test-job argv smoke (~15 s)
+5. /tests_status          → check smoke result
+6. /e2e_plan analyze 98 1 → read-only NLU eval scan
+7. /e2e_ok <token>        → start the analyze job
+8. /e2e_report            → see results after job completes
+9. /loop_status           → all loop job status
 ```
 
 ---

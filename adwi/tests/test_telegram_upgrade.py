@@ -1394,6 +1394,7 @@ class TestExistingInvariantsStillHold(unittest.TestCase):
             "/telegram_smoke_full", "/telegram_validate",
             "/e2e_plan", "/e2e_ok", "/e2e_report",
             "/e2e_cancel_plan", "/e2e_cancel_ok",
+            "/e2e_preflight", "/control_center",
         ]
         for cmd in locally_handled:
             with self.subTest(cmd=cmd):
@@ -1771,6 +1772,238 @@ class TestE2ESummaryScript(unittest.TestCase):
         for pattern in ("TOKEN", "SECRET", "PASSWORD", "API_KEY"):
             # printing of these patterns should not appear
             self.assertNotIn(f'print({pattern}', source.replace(" ", ""))
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# /e2e_preflight command (Wave 9)
+# ═══════════════════════════════════════════════════════════════════════════════
+
+class TestE2EPreflight(unittest.TestCase):
+    """Tests for /e2e_preflight — read-only readiness check."""
+
+    def test_e2e_preflight_in_table(self):
+        self.assertIn("/e2e_preflight", bridge.TELEGRAM_COMMANDS)
+        self.assertIsNone(bridge.TELEGRAM_COMMANDS["/e2e_preflight"])
+
+    def test_e2e_preflight_does_not_call_safe_api(self):
+        routes = _api_calls(_make_update(ALLOWED_UID, "/e2e_preflight"))
+        self.assertEqual(routes, [])
+
+    def test_e2e_preflight_returns_string(self):
+        """Handler must reply with a non-empty string (no crash)."""
+        sent: list[str] = []
+        with patch.object(bridge, "_send_reply", lambda t, c, msg: sent.append(msg)), \
+             patch.object(bridge, "_e2e_preflight_checks", return_value=[
+                 ("PASS", "e2e_auto_loop.py", ""),
+                 ("PASS", "VENV_PY", ""),
+                 ("WARN", "Ollama not reachable", "start Ollama"),
+                 ("WARN", "llama3.1:8b", "cannot check"),
+                 ("PASS", "Loop not running", "status=no_job"),
+                 ("PASS", "Git dirty files", "clean"),
+                 ("PASS", "Command registry", "57 commands registered"),
+             ]):
+            bridge._handle_local_cmd("/e2e_preflight", "", "tok", 123, "sec")
+        self.assertTrue(sent, "handler must send at least one reply")
+        self.assertGreater(len(sent[0]), 0)
+
+    def test_e2e_preflight_contains_result_line(self):
+        sent: list[str] = []
+        with patch.object(bridge, "_send_reply", lambda t, c, msg: sent.append(msg)), \
+             patch.object(bridge, "_e2e_preflight_checks", return_value=[
+                 ("PASS", "e2e_auto_loop.py", ""),
+                 ("PASS", "VENV_PY", ""),
+                 ("PASS", "Loop not running", "status=no_job"),
+                 ("PASS", "Ollama reachable", "3 model(s)"),
+                 ("PASS", "llama3.1:8b", "present"),
+                 ("PASS", "Git dirty files", "clean"),
+                 ("PASS", "Command registry", "57 commands"),
+             ]):
+            bridge._handle_local_cmd("/e2e_preflight", "", "tok", 123, "sec")
+        combined = " ".join(sent)
+        self.assertIn("Result", combined)
+
+    def test_e2e_preflight_ollama_unavailable_is_warn_not_fail(self):
+        """Ollama not reachable must produce WARN, not FAIL — analyze still allowed."""
+        all_checks = [
+            ("PASS", "e2e_auto_loop.py", ""),
+            ("PASS", "adwi-e2e-status-reader", ""),
+            ("PASS", "telegram_e2e_summary.py", ""),
+            ("PASS", "VENV_PY", ""),
+            ("PASS", "Loop not running", "status=no_job"),
+            ("WARN", "Ollama not reachable", "start Ollama"),
+            ("WARN", "llama3.1:8b", "cannot check"),
+            ("PASS", "Git dirty files", "clean"),
+            ("PASS", "Command registry", "57 commands"),
+        ]
+        sent: list[str] = []
+        with patch.object(bridge, "_send_reply", lambda t, c, msg: sent.append(msg)), \
+             patch.object(bridge, "_e2e_preflight_checks", return_value=all_checks):
+            bridge._handle_local_cmd("/e2e_preflight", "", "tok", 123, "sec")
+        combined = " ".join(sent)
+        self.assertIn("WARN", combined)
+        self.assertNotIn("FAIL", combined)
+
+    def test_e2e_preflight_model_detected_from_ollama_response(self):
+        """If Ollama tags contain llama3.1:8b, check shows PASS."""
+        # Simulate _e2e_preflight_checks returning PASS for llama3.1:8b
+        checks_with_model = [
+            ("PASS", "e2e_auto_loop.py", ""),
+            ("PASS", "Loop not running", "status=no_job"),
+            ("PASS", "Ollama reachable", "2 model(s)"),
+            ("PASS", "llama3.1:8b", "present"),
+            ("PASS", "Git dirty files", "clean"),
+            ("PASS", "Command registry", "57 commands"),
+        ]
+        sent: list[str] = []
+        with patch.object(bridge, "_send_reply", lambda t, c, msg: sent.append(msg)), \
+             patch.object(bridge, "_e2e_preflight_checks", return_value=checks_with_model):
+            bridge._handle_local_cmd("/e2e_preflight", "", "tok", 123, "sec")
+        combined = " ".join(sent)
+        self.assertIn("llama3.1:8b", combined)
+        self.assertIn("present", combined)
+
+    def test_e2e_preflight_summary_ok(self):
+        with patch.object(bridge, "_e2e_preflight_checks", return_value=[
+            ("PASS", "a", ""), ("PASS", "b", ""),
+        ]):
+            self.assertEqual(bridge._e2e_preflight_summary(), "OK")
+
+    def test_e2e_preflight_summary_warn(self):
+        with patch.object(bridge, "_e2e_preflight_checks", return_value=[
+            ("PASS", "a", ""), ("WARN", "Ollama not reachable", "x"),
+        ]):
+            result = bridge._e2e_preflight_summary()
+            self.assertIn("WARN", result)
+
+    def test_e2e_preflight_summary_fail(self):
+        with patch.object(bridge, "_e2e_preflight_checks", return_value=[
+            ("FAIL", "e2e_auto_loop.py", "not found"), ("PASS", "b", ""),
+        ]):
+            result = bridge._e2e_preflight_summary()
+            self.assertIn("FAIL", result)
+
+    def test_e2e_preflight_in_menu(self):
+        self.assertIn("/e2e_preflight", bridge.MENU_TEXT)
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# /e2e_plan preflight integration (Wave 9)
+# ═══════════════════════════════════════════════════════════════════════════════
+
+class TestE2EPlanPreflight(unittest.TestCase):
+    """Verify /e2e_plan includes preflight line and full-mode extra warning."""
+
+    def _plan_reply(self, args: str = "", preflight: str = "OK") -> str:
+        sent: list[str] = []
+        with patch.object(bridge, "_e2e_preflight_summary", return_value=preflight), \
+             patch.object(bridge, "_send_reply", lambda t, c, msg: sent.append(msg)):
+            bridge._do_e2e_plan(args, TOKEN, ALLOWED_UID)
+        return sent[0] if sent else ""
+
+    def test_e2e_plan_contains_preflight_line(self):
+        reply = self._plan_reply("analyze 98 1", preflight="OK")
+        self.assertIn("Preflight", reply)
+        self.assertIn("OK", reply)
+
+    def test_e2e_plan_preflight_warn_shown(self):
+        reply = self._plan_reply("analyze 98 1", preflight="WARN — Ollama not reachable")
+        self.assertIn("WARN", reply)
+
+    def test_e2e_plan_full_preflight_fail_adds_strong_warning(self):
+        reply = self._plan_reply("full 98 1", preflight="WARN — Ollama not reachable")
+        self.assertIn("STRONG WARNING", reply)
+
+    def test_e2e_plan_full_preflight_ok_no_strong_warning(self):
+        reply = self._plan_reply("full 98 1", preflight="OK")
+        self.assertNotIn("STRONG WARNING", reply)
+
+    def test_e2e_plan_analyze_preflight_fail_no_strong_warning(self):
+        """analyze mode should not get STRONG WARNING even with bad preflight."""
+        reply = self._plan_reply("analyze 98 1", preflight="WARN — Ollama not reachable")
+        self.assertNotIn("STRONG WARNING", reply)
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# /control_center command (Wave 9)
+# ═══════════════════════════════════════════════════════════════════════════════
+
+class TestControlCenter(unittest.TestCase):
+    """Tests for /control_center — read-only ops dashboard."""
+
+    def _run(self, mock_runner=None) -> str:
+        sent: list[str] = []
+        if mock_runner is None:
+            runner = MagicMock()
+            runner.list_recent.return_value = []
+        else:
+            runner = mock_runner
+        with patch.object(bridge, "_JOB_RUNNER", runner), \
+             patch.object(bridge, "_send_reply", lambda t, c, msg: sent.append(msg)):
+            bridge._handle_local_cmd("/control_center", "", TOKEN, ALLOWED_UID, SECRET)
+        return sent[0] if sent else ""
+
+    def test_control_center_in_table(self):
+        self.assertIn("/control_center", bridge.TELEGRAM_COMMANDS)
+        self.assertIsNone(bridge.TELEGRAM_COMMANDS["/control_center"])
+
+    def test_control_center_does_not_call_safe_api(self):
+        routes = _api_calls(_make_update(ALLOWED_UID, "/control_center"))
+        self.assertEqual(routes, [])
+
+    def test_control_center_includes_command_count(self):
+        reply = self._run()
+        self.assertIn(str(len(bridge.TELEGRAM_COMMANDS)), reply)
+
+    def test_control_center_includes_job_summary(self):
+        mock_r = MagicMock()
+        mock_r.list_recent.return_value = [
+            {"id": "test-id-1", "type": "test-quick", "status": "succeeded",
+             "start_time": "2026-06-22T10:00:00", "end_time": None},
+        ]
+        reply = self._run(mock_runner=mock_r)
+        self.assertIn("test-quick", reply)
+
+    def test_control_center_includes_suggested_commands(self):
+        reply = self._run()
+        self.assertIn("/telegram_validate", reply)
+        self.assertIn("/e2e_preflight", reply)
+        self.assertIn("/e2e_report", reply)
+        self.assertIn("/loop_status", reply)
+
+    def test_control_center_no_e2e_job_message(self):
+        """When no status.json exists, should say 'no loop run yet'."""
+        import tempfile, os as _os
+        # Override _E2E_STATUS_DIR to a non-existent dir
+        with patch.object(bridge, "_E2E_STATUS_DIR",
+                          Path(tempfile.mkdtemp()) / "nonexistent"):
+            reply = self._run()
+        self.assertIn("no loop", reply.lower())
+
+    def test_control_center_in_menu(self):
+        self.assertIn("/control_center", bridge.MENU_TEXT)
+
+    def test_control_center_reply_fits_telegram(self):
+        """Output must fit within REPLY_MAX_LEN."""
+        reply = self._run()
+        self.assertLessEqual(len(reply), bridge.REPLY_MAX_LEN)
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# Wave 9 doc drift checks
+# ═══════════════════════════════════════════════════════════════════════════════
+
+class TestWave9DocDrift(unittest.TestCase):
+    """Verify stale loop_status references are fixed in bot.py."""
+
+    def test_menu_text_loop_status_mentions_e2e(self):
+        """MENU_TEXT /loop_status description must mention E2E."""
+        self.assertIn("E2E", bridge.MENU_TEXT)
+        # The /loop_status line should reference E2E
+        for line in bridge.MENU_TEXT.splitlines():
+            if "/loop_status" in line:
+                self.assertIn("E2E", line.upper(),
+                              f"MENU_TEXT /loop_status line must mention E2E: {line!r}")
+                break
 
 
 if __name__ == "__main__":

@@ -55,12 +55,12 @@ LaunchAgent fires → adwi/nightly.py
     Step 10: Write morning_brief.md
 ```
 
-## Flow D — Telegram Bridge (Wave 8, 55 commands)
+## Flow D — Telegram Bridge (Wave 9, 57 commands)
 
 ```
 /cmd on Telegram
     → sender allowlist (TELEGRAM_ALLOWED_USER_ID)
-    → command allowlist (TELEGRAM_COMMANDS — 55 entries)
+    → command allowlist (TELEGRAM_COMMANDS — 57 entries)
     ├── route = None (locally handled):
     │     /help /menu /ping → static reply
     │     /test_* /obsidian_* /memory_scan → job_runner.submit()

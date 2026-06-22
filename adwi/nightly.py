@@ -882,7 +882,53 @@ def step_obsidian_daily_note(data: dict) -> str | None:
     return str(note_path)
 
 
-# ── Step 11: Update Obsidian Home dashboard ──────────────────────────────────
+# ── Step 11: Obsidian vault validation ───────────────────────────────────────
+
+_OBSIDIAN_VALIDATION_STATE = ADWI_DIR / "logs" / "obsidian_last_validation.json"
+
+
+def step_obsidian_validate() -> dict:
+    """Run adwi/scripts/validate_obsidian_vault.py and return a summary dict.
+
+    Keys: passed (bool), output (str), errors (str), summary (str).
+    Never raises — failures are captured and returned.
+    """
+    script = ADWI_DIR / "scripts" / "validate_obsidian_vault.py"
+    if not script.exists():
+        return {"passed": None, "output": "", "errors": "", "summary": "validator script not found"}
+    try:
+        r = subprocess.run(
+            [sys.executable, str(script)],
+            capture_output=True, text=True, timeout=15,
+            cwd=str(WORKSPACE),
+        )
+        passed  = r.returncode == 0
+        summary = "OK" if passed else "FAILED"
+        result  = {
+            "passed":  passed,
+            "output":  r.stdout.strip(),
+            "errors":  r.stderr.strip(),
+            "summary": summary,
+        }
+        # Persist state for /obsidian-status
+        try:
+            _OBSIDIAN_VALIDATION_STATE.parent.mkdir(parents=True, exist_ok=True)
+            _OBSIDIAN_VALIDATION_STATE.write_text(
+                json.dumps({
+                    "passed": passed, "date": DATE_STR, "time": TIME_STR, "summary": summary
+                }),
+                encoding="utf-8",
+            )
+        except Exception:
+            pass
+        return result
+    except subprocess.TimeoutExpired:
+        return {"passed": False, "output": "", "errors": "timed out (15s)", "summary": "TIMEOUT"}
+    except Exception as exc:
+        return {"passed": False, "output": "", "errors": str(exc), "summary": "ERROR"}
+
+
+# ── Step 12: Update Obsidian Home dashboard ──────────────────────────────────
 
 def step_update_obsidian_home(data: dict) -> None:
     """Update the generated status block in obsidian-vault/Adwi Home.md."""
@@ -938,12 +984,22 @@ def step_update_obsidian_home(data: dict) -> None:
         if (is_sunday or not has_recent_review) else ""
     )
 
+    ov = data.get("obsidian_validation", {})
+    ov_passed = ov.get("passed")
+    if ov_passed is True:
+        vault_line = "- Obsidian vault: ✓ OK"
+    elif ov_passed is False:
+        vault_line = "- Obsidian vault: ✗ FAILED — run `/obsidian-validate`"
+    else:
+        vault_line = "- Obsidian vault: (not checked)"
+
     block = (
         f"*Updated {DATE_STR} {TIME_STR} by nightly loop*\n\n"
         f"**Today:** [[daily-notes/{DATE_STR}]]\n\n"
         f"**Recent notes:**\n{notes_links}\n\n"
         f"**Status:**\n{nlu_line}\n"
-        f"- Disk: {health.get('disk_used','?')} used / {health.get('disk_avail','?')} free\n\n"
+        f"- Disk: {health.get('disk_used','?')} used / {health.get('disk_avail','?')} free\n"
+        f"{vault_line}\n\n"
         f"**Pending approval:**\n{pending_str}"
         f"{review_reminder}\n\n"
         f"→ [[knowledge/Pending Approval]] · [[knowledge/Eval and Reliability Map]] · [[System Map.canvas]]"
@@ -985,6 +1041,12 @@ def step_update_obsidian_pending(data: dict) -> None:
         items.append(
             f"- **Self-heal FAILED** — Aider made {heal.get('attempts',0)} attempt(s), "
             f"all rolled back. Report: `{heal.get('report_path','~/Desktop')}`."
+        )
+
+    ov = data.get("obsidian_validation", {})
+    if ov.get("passed") is False:
+        items.append(
+            "- **Obsidian vault validation failed** — run `/obsidian-validate` to see details."
         )
 
     if items:
@@ -1072,11 +1134,17 @@ def step_write_report(data: dict) -> Path:
 
     # ── System Health section ──────────────────────────────────────────────────
     health = data.get("sys_health", {})
+    ov     = data.get("obsidian_validation", {})
+    ov_line = (
+        f"- Obsidian vault: {'✓ OK' if ov.get('passed') else '✗ FAILED — run /obsidian-validate'}"
+        if ov.get("passed") is not None else "- Obsidian vault: (not checked)"
+    )
     lines += [
         "",
         "## 7. System Health",
         f"- Disk: {health.get('disk_used','?')} used, {health.get('disk_avail','?')} free ({health.get('disk_pct','?')})",
         f"- Brew packages outdated: {health.get('brew_outdated_count', 0)}",
+        ov_line,
     ]
     if health.get("brew_outdated"):
         for pkg in health["brew_outdated"][:5]:
@@ -1122,6 +1190,9 @@ def step_write_report(data: dict) -> Path:
             f"Pre-flight record: `{heal.get('preflight_record','')}`"
         )
 
+    if ov.get("passed") is False:
+        pending.append("- **Obsidian vault validation failed** — run `/obsidian-validate` to see failures.")
+
     lines += ["", "## ⚠ Pending User Approval"]
     if pending:
         lines += pending
@@ -1141,6 +1212,9 @@ def step_write_report(data: dict) -> Path:
         f"- Docker: {', '.join(svc.get('docker_up', []))}",
         f"- Disk: {health.get('disk_used','?')} used / {health.get('disk_avail','?')} free",
         f"- Syntax check: {'✓ OK' if ev.get('syntax_ok') else '✗ ' + ev.get('syntax_error','')}",
+        (f"- Obsidian vault: ✓ OK" if ov.get("passed") is True
+         else f"- Obsidian vault: ✗ FAILED — run /obsidian-validate" if ov.get("passed") is False
+         else "- Obsidian vault: (not checked)"),
         "",
         "## ⚠ Pending User Approval",
     ] + (pending if pending else ["- Nothing — all clear ✓"]) + [
@@ -1175,16 +1249,16 @@ def main():
 
     data: dict = {}
 
-    _pr("[1/13] Services health check...")
+    _pr("[1/14] Services health check...")
     data["services"] = step_services()
     svc = data["services"]
     _pr(f"  ollama={svc.get('ollama')}  docker_up={svc.get('docker_up')}")
 
-    _pr("[2/13] Reviewing logs...")
+    _pr("[2/14] Reviewing logs...")
     data["log_review"] = step_review_logs()
     _pr(f"  {data['log_review'].get('repair_count', 0)} repair logs reviewed")
 
-    _pr("[3/13] AI skill discovery...")
+    _pr("[3/14] AI skill discovery...")
     if _ollama_ok():
         data["skill_suggestions"] = step_skill_discovery(data["log_review"])
         _save_pending(data["skill_suggestions"])
@@ -1193,7 +1267,7 @@ def main():
         data["skill_suggestions"] = "[Ollama offline — skipped]"
         _pr("  ⚠ Ollama offline, skipping")
 
-    _pr("[4/13] Aider self-healing (detect & fix test failures)...")
+    _pr("[4/14] Aider self-healing (detect & fix test failures)...")
     data["aider_heal"] = step_aider_heal()
     ah = data["aider_heal"]
     if ah.get("skipped_reason"):
@@ -1203,12 +1277,12 @@ def main():
     elif not ah.get("tests_passed_before"):
         _pr(f"  ✗ Could not auto-fix — check ~/Desktop for report")
 
-    _pr("[5/13] Running evals...")
+    _pr("[5/14] Running evals...")
     data["evals"] = step_evals()
     ev = data["evals"]
     _pr(f"  Syntax: {'OK' if ev.get('syntax_ok') else 'FAIL: ' + ev.get('syntax_error','')}")
 
-    _pr("[6/13] Memory scan (terminal + git + notes)...")
+    _pr("[6/14] Memory scan (terminal + git + notes)...")
     try:
         import importlib.util as _ilu
         _spec = _ilu.spec_from_file_location("memory", ADWI_DIR / "memory.py")
@@ -1225,12 +1299,12 @@ def main():
         data["memory_scan"] = {"error": str(_e)}
         _pr(f"  ⚠ memory scan: {_e}")
 
-    _pr("[7/13] System health audit (brew, npm, disk, docker)...")
+    _pr("[7/14] System health audit (brew, npm, disk, docker)...")
     data["sys_health"] = step_system_health()
     sh = data["sys_health"]
     _pr(f"  disk {sh.get('disk_avail','?')} free | brew outdated: {sh.get('brew_outdated_count',0)} | npm outdated: {sh.get('npm_outdated_count',0)}")
 
-    _pr("[8/13] Web research (SearXNG release note queries)...")
+    _pr("[8/14] Web research (SearXNG release note queries)...")
     try:
         data["web_research"] = step_web_research()
         _pr(f"  searched {len(data['web_research'])} tool(s)")
@@ -1238,7 +1312,7 @@ def main():
         data["web_research"] = {}
         _pr(f"  ⚠ web research: {_e}")
 
-    _pr("[9/13] Capability sync...")
+    _pr("[9/14] Capability sync...")
     data["cap_sync"] = step_capability_sync()
     cs = data["cap_sync"]
     if "error" not in cs:
@@ -1246,7 +1320,7 @@ def main():
     else:
         _pr(f"  ⚠ {cs['error']}")
 
-    _pr("[10/13] Git commit + push...")
+    _pr("[10/14] Git commit + push...")
     data["git_commit"] = step_git_commit()
     gc = data["git_commit"]
     if gc.get("success"):
@@ -1255,21 +1329,30 @@ def main():
     else:
         _pr(f"  ⚠ {gc.get('message','no changes')}")
 
-    _pr("[11/13] Writing Obsidian daily note...")
+    _pr("[11/14] Writing Obsidian daily note...")
     try:
         note_path = step_obsidian_daily_note(data)
         _pr(f"  ✓ {note_path}")
     except Exception as _e:
         _pr(f"  ⚠ daily note: {_e}")
 
-    _pr("[12/13] Updating Obsidian home dashboard...")
+    _pr("[12/14] Obsidian vault validation...")
+    try:
+        data["obsidian_validation"] = step_obsidian_validate()
+        ov = data["obsidian_validation"]
+        _pr(f"  {'✓' if ov.get('passed') else '✗'} vault {ov.get('summary', '?')}")
+    except Exception as _e:
+        data["obsidian_validation"] = {"passed": None, "summary": "error"}
+        _pr(f"  ⚠ vault validation: {_e}")
+
+    _pr("[13/14] Updating Obsidian home dashboard...")
     try:
         step_update_obsidian_home(data)
         _pr("  ✓ Adwi Home.md updated")
     except Exception as _e:
         _pr(f"  ⚠ home update: {_e}")
 
-    _pr("[13/13] Updating Pending Approval note...")
+    _pr("[14/14] Updating Pending Approval note...")
     try:
         step_update_obsidian_pending(data)
         _pr("  ✓ Pending Approval.md updated")

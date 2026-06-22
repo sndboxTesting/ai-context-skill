@@ -122,6 +122,7 @@ obsidian-vault/.obsidian/app.json
 obsidian-vault/.obsidian/appearance.json
 
 # ── Runtime logs and failure DBs ─────────────────────────────────────────────
+adwi/logs/obsidian_last_validation.json
 adwi/logs/adwi_nlu_fast.jsonl
 adwi/logs/simlab_failures.db
 logs/adwi_nlu_fast.jsonl

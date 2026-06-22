@@ -91,6 +91,12 @@ python3 adwi/scripts/validate_obsidian_vault.py
 
 Checks: required directories, all 6 templates present, `.obsidian` JSON config values, volatile files not tracked by git, Daily Note template section sync, Idea Note placeholders, knowledge notes, duplicate marker blocks in daily notes.
 
+**Validation runs automatically every night** as step 12/14 of the nightly loop (`adwi/nightly.py`). Results appear in:
+- `Adwi Home.md` → `ADWI:HOME-STATUS` block: `Obsidian vault: ✓ OK` or `✗ FAILED`
+- `knowledge/Pending Approval.md` → pending item added on failure
+- Morning brief → `Quick Status` section
+- `/obsidian-status` → `Last validation` line (reads `adwi/logs/obsidian_last_validation.json`)
+
 ---
 
 **To manually run the Obsidian home/pending refresh:**

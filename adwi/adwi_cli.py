@@ -4094,6 +4094,17 @@ def cmd_obsidian_status() -> None:
         if revs:
             latest_review = revs[0].name
 
+    # Last nightly validation state
+    _val_state_path = Path(__file__).resolve().with_name("logs") / "obsidian_last_validation.json"
+    val_line = "(not yet run — run /obsidian-validate or wait for nightly)"
+    try:
+        if _val_state_path.exists():
+            _vs = json.loads(_val_state_path.read_text(encoding="utf-8"))
+            _icon = "✓" if _vs.get("passed") else "✗"
+            val_line = f"{_icon} {_vs.get('summary','?')} (nightly {_vs.get('date','?')} {_vs.get('time','?')})"
+    except Exception:
+        pass
+
     adwi_head("Obsidian Vault Status")
     cprint(f"  Vault:           {vault}", "")
     cprint(f"  Daily notes:     {len(notes)} note(s)", "")
@@ -4102,6 +4113,7 @@ def cmd_obsidian_status() -> None:
     cprint(f"    plan:          {'✓ ADWI:DAILY-PLAN present' if has_plan else '✗ none  (run /obsidian-plan)'}", "")
     cprint(f"  Latest review:   {latest_review or '(none — run /obsidian-review-save)'}", "")
     cprint(f"  .obsidian dir:   {'present' if (vault / '.obsidian').exists() else 'absent'}", "")
+    cprint(f"  Last validation: {val_line}", "")
 
 
 def cmd_obsidian_validate() -> None:

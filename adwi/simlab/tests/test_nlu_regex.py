@@ -2192,6 +2192,109 @@ class TestComparisonQuestionsChat(unittest.TestCase):
         self.assertEqual(_classify("what is the difference between llama2 and llama3"), "chat")
 
 
+class TestExtractIdeas(unittest.TestCase):
+    """extract_ideas intent regex coverage."""
+
+    def test_pull_ideas_from_this(self):
+        self.assertEqual(_classify("pull ideas from this"), "extract_ideas")
+
+    def test_key_takeaways(self):
+        self.assertEqual(_classify("key takeaways from the doc"), "extract_ideas")
+
+
+class TestImplementIdea(unittest.TestCase):
+    """implement_idea intent regex coverage."""
+
+    def test_implement_this_feature(self):
+        self.assertEqual(_classify("implement this feature"), "implement_idea")
+
+    def test_build_this_feature(self):
+        self.assertEqual(_classify("build this feature"), "implement_idea")
+
+
+class TestOrganizeIntent(unittest.TestCase):
+    """organize intent regex coverage."""
+
+    def test_organize_bare(self):
+        self.assertEqual(_classify("organize"), "organize")
+
+    def test_organize_my_files(self):
+        self.assertEqual(_classify("organize my files"), "organize")
+
+    def test_tidy_up_workspace(self):
+        self.assertEqual(_classify("tidy up my workspace folder"), "organize")
+
+
+class TestGithubVisibility(unittest.TestCase):
+    """github_visibility intent regex coverage."""
+
+    def test_make_repo_public(self):
+        self.assertEqual(_classify("make my repo public"), "github_visibility")
+
+    def test_repo_visibility(self):
+        self.assertEqual(_classify("repo visibility settings"), "github_visibility")
+
+
+class TestGithubConnected(unittest.TestCase):
+    """github_connected intent regex coverage."""
+
+    def test_is_github_connected(self):
+        self.assertEqual(_classify("is github connected"), "github_connected")
+
+    def test_adwi_check_github(self):
+        self.assertEqual(_classify("adwi check github"), "github_connected")
+
+
+class TestMemoryContext(unittest.TestCase):
+    """memory_context intent regex coverage."""
+
+    def test_show_session_context(self):
+        self.assertEqual(_classify("show session context"), "memory_context")
+
+    def test_context_summary(self):
+        self.assertEqual(_classify("context summary right now"), "memory_context")
+
+
+class TestRouteIntent(unittest.TestCase):
+    """route intent regex coverage."""
+
+    def test_route_this_query(self):
+        self.assertEqual(_classify("route this query"), "route")
+
+    def test_which_tool_should_handle(self):
+        self.assertEqual(_classify("which tool should handle this"), "route")
+
+
+class TestSyncIntent(unittest.TestCase):
+    """sync intent regex coverage."""
+
+    def test_sync_bare(self):
+        self.assertEqual(_classify("sync"), "sync")
+
+    def test_sync_knowledge_base(self):
+        self.assertEqual(_classify("sync knowledge base"), "sync")
+
+
+class TestToolRoadmap(unittest.TestCase):
+    """tool_roadmap intent regex coverage."""
+
+    def test_tool_roadmap(self):
+        self.assertEqual(_classify("tool roadmap"), "tool_roadmap")
+
+    def test_show_tool_plan(self):
+        self.assertEqual(_classify("show tool plan"), "tool_roadmap")
+
+
+class TestTrustedRoots(unittest.TestCase):
+    """trusted_roots intent regex coverage."""
+
+    def test_adwi_trusted_roots(self):
+        self.assertEqual(_classify("adwi trusted roots"), "trusted_roots")
+
+    def test_allowed_directories(self):
+        self.assertEqual(_classify("allowed directories"), "trusted_roots")
+
+
 class TestCleanupIntent(unittest.TestCase):
     """Cleanup intent regex coverage."""
 

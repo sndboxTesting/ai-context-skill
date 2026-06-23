@@ -1,0 +1,218 @@
+#!/bin/bash
+# adwi-autoresearch-codex-then-claude — two-phase unattended autoresearch session
+#
+# Phase 1: Codex runs non-interactively until its token/time limit is reached.
+# Phase 2: Claude picks up in the same worktree/branch automatically.
+#
+# Usage:
+#   adwi-autoresearch-codex-then-claude            (tag: <date>-codex, e.g. jun23-codex)
+#   adwi-autoresearch-codex-then-claude --dry-run
+#   adwi-autoresearch-codex-then-claude --preflight-only
+
+set -euo pipefail
+
+# ── Environment ───────────────────────────────────────────────────────────────
+export PATH="/Users/MAC/.local/bin:/Users/MAC/bin:/Users/MAC/SuneelWorkSpace/adwi/bin:/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin"
+export HOME="/Users/MAC"
+
+WORKSPACE="$HOME/SuneelWorkSpace"
+WORKTREE_BASE="$WORKSPACE/.worktrees/adwi-autoresearch"
+LOG_DIR="$WORKSPACE/logs/autoresearch/adwi"
+PROGRAM_FILE="$WORKSPACE/adwi/autoresearch-program.md"
+BASE_TAG=$(date +%b%-d | tr '[:upper:]' '[:lower:]')  # e.g. jun23
+TAG="${BASE_TAG}-codex"
+SESSION="adwi-ar-${TAG}"
+BRANCH="adwi-autoresearch/${TAG}"
+WORKTREE="$WORKTREE_BASE/${TAG}"
+LOG_FILE="$LOG_DIR/${TAG}.log"
+WRAPPER_SCRIPT="$LOG_DIR/${TAG}-wrapper.sh"
+
+DRY_RUN=0
+PREFLIGHT_ONLY=0
+
+for arg in "$@"; do
+    case "$arg" in
+        --dry-run)        DRY_RUN=1 ;;
+        --preflight-only) PREFLIGHT_ONLY=1 ;;
+        *) echo "Unknown arg: $arg" ;;
+    esac
+done
+
+# ── Preflight ─────────────────────────────────────────────────────────────────
+
+echo "[$(date '+%H:%M')] Adwi autoresearch (Codex→Claude) preflight..."
+
+cd "$WORKSPACE"
+
+CURRENT_BRANCH=$(git rev-parse --abbrev-ref HEAD 2>/dev/null || echo "UNKNOWN")
+if [ "$CURRENT_BRANCH" != "main" ]; then
+    echo "ERROR: Root repo is on '$CURRENT_BRANCH', not 'main'. Aborting."
+    exit 1
+fi
+echo "  [✓] Root repo on main"
+
+if [ ! -f "$PROGRAM_FILE" ]; then
+    echo "ERROR: $PROGRAM_FILE not found."
+    exit 1
+fi
+echo "  [✓] Program file present"
+
+if ! command -v screen &>/dev/null; then
+    echo "ERROR: 'screen' not found. Install: brew install screen"
+    exit 1
+fi
+echo "  [✓] screen: $(screen --version 2>&1 | head -1)"
+
+if ! command -v codex &>/dev/null; then
+    echo "ERROR: 'codex' not found in PATH."
+    exit 1
+fi
+echo "  [✓] codex: $(codex --version 2>/dev/null | head -1 || echo 'found')"
+
+if ! command -v claude &>/dev/null; then
+    echo "ERROR: 'claude' not found in PATH."
+    exit 1
+fi
+echo "  [✓] claude: $(claude --version 2>/dev/null | head -1 || echo 'found')"
+
+STAGED=$(git diff --cached --name-only 2>/dev/null)
+if [ -n "$STAGED" ]; then
+    echo "ERROR: Staged changes in root repo. Commit or unstage before autoresearch."
+    exit 1
+fi
+echo "  [✓] No staged changes"
+
+python3 -m py_compile "$WORKSPACE/adwi/adwi_cli.py" 2>/dev/null \
+    && echo "  [✓] adwi_cli.py syntax OK" \
+    || echo "  [!] WARNING: adwi_cli.py has a syntax error"
+
+mkdir -p "$LOG_DIR" "$WORKTREE_BASE"
+echo "  [✓] Directories ready"
+
+if [ "$PREFLIGHT_ONLY" -eq 1 ]; then
+    echo ""
+    echo "Preflight passed."
+    echo "  Would launch: $SESSION"
+    echo "    Phase 1 (Codex): codex exec --dangerously-bypass-approvals-and-sandbox -s workspace-write"
+    echo "    Phase 2 (Claude): after Codex exits, Claude continues in same worktree"
+    echo "    Worktree: $WORKTREE"
+    echo "    Branch:   $BRANCH"
+    echo "    Log:      $LOG_FILE"
+    exit 0
+fi
+
+if [ "$DRY_RUN" -eq 1 ]; then
+    echo ""
+    echo "DRY RUN — no sessions or worktrees created. Would launch:"
+    echo "  Session:  $SESSION"
+    echo "    Phase 1: Codex (non-interactive, until token limit)"
+    echo "    Phase 2: Claude (continues in same worktree after Codex exits)"
+    echo "    Worktree: $WORKTREE"
+    echo "    Branch:   $BRANCH"
+    echo "    Log:      $LOG_FILE"
+    exit 0
+fi
+
+# ── Guard: session / worktree / branch already exist ─────────────────────────
+
+if { screen -ls 2>/dev/null || true; } | grep -q "\.${SESSION}"; then
+    echo "ERROR: Screen session '$SESSION' is already running."
+    echo "       Attach: screen -r $SESSION"
+    exit 1
+fi
+
+if [ -d "$WORKTREE" ]; then
+    echo "ERROR: Worktree already exists: $WORKTREE"
+    echo "       Remove: git worktree remove '$WORKTREE' && git branch -d '$BRANCH'"
+    exit 1
+fi
+
+if git branch --list "$BRANCH" | grep -q .; then
+    echo "ERROR: Branch '$BRANCH' already exists."
+    echo "       Remove: git branch -d '$BRANCH'"
+    exit 1
+fi
+
+# ── Create worktree ───────────────────────────────────────────────────────────
+
+echo ""
+echo "[$(date '+%H:%M')] Creating worktree..."
+git worktree add "$WORKTREE" -b "$BRANCH" main
+echo "  [✓] Worktree: $WORKTREE (branch: $BRANCH)"
+
+# ── Build kickoff prompts ─────────────────────────────────────────────────────
+
+KICKOFF_CODEX="You are running as an autonomous Adwi improvement agent (Phase 1 — Codex). Your working directory is an isolated git worktree: ${WORKTREE} (branch: ${BRANCH}). The root repo is at ${WORKSPACE} — do NOT cd there or modify its runtime files. Read adwi/autoresearch-program.md carefully — it contains your complete instructions. Priority order: fix failing tests in adwi/tests/ → apply open NHR items from adwi/docs/NLU_REPAIR_BACKLOG.md → add test coverage → fix stale docs → improve bin scripts. For each experiment: make the change, run the fast gate (py_compile + NLU regex tests), run the full gate (validate-docs + pytest), then keep or revert, then log to adwi/autoresearch-results.tsv. Run the experiment loop continuously without pausing or asking for input. Tag: ${TAG}. Branch: ${BRANCH}."
+
+KICKOFF_CLAUDE="Continue the autoresearch session from where Codex left off (Phase 2 — Claude). This is the same isolated git worktree: ${WORKTREE} (branch: ${BRANCH}). The root repo is at ${WORKSPACE} — do NOT cd there or modify runtime files. FIRST: read adwi/autoresearch-results.tsv to see every experiment Codex completed. Do NOT repeat experiments Codex already attempted. THEN: read adwi/autoresearch-program.md for the full experiment loop instructions. CRITICAL: If you see hook warnings, 'hook error', or 'non-blocking' messages, IGNORE them and CONTINUE — they are from background monitoring tools. Continue the improvement loop autonomously until your token limit: pick the next fix → edit → fast gate → full gate → keep or revert → log to adwi/autoresearch-results.tsv. Do NOT pause or ask for guidance. Tag: ${TAG}. Branch: ${BRANCH}."
+
+# ── Write the phase wrapper script ────────────────────────────────────────────
+# This script runs inside the screen session and orchestrates both phases.
+# It is written to LOG_DIR (not the worktree) so it survives worktree resets.
+
+cat > "$WRAPPER_SCRIPT" <<WRAPPER
+#!/bin/bash
+export PATH='/Users/MAC/.local/bin:/Users/MAC/bin:/Users/MAC/SuneelWorkSpace/adwi/bin:/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin'
+export HOME='/Users/MAC'
+export HEADROOM_DISABLE=1
+export CLAUDE_HEADROOM_DISABLE=1
+export HEADROOM_PASSTHROUGH=1
+
+SESSION='${SESSION}'
+WORKTREE='${WORKTREE}'
+LOG_FILE='${LOG_FILE}'
+
+cd "\$WORKTREE"
+
+KICKOFF_CODEX='${KICKOFF_CODEX}'
+KICKOFF_CLAUDE='${KICKOFF_CLAUDE}'
+
+# ── Phase 1: Codex (non-interactive, blocking) ───────────────────────────────
+echo "" | tee -a "\$LOG_FILE"
+echo "=== [Phase 1 — Codex] \$(date) ===" | tee -a "\$LOG_FILE"
+echo "" | tee -a "\$LOG_FILE"
+
+codex exec \\
+    --dangerously-bypass-approvals-and-sandbox \\
+    -s workspace-write \\
+    -c shell_environment_policy.inherit=all \\
+    "\$KICKOFF_CODEX" 2>&1 | tee -a "\$LOG_FILE" || true
+
+echo "" | tee -a "\$LOG_FILE"
+echo "=== [Phase 1 — Codex exited] \$(date) ===" | tee -a "\$LOG_FILE"
+echo "=== [Phase 2 — Claude starting] \$(date) ===" | tee -a "\$LOG_FILE"
+echo "" | tee -a "\$LOG_FILE"
+
+# ── Phase 2: Claude (interactive TUI, kickoff injected via screen-stuff) ──────
+# Spawn background jobs that inject the kickoff after Claude TUI has initialised.
+# The exec below replaces this bash process with the 'script | claude' chain,
+# so the terminal input flows into Claude — the screen-stuff lands in Claude's REPL.
+(sleep 10 && screen -S "\$SESSION" -p 0 -X stuff "\${KICKOFF_CLAUDE}\$(printf '\\\r')") &
+(sleep 14 && screen -S "\$SESSION" -p 0 -X stuff "\$(printf '\\\r')") &
+
+exec script -q -a -F "\$LOG_FILE" claude --dangerously-skip-permissions
+WRAPPER
+
+chmod +x "$WRAPPER_SCRIPT"
+
+# ── Launch screen session ─────────────────────────────────────────────────────
+
+screen -dmS "$SESSION" bash "$WRAPPER_SCRIPT"
+sleep 2
+
+if { screen -ls 2>/dev/null || true; } | grep -q "\.${SESSION}"; then
+    echo "  [✓] Session '$SESSION' launched"
+    echo ""
+    echo "  Phase 1 (Codex):  running now — non-interactive until token limit"
+    echo "  Phase 2 (Claude): starts automatically after Codex exits"
+    echo ""
+    echo "  Worktree: $WORKTREE"
+    echo "  Branch:   $BRANCH"
+    echo "  Log:      $LOG_FILE"
+    echo "  Attach:   screen -r $SESSION"
+    echo ""
+    echo "  Morning review: adwi-autoresearch-morning"
+else
+    echo "  [!] ERROR: Session failed to start. Check wrapper: $WRAPPER_SCRIPT"
+    exit 1
+fi

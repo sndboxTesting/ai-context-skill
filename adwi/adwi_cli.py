@@ -550,6 +550,8 @@ _REGEX_INTENTS = [
 
     # ══ CYCLE-2a: CHAT ADVISORY GUARDS — intercept before domain patterns fire ════
     # Exact conversational tokens (anchored)
+    # FIX-CHAT-002: "remember this for me" without content → chat (context-free utterance, no "this" to store)
+    (re.compile(r"^remember\s+this\s+for\s+me\s*[.!?]?\s*$", re.I), "chat"),
     (re.compile(r"^(?:what\s+time\s+is\s+it|what.s\s+the\s+time)\s*[?]?\s*$", re.I), "chat"),
     (re.compile(r"^(?:what.s\s+today.s\s+date|what\s+is\s+today.s\s+date|what.s\s+the\s+date)\s*[?]?\s*$", re.I), "chat"),
     (re.compile(r"^what.s\s+new\s*[?]?\s*$", re.I), "chat"),
@@ -898,6 +900,8 @@ _REGEX_INTENTS = [
     (re.compile(r"\bda[il]{2,4}y\s+(note|entry|journal|log)\b", re.I), "obsidian_daily"),
 
     # ── Obsidian vault ───────────────────────────────────────────────────────────
+    # FIX-OBS-003: bare "notes" alone → obsidian_search (anchored to prevent false positives)
+    (re.compile(r"^\s*notes\s*$", re.I), "obsidian_search"),
     (re.compile(r"(obsidian|vault|my notes?).{0,20}(search|find|look up|what do i have)", re.I), "obsidian_search"),
     (re.compile(r"(open|read|show).{0,10}(obsidian|vault|note).{0,30}", re.I), "obsidian_search"),
     # Verb-first ordering: "search my obsidian vault / notes for ..."
@@ -1494,6 +1498,8 @@ _REGEX_INTENTS = [
     # FIX-META-001: "cpaabilities" full-word typo (cpaabilit\b doesn't match the 3-letter suffix "ies")
     (re.compile(r"\b(cpaabilities|cpaabilit|capabilites|capabilty|cabpabilities)\b", re.I), "capabilities"),
     (re.compile(r"\bwut\s+can\s+(u|you)\b.{0,15}(do|help|offer)\b", re.I), "capabilities"),
+    # FIX-META-002: "what else can adwi/you do?" → capabilities (what_next is for future features)
+    (re.compile(r"^what\s+else\s+can\s+(?:you|adwi)\s+do\s*[?]?\s*$", re.I), "capabilities"),
 
     # ── Sync knowledge base ──────────────────────────────────────────────────────
     # CYCLE-5: bare "sync" anchor

@@ -2069,5 +2069,35 @@ class TestLearnFromError(unittest.TestCase):
         self.assertEqual(_classify("export training data"), "__none__")
 
 
+class TestBareNotesObsidianSearch(unittest.TestCase):
+    """FIX-OBS-003: bare 'notes' → obsidian_search (anchored)."""
+
+    def test_bare_notes(self):
+        self.assertEqual(_classify("notes"), "obsidian_search")
+
+    def test_notes_with_spaces(self):
+        self.assertEqual(_classify("  notes  "), "obsidian_search")
+
+
+class TestWhatElseCanAdwiDo(unittest.TestCase):
+    """FIX-META-002: 'what else can adwi/you do?' → capabilities."""
+
+    def test_what_else_can_adwi_do(self):
+        self.assertEqual(_classify("what else can adwi do?"), "capabilities")
+
+    def test_what_else_can_you_do(self):
+        self.assertEqual(_classify("what else can you do"), "capabilities")
+
+
+class TestRememberThisForMeChat(unittest.TestCase):
+    """FIX-CHAT-002: bare 'remember this for me' → chat (no content = conversational)."""
+
+    def test_remember_this_for_me(self):
+        self.assertEqual(_classify("remember this for me"), "chat")
+
+    def test_remember_this_for_me_period(self):
+        self.assertEqual(_classify("remember this for me."), "chat")
+
+
 if __name__ == "__main__":
     unittest.main(verbosity=2)

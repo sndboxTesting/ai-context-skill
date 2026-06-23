@@ -2595,5 +2595,41 @@ class TestFIXTR002TechRadarWhatIs(unittest.TestCase):
         self.assertEqual(_classify("what's trending in ML"), "tech_radar")
 
 
+class TestFIXDAILY001WhatDoINeedToKnow(unittest.TestCase):
+    """FIX-DAILY-001: 'what do i need to know today' / 'what should i focus on today' → daily_brief."""
+
+    def test_what_do_i_need_to_know_today(self):
+        self.assertEqual(_classify("what do i need to know today"), "daily_brief")
+
+    def test_what_should_i_focus_on_today(self):
+        self.assertEqual(_classify("what should i focus on today"), "daily_brief")
+
+
+class TestFIXMEM001PruneTrimConsolidate(unittest.TestCase):
+    """FIX-MEM-001: prune/trim/consolidate memories → memory_curate."""
+
+    def test_prune_old_memories(self):
+        self.assertEqual(_classify("prune old memories"), "memory_curate")
+
+    def test_trim_my_memory(self):
+        self.assertEqual(_classify("trim my memory"), "memory_curate")
+
+    def test_consolidate_memories(self):
+        self.assertEqual(_classify("consolidate memories"), "memory_curate")
+
+
+class TestFIXAUS001AssistantUpgradeStatus(unittest.TestCase):
+    """FIX-AUS-001: natural phrasings for assistant_upgrade_status."""
+
+    def test_status_of_the_assistant_upgrade(self):
+        self.assertEqual(_classify("whats the status of the assistant upgrade"), "assistant_upgrade_status")
+
+    def test_upgrade_progress_bare(self):
+        self.assertEqual(_classify("upgrade progress"), "assistant_upgrade_status")
+
+    def test_how_is_the_upgrade_going(self):
+        self.assertEqual(_classify("how is the upgrade going"), "assistant_upgrade_status")
+
+
 if __name__ == "__main__":
     unittest.main(verbosity=2)

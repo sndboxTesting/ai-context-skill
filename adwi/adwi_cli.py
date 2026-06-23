@@ -862,6 +862,8 @@ _REGEX_INTENTS = [
     (re.compile(r"\b(daily.?brief|morning.?brief|today.{0,5}brief)\b", re.I), "daily_brief"),
     (re.compile(r"\b(give me|show me|run|start)\b.{0,15}\b(my\s+)?(daily|morning|today.{0,5})\s+(brief|summary|digest|rundown)\b", re.I), "daily_brief"),
     (re.compile(r"\bwhat.{0,10}(my|today.{0,5})\s+(day|agenda|priorities|focus|schedule)\b", re.I), "daily_brief"),
+    # FIX-DAILY-001: "what do i need to know today", "what should i focus on today"
+    (re.compile(r"\bwhat\b.{0,20}\b(?:need|should)\b.{0,15}\b(?:know|focus)\b.{0,10}\btoday\b", re.I), "daily_brief"),
     # ── Daily improve — NHR-006: no regex existed; LLM was routing to status/chat ─
     # FIX-DI-001: extend stem patterns to match full words (improve → improvement, improving, etc.)
     (re.compile(r"\b(daily.?improv\w*|daily.?enhanc\w*|daily.?routine)\b", re.I), "daily_improve"),
@@ -1502,9 +1504,16 @@ _REGEX_INTENTS = [
     (re.compile(r"\bclean\b.{0,10}\bmemor(?:y|ies)\b", re.I), "memory_curate"),
     (re.compile(r"\b(propose|suggest)\b.{0,20}\b(new\s+)?(durable\s+)?(memory|memories|facts?)\b", re.I), "memory_curate"),
     (re.compile(r"\blearn\s+(from|about)\b.{0,30}\b(my\s+)?(recent\s+)?(logs?|history|sessions?|notes?)\b", re.I), "memory_curate"),
+    # FIX-MEM-001: prune/trim/consolidate synonyms for curating memory
+    (re.compile(r"\b(prune|trim|consolidate)\b.{0,20}\bmemor(?:y|ies)\b", re.I), "memory_curate"),
     # ── Assistant upgrade status ──────────────────────────────────────────────────
     (re.compile(r"\b(upgrade.?pack.?status|assistant.?upgrade.?status)\b", re.I), "assistant_upgrade_status"),
     (re.compile(r"\b(research|browser.?delegate|tech.?radar|memory.?curat).{0,20}\b(status|ready|installed|available)\b", re.I), "assistant_upgrade_status"),
+    # FIX-AUS-001: "status of the assistant upgrade", "how is the upgrade going", "upgrade progress"
+    (re.compile(r"\bassistant\s+upgrade\b.{0,30}(status|progress|going|done|complete|ready)\b", re.I), "assistant_upgrade_status"),
+    (re.compile(r"\b(status|progress)\b.{0,30}\bassistant\s+upgrade\b", re.I), "assistant_upgrade_status"),
+    (re.compile(r"\bhow\b.{0,20}\b(the\s+)?(?:assistant\s+)?upgrade\b.{0,20}\b(going|progressing|coming)\b", re.I), "assistant_upgrade_status"),
+    (re.compile(r"\bupgrade\s+progress\b", re.I), "assistant_upgrade_status"),
     # FIX-MEMSCAN-002: refresh/rebuild/rescan and "memory scan X" patterns
     (re.compile(r"\b(refresh|rebuild|rescan|reindex)\b.{0,20}\b(memory|knowledge|index|ledger)\b", re.I), "memory_scan"),
     (re.compile(r"\bindex\b.{0,20}\b(terminal\s+history|history|session|conversation)\b", re.I), "memory_scan"),

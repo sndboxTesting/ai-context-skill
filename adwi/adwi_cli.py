@@ -729,9 +729,14 @@ _REGEX_INTENTS = [
     # FIX-OBS-004: obsidian_search wins for topic-qualified "search my notes about/on/for X"
     # Must precede the broad rag_search "search my notes" pattern below
     (re.compile(r"\bsea?r?a?ch\s+my\s+notes?\b.{0,5}(?:about|on|regarding|for)\b", re.I), "obsidian_search"),
+    # FIX-RAG-001: "what do my notes say about X", "what's in my notes about X" → obsidian_search
+    (re.compile(r"\bwhat\b.{0,15}\bmy\s+notes?\b.{0,20}\b(?:say|contain|have)\b.{0,20}\b(?:about|on|regarding)\b", re.I), "obsidian_search"),
     # rag_search beats obsidian_search for notes+summarize and bare "my notes" (with typo tolerance)
     (re.compile(r"\bsea?r?a?ch\s+(?:my\s+)?notes?\b.{0,40}(?:then|and)\s+summariz", re.I), "rag_search"),
     (re.compile(r"\bsea?r?a?ch\s+my\s+notes?\b", re.I), "rag_search"),
+    # "what does my knowledge base say", "what's in my knowledge base" → rag_search
+    (re.compile(r"\bmy\s+knowledge\s+base\b.{0,30}\b(?:say|contain|have|know)\b", re.I), "rag_search"),
+    (re.compile(r"\bwhat.{0,10}(?:in|inside)\b.{0,10}\bmy\s+knowledge\s+base\b", re.I), "rag_search"),
     # FIX-NOTES-001: "find/search notes about X" → obsidian_search BEFORE rag_search swallows it
     (re.compile(r"\b(find|search)\s+(for\s+)?notes?\b.{0,20}\b(about|on|regarding)\b", re.I), "obsidian_search"),
     (re.compile(r"\bsearch\s+(for\s+)?notes?\s+for\b", re.I), "obsidian_search"),
@@ -895,6 +900,9 @@ _REGEX_INTENTS = [
     # FIX-II-001: "add this feature/functionality", "create this feature" → implement_idea
     # Negative lookahead: NOT "to [backlog/notes/list/tracker]" which means storage, not build
     (re.compile(r"\b(?:add|create)\b.{0,15}\b(?:this|that|the)\b.{0,15}\b(?:feature|functionality|capability)\b(?!\s+to\s+(?:(?:the|my)\s+)?(?:backlog|todo|list|notes?|obsidian|queue|jira|linear|tracker))", re.I), "implement_idea"),
+    # FIX-IMPL-001: "build/implement/develop/code up a new feature/function/module" without pronoun
+    (re.compile(r"\b(?:implement|develop|build(?:\s+out)?)\b.{0,25}\b(?:an?\s+)?(?:new\s+)?(?:feature|function(?:ality)?|module|component|handler|endpoint|service|solution)\b", re.I), "implement_idea"),
+    (re.compile(r"\bcode\s+up\b.{0,25}\b(?:an?\s+)?(?:new\s+)?(?:feature|function|module|solution)\b", re.I), "implement_idea"),
     # CYCLE-6: "adwi feature list" → capabilities (must beat what_next's "feature" match below)
     (re.compile(r"\badwi\b.{0,20}\bfeature\s+list\b", re.I), "capabilities"),
     (re.compile(r"\blist\s+(?:all\s+)?(?:your|adwi.?s?)\s+commands?\b", re.I), "capabilities"),
@@ -1081,12 +1089,17 @@ _REGEX_INTENTS = [
     (re.compile(r"^voice\s+out\s*$", re.I), "voice_out"),
     (re.compile(r"\b(voice input|voice mode|voice.{0,10}recording|start.{0,10}voice|listen.{0,10}voice)\b", re.I), "voice_in"),
     (re.compile(r"\bstart.{0,15}(recording|listening)\b", re.I), "voice_in"),
+    # FIX-VI-002: "begin transcription/dictation/recording" → voice_in
+    (re.compile(r"\bbegin\b.{0,10}\b(?:transcription|dictation|recording|listening)\b", re.I), "voice_in"),
     # FIX-VI-001: "use microphone/mic", "dictate", "turn on voice" → voice_in
     (re.compile(r"\b(?:use|enable|activate|turn\s+on)\b.{0,15}\b(?:microphone|mic|voice\s+input)\b", re.I), "voice_in"),
     (re.compile(r"\bdictate\b", re.I), "voice_in"),
     (re.compile(r"\b(text.to.speech|tts\b|speak.{0,15}this|say.{0,20}(aloud|out loud)|read.{0,10}aloud|read.{0,10}this.{0,10}out)\b", re.I), "voice_out"),
     # FIX-VOC-001: "narrate this", "vocalize this" → voice_out
     (re.compile(r"\b(?:narrate|vocalize)\b.{0,20}\b(?:this|that|it|the\s+response|the\s+answer|the\s+text)\b", re.I), "voice_out"),
+    # FIX-VO-001: "read back to me", "read it back" → voice_out
+    (re.compile(r"\bread\b.{0,10}\bback\b.{0,15}\bme\b", re.I), "voice_out"),
+    (re.compile(r"\bread\b.{0,5}\bit\b.{0,5}\bback\b", re.I), "voice_out"),
 
     # ── Backup now / status / log ─────────────────────────────────────────────────
     # FIX-REL-007: "backup now", "commit and push", "save work to github" — no regex existed

@@ -3623,5 +3623,60 @@ class TestFIXST002HealthCheck(unittest.TestCase):
         self.assertNotEqual(_classify("health and wellness tips"), "status")
 
 
+class TestFIXVO001ReadBackToMe(unittest.TestCase):
+    """FIX-VO-001: 'read back to me', 'read it back' → voice_out."""
+
+    def test_read_back_to_me(self):
+        self.assertEqual(_classify("read back to me"), "voice_out")
+
+    def test_read_it_back(self):
+        self.assertEqual(_classify("read it back"), "voice_out")
+
+
+class TestFIXVI002BeginTranscription(unittest.TestCase):
+    """FIX-VI-002: 'begin transcription/dictation/recording' → voice_in."""
+
+    def test_begin_transcription(self):
+        self.assertEqual(_classify("begin transcription"), "voice_in")
+
+    def test_begin_dictation(self):
+        self.assertEqual(_classify("begin dictation"), "voice_in")
+
+    def test_begin_recording(self):
+        self.assertEqual(_classify("begin recording"), "voice_in")
+
+
+class TestFIXRAG001NotesKnowledgeBaseQueries(unittest.TestCase):
+    """FIX-RAG-001: 'what do my notes say about X' → obsidian_search; knowledge base queries → rag_search."""
+
+    def test_what_notes_say_about(self):
+        self.assertEqual(_classify("what do my notes say about python"), "obsidian_search")
+
+    def test_knowledge_base_say_about(self):
+        self.assertEqual(_classify("what does my knowledge base say about X"), "rag_search")
+
+    def test_whats_in_knowledge_base(self):
+        self.assertEqual(_classify("what's in my knowledge base"), "rag_search")
+
+
+class TestFIXIMPL001BuildFeatureNoPronoun(unittest.TestCase):
+    """FIX-IMPL-001: build/implement/develop + feature/function/module without 'this/that' pronoun."""
+
+    def test_build_new_feature(self):
+        self.assertEqual(_classify("build a new feature for adwi"), "implement_idea")
+
+    def test_implement_search_function(self):
+        self.assertEqual(_classify("implement the search function"), "implement_idea")
+
+    def test_code_up_a_solution(self):
+        self.assertEqual(_classify("code up a solution"), "implement_idea")
+
+    def test_develop_new_component(self):
+        self.assertEqual(_classify("develop a new component"), "implement_idea")
+
+    def test_no_false_positive_build_house(self):
+        self.assertNotEqual(_classify("build a house"), "implement_idea")
+
+
 if __name__ == "__main__":
     unittest.main(verbosity=2)

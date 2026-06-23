@@ -2099,5 +2099,18 @@ class TestRememberThisForMeChat(unittest.TestCase):
         self.assertEqual(_classify("remember this for me."), "chat")
 
 
+class TestBenchmarkAdditionalPatterns(unittest.TestCase):
+    """FIX-BENCH-002: test speed / perf test patterns for benchmark."""
+
+    def test_test_speed_of_adwi(self):
+        self.assertEqual(_classify("test the speed of adwi"), "benchmark")
+
+    def test_perf_test_ollama(self):
+        self.assertEqual(_classify("perf test ollama"), "benchmark")
+
+    def test_test_speed_of_model(self):
+        self.assertEqual(_classify("test the speed of the model"), "benchmark")
+
+
 if __name__ == "__main__":
     unittest.main(verbosity=2)

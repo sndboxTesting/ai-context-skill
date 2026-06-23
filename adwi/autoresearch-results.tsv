@@ -50,3 +50,4 @@ bb2dc8d	828	828	25	25	17	17	keep	FIX-OF-002/MR-002/MS-002/MSCAN-002: files-older
 13305f8	859	859	25	25	17	17	keep	FIX-COV-001: eval_adwi/test_adwi/nightly_status coverage tests (859 tests, test-only)
 ae017e7	866	866	25	25	17	17	keep	FIX-GMAILCOMPOSE-001/FIX-FE-004: draft-email→gmail_compose, look-at-traceback→fix_error (866 tests)
 ca4e62d	871	871	25	25	17	17	keep	FIX-GFB-001: tighten gmail_filter_build show-me pattern (false positive fix) (871 tests)
+a00eb85	879	879	25	25	17	17	keep	FIX-DU-007: almost-out-of-space, low-on-disk, not-much-space forms → disk_usage (879 tests)

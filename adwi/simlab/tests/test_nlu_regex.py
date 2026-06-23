@@ -2176,5 +2176,21 @@ class TestDiskUsageRemaining(unittest.TestCase):
         self.assertEqual(_classify("disk remaining"), "disk_usage")
 
 
+class TestComparisonQuestionsChat(unittest.TestCase):
+    """FIX-CHAT-004: comparison/explanatory questions → chat (not rag_search)."""
+
+    def test_difference_between_qdrant_and_pinecone(self):
+        self.assertEqual(_classify("what is the difference between qdrant and pinecone"), "chat")
+
+    def test_compare_qdrant_vs_chroma(self):
+        self.assertEqual(_classify("compare qdrant vs chroma"), "chat")
+
+    def test_which_is_better(self):
+        self.assertEqual(_classify("which is better for my use case"), "chat")
+
+    def test_difference_between_llama_versions(self):
+        self.assertEqual(_classify("what is the difference between llama2 and llama3"), "chat")
+
+
 if __name__ == "__main__":
     unittest.main(verbosity=2)

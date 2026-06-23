@@ -244,6 +244,10 @@ REGEX_INTENTS = [
     (re.compile(r"\bhow\s+do\s+I\s+know\s+if\b", re.I), "chat"),
     (re.compile(r"\bwhat\s+should\s+I\s+monitor\b", re.I), "chat"),
     (re.compile(r"\bhow\s+often\s+should\s+I\s+check\b", re.I), "chat"),
+    # FIX-CHAT-004: comparison questions → chat (not rag_search)
+    (re.compile(r"\bwhat\s+is\s+the\s+difference\s+between\b", re.I), "chat"),
+    (re.compile(r"\bcompare\b.{0,40}\bvs\.?\b", re.I), "chat"),
+    (re.compile(r"\bwhich\s+is\s+(?:better|best|faster|more)\b", re.I), "chat"),
     (re.compile(r"\bwhen\s+does\b.{0,30}\b(?:error|exception|ValueError|TypeError|KeyError|occur|happen|trigger)\b", re.I), "chat"),
     (re.compile(r"\bwhat\s+causes?\b.{0,25}\bfiles?\b.{0,20}\bto\s+be\s+(?:large|big|huge)\b", re.I), "chat"),
     (re.compile(r"\bwhy\s+do\s+I\b.{0,25}\b(?:accumulate|build\s+up|end\s+up\s+with|have\s+so\s+many)\b", re.I), "chat"),

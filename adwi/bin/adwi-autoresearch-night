@@ -127,8 +127,8 @@ if [ "$DRY_RUN" -eq 1 ]; then
         echo "  Session: $SESSION"
         echo "    Branch:   $BRANCH"
         echo "    Log:      $LOG_DIR/${TAG}.log"
-        echo "    Command:  screen -dmS $SESSION -L -Logfile $LOG_DIR/${TAG}.log \\"
-        echo "              bash -c \"cd '$WORKSPACE' && exec claude --dangerously-skip-permissions\""
+        echo "    Command:  screen -dmS $SESSION \\"
+        echo "              bash -c \"cd '$WORKSPACE' && exec script -q -F '$LOG_DIR/${TAG}.log' claude --dangerously-skip-permissions\""
     done
     echo ""
     echo "To start for real:  adwi-autoresearch-night $NUM_SESSIONS"
@@ -164,9 +164,11 @@ for i in $(seq 1 "$NUM_SESSIONS"); do
         continue
     fi
 
-    # Start detached screen session with Claude in the workspace root
-    screen -dmS "$SESSION" -L -Logfile "$LOG_FILE" \
-        bash -c "cd '$WORKSPACE' && exec claude --dangerously-skip-permissions"
+    # Start detached screen session with Claude in the workspace root.
+    # macOS Screen 4.00.03 supports -L but not -Logfile; script(1) gives us
+    # a stable per-session log path while preserving an interactive TTY.
+    screen -dmS "$SESSION" \
+        bash -c "cd '$WORKSPACE' && exec script -q -F '$LOG_FILE' claude --dangerously-skip-permissions"
 
     # Wait for claude TUI to initialize
     sleep 6

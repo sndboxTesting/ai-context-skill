@@ -586,6 +586,7 @@ REGEX_INTENTS = [
     # FIX-DI-001: extend stem patterns to match full words (improve → improvement, improving, etc.)
     (re.compile(r"\b(daily.?improv\w*|daily.?enhanc\w*|daily.?routine)\b", re.I), "daily_improve"),
     (re.compile(r"\brun.{0,10}daily.{0,10}(improve\w*|maintenance|self.?improve\w*)\b", re.I), "daily_improve"),
+    (re.compile(r"\b(continue|resume|keep|run)\b.{0,20}\b(adwi\s+)?(improvement|self.?improvement|improve\w*)\b.{0,20}\b(loop|cycle|experiment)\b", re.I), "daily_improve"),
 
     # ── Gmail Phase 15 early guards — MUST precede web_search and git_status ────
     # "what changed in the last reply/thread" must beat git_status "what changed"

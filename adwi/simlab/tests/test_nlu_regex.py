@@ -2535,5 +2535,21 @@ class TestChatFinalBoundary(unittest.TestCase):
         self.assertEqual(_classify("can you rephrase that?"), "chat")
 
 
+class TestDailyImproveContinuationPhrases(unittest.TestCase):
+    """Experiment 26: resume/continue improvement-cycle phrasing."""
+
+    def _match(self, text: str) -> str | None:
+        for pattern, intent in _REGEX_INTENTS:
+            if pattern.search(text):
+                return intent
+        return None
+
+    def test_continue_daily_improvement_loop(self):
+        self.assertEqual(self._match("continue the daily improvement loop"), "daily_improve")
+
+    def test_continue_self_improvement_experiment(self):
+        self.assertEqual(self._match("continue the self improvement experiment"), "daily_improve")
+
+
 if __name__ == "__main__":
     unittest.main(verbosity=2)

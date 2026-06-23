@@ -923,7 +923,8 @@ _REGEX_INTENTS = [
     # voice_out wins over daily_brief when verb is speak/say-aloud/read-aloud
     (re.compile(r"\b(speak|say\s+aloud|read\s+aloud)\b.{0,25}\b(morning.?brief|daily.?brief)\b", re.I), "voice_out"),
     # ── Daily brief (proactive user brief, BEFORE daily_improve dev routine) ────
-    (re.compile(r"\b(daily.?brief|morning.?brief|today.{0,5}brief)\b", re.I), "daily_brief"),
+    # FIX-DB-003: extend to match "briefing" (word boundary after "brief" doesn't match "briefing")
+    (re.compile(r"\b(daily.?brief(?:ing)?|morning.?brief(?:ing)?|today.{0,5}brief(?:ing)?)\b", re.I), "daily_brief"),
     (re.compile(r"\b(give me|show me|run|start)\b.{0,15}\b(my\s+)?(daily|morning|today.{0,5})\s+(brief|summary|digest|rundown)\b", re.I), "daily_brief"),
     (re.compile(r"\bwhat.{0,10}(my|today.{0,5})\s+(day|agenda|priorities|focus|schedule)\b", re.I), "daily_brief"),
     # FIX-DAILY-001: "what do i need to know today", "what should i focus on today"
@@ -943,6 +944,11 @@ _REGEX_INTENTS = [
 
     # ── Gmail Phase 15 early guards — MUST precede web_search and git_status ────
     # "what changed in the last reply/thread" must beat git_status "what changed"
+    # FIX-GTI-001: "who sent this", "what is this email about", sender/content queries → gmail_thread_intel
+    (re.compile(r"\bwho\b.{0,15}\b(?:sent|wrote|authored|is\s+this\s+(?:email|from))\b", re.I), "gmail_thread_intel"),
+    (re.compile(r"\bwhat\s+(?:is|was)\b.{0,15}\b(?:this|the)\b.{0,10}\b(?:email|message|thread)\b.{0,20}\b(?:about|regarding|on)\b", re.I), "gmail_thread_intel"),
+    (re.compile(r"\b(?:analyze|analysis|sentiment)\b.{0,20}\b(?:this|the)\b.{0,15}\b(?:email|thread|message|conversation)\b", re.I), "gmail_thread_intel"),
+    (re.compile(r"\bemail\b.{0,15}\bsentiment\b|\bsentiment\b.{0,15}\b(?:of|in)\b.{0,10}\b(?:this|the)\b.{0,10}\b(?:email|thread)\b", re.I), "gmail_thread_intel"),
     (re.compile(r"\bwhat\s+changed\b.{0,30}\b(?:reply|thread|email|message|conversation)\b", re.I), "gmail_thread_intel"),
     # FIX-STAGE3-001: "open/read/show the latest message" → gmail_read, not thread_intel
     # negative lookahead: "open the latest email from X" falls through to gmail_open
@@ -965,6 +971,9 @@ _REGEX_INTENTS = [
     (re.compile(r"\bopen\b.{0,20}\b(?:url|link|page|website|site)\b.{0,20}\b(?:in\s+(?:a\s+)?)?browser\b", re.I), "browser_delegate"),
     (re.compile(r"\b(?:visit|fetch)\b.{0,15}\b(?:this\s+)?(?:url|link|webpage|website)\b", re.I), "browser_delegate"),
     # ── Research operator (deep cited research, BEFORE web_search) ───────────────
+    # FIX-RES-003: "do some research on X", "gather information about X" → research
+    (re.compile(r"\bdo\s+(?:some\s+)?research\b", re.I), "research"),
+    (re.compile(r"\bgather\b.{0,20}\b(?:information|data|facts|details|intel)\b.{0,20}\b(?:about|on|regarding)\b", re.I), "research"),
     # research beats web_search for "research latest/recent X"
     (re.compile(r"\bresearch\b.{0,20}\b(latest|recent|current|new)\b.{0,30}\b(changes?|updates?|protocol|spec|release|version)", re.I), "research"),
     (re.compile(r"\bresearch\b.{0,10}\b(MCP|LLM|AI|ML|API|protocol|framework)\b", re.I), "research"),

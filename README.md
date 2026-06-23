@@ -152,6 +152,7 @@ All managed at `~/Library/LaunchAgents/com.suneel.*.plist`.
 <!-- AUTO:AGENTS -->
 | Agent | Schedule |
 |---|---|
+| `adwi-autoresearch-night` | 23:00 AM |
 | `adwi-git-backup` | every 30min |
 | `adwi-nightly` | 2:00 AM |
 | `adwi-scheduled-send` | every 2min |

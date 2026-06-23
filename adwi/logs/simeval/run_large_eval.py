@@ -1000,6 +1000,8 @@ REGEX_INTENTS = [
     (re.compile(r"\b(?:show\s+me|what\s+rule|what\s+filter)\b.{0,30}\b(?:for|would|you\s+make)\b", re.I), "gmail_filter_build"),
 
     # ── Gmail Phase 15: thread intel + forward — MUST precede Phase 3 (gmail_draft_reply / gmail_compose) ──
+    # FIX-GTI-001: "check email then search for action items" is a general inbox op, not thread intel
+    (re.compile(r"\bcheck\s+(?:my\s+)?(?:email|inbox)\b.{0,80}\baction\s+items?\b", re.I), "gmail"),
     # gmail_thread_intel — action items, decisions, questions, reply-needed, latest-delta
     (re.compile(r"\baction\s+items?\b", re.I), "gmail_thread_intel"),
     (re.compile(r"\bwhat\s+(?:action\s+items?|decisions?|questions?|changed|do\s+I\s+(?:owe|need\s+to\s+do))\b", re.I), "gmail_thread_intel"),

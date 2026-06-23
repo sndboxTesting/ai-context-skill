@@ -8,3 +8,4 @@ afff777	481	481	25	25	17	17	keep	FIX-006: benchmark regex — how do i benchmark
 ada40b5	481	481	25	25	17	17	keep	FIX-NR-001: nightly_run regex — 'rn nightly' casual abbrev pattern (master report failure)
 00b1ef6	481	481	25	25	17	17	keep	FIX-GTS-001: gmail_tasks_save early guard — 'add those/them/these to daily note' plural-pronoun pattern
 214f552	493	493	25	25	17	17	keep	add 12 regression tests for this session's fixes: benchmark verb-form, disk_usage colloquial/typo, nightly rn abbrev, gmail_tasks_save pronoun
+fb2901c	493	493	25	25	17	17	keep	FIX-GTI-001: guard broad action-items pattern — 'check email...action items' routes to gmail not gmail_thread_intel

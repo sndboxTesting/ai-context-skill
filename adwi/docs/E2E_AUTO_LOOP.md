@@ -308,7 +308,7 @@ The workflow template is at: `adwi/automation/workflows/adwi-e2e-auto-loop.json`
 - Start: `POST http://100.110.47.128:5678/webhook/adwi-e2e-auto-loop`
 - Status: `POST http://100.110.47.128:5678/webhook/adwi-e2e-auto-loop-status`
 
-**Current state: template-only** — not live-wired. n8n credential DB was not touched.
+**Current state: active and live.** Workflow `6192b91d-7c1b-48c2-a0b9-b325ca774fe9` is in n8n, `active=1`, `activeVersionId` set, both webhook endpoints registered and returning HTTP 200. `ADWI_LOCAL_SECRET` is set in the container via `docker-compose.yml` line 34. n8n data volume: `adwi/infra/docker/n8n-data/` (managed by `adwi/infra/docker/docker-compose.yml`).
 
 ---
 

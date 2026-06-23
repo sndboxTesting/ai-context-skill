@@ -1,0 +1,11 @@
+#!/bin/bash
+# Adwi Command API launcher — called by com.suneel.command-api LaunchAgent
+# Serves allowlisted safe commands on 127.0.0.1:5055
+
+export PATH="/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin"
+export HOME="/Users/MAC"
+export PYTHONUNBUFFERED=1
+WORKSPACE="$HOME/SuneelWorkSpace"
+
+cd "$WORKSPACE"
+exec python3 "$WORKSPACE/adwi/services/command-api/server.py"

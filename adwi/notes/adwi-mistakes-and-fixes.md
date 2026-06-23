@@ -5,6 +5,16 @@ Updated by `/daily-improve` and error handlers in adwi_cli.py.
 
 ---
 
+## 2026-06-22 — n8n workflow SQL activation: activeVersionId required
+
+**What failed:** Setting `workflow_entity.active=1` via SQL was not enough to activate an n8n 2.25.x workflow at startup. n8n also requires `activeVersionId` to be set to the same value as `versionId`. Without `activeVersionId`, n8n silently skips the workflow during "Start Active Workflows", and any webhook hits return "Active version not found for workflow with id '...'"
+
+**Fix:** `UPDATE workflow_entity SET activeVersionId = versionId WHERE id = '<workflow-id>'` (stop n8n before the write, restart after). This is what the n8n UI sets automatically when you toggle a workflow active.
+
+**Rule to remember:** To activate an n8n workflow via SQL, three fields must be set: `workflow_entity.active=1`, `workflow_entity.activeVersionId=<versionId>`, and a matching row in `workflow_published_version`. Setting only `active=1` is insufficient in n8n 2.25.x+. Always stop n8n before writing to SQLite (VirtioFS WAL conflict on macOS Docker).
+
+---
+
 ## 2026-06-21 — validate_adwi_env.py missing adwi:latest check
 
 **What failed:** `validate_adwi_env.py` `chk_ollama()` only checked for `llama3.1:8b` as a required model. `adwi:latest` (the primary reasoning model, built from qwen3:30b) was not verified at boot time, so a missing or corrupt `adwi:latest` would pass the environment check silently and only fail at first inference.

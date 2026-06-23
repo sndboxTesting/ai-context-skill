@@ -112,16 +112,11 @@ def run_python(code: str) -> str:
             Path(tmp).unlink(missing_ok=True)
 
 
-@mcp.tool()
-def run_bash(command: str) -> str:
-    """Execute an allowed bash command via Adwi's safe command allowlist."""
-    return (
-        "run_bash is not currently implemented in this MCP sandbox. "
-        "The adwi CLI (/run-bash) provides shell execution with risk classification "
-        "and interactive safety gates that are not portable to the MCP context. "
-        "Use the adwi CLI directly, or use the git_status / read_file / list_files tools for read-only operations."
-    )
-
+# run_bash is intentionally absent.
+# The adwi CLI (/run-bash) provides shell execution with risk classification and
+# interactive safety gates that are not portable to the MCP stdio transport.
+# For external shell access, use the Safe Command API (:5055, 30-command allowlist).
+# For scripted execution, use the run_python tool above.
 
 @mcp.tool()
 def search_notes(query: str, max_results: int = 5) -> str:

@@ -23,3 +23,14 @@
 ```json
 
 ```
+
+## 2026-06-22 02:12
+```json
+[Ollama error: HTTP Error 500: Internal Server Error]
+```
+
+## 2026-06-22 14:32
+```json
+{"name":"search-note","type":"command","title":"Smart Note Search","description":"Search local notes by content using semantic embedding without leaving terminal.","priority":"high","effort":"hours","implementation_hint":"Build on nomic-embed-text model to create a CLI tool that queries Qdrant vector DB of note embeddings."}
+{"name":"codellama:
+```

@@ -9694,7 +9694,7 @@ def cmd_tool_roadmap() -> None:
         ("Unsloth + LoRA/QLoRA",  "Future fine-tuning (1000+ examples needed first)",
          "planned", "pip install unsloth — NOT YET, need more training data"),
         ("Adwi code sandbox",     "Safe code execution (isolated)",
-         "active",  "adwi/services/mcp/adwi-sandbox (8 tools)"),
+         "active",  "adwi/services/mcp/adwi-sandbox (7 tools)"),
         ("ComfyUI",               "Local image generation",
          "planned", "git clone https://github.com/comfyanonymous/ComfyUI"),
         ("Open WebUI Knowledge",  "Automatic knowledge sync to browser UI",

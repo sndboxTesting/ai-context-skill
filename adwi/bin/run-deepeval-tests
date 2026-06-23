@@ -1,0 +1,7 @@
+#!/bin/bash
+# Adwi DeepEval NLU test runner
+# Runs eval/deepeval/test_nlu.py from the adwi/ directory using the project venv.
+# deepeval (optional): .venv/bin/pip install deepeval  — Test 6 skips if not installed.
+WORKSPACE="${HOME}/SuneelWorkSpace"
+cd "${WORKSPACE}/adwi"
+exec "${WORKSPACE}/adwi/.venv/bin/python3" -m pytest eval/deepeval/test_nlu.py -v "$@"

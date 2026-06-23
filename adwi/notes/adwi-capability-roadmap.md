@@ -52,7 +52,7 @@ Use `/add-capability-plan <idea>` to add new ideas. Use `/daily-improve` to revi
 
 - [x] 10 MCP servers connected — Playwright, Fetch, GitHub, SQLite, Memory, Sequential Thinking, Qdrant, ComfyUI bridge, Adwi sandbox, Filesystem
 - [x] Qdrant vector DB — Docker container running :6333, LaunchAgent for auto-start, collection: adwi-knowledge
-- [x] Adwi sandbox MCP — 8 tools: run_python, run_bash, search_notes, git_status, read_file, list_files, adwi_status, note_append
+- [x] Adwi sandbox MCP — 7 tools: run_python, search_notes, git_status, read_file, list_files, adwi_status, note_append (run_bash removed — use Safe Command API :5055 for external shell access)
 - [x] ComfyUI MCP bridge — 3 tools: generate_image, comfyui_status, list_models (needs ComfyUI install separately)
 - [x] SQLite workspace DB — notes, tasks, learnings tables at mcp-servers/workspace.db
 - [x] GitHub MCP — suneeluhcl token saved, repos/issues/PRs accessible

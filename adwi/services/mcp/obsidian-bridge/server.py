@@ -4,6 +4,7 @@ Obsidian Bridge — local HTTP API for vault read/write/search.
 Runs on 127.0.0.1:5056. Zero external dependencies (stdlib only).
 
 Routes:
+  GET  /health                    liveness probe — {"ok": true, "service": "obsidian-bridge"} (no auth required)
   GET  /                          health + vault stats
   GET  /read?path=<rel>           read a note (path relative to vault root)
   GET  /list?dir=<rel>            list notes in a vault subdirectory
@@ -123,6 +124,10 @@ class Handler(BaseHTTPRequestHandler):
             return {}
 
     def do_GET(self):
+        # Liveness probe — no auth required, no vault data returned
+        if urlparse(self.path).path.rstrip("/") == "/health":
+            return self._json(200, {"ok": True, "service": "obsidian-bridge"})
+
         if not self._check_auth():
             return self._json(401, {"error": "Unauthorized — X-Adwi-Secret header required"})
         parsed = urlparse(self.path)

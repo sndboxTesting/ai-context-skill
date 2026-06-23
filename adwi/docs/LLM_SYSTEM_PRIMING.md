@@ -117,7 +117,7 @@ Pipeline stages (every natural-language input):
 
 ### Command Registry
 
-- **Total commands:** 184 (extracted from `adwi/adwi_cli.py` + `adwi/capabilities.json`)
+- **Total commands:** 193 (extracted from `adwi/adwi_cli.py` + `adwi/capabilities.json`)
 - **Registry-dispatched clusters:** Phases 7–23 (Gmail, Remote/HA, Diagnostics, Voice, Disk, System, Knowledge, Eval)
 - **Source of truth:** `bin/auto-update-readme` extractor → `README.md AUTO:COMMANDS`
 
@@ -261,10 +261,10 @@ If you are a cold-starting LLM, do NOT assume:
 - `MASTER_REPORT_v2.md` is stale — it was regenerated 2026-06-20 and reflects **98.3% combined** (P1: 98.4%, P2: 98.2%). Use `CLAUDE.md` for the narrative; use the JSON summary files for machine-readable values.
 - "97.0% combined" — that was Stop Condition A (2026-06-17). Stop Condition B (>98%) was met 2026-06-19. Current is **98.3%**.
 - "62 intent classes" — that was the count when capabilities.json had 62 entries. `_ALL_INTENTS` now has **115** classes.
-- "104-command registry" — was the Phase 5 count. Current count is **184**.
-- "167 commands" — was the count before Phase 23 and recent additions. Current is **184**.
+- "104-command registry" — was the Phase 5 count. Current count is **193**.
+- "167 commands" — was the count before Phase 23 and recent additions. Current is **193**.
 - "49-fixture nlu_fixtures" — was the Phase 7 initial count. Current live count is **96**.
-- "121 commands" — was an old annotation in the directory tree. Current is **184**.
+- "121 commands" — was an old annotation in the directory tree. Current is **193**.
 - "35 helper scripts" — was stale bin/ count. Current is **41**.
 - "390 tests in test_nlu_regex.py" — was the pre-reliability-session count. Current is **481** tests.
 - Docker SERVICES section ports were reliable before 2026-06-17 — a regex bug caused `:1` to appear for all ports; this is now fixed.
@@ -277,7 +277,7 @@ If you are a cold-starting LLM, do NOT assume:
 
 | File | Role | Maintained by |
 |------|------|--------------|
-| `adwi/adwi_cli.py` | REPL, 184 commands, NLU pipeline (`_REGEX_INTENTS`, `_INTENT_SYSTEM`, dispatch) | Human + aider |
+| `adwi/adwi_cli.py` | REPL, 193 commands, NLU pipeline (`_REGEX_INTENTS`, `_INTENT_SYSTEM`, dispatch) | Human + aider |
 | `adwi/commands/*.py` | CommandRegistry handler modules (dispatch-first, Phases 7–23) | Human |
 | `adwi/path_validator.py` | Security gate — blocked roots (deny-first) | Human |
 | `adwi/capabilities.json` | Capability registry | `bin/auto-update-readme` |

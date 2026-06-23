@@ -201,18 +201,23 @@ long-poll timeout).
 
 ---
 
-## Step 9 — Stop or unload the bridge
+## Step 9 — Stop or start the bridge
+
+Use the helper scripts in `adwi/bin/` — they use the modern `launchctl bootstrap`/`bootout` API
+so that `KeepAlive` is properly disabled and the service stays stopped:
 
 ```bash
-# Unload (stops the process; does not delete the plist — reloads on next login)
-launchctl unload ~/Library/LaunchAgents/com.suneel.telegram-bridge.plist
+# Stop (unloads plist — process will not restart automatically)
+adwi/bin/stop-telegram-bridge
 
-# Reload after changes
-launchctl unload ~/Library/LaunchAgents/com.suneel.telegram-bridge.plist
-launchctl load   ~/Library/LaunchAgents/com.suneel.telegram-bridge.plist
+# Start (loads plist — process starts via RunAtLoad)
+adwi/bin/start-telegram-bridge
 
-# Full uninstall (removes from login autostart)
-launchctl unload ~/Library/LaunchAgents/com.suneel.telegram-bridge.plist
+# Reload after plist changes (stop then start)
+adwi/bin/stop-telegram-bridge && adwi/bin/start-telegram-bridge
+
+# Full uninstall
+adwi/bin/stop-telegram-bridge
 rm ~/Library/LaunchAgents/com.suneel.telegram-bridge.plist
 ```
 
@@ -226,9 +231,9 @@ rm ~/Library/LaunchAgents/com.suneel.telegram-bridge.plist
 | Install LaunchAgent | see Step 6 above |
 | Check if running | `launchctl list \| grep telegram-bridge` |
 | View live logs | `tail -f /tmp/adwi-telegram-bridge.log` |
-| Stop (keep plist) | `launchctl unload ~/Library/LaunchAgents/com.suneel.telegram-bridge.plist` |
-| Start (reload plist) | `launchctl load ~/Library/LaunchAgents/com.suneel.telegram-bridge.plist` |
-| Full uninstall | `launchctl unload ~/...` then `rm ~/Library/LaunchAgents/com.suneel.telegram-bridge.plist` |
+| Stop (keep plist) | `adwi/bin/stop-telegram-bridge` |
+| Start (reload plist) | `adwi/bin/start-telegram-bridge` |
+| Full uninstall | `adwi/bin/stop-telegram-bridge` then `rm ~/Library/LaunchAgents/com.suneel.telegram-bridge.plist` |
 | Run bridge tests | `python3 -m unittest adwi/tests/test_telegram_bridge.py` |
 
 ---

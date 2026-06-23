@@ -1,0 +1,12 @@
+#!/bin/bash
+# Adwi Telegram bridge launcher — called by com.suneel.telegram-bridge LaunchAgent
+# Long-polling bot serving 57 commands; no public endpoint required.
+# Secrets (TELEGRAM_BOT_TOKEN, ADWI_LOCAL_SECRET) are loaded by bot.py from adwi/config/.env.
+
+export PATH="/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin"
+export HOME="/Users/MAC"
+export PYTHONUNBUFFERED=1
+WORKSPACE="$HOME/SuneelWorkSpace"
+
+cd "$WORKSPACE"
+exec python3 "$WORKSPACE/adwi/services/telegram-bridge/bot.py"

@@ -1563,7 +1563,7 @@
     {
       "name": "Obsidian Capture",
       "command": "/obsidian-capture <type> <text>",
-      "description": "Append a timestamped entry to the matching section of today's daily note. Types: focus, decision, idea, task, bug, fix, approval, note. idea → also logs to knowledge/Ideas Index.md. approval → also logs to knowledge/Pending Approval.md. Works offline (direct vault write).",
+      "description": "Append a timestamped entry to the matching section of today's daily note. Types: focus, decision, idea, task, bug, fix, approval, note. idea \u2192 also logs to knowledge/Ideas Index.md. approval \u2192 also logs to knowledge/Pending Approval.md. Works offline (direct vault write).",
       "risk": "low",
       "files_touched": [
         "obsidian-vault/daily-notes/YYYY-MM-DD.md"
@@ -1609,7 +1609,7 @@
     {
       "name": "Obsidian Plan",
       "command": "/obsidian-plan [days]",
-      "description": "Generate or update today's ADWI:DAILY-PLAN marker block from last N days of captures (default 7). Deterministic — no LLM. Sections: Top Focus, Carryover Tasks, Decisions, Ideas, Bugs/Fixes, Pending Approval.",
+      "description": "Generate or update today's ADWI:DAILY-PLAN marker block from last N days of captures (default 7). Deterministic \u2014 no LLM. Sections: Top Focus, Carryover Tasks, Decisions, Ideas, Bugs/Fixes, Pending Approval.",
       "risk": "low",
       "files_touched": [
         "obsidian-vault/daily-notes/YYYY-MM-DD.md"

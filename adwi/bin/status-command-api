@@ -1,17 +1,22 @@
 #!/bin/zsh
-API_DIR="$HOME/SuneelWorkSpace/adwi/services/command-api"
+LABEL="com.suneel.command-api"
 
-echo "=== SAFE COMMAND API PROCESS ==="
-if [ -f "$API_DIR/api.pid" ]; then
-  ps -p "$(cat "$API_DIR/api.pid")" -o pid,stat,command || true
+echo "=== LAUNCHAGENT STATUS ==="
+if launchctl list "$LABEL" >/dev/null 2>&1; then
+  launchctl list "$LABEL"
 else
-  echo "No PID file found."
+  echo "LaunchAgent not loaded."
 fi
 
 echo ""
-echo "=== SAFE COMMAND API CHECK ==="
-curl -s http://127.0.0.1:5055/ | python3 -m json.tool || echo "Safe Command API is not responding."
+echo "=== PORT 5055 ==="
+if lsof -tiTCP:5055 -sTCP:LISTEN >/dev/null 2>&1; then
+  lsof -i :5055 -sTCP:LISTEN -nP 2>/dev/null | grep -v "^COMMAND"
+else
+  echo "Port 5055: no listener."
+fi
 
 echo ""
-echo "=== ALLOWED COMMAND TEST ==="
-curl -s http://127.0.0.1:5055/status-ai | python3 -m json.tool | head -60 || true
+echo "=== API HEALTH CHECK ==="
+curl -s --max-time 3 http://127.0.0.1:5055/ | python3 -m json.tool 2>/dev/null \
+  || echo "API not responding."

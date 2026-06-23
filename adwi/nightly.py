@@ -97,14 +97,24 @@ def _ollama_ask(prompt: str, model: str = "adwi:latest", timeout: int = 180) -> 
         "model": model, "prompt": prompt, "stream": False,
         "options": {"temperature": 0.7, "num_predict": 1500}
     }).encode()
-    try:
-        req = urllib.request.Request(
-            "http://127.0.0.1:11434/api/generate", data=payload, method="POST",
-            headers={"Content-Type": "application/json"})
-        with urllib.request.urlopen(req, timeout=timeout) as r:
-            return json.loads(r.read())["response"].strip()
-    except Exception as e:
-        return f"[Ollama error: {e}]"
+    req = urllib.request.Request(
+        "http://127.0.0.1:11434/api/generate", data=payload, method="POST",
+        headers={"Content-Type": "application/json"})
+    last_err: Exception | None = None
+    for attempt in range(3):
+        try:
+            with urllib.request.urlopen(req, timeout=timeout) as r:
+                return json.loads(r.read())["response"].strip()
+        except urllib.error.HTTPError as e:
+            last_err = e
+            if e.code >= 500 and attempt < 2:
+                time.sleep(15 * (attempt + 1))
+                continue
+            break
+        except Exception as e:
+            last_err = e
+            break
+    return f"[Ollama error: {last_err}]"
 
 
 # ── Subprocess helpers ─────────────────────────────────────────────────────────
@@ -113,9 +123,14 @@ def _run(cmd: list, timeout: int = 60, cwd: Path = WORKSPACE) -> tuple[int, str,
     env = {**os.environ,
            "PATH": "/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin",
            "HOME": str(HOME)}
-    r = subprocess.run(cmd, capture_output=True, text=True, timeout=timeout,
-                       cwd=str(cwd), env=env)
-    return r.returncode, r.stdout.strip(), r.stderr.strip()
+    try:
+        r = subprocess.run(cmd, capture_output=True, text=True, timeout=timeout,
+                           cwd=str(cwd), env=env)
+        return r.returncode, r.stdout.strip(), r.stderr.strip()
+    except subprocess.TimeoutExpired:
+        return 1, "", f"timed out after {timeout}s: {cmd[0] if cmd else '?'}"
+    except FileNotFoundError as e:
+        return 1, "", str(e)
 
 
 def _run_adwi_cmd(command: str, timeout: int = 300) -> str:
@@ -1234,7 +1249,10 @@ def step_write_report(data: dict) -> Path:
         f"*Obsidian daily note: `obsidian-vault/daily-notes/{DATE_STR}.md`*",
     ]
     brief_path.parent.mkdir(parents=True, exist_ok=True)
-    brief_path.write_text("\n".join(brief_lines), encoding="utf-8")
+    try:
+        brief_path.write_text("\n".join(brief_lines), encoding="utf-8")
+    except Exception as _e:
+        _pr(f"  ⚠ morning brief write failed: {_e}")
 
     return LOG_PATH
 
@@ -1278,7 +1296,11 @@ def main():
         _pr(f"  ✗ Could not auto-fix — check ~/Desktop for report")
 
     _pr("[5/14] Running evals...")
-    data["evals"] = step_evals()
+    try:
+        data["evals"] = step_evals()
+    except Exception as _e:
+        data["evals"] = {"syntax_ok": False, "routing_eval": "", "promptfoo": {}, "_error": str(_e)}
+        _pr(f"  ⚠ step_evals failed: {_e}")
     ev = data["evals"]
     _pr(f"  Syntax: {'OK' if ev.get('syntax_ok') else 'FAIL: ' + ev.get('syntax_error','')}")
 
@@ -1359,10 +1381,22 @@ def main():
     except Exception as _e:
         _pr(f"  ⚠ pending update: {_e}")
 
-    report = step_write_report(data)
-    _pr(f"\n✓ Nightly log:     {report}")
-    _pr(f"✓ Morning brief:   ~/Desktop/morning_brief.md")
-    _pr(f"✓ Obsidian note:   obsidian-vault/daily-notes/{DATE_STR}.md")
+    try:
+        report = step_write_report(data)
+        _pr(f"\n✓ Nightly log:     {report}")
+        _pr(f"✓ Morning brief:   ~/Desktop/morning_brief.md")
+        _pr(f"✓ Obsidian note:   obsidian-vault/daily-notes/{DATE_STR}.md")
+    except Exception as _e:
+        _pr(f"\n⚠ step_write_report failed: {_e}")
+        try:
+            NIGHTLY_LOG_DIR.mkdir(parents=True, exist_ok=True)
+            LOG_PATH.write_text(
+                f"# Nightly {DATE_STR} — step_write_report failed\n\n{_e}\n",
+                encoding="utf-8",
+            )
+            _pr(f"  Emergency log: {LOG_PATH}")
+        except Exception:
+            pass
     _pr(f"{'='*60}\n")
 
 

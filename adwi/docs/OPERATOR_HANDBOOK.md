@@ -36,7 +36,8 @@ bin/start-phoenix
 bin/adwi
 ```
 
-LaunchAgents that auto-start at login: `adwi-git-backup` (30 min), `adwi-nightly` (2 AM), `adwi-scheduled-send` (2 min), `phoenix`, `obsidian-bridge`, `openwebui-knowledge-watcher`, `qdrant`.
+LaunchAgents that auto-start at login: `adwi-git-backup` (30 min), `adwi-nightly` (2 AM), `adwi-scheduled-send` (2 min), `phoenix`, `obsidian-bridge`, `command-api` (:5055), `telegram-bridge`, `openwebui-knowledge-watcher`, `qdrant`.
+Use `adwi/bin/stop-command-api` / `adwi/bin/start-command-api` and `adwi/bin/stop-telegram-bridge` / `adwi/bin/start-telegram-bridge` to control those two — plain `kill` does not work because KeepAlive restarts the process.
 
 ---
 

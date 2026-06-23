@@ -1,0 +1,21 @@
+#!/bin/zsh
+# Loads the Telegram bridge LaunchAgent.
+# Token is loaded by bot.py from adwi/config/.env — never printed here.
+# Use stop-telegram-bridge to stop it (KeepAlive will NOT restart after bootout).
+PLIST="$HOME/Library/LaunchAgents/com.suneel.telegram-bridge.plist"
+LABEL="com.suneel.telegram-bridge"
+DOMAIN="gui/$(id -u)"
+
+if [[ ! -f "$PLIST" ]]; then
+  echo "ERROR: plist not found: $PLIST" >&2
+  exit 1
+fi
+
+if launchctl list "$LABEL" >/dev/null 2>&1; then
+  echo "Telegram bridge is already loaded ($LABEL)."
+  exit 0
+fi
+
+launchctl bootstrap "$DOMAIN" "$PLIST"
+echo "Telegram bridge LaunchAgent loaded."
+echo "Logs: tail -f /tmp/adwi-telegram-bridge.log"

@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0.0",
-  "generated_at": "2026-06-20T15:36:59.904331+00:00",
+  "generated_at": "2026-06-22T20:50:59.514542+00:00",
   "generated_by": "bin/generate-manifest",
   "system_identity": {
     "name": "Adwi",
@@ -173,6 +173,12 @@
       "purpose": "Prevent Mac sleep while services run"
     },
     {
+      "label": "command-api",
+      "plist": "/Users/MAC/Library/LaunchAgents/com.suneel.command-api.plist",
+      "schedule": "KeepAlive",
+      "purpose": ""
+    },
+    {
       "label": "obsidian-bridge",
       "plist": "/Users/MAC/Library/LaunchAgents/com.suneel.obsidian-bridge.plist",
       "schedule": "KeepAlive",
@@ -195,6 +201,12 @@
       "plist": "/Users/MAC/Library/LaunchAgents/com.suneel.qdrant.plist",
       "schedule": "RunAtLoad",
       "purpose": "Start suneel-qdrant Docker container on login"
+    },
+    {
+      "label": "telegram-bridge",
+      "plist": "/Users/MAC/Library/LaunchAgents/com.suneel.telegram-bridge.plist",
+      "schedule": "KeepAlive",
+      "purpose": ""
     }
   ],
   "nlu_pipeline": {
@@ -256,12 +268,12 @@
     ]
   },
   "command_registry": {
-    "total_commands": 184,
+    "total_commands": 193,
     "source_files": [
       "adwi/adwi_cli.py",
       "adwi/capabilities.json"
     ],
-    "last_counted": "2026-06-20",
+    "last_counted": "2026-06-22",
     "commands": [
       "/add-capability-plan",
       "/add-root",
@@ -392,9 +404,18 @@
       "/nightly-run",
       "/nightly-status",
       "/notify",
+      "/obsidian-capture",
       "/obsidian-daily",
+      "/obsidian-help",
+      "/obsidian-plan",
+      "/obsidian-plan-clear",
+      "/obsidian-promote-idea",
       "/obsidian-read",
+      "/obsidian-review",
+      "/obsidian-review-save",
       "/obsidian-search",
+      "/obsidian-status",
+      "/obsidian-validate",
       "/obsidian-write",
       "/old-files",
       "/organize",

@@ -1,0 +1,19 @@
+#!/bin/zsh
+# Unloads the Telegram bridge LaunchAgent so it stays stopped.
+# launchd KeepAlive will NOT restart the process after bootout.
+PLIST="$HOME/Library/LaunchAgents/com.suneel.telegram-bridge.plist"
+LABEL="com.suneel.telegram-bridge"
+DOMAIN="gui/$(id -u)"
+
+if [[ ! -f "$PLIST" ]]; then
+  echo "ERROR: plist not found: $PLIST" >&2
+  exit 1
+fi
+
+if ! launchctl list "$LABEL" >/dev/null 2>&1; then
+  echo "Telegram bridge is not loaded — nothing to stop."
+  exit 0
+fi
+
+launchctl bootout "$DOMAIN" "$PLIST"
+echo "Telegram bridge LaunchAgent unloaded. Service will not restart."

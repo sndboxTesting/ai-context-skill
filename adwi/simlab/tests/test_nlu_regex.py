@@ -3572,5 +3572,56 @@ class TestFIXDU007AlmostOutOfSpace(unittest.TestCase):
         self.assertNotEqual(_classify("almost out of time"), "disk_usage")
 
 
+class TestFIXLF002LargestBiggestFiles(unittest.TestCase):
+    """FIX-LF-002: 'largest/biggest files' bare forms → large_files."""
+
+    def test_which_files_are_largest(self):
+        self.assertEqual(_classify("which files are largest"), "large_files")
+
+    def test_biggest_files_on_system(self):
+        self.assertEqual(_classify("biggest files on my system"), "large_files")
+
+    def test_find_my_largest_files(self):
+        self.assertEqual(_classify("find my largest files"), "large_files")
+
+    def test_show_largest_files(self):
+        self.assertEqual(_classify("show largest files"), "large_files")
+
+
+class TestFIXGIT001BranchUncommitted(unittest.TestCase):
+    """FIX-GIT-001: 'what branch am I on', 'uncommitted changes', 'show git changes'."""
+
+    def test_what_branch_am_i_on(self):
+        self.assertEqual(_classify("what branch am I on"), "git_status")
+
+    def test_uncommitted_changes(self):
+        self.assertEqual(_classify("uncommitted changes"), "git_status")
+
+    def test_show_git_changes(self):
+        self.assertEqual(_classify("show git changes"), "git_status")
+
+    def test_what_branch_are_we_on(self):
+        self.assertEqual(_classify("what branch are we on"), "git_status")
+
+
+class TestFIXST002HealthCheck(unittest.TestCase):
+    """FIX-ST-002: 'health check', 'how is adwi doing', 'is adwi healthy' → status."""
+
+    def test_health_check(self):
+        self.assertEqual(_classify("health check"), "status")
+
+    def test_how_is_adwi_doing(self):
+        self.assertEqual(_classify("how is adwi doing"), "status")
+
+    def test_is_adwi_healthy(self):
+        self.assertEqual(_classify("is adwi healthy"), "status")
+
+    def test_is_the_system_ok(self):
+        self.assertEqual(_classify("is the system ok"), "status")
+
+    def test_no_false_positive_health_wellness(self):
+        self.assertNotEqual(_classify("health and wellness tips"), "status")
+
+
 if __name__ == "__main__":
     unittest.main(verbosity=2)

@@ -643,6 +643,9 @@ _REGEX_INTENTS = [
     (re.compile(r"\bfiles?\b.{0,20}exceed(ing)?\b.{0,10}\d+\s*(gb|mb|gigabyte|megabyte)\b", re.I), "large_files"),
     # FIX-REL-001: "size hogs on my disk" — disk/size hog phrasing
     (re.compile(r"\b(size|disk|space)\s*hogs?\b", re.I), "large_files"),
+    # FIX-LF-002: bare "largest/biggest files" forms not covered by space-consumer patterns
+    (re.compile(r"\b(?:largest|biggest)\b.{0,20}\bfiles?\b", re.I), "large_files"),
+    (re.compile(r"\bfiles?\b.{0,20}\b(?:largest|biggest)\b", re.I), "large_files"),
 
     # ── Disk / space (narrowed to disk/space/storage objects only) ───────────────
     # FIX-SPRINT-005: advisory "what generates/causes disk usage" → skip disk_usage (LLM handles as chat)
@@ -862,6 +865,10 @@ _REGEX_INTENTS = [
     (re.compile(r"(check|verify).{0,20}(setup|stack|services|system)", re.I), "status"),
     # FIX-ST-001: "system check", "all systems go" → status
     (re.compile(r"\bsystem\s+check\b", re.I), "status"),
+    # FIX-ST-002: "health check", "how is adwi doing", "is adwi healthy" → status
+    (re.compile(r"\bhealth\s+check\b", re.I), "status"),
+    (re.compile(r"\bhow\s+is\b.{0,15}\b(?:adwi|the\s+system|everything)\b.{0,15}\bdoing\b", re.I), "status"),
+    (re.compile(r"\bis\b.{0,10}\b(?:adwi|the\s+system)\b.{0,20}\b(?:healthy|running\s+well|ok|okay|fine)\b", re.I), "status"),
     (re.compile(r"\ball\s+systems?\s+(?:go|running|ok|good|fine|operational)\b", re.I), "status"),
     # CYCLE-4: "is the model slow/fast" → status (diagnostic); "why is X slow" stays in chat (advisory)
     (re.compile(r"\bis\b.{0,15}\b(?:the\s+)?(?:model|adwi|ollama)\b.{0,15}\b(?:slow|fast|sluggish|lagging|unresponsive|not\s+responding)\b", re.I), "status"),
@@ -1217,6 +1224,10 @@ _REGEX_INTENTS = [
     (re.compile(r"\brepo\b.{0,15}\b(clean|dirty|status|changes)\b", re.I), "git_status"),
     # FIX-S3-008: "what did I change", "what's modified", "show me what's changed"
     (re.compile(r"\bwhat\s+(did\s+i|have\s+i).{0,10}(change|modify|edit|commit)\b", re.I), "git_status"),
+    # FIX-GIT-001: "what branch am I on", "uncommitted changes", "show git changes"
+    (re.compile(r"\bwhat\s+branch\b.{0,20}\b(?:am\s+i|are\s+we)\b.{0,10}\bon\b", re.I), "git_status"),
+    (re.compile(r"\buncommitted\b.{0,20}\bchanges?\b", re.I), "git_status"),
+    (re.compile(r"\bshow\b.{0,10}\bgit\b.{0,20}\bchanges?\b", re.I), "git_status"),
     (re.compile(r"\bwhat.{0,5}(is|has|s)\s+(changed|modified|staged)\b", re.I), "git_status"),
     (re.compile(r"\bshow\s+(me\s+)?(what.{0,5}changed|the\s+diff|changes?\s+since)\b", re.I), "git_status"),
     # CYCLE-3: "are there any changes", "untracked files", "any changes to push"

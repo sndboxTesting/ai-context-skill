@@ -2631,5 +2631,58 @@ class TestFIXAUS001AssistantUpgradeStatus(unittest.TestCase):
         self.assertEqual(_classify("how is the upgrade going"), "assistant_upgrade_status")
 
 
+class TestFIXFS001WhereSaved(unittest.TestCase):
+    """FIX-FS-001: 'where did i save X' → file_search, not gmail_save_attachment."""
+
+    def test_where_did_i_save_the_pdf(self):
+        self.assertEqual(_classify("where did i save the pdf"), "file_search")
+
+    def test_where_do_i_keep_tax_documents(self):
+        self.assertEqual(_classify("where do i keep my tax documents"), "file_search")
+
+    def test_save_attachment_still_gmail(self):
+        # "save the pdf attachment from that email" must stay gmail_save_attachment
+        self.assertEqual(_classify("save the pdf attachment from that email"), "gmail_save_attachment")
+
+
+class TestFIXFL001ListMyFiles(unittest.TestCase):
+    """FIX-FL-001: type/location-qualified file listing → file_list."""
+
+    def test_list_my_python_files(self):
+        self.assertEqual(_classify("list my python files"), "file_list")
+
+    def test_show_files_in_downloads(self):
+        self.assertEqual(_classify("show files in downloads"), "file_list")
+
+    def test_show_files_in_workspace(self):
+        self.assertEqual(_classify("show files in my workspace"), "file_list")
+
+
+class TestFIXST001SystemCheck(unittest.TestCase):
+    """FIX-ST-001: 'system check', 'all systems go' → status."""
+
+    def test_system_check(self):
+        self.assertEqual(_classify("system check"), "status")
+
+    def test_all_systems_go(self):
+        self.assertEqual(_classify("all systems go"), "status")
+
+    def test_all_systems_operational(self):
+        self.assertEqual(_classify("all systems operational"), "status")
+
+
+class TestFIXNR002KickOffNightly(unittest.TestCase):
+    """FIX-NR-002: 'kick off nightly', 'run the nightly job' → nightly_run."""
+
+    def test_kick_off_nightly(self):
+        self.assertEqual(_classify("kick off nightly"), "nightly_run")
+
+    def test_run_the_nightly_job(self):
+        self.assertEqual(_classify("run the nightly job"), "nightly_run")
+
+    def test_start_the_nightly(self):
+        self.assertEqual(_classify("start the nightly"), "nightly_run")
+
+
 if __name__ == "__main__":
     unittest.main(verbosity=2)

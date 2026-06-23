@@ -775,6 +775,8 @@ _REGEX_INTENTS = [
     (re.compile(r"\b(find|locate)\b.{0,20}(all\s+|every\s+)?(dockerfile|makefile|vagrantfile|jenkinsfile|procfile)\b", re.I), "file_search"),
     # FIX-REL-011: "search for shell scripts" — search for + script/config/folder nouns
     (re.compile(r"\bsearch\s+for\b.{0,30}\b(scripts?|configs?|folders?)\b", re.I), "file_search"),
+    # FIX-FS-001: "where did i save the pdf" → file_search, not gmail_save_attachment
+    (re.compile(r"\bwhere\b.{0,15}\b(?:did|do)\b.{0,10}\bi\b.{0,15}\b(?:save|put|store|keep)\b", re.I), "file_search"),
     (re.compile(r"\bls\b", re.I), "file_list"),
     # FIX-REL-009: "list the contents of X" — extend content → contents?
     (re.compile(r"\blist\s+(files?|dir(ectory)?|folder|contents?)\b", re.I), "file_list"),
@@ -782,6 +784,9 @@ _REGEX_INTENTS = [
     (re.compile(r"\bwhat\s+files?\b.{0,20}(are in|in|inside)\b", re.I), "file_list"),
     # FIX-REL-006: "what's in my home directory" — dir contents without "files" keyword
     (re.compile(r"\bwhat.s\b.{0,25}\b(in|inside)\b.{0,20}\b(my\s+)?(home|workspace|root|project|folder|dir(?:ectory)?)\b", re.I), "file_list"),
+    # FIX-FL-001: "list my python files", "show files in downloads" — type-qualified or location-qualified listing
+    (re.compile(r"\blist\b.{0,15}\bmy\b.{0,30}\bfiles?\b", re.I), "file_list"),
+    (re.compile(r"\bshow\b.{0,20}\bfiles?\b.{0,10}\bin\b", re.I), "file_list"),
     (re.compile(r"\bread\b.{0,25}\.(py|js|ts|md|yaml|yml|json|txt|sh|toml|cfg|gitignore)\b", re.I), "file_read"),
     (re.compile(r"\bread\b.{0,20}(the file\b|file contents?\b|contents? of)\b", re.I), "file_read"),
     (re.compile(r"\b(show|display|cat)\b.{0,20}(contents? of|the file\b)\b", re.I), "file_read"),
@@ -821,6 +826,9 @@ _REGEX_INTENTS = [
     (re.compile(r"^\s*(?:is\s+)?all\s+ok\s*\??\s*$", re.I), "status"),
     (re.compile(r"\b(is|are)\b.{0,20}\b(ollama|docker|adwi|n8n|redis|api|server|services?|stack|everything)\b.{0,15}\b(available|up|running|reachable|responding|down|offline|unavailable)\b", re.I), "status"),
     (re.compile(r"(check|verify).{0,20}(setup|stack|services|system)", re.I), "status"),
+    # FIX-ST-001: "system check", "all systems go" → status
+    (re.compile(r"\bsystem\s+check\b", re.I), "status"),
+    (re.compile(r"\ball\s+systems?\s+(?:go|running|ok|good|fine|operational)\b", re.I), "status"),
     # CYCLE-4: "is the model slow/fast" → status (diagnostic); "why is X slow" stays in chat (advisory)
     (re.compile(r"\bis\b.{0,15}\b(?:the\s+)?(?:model|adwi|ollama)\b.{0,15}\b(?:slow|fast|sluggish|lagging|unresponsive|not\s+responding)\b", re.I), "status"),
     # CYCLE-5: status for "how's my AI doing"
@@ -963,6 +971,9 @@ _REGEX_INTENTS = [
     (re.compile(r"^nightly\s+run\s*$", re.I), "nightly_run"),
     # FIX-NR-001: "rn nightly" — casual abbreviation of "run nightly"
     (re.compile(r"^\s*rn\s+nightly\s*$", re.I), "nightly_run"),
+    # FIX-NR-002: "kick off nightly", "run the nightly job"
+    (re.compile(r"\b(?:kick\s+off|start\s+the)\b.{0,10}\bnightly\b", re.I), "nightly_run"),
+    (re.compile(r"\brun\s+(?:the\s+)?nightly\s+(?:job|task|script|process|routine)\b", re.I), "nightly_run"),
 
     # ── Model status / switching ─────────────────────────────────────────────────
     (re.compile(r"\b(what|which)\b.{0,15}\bmodel\b.{0,20}\b(am i|are you|is active|running|using|current|loaded)\b", re.I), "model_status"),

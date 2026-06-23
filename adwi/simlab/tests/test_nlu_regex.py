@@ -2035,5 +2035,39 @@ class TestStatusAllOk(unittest.TestCase):
         self.assertEqual(_classify("all ok"), "status")
 
 
+class TestCapabilitiesTypo(unittest.TestCase):
+    """FIX-META-001: 'cpaabilities' full-word typo → capabilities."""
+
+    def test_cpaabilities_full_word(self):
+        self.assertEqual(_classify("cpaabilities"), "capabilities")
+
+    def test_capabilites_typo(self):
+        self.assertEqual(_classify("capabilites"), "capabilities")
+
+
+class TestWebSearchTavily(unittest.TestCase):
+    """FIX-WEB-003: tavily-prefixed search queries → web_search."""
+
+    def test_search_with_tavily(self):
+        self.assertEqual(_classify("search with tavily for python packages"), "web_search")
+
+    def test_use_tavily(self):
+        self.assertEqual(_classify("use tavily to find best python libraries"), "web_search")
+
+
+class TestLearnFromError(unittest.TestCase):
+    """FIX-PLAN-001: learn_from_error regex anchor (before fix_error block)."""
+
+    def test_learn_from_my_last_error(self):
+        self.assertEqual(_classify("learn from my last error"), "learn_from_error")
+
+    def test_learn_from_error(self):
+        self.assertEqual(_classify("learn from error"), "learn_from_error")
+
+    def test_export_training_blocked_by_security_guard(self):
+        # "export training data" is intentionally blocked by the security __none__ guard
+        self.assertEqual(_classify("export training data"), "__none__")
+
+
 if __name__ == "__main__":
     unittest.main(verbosity=2)

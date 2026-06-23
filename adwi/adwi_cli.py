@@ -873,6 +873,8 @@ _REGEX_INTENTS = [
     (re.compile(r"\bdownload\b.{0,30}(from\s+the\s+web|a\s+file\s+from\s+https?://)", re.I), "browse"),
 
     # ── Web search ───────────────────────────────────────────────────────────────
+    # FIX-WEB-003: "search with tavily for X" — tavily is a web search service
+    (re.compile(r"\b(?:search|use|query)\s+(?:with\s+)?tavily\b", re.I), "web_search"),
     (re.compile(r"(search the web|web search|google|search online|look up online|find online|search internet).{0,50}", re.I), "web_search"),
     (re.compile(r"(what('s| is) (the latest|new in|current).{0,30}(release|version|update|news|changelog))", re.I), "web_search"),
     # FIX-WEB-001: "look up X guide/version/performance" patterns — BEFORE model_status
@@ -981,6 +983,11 @@ _REGEX_INTENTS = [
     (re.compile(r"\b(inspect|review|look at|examine).{0,20}(adwi.{0,10}\.py|adwi.?code|adwi.?source)\b", re.I), "inspect_code"),
     (re.compile(r"\b(inspect|review).{0,15}(adwi_cli|nightly\.py|memory\.py|backup\.py|grader\.py)\b", re.I), "inspect_code"),
     (re.compile(r"\b(find bugs in|check for bugs in|code review).{0,20}\badwi\b", re.I), "inspect_code"),
+
+    # FIX-PLAN-001: learn_from_error — must be BEFORE fix_error to avoid LLM routing to doctor
+    # NOTE: export_training is intentionally NOT regex-anchored here — "export training data" is
+    # blocked by the security __none__ guard at line ~545 (export training data → __none__).
+    (re.compile(r"\blearn\s+from\s+(?:my\s+)?(?:last\s+)?(?:recent\s+)?error\b", re.I), "learn_from_error"),
 
     # ── Fix error / exception — catches pasted tracebacks and HTTP error codes ────
     (re.compile(r"\b(TypeError|ValueError|KeyError|AttributeError|SyntaxError|ImportError|ModuleNotFoundError|NameError|RuntimeError|IndexError|OSError|IOError|FileNotFoundError|PermissionError|ZeroDivisionError|StopIteration|AssertionError|RecursionError|MemoryError|TimeoutError|ConnectionError|UnicodeError|ValidationError|UnicodeDecodeError|UnicodeEncodeError|OverflowError|LookupError|ArithmeticError)\b\s*:", re.I), "fix_error"),
@@ -1484,7 +1491,8 @@ _REGEX_INTENTS = [
     # ── Capabilities ─────────────────────────────────────────────────────────────
     # FIX-S3-004: "adwi feature list", typos, colloquial "wut can u do"
     (re.compile(r"\badwi\b.{0,20}\b(feature\s+list|features|commands|abilities|capabilities)\b", re.I), "capabilities"),
-    (re.compile(r"\b(cpaabilit|capabilites|capabilty|cabpabilities)\b", re.I), "capabilities"),
+    # FIX-META-001: "cpaabilities" full-word typo (cpaabilit\b doesn't match the 3-letter suffix "ies")
+    (re.compile(r"\b(cpaabilities|cpaabilit|capabilites|capabilty|cabpabilities)\b", re.I), "capabilities"),
     (re.compile(r"\bwut\s+can\s+(u|you)\b.{0,15}(do|help|offer)\b", re.I), "capabilities"),
 
     # ── Sync knowledge base ──────────────────────────────────────────────────────

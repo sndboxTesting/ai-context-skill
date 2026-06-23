@@ -879,7 +879,8 @@ _REGEX_INTENTS = [
     # (suggest|recommend).{0,20}(improvement) pattern fires on "suggested improvement"
     (re.compile(r"\b(?:implement|build|code\s+up|develop)\b.{0,20}\b(?:the\s+)?(?:suggested|recommended|proposed)\b", re.I), "implement_idea"),
     # FIX-II-001: "add this feature/functionality", "create this feature" → implement_idea
-    (re.compile(r"\b(?:add|create)\b.{0,15}\b(?:this|that|the)\b.{0,15}\b(?:feature|functionality|capability)\b", re.I), "implement_idea"),
+    # Negative lookahead: NOT "to [backlog/notes/list/tracker]" which means storage, not build
+    (re.compile(r"\b(?:add|create)\b.{0,15}\b(?:this|that|the)\b.{0,15}\b(?:feature|functionality|capability)\b(?!\s+to\s+(?:(?:the|my)\s+)?(?:backlog|todo|list|notes?|obsidian|queue|jira|linear|tracker))", re.I), "implement_idea"),
     # CYCLE-6: "adwi feature list" → capabilities (must beat what_next's "feature" match below)
     (re.compile(r"\badwi\b.{0,20}\bfeature\s+list\b", re.I), "capabilities"),
     (re.compile(r"\blist\s+(?:all\s+)?(?:your|adwi.?s?)\s+commands?\b", re.I), "capabilities"),

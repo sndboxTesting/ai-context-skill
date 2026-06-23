@@ -457,6 +457,8 @@ REGEX_INTENTS = [
     (re.compile(r"\b(anything|something)\b.{0,15}\b(down|broken|offline|unavailable|not\s+responding)\b", re.I), "status"),
     (re.compile(r"\b(is|are)\b.{0,20}\b(ollama|docker|adwi|n8n|redis|api|server|services?|stack|everything)\b.{0,15}\b(available|up|running|reachable|responding|down|offline|unavailable)\b", re.I), "status"),
     (re.compile(r"(check|verify).{0,20}(setup|stack|services|system)", re.I), "status"),
+    # FIX-STATUS-003: "all ok?" / "is all ok?" — brief status probe
+    (re.compile(r"^\s*(?:is\s+)?all\s+ok\s*\??\s*$", re.I), "status"),
     # CYCLE-4: "is the model slow/fast/performing well" → status (diagnostic, not advisory)
     (re.compile(r"\bis\b.{0,15}\b(?:the\s+)?(?:model|adwi|ollama)\b.{0,15}\b(?:slow|fast|sluggish|lagging|unresponsive|not\s+responding)\b", re.I), "status"),
     # CYCLE-5: "how's my AI doing/performing" → status

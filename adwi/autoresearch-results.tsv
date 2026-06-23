@@ -26,3 +26,23 @@ c6bd063	573	573	25	25	17	17	keep	CYCLE-7 test coverage (19 tests) + FIX-TR-001 t
 3df3d6a	612	612	25	25	17	17	keep	All remaining 10 zero-coverage intents now have tests (612 total — full coverage)
 7cfb84d	614	614	25	25	17	17	keep	FIX-DI-001: daily_improve stem patterns fixed (improv\w*) — eval scenarios now match (614 tests)
 69c35a1	616	616	25	25	17	17	keep	FIX-DI-002: route improvement continuation loop/experiment phrasing
+171ced0	616	616	25	25	17	17	keep	doc: LLM_SYSTEM_PRIMING.md NLU test count 481→616 (PRIMEFILE-005 fix)
+d36307f	626	626	25	25	17	17	keep	FIX-OBS-004/RES-001/TR-002: obsidian search topic guard, research window, tech_radar what-is (626 tests)
+39f53fe	634	634	25	25	17	17	keep	FIX-DAILY-001/MEM-001/AUS-001: daily_brief need-to-know, memory_curate prune/trim, assistant_upgrade_status upgrade-going (634 tests)
+4a23a61	646	646	25	25	17	17	keep	FIX-FS-001/FL-001/ST-001/NR-002: file save false-positive guard, list-my-files, system-check, kick-off-nightly (646 tests)
+ae0146e	656	656	25	25	17	17	keep	FIX-OBS-005/006/MR-001/BU-001: look-in-notes obsidian guard, find-notes-from, what-did-i-say memory_recall, push-my-changes backup_now (656 tests)
+d04d69c	676	676	25	25	17	17	keep	FIX-LFE-001/BST-001/GENIMG-001/TR-003: learn-from-this-error, backup-state queries, show-me-a-picture, upcoming-tools (676 tests)
+1bb154c	694	694	25	25	17	17	keep	FIX-EXT-001/UC-001/ROUTE-001: identify-key-points extract_ideas, fallback-to-cloud use_cloud, how-would-you-route route (694 tests)
+54e5cd4	708	708	25	25	17	17	keep	FIX-RC-002/DOC-001/GV-001: run-this-snippet run_code, self-check doctor, toggle-repo-visibility github_visibility (708 tests)
+e206944	724	724	25	25	17	17	keep	FIX-DI-003/BL-001/BD-001: kick-off-daily daily_improve, recent-backups backup_log, browse-to-url browser_delegate (724 tests)
+589bba6	738	738	25	25	17	17	keep	FIX-DU-006: not-enough-space, filling-up, need-more-storage, how-many-GB disk_usage fallthroughs (738 tests)
+37f2cfd	738	738	25	25	17	17	keep	FIX-BD-001 false positive guard: go-to-next-page now -> browse not browser_delegate
+84d6c2a	756	756	25	25	17	17	keep	FIX-VOC-001/DB-002/II-001: narrate-this voice_out, todays-overview daily_brief, add-this-feature implement_idea (756 tests)
+7002797	774	774	25	25	17	17	keep	FIX-OD-001/VI-001/MC-002: check-daily-note obsidian_daily, dictate/mic voice_in, view-context memory_context (774 tests)
+a5834dd	794	794	25	25	17	17	keep	FIX-FR-002/003/FS-002/FL-002: open-config-file false positive fixed, where-are-my-docs file_search, show-all-pdf-files file_list (794 tests)
+dc98b1a	801	801	25	25	17	17	keep	FIX-FE-003: debug/troubleshoot/diagnose this-error fix_error (801 tests)
+eb5669c	801	801	25	25	17	17	keep	FIX-FE-003: debug/troubleshoot/diagnose this-error fix_error (801 tests)
+9847c86	801	801	25	25	17	17	keep	FIX-II-001 guard: add-feature-to-backlog now correctly NOT implement_idea
+e4e4b71	815	815	25	25	17	17	keep	FIX-RES-002/BU-002/NR-003: investigate-this research, push-to-github backup_now, run-maintenance nightly_run (815 tests)
+fa3e2dd	815	815	25	25	17	17	keep	FIX-RES-002/BU-002/NR-003: investigate-this research, push-to-github backup_now, run-maintenance nightly_run (815 tests)
+bb2dc8d	828	828	25	25	17	17	keep	FIX-OF-002/MR-002/MS-002/MSCAN-002: files-older-than old_files, what-in-memory memory_recall, memory-usage-stats memory_stats, list-my-memories memory_scan (828 tests)

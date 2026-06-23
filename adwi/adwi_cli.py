@@ -949,6 +949,9 @@ _REGEX_INTENTS = [
     (re.compile(r"\b(deep.?dive|deep.?research|research.?brief|cited\s+report|research\s+report)\b", re.I), "research"),
     # FIX-RES-001: expand window {0,15}→{0,25} — "investigate this topic deeply for me" has 19 chars between verb and "for me"
     (re.compile(r"\b(research|investigate|look\s+into).{0,25}\bfor\s+me\b", re.I), "research"),
+    # FIX-RES-002: "investigate this topic", "research this", "look into this deeply"
+    (re.compile(r"\b(?:research|investigate)\s+(?:this|that)\b", re.I), "research"),
+    (re.compile(r"\b(?:investigate|look\s+into)\b.{0,30}\b(?:topic|subject|area|question|further|deeply|thoroughly)\b", re.I), "research"),
     (re.compile(r"\b(write|produce|generate)\b.{0,20}\b(research|cited|sourced)\s+(brief|report|summary)\b", re.I), "research"),
     (re.compile(r"\bsave\b.{0,20}\bresearch\b.{0,30}\b(about|on|into)\b", re.I), "research"),
     # ── Browse — URL/domain visit patterns BEFORE web_search ─────────────────────
@@ -1022,6 +1025,8 @@ _REGEX_INTENTS = [
     # FIX-NR-002: "kick off nightly", "run the nightly job"
     (re.compile(r"\b(?:kick\s+off|start\s+the)\b.{0,10}\bnightly\b", re.I), "nightly_run"),
     (re.compile(r"\brun\s+(?:the\s+)?nightly\s+(?:job|task|script|process|routine)\b", re.I), "nightly_run"),
+    # FIX-NR-003: "run maintenance", "schedule maintenance" → nightly_run
+    (re.compile(r"\b(?:run|trigger|schedule|start)\b.{0,15}\bmaintenance\b", re.I), "nightly_run"),
 
     # ── Model status / switching ─────────────────────────────────────────────────
     (re.compile(r"\b(what|which)\b.{0,15}\bmodel\b.{0,20}\b(am i|are you|is active|running|using|current|loaded)\b", re.I), "model_status"),
@@ -1074,6 +1079,9 @@ _REGEX_INTENTS = [
     # FIX-BU-001: "push my changes/code/work" → backup_now
     (re.compile(r"\bpush\b.{0,15}\bmy\b.{0,10}\b(changes|code|work|commits?|updates?)\b", re.I), "backup_now"),
     (re.compile(r"\bsave\b.{0,20}\b(my\s+)?(work|changes|code)\b.{0,20}\b(to\s+)?github\b", re.I), "backup_now"),
+    # FIX-BU-002: "push to github", "sync to github" → backup_now
+    (re.compile(r"\bpush\b.{0,20}\b(?:to\s+)?github\b", re.I), "backup_now"),
+    (re.compile(r"\bsync\b.{0,20}\bgithub\b", re.I), "backup_now"),
     (re.compile(r"\b(backup.{0,10}(status|health|check|recent|current)|last.{0,10}backup|when.{0,15}(was.{0,5})?backup)\b", re.I), "backup_status"),
     # FIX-BST-001: "is/did/has backup run/complete/fail/succeed" → backup_status
     (re.compile(r"\b(?:is|was|has|did)\b.{0,15}\b(?:the\s+)?backup\b.{0,20}\b(?:run|running|complete|completed|finish|finished|succeed|succeeded|fail|failed|done|successful)\b", re.I), "backup_status"),

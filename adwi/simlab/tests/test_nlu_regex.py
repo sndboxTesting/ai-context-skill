@@ -3262,5 +3262,59 @@ class TestFIXFE003DebugTroubleshoot(unittest.TestCase):
         self.assertEqual(_classify("troubleshoot my code"), "fix_error")
 
 
+class TestFIXRES002InvestigateThis(unittest.TestCase):
+    """FIX-RES-002: 'investigate this/that', 'research this', 'look into topic deeply' → research."""
+
+    def test_investigate_this_topic(self):
+        self.assertEqual(_classify("investigate this topic"), "research")
+
+    def test_research_this(self):
+        self.assertEqual(_classify("research this"), "research")
+
+    def test_investigate_that_deeply(self):
+        self.assertEqual(_classify("investigate that deeply"), "research")
+
+    def test_look_into_topic_further(self):
+        self.assertEqual(_classify("look into this topic further"), "research")
+
+    def test_look_into_question_thoroughly(self):
+        self.assertEqual(_classify("look into this question thoroughly"), "research")
+
+    def test_investigate_subject(self):
+        self.assertEqual(_classify("investigate this subject"), "research")
+
+
+class TestFIXBU002PushToGithub(unittest.TestCase):
+    """FIX-BU-002: 'push to github', 'sync to github' → backup_now."""
+
+    def test_push_to_github(self):
+        self.assertEqual(_classify("push to github"), "backup_now")
+
+    def test_push_github(self):
+        self.assertEqual(_classify("push github"), "backup_now")
+
+    def test_sync_to_github(self):
+        self.assertEqual(_classify("sync to github"), "backup_now")
+
+    def test_sync_github(self):
+        self.assertEqual(_classify("sync github"), "backup_now")
+
+
+class TestFIXNR003RunMaintenance(unittest.TestCase):
+    """FIX-NR-003: 'run/trigger/schedule maintenance' → nightly_run."""
+
+    def test_run_maintenance(self):
+        self.assertEqual(_classify("run maintenance"), "nightly_run")
+
+    def test_schedule_maintenance(self):
+        self.assertEqual(_classify("schedule maintenance"), "nightly_run")
+
+    def test_trigger_maintenance(self):
+        self.assertEqual(_classify("trigger maintenance"), "nightly_run")
+
+    def test_start_maintenance(self):
+        self.assertEqual(_classify("start maintenance"), "nightly_run")
+
+
 if __name__ == "__main__":
     unittest.main(verbosity=2)

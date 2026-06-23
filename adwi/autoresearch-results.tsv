@@ -11,3 +11,4 @@ ada40b5	481	481	25	25	17	17	keep	FIX-NR-001: nightly_run regex — 'rn nightly' 
 fb2901c	493	493	25	25	17	17	keep	FIX-GTI-001: guard broad action-items pattern — 'check email...action items' routes to gmail not gmail_thread_intel
 378fc73	493	493	25	25	17	17	keep	FIX-STATUS-003: 'all ok?' / 'is all ok?' anchored regex → status intent
 a21e9c6	499	499	25	25	17	17	keep	add regression tests for FIX-GTI-001 and FIX-STATUS-003 (499 total NLU tests)
+6cbc076	506	506	25	25	17	17	keep	FIX-META-001/WEB-003/PLAN-001: capabilities typo 'cpaabilities', tavily web_search, learn_from_error regex; export_training security guard documented

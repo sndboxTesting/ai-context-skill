@@ -919,7 +919,7 @@ _REGEX_INTENTS = [
     (re.compile(r"\b(browser.?delegate|delegate.{0,15}browser|safe.?browse|browser.?agent|browser.?task)\b", re.I), "browser_delegate"),
     (re.compile(r"\b(use\s+browser\s+to|use\s+playwright\s+to|automate.{0,20}browser)\b", re.I), "browser_delegate"),
     # FIX-BD-001: "browse to/open in browser/visit URL" → browser_delegate
-    (re.compile(r"\b(?:browse\s+to|navigate\s+to|go\s+to)\b.{0,30}\b(?:url|link|page|site|website)\b", re.I), "browser_delegate"),
+    (re.compile(r"\b(?:browse\s+to|navigate\s+to|go\s+to)\b.{0,30}\b(?:url|link|site|website|(?:this|that)\s+page)\b", re.I), "browser_delegate"),
     (re.compile(r"\bopen\b.{0,20}\b(?:url|link|page|website|site)\b.{0,20}\b(?:in\s+(?:a\s+)?)?browser\b", re.I), "browser_delegate"),
     (re.compile(r"\b(?:visit|fetch)\b.{0,15}\b(?:this\s+)?(?:url|link|webpage|website)\b", re.I), "browser_delegate"),
     # ── Research operator (deep cited research, BEFORE web_search) ───────────────

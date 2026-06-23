@@ -1203,6 +1203,8 @@ REGEX_INTENTS = [
     # ── Tech radar ────────────────────────────────────────────────────────────────
     (re.compile(r"\b(tech.?radar|technology.?radar)\b", re.I), "tech_radar"),
     (re.compile(r"\bscan\b.{0,20}\b(new|latest|trending).{0,20}\b(ai.?tools?|tech.?tools?|frameworks?|models?)\b", re.I), "tech_radar"),
+    # FIX-TR-001: bare "what's trending in tech/AI/ML" — no action suffix needed
+    (re.compile(r"\bwhat'?s\b.{0,20}\b(new|trending|interesting)\b.{0,20}\b(tech|ai|llm|ml|tools?)\b", re.I), "tech_radar"),
     (re.compile(r"\b(what.{0,20}(new|interesting|trending).{0,20}(tech|ai.?tools?|frameworks?|models?))\b.{0,30}\b(try|watch|ignore|adopt|for\s+me|my\s+setup)\b", re.I), "tech_radar"),
     # ── Memory curate (BEFORE memory_scan) ───────────────────────────────────────
     (re.compile(r"\bmemory.{0,2}curat\w+\b", re.I), "memory_curate"),

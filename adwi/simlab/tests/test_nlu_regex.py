@@ -2192,6 +2192,87 @@ class TestComparisonQuestionsChat(unittest.TestCase):
         self.assertEqual(_classify("what is the difference between llama2 and llama3"), "chat")
 
 
+class TestDailyBrief(unittest.TestCase):
+    """CYCLE-7: daily_brief intent regex coverage."""
+
+    def test_daily_brief_bare(self):
+        self.assertEqual(_classify("daily brief"), "daily_brief")
+
+    def test_morning_brief(self):
+        self.assertEqual(_classify("morning brief"), "daily_brief")
+
+    def test_give_me_daily_summary(self):
+        self.assertEqual(_classify("give me my daily summary"), "daily_brief")
+
+    def test_whats_my_agenda_today(self):
+        self.assertEqual(_classify("what's my agenda today"), "daily_brief")
+
+
+class TestResearchIntent(unittest.TestCase):
+    """CYCLE-7: research intent regex coverage."""
+
+    def test_research_latest_mcp_changes(self):
+        self.assertEqual(_classify("research latest MCP changes"), "research")
+
+    def test_deep_dive_llm_tool_use(self):
+        self.assertEqual(_classify("deep dive into LLM tool use"), "research")
+
+    def test_look_into_this_for_me(self):
+        self.assertEqual(_classify("look into this for me"), "research")
+
+    def test_produce_cited_report(self):
+        self.assertEqual(_classify("produce a cited report on AI agents"), "research")
+
+
+class TestBrowserDelegate(unittest.TestCase):
+    """CYCLE-7: browser_delegate intent regex coverage."""
+
+    def test_browser_delegate_bare(self):
+        self.assertEqual(_classify("browser delegate"), "browser_delegate")
+
+    def test_use_browser_to_fill_form(self):
+        self.assertEqual(_classify("use browser to fill out the form"), "browser_delegate")
+
+    def test_automate_browser(self):
+        self.assertEqual(_classify("automate the browser to log in"), "browser_delegate")
+
+
+class TestTechRadar(unittest.TestCase):
+    """CYCLE-7: tech_radar intent regex coverage."""
+
+    def test_tech_radar_bare(self):
+        self.assertEqual(_classify("tech radar"), "tech_radar")
+
+    def test_scan_new_ai_tools(self):
+        self.assertEqual(_classify("scan for new AI tools"), "tech_radar")
+
+    def test_whats_trending_in_tech(self):
+        self.assertEqual(_classify("what's trending in tech"), "tech_radar")
+
+
+class TestMemoryCurate(unittest.TestCase):
+    """CYCLE-7: memory_curate intent regex coverage."""
+
+    def test_memory_curate_bare(self):
+        self.assertEqual(_classify("memory curate"), "memory_curate")
+
+    def test_propose_new_memories(self):
+        self.assertEqual(_classify("propose new durable memories"), "memory_curate")
+
+    def test_learn_from_recent_logs(self):
+        self.assertEqual(_classify("learn from my recent logs"), "memory_curate")
+
+
+class TestAssistantUpgradeStatus(unittest.TestCase):
+    """CYCLE-7: assistant_upgrade_status intent regex coverage."""
+
+    def test_upgrade_pack_status(self):
+        self.assertEqual(_classify("upgrade pack status"), "assistant_upgrade_status")
+
+    def test_assistant_upgrade_status(self):
+        self.assertEqual(_classify("assistant upgrade status"), "assistant_upgrade_status")
+
+
 class TestComparisonQuestionsChatExtra(unittest.TestCase):
     """FIX-CHAT-005: what's-the-difference contraction + compare-for-my pattern."""
 

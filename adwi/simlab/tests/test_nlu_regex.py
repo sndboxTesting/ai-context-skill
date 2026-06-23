@@ -1952,5 +1952,61 @@ class TestReliabilityCycle3Regressions(unittest.TestCase):
         self.assertEqual(_classify("help: RuntimeError: maximum recursion depth exceeded"), "fix_error")
 
 
+# ---------------------------------------------------------------------------
+# Autoresearch jun23-1 — regression tests for new patterns
+# ---------------------------------------------------------------------------
+
+class TestBenchmarkVerbForm(unittest.TestCase):
+    """FIX-006: 'how do i benchmark it/my model' verb-form patterns."""
+
+    def test_how_do_i_benchmark_it(self):
+        self.assertEqual(_classify("my local AI model is responding much slower than usual what could be causing this and how do i benchmark it"), "benchmark")
+
+    def test_how_can_i_benchmark_my_model(self):
+        self.assertEqual(_classify("how can i benchmark my model"), "benchmark")
+
+    def test_local_ai_model_benchmark(self):
+        self.assertEqual(_classify("local AI model benchmark"), "benchmark")
+
+
+class TestDiskUsagePatterns(unittest.TestCase):
+    """FIX-DU-001..004: disk_usage patterns for colloquial and typo forms."""
+
+    def test_am_i_running_out_of_space(self):
+        self.assertEqual(_classify("am i running out of space"), "disk_usage")
+
+    def test_running_low_on_storage(self):
+        self.assertEqual(_classify("running low on storage"), "disk_usage")
+
+    def test_disk_uzage_typo(self):
+        self.assertEqual(_classify("disk uzage"), "disk_usage")
+
+    def test_how_much_storeage(self):
+        self.assertEqual(_classify("how much storeage do i have"), "disk_usage")
+
+    def test_ssd_almost_full(self):
+        self.assertEqual(_classify("my ssd is almost full"), "disk_usage")
+
+    def test_running_out_of_disk_space(self):
+        self.assertEqual(_classify("running out of disk space"), "disk_usage")
+
+
+class TestNightlyRunAbbreviation(unittest.TestCase):
+    """FIX-NR-001: 'rn nightly' casual abbreviation for nightly_run."""
+
+    def test_rn_nightly(self):
+        self.assertEqual(_classify("rn nightly"), "nightly_run")
+
+
+class TestGmailTasksSavePronoun(unittest.TestCase):
+    """FIX-GTS-001: 'add those to my daily note' pronoun pattern."""
+
+    def test_add_those_to_daily_note(self):
+        self.assertEqual(_classify("add those to my daily note"), "gmail_tasks_save")
+
+    def test_add_them_to_daily_note(self):
+        self.assertEqual(_classify("add them to the daily note"), "gmail_tasks_save")
+
+
 if __name__ == "__main__":
     unittest.main(verbosity=2)

@@ -789,6 +789,9 @@ _REGEX_INTENTS = [
     (re.compile(r"\bsearch\s+for\b.{0,30}\b(scripts?|configs?|folders?)\b", re.I), "file_search"),
     # FIX-FS-001: "where did i save the pdf" → file_search, not gmail_save_attachment
     (re.compile(r"\bwhere\b.{0,15}\b(?:did|do)\b.{0,10}\bi\b.{0,15}\b(?:save|put|store|keep)\b", re.I), "file_search"),
+    # FIX-FS-002: "where are my documents/photos/files", "find my photos from last year"
+    (re.compile(r"\bwhere\s+(?:are|is)\b.{0,15}\bmy\b.{0,20}\b(?:documents?|photos?|pictures?|files?|videos?|downloads?)\b", re.I), "file_search"),
+    (re.compile(r"\bfind\s+my\b.{0,20}\b(?:photos?|pictures?|documents?|videos?|downloads?)\b", re.I), "file_search"),
     (re.compile(r"\bls\b", re.I), "file_list"),
     # FIX-REL-009: "list the contents of X" — extend content → contents?
     (re.compile(r"\blist\s+(files?|dir(ectory)?|folder|contents?)\b", re.I), "file_list"),
@@ -799,6 +802,9 @@ _REGEX_INTENTS = [
     # FIX-FL-001: "list my python files", "show files in downloads" — type-qualified or location-qualified listing
     (re.compile(r"\blist\b.{0,15}\bmy\b.{0,30}\bfiles?\b", re.I), "file_list"),
     (re.compile(r"\bshow\b.{0,20}\bfiles?\b.{0,10}\bin\b", re.I), "file_list"),
+    # FIX-FL-002: "show me all PDF/python files", "show me what files I have" → file_list
+    (re.compile(r"\bshow\s+(?:me\s+)?(?:all\s+)?(?:the\s+)?(?:pdf|python|text|image|photo|video|audio|zip|log)\b.{0,15}\bfiles?\b", re.I), "file_list"),
+    (re.compile(r"\bshow\s+(?:me\s+)?(?:what\s+)?files?\b.{0,20}\b(?:i\s+have|are\s+(?:here|there|available))\b", re.I), "file_list"),
     (re.compile(r"\bread\b.{0,25}\.(py|js|ts|md|yaml|yml|json|txt|sh|toml|cfg|gitignore)\b", re.I), "file_read"),
     (re.compile(r"\bread\b.{0,20}(the file\b|file contents?\b|contents? of)\b", re.I), "file_read"),
     (re.compile(r"\b(show|display|cat)\b.{0,20}(contents? of|the file\b)\b", re.I), "file_read"),
@@ -808,6 +814,12 @@ _REGEX_INTENTS = [
     # FIX-S3-002: "show the nightly.py source", "show me adwi/__init__.py" → file_read not inspect_code
     (re.compile(r"\b(show|display|print)\b.{0,10}\b\w+\.(py|js|ts|sh|md)\b", re.I), "file_read"),
     (re.compile(r"\b(show|display)\b.{0,15}\b(adwi/|src/|logs?/)\b", re.I), "file_read"),
+    # FIX-FR-002: "open [file with extension]" or "open the config/settings file" → file_read
+    # BEFORE gmail_save_attachment which matches open+file without requiring attachment context
+    (re.compile(r"\bopen\b.{0,25}\.(py|js|ts|md|yaml|yml|json|txt|sh|toml|cfg|ini|gitignore)\b", re.I), "file_read"),
+    (re.compile(r"\bopen\b.{0,30}\b(the\s+)?(main|config|configuration|settings?|local|env)\s+(file|script)\b", re.I), "file_read"),
+    # FIX-FR-003: "read the README", "read the config file" (open verb was missing)
+    (re.compile(r"\b(?:read|open)\b.{0,20}\b(?:the\s+)?README\b", re.I), "file_read"),
 
     # ── Doctor — BEFORE status (Bug 3 companion: deep check beats shallow) ───────
     (re.compile(r"\b(run doctor|doctor mode)\b", re.I), "doctor"),

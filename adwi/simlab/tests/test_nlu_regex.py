@@ -3163,5 +3163,79 @@ class TestFIXMC002MemoryContextView(unittest.TestCase):
         self.assertEqual(_classify("what's loaded in context"), "memory_context")
 
 
+class TestFIXFR002OpenFileFalsePositive(unittest.TestCase):
+    """FIX-FR-002/003: 'open [file with ext]' and 'open the config/README' → file_read.
+    Was false-positiving to gmail_save_attachment because open+file matched that pattern."""
+
+    def test_open_config_file(self):
+        self.assertEqual(_classify("open the config file"), "file_read")
+
+    def test_open_settings_file(self):
+        self.assertEqual(_classify("open the settings file"), "file_read")
+
+    def test_open_py_file(self):
+        self.assertEqual(_classify("open train.py"), "file_read")
+
+    def test_open_json_file(self):
+        self.assertEqual(_classify("open config.json"), "file_read")
+
+    def test_open_readme(self):
+        self.assertEqual(_classify("open the README"), "file_read")
+
+    def test_read_readme(self):
+        self.assertEqual(_classify("read the README"), "file_read")
+
+    def test_open_env_file(self):
+        self.assertEqual(_classify("open the env file"), "file_read")
+
+    def test_gmail_save_attachment_still_works(self):
+        # gmail_save_attachment should still work for email attachment context
+        self.assertEqual(_classify("open the attached invoice"), "gmail_save_attachment")
+
+    def test_save_attached_pdf_still_works(self):
+        self.assertEqual(_classify("save the attached pdf"), "gmail_save_attachment")
+
+
+class TestFIXFS002FindMyDocuments(unittest.TestCase):
+    """FIX-FS-002: 'where are my documents/photos', 'find my photos' → file_search."""
+
+    def test_where_are_my_documents(self):
+        self.assertEqual(_classify("where are my documents"), "file_search")
+
+    def test_where_are_my_photos(self):
+        self.assertEqual(_classify("where are my photos"), "file_search")
+
+    def test_where_are_my_files(self):
+        self.assertEqual(_classify("where are my files"), "file_search")
+
+    def test_find_my_photos(self):
+        self.assertEqual(_classify("find my photos"), "file_search")
+
+    def test_find_my_documents(self):
+        self.assertEqual(_classify("find my documents"), "file_search")
+
+    def test_find_my_photos_from_last_year(self):
+        self.assertEqual(_classify("find my photos from last year"), "file_search")
+
+
+class TestFIXFL002ShowAllFilesType(unittest.TestCase):
+    """FIX-FL-002: 'show me all pdf files', 'show me what files I have' → file_list."""
+
+    def test_show_me_all_pdf_files(self):
+        self.assertEqual(_classify("show me all pdf files"), "file_list")
+
+    def test_show_me_all_python_files(self):
+        self.assertEqual(_classify("show me all python files"), "file_list")
+
+    def test_show_me_all_log_files(self):
+        self.assertEqual(_classify("show me all log files"), "file_list")
+
+    def test_show_me_what_files_i_have(self):
+        self.assertEqual(_classify("show me what files i have"), "file_list")
+
+    def test_show_me_files_available(self):
+        self.assertEqual(_classify("show me what files are available"), "file_list")
+
+
 if __name__ == "__main__":
     unittest.main(verbosity=2)

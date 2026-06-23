@@ -372,6 +372,9 @@ REGEX_INTENTS = [
     # FIX-DU-004: "am i running out", "disk/ssd is almost full"
     (re.compile(r"\bam\s+i\s+running\s+out\b", re.I), "disk_usage"),
     (re.compile(r"\b(?:my\s+)?(?:disk|drive|ssd|hdd)\s+(?:is\s+)?(?:almost|nearly|getting)\s+full\b", re.I), "disk_usage"),
+    # FIX-DU-005: "free space remaining", "storage remaining"
+    (re.compile(r"\bfree\s+space\s+remaining\b", re.I), "disk_usage"),
+    (re.compile(r"\b(?:storage|disk|space)\s+remaining\b", re.I), "disk_usage"),
     (re.compile(r"(free up|clean up).{0,20}(space|disk|storage|room)", re.I), "cleanup"),
 
     # FIX-SPRINT-004: "purge old X", "remove leftover X" → cleanup BEFORE old_files steals them

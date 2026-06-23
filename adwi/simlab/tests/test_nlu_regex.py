@@ -2163,5 +2163,18 @@ class TestChatConversationalContinuation(unittest.TestCase):
         self.assertEqual(_classify("what does that mean"), "chat")
 
 
+class TestDiskUsageRemaining(unittest.TestCase):
+    """FIX-DU-005: 'free space remaining', 'storage remaining' → disk_usage."""
+
+    def test_free_space_remaining(self):
+        self.assertEqual(_classify("free space remaining"), "disk_usage")
+
+    def test_storage_remaining(self):
+        self.assertEqual(_classify("storage remaining"), "disk_usage")
+
+    def test_disk_remaining(self):
+        self.assertEqual(_classify("disk remaining"), "disk_usage")
+
+
 if __name__ == "__main__":
     unittest.main(verbosity=2)

@@ -2923,5 +2923,66 @@ class TestFIXGV001GithubVisibility(unittest.TestCase):
         self.assertEqual(_classify("switch github repo visibility"), "github_visibility")
 
 
+class TestFIXDI003DailyImproveTrigger(unittest.TestCase):
+    """FIX-DI-003: 'do/trigger/kick off daily maintenance/improvement' → daily_improve."""
+
+    def test_do_daily_maintenance(self):
+        self.assertEqual(_classify("do daily maintenance"), "daily_improve")
+
+    def test_trigger_daily_improvement(self):
+        self.assertEqual(_classify("trigger daily improvement"), "daily_improve")
+
+    def test_kick_off_daily_routine(self):
+        self.assertEqual(_classify("kick off daily routine"), "daily_improve")
+
+    def test_start_daily_loop(self):
+        self.assertEqual(_classify("start daily loop"), "daily_improve")
+
+
+class TestFIXBL001BackupLogHistory(unittest.TestCase):
+    """FIX-BL-001: 'recent backups', 'show backup entries' → backup_log."""
+
+    def test_recent_backups(self):
+        self.assertEqual(_classify("recent backups"), "backup_log")
+
+    def test_show_recent_backups(self):
+        self.assertEqual(_classify("show recent backups"), "backup_log")
+
+    def test_show_backup_entries(self):
+        self.assertEqual(_classify("show backup entries"), "backup_log")
+
+    def test_show_backup_records(self):
+        self.assertEqual(_classify("show backup records"), "backup_log")
+
+
+class TestFIXBD001BrowseTo(unittest.TestCase):
+    """FIX-BD-001: 'browse to URL', 'open link in browser', 'visit webpage' → browser_delegate."""
+
+    def test_browse_to_url(self):
+        self.assertEqual(_classify("browse to this url"), "browser_delegate")
+
+    def test_navigate_to_page(self):
+        self.assertEqual(_classify("navigate to this page"), "browser_delegate")
+
+    def test_go_to_link(self):
+        self.assertEqual(_classify("go to this link"), "browser_delegate")
+
+    def test_open_url_in_browser(self):
+        self.assertEqual(_classify("open this url in browser"), "browser_delegate")
+
+    def test_visit_this_url(self):
+        self.assertEqual(_classify("visit this url"), "browser_delegate")
+
+    def test_visit_webpage(self):
+        self.assertEqual(_classify("visit this webpage"), "browser_delegate")
+
+    def test_fetch_this_link(self):
+        self.assertEqual(_classify("fetch this link"), "browser_delegate")
+
+    def test_fetch_page_and_summarize_is_browse(self):
+        # "fetch this page and summarize" has no url/link keyword → routes to browse, not browser_delegate
+        self.assertNotEqual(_classify("fetch this page and summarize it"), "browser_delegate")
+
+
 if __name__ == "__main__":
     unittest.main(verbosity=2)

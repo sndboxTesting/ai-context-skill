@@ -888,6 +888,8 @@ _REGEX_INTENTS = [
     (re.compile(r"\b(daily.?improv\w*|daily.?enhanc\w*|daily.?routine)\b", re.I), "daily_improve"),
     (re.compile(r"\brun.{0,10}daily.{0,10}(improve\w*|maintenance|self.?improve\w*)\b", re.I), "daily_improve"),
     (re.compile(r"\b(continue|resume|keep|run)\b.{0,20}\b(adwi\s+)?(improvement|self.?improvement|improve\w*)\b.{0,20}\b(loop|cycle|experiment)\b", re.I), "daily_improve"),
+    # FIX-DI-003: "do/trigger/kick off daily maintenance/improvement/routine" → daily_improve
+    (re.compile(r"\b(?:do|trigger|kick\s+off|start)\b.{0,15}\bdaily\b.{0,20}\b(?:maintenance|improve\w*|enhance\w*|routine|loop)\b", re.I), "daily_improve"),
 
     # ── Gmail Phase 15 early guards — MUST precede web_search and git_status ────
     # "what changed in the last reply/thread" must beat git_status "what changed"
@@ -908,6 +910,10 @@ _REGEX_INTENTS = [
     # ── Browser delegate (safe agent browse, BEFORE bare browse) ─────────────────
     (re.compile(r"\b(browser.?delegate|delegate.{0,15}browser|safe.?browse|browser.?agent|browser.?task)\b", re.I), "browser_delegate"),
     (re.compile(r"\b(use\s+browser\s+to|use\s+playwright\s+to|automate.{0,20}browser)\b", re.I), "browser_delegate"),
+    # FIX-BD-001: "browse to/open in browser/visit URL" → browser_delegate
+    (re.compile(r"\b(?:browse\s+to|navigate\s+to|go\s+to)\b.{0,30}\b(?:url|link|page|site|website)\b", re.I), "browser_delegate"),
+    (re.compile(r"\bopen\b.{0,20}\b(?:url|link|page|website|site)\b.{0,20}\b(?:in\s+(?:a\s+)?)?browser\b", re.I), "browser_delegate"),
+    (re.compile(r"\b(?:visit|fetch)\b.{0,15}\b(?:this\s+)?(?:url|link|webpage|website)\b", re.I), "browser_delegate"),
     # ── Research operator (deep cited research, BEFORE web_search) ───────────────
     # research beats web_search for "research latest/recent X"
     (re.compile(r"\bresearch\b.{0,20}\b(latest|recent|current|new)\b.{0,30}\b(changes?|updates?|protocol|spec|release|version)", re.I), "research"),
@@ -1036,6 +1042,9 @@ _REGEX_INTENTS = [
     # FIX-BST-001: "is/did/has backup run/complete/fail/succeed" → backup_status
     (re.compile(r"\b(?:is|was|has|did)\b.{0,15}\b(?:the\s+)?backup\b.{0,20}\b(?:run|running|complete|completed|finish|finished|succeed|succeeded|fail|failed|done|successful)\b", re.I), "backup_status"),
     (re.compile(r"\bbackup.{0,15}(log|history|logs)\b", re.I), "backup_log"),
+    # FIX-BL-001: "recent backups", "show backup entries" → backup_log
+    (re.compile(r"\brecent\s+backups?\b", re.I), "backup_log"),
+    (re.compile(r"\bshow\b.{0,20}\bbackup\b.{0,20}\b(?:entries|records|details)\b", re.I), "backup_log"),
 
     # ── Patch adwi — NHR-003: code changes via aider ─────────────────────────────
     (re.compile(r"\b(run|use|apply).{0,10}\baider\b", re.I), "patch_adwi"),

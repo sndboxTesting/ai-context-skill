@@ -1006,6 +1006,9 @@ _REGEX_INTENTS = [
     (re.compile(r"\byoutube\b.{0,40}(summar|transcri|watch|clip|video|channel|tutorial)\b", re.I), "youtube"),
     (re.compile(r"(summar|transcri|explain).{0,20}\byoutube\b", re.I), "youtube"),
     (re.compile(r"\b(yt\s+video|youtu\.be|youtube\.com)\b", re.I), "youtube"),
+    # FIX-YT-001: verb-before-youtube forms not covered by existing patterns
+    (re.compile(r"\b(?:search|look\s+up|find)\b.{0,20}\byoutube\b", re.I), "youtube"),
+    (re.compile(r"\b(?:watch|play)\b.{0,10}\byoutube\b", re.I), "youtube"),
 
     # ── Browse / fetch URL ───────────────────────────────────────────────────────
     (re.compile(r"(browse|visit|open|fetch|go to|check out|navigate to).{0,15}(https?://|website|site|webpage|url|\.(com|io|org|dev|net))", re.I), "browse"),
@@ -1679,6 +1682,10 @@ _REGEX_INTENTS = [
     (re.compile(r"\b(sync|update|push)\b.{0,20}\b(knowledge|notes?)\b.{0,20}\b(open.?webui|openwebui|webui)\b", re.I), "sync"),
     (re.compile(r"\bopen.?webui\b.{0,20}\b(sync|update|push|add|knowledge)\b", re.I), "sync"),
     (re.compile(r"\bsync\b.{0,15}\b(knowledge\s+base|knowledge)\b", re.I), "sync"),
+    # FIX-SYNC-001: update-knowledge and sync-notes forms not covered by existing patterns
+    # Note: refresh/rebuild+knowledge stolen by memory_scan (line ~1623) — use only "update"
+    (re.compile(r"\bupdate\b.{0,20}\b(?:knowledge\s+base|knowledge|notes?)\b(?!.{0,20}github)", re.I), "sync"),
+    (re.compile(r"\bsync\b.{0,20}\b(?:my\s+)?notes?\b(?!.{0,20}github)", re.I), "sync"),
 ]
 
 def _regex_prefilter(text: str):

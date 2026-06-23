@@ -3371,5 +3371,70 @@ class TestFIXMSCAN002ListMyMemories(unittest.TestCase):
         self.assertEqual(_classify("display my memories"), "memory_scan")
 
 
+class TestFIXYT001SearchFindYoutube(unittest.TestCase):
+    """FIX-YT-001: verb-before-youtube forms (search/watch/find/play) → youtube."""
+
+    def test_search_youtube_for(self):
+        self.assertEqual(_classify("search youtube for deep learning tutorials"), "youtube")
+
+    def test_find_youtube_video(self):
+        self.assertEqual(_classify("find a youtube video about transformers"), "youtube")
+
+    def test_watch_youtube(self):
+        self.assertEqual(_classify("watch youtube video on python programming"), "youtube")
+
+    def test_play_youtube(self):
+        self.assertEqual(_classify("play youtube video"), "youtube")
+
+    def test_find_youtube_channel(self):
+        self.assertEqual(_classify("find the youtube channel for Andrej Karpathy"), "youtube")
+
+
+class TestFIXSYNC001UpdateKnowledge(unittest.TestCase):
+    """FIX-SYNC-001: update/refresh/rebuild knowledge + sync notes → sync."""
+
+    def test_update_knowledge_base(self):
+        self.assertEqual(_classify("update my knowledge base"), "sync")
+
+    def test_update_knowledge_base(self):
+        self.assertEqual(_classify("update my knowledge base"), "sync")
+
+    def test_update_notes(self):
+        self.assertEqual(_classify("update my notes"), "sync")
+
+    def test_sync_my_notes(self):
+        self.assertEqual(_classify("sync my notes"), "sync")
+
+    def test_sync_notes_not_github(self):
+        # "sync my notes to github" should stay backup_now (github guard in pattern)
+        self.assertEqual(_classify("sync my notes to github"), "backup_now")
+
+
+class TestFIXWN001WhatNextExtra(unittest.TestCase):
+    """FIX-WN-001: extra coverage for what_next patterns."""
+
+    def test_suggest_next_improvement(self):
+        self.assertEqual(_classify("suggest the next improvement for adwi"), "what_next")
+
+    def test_what_should_I_improve(self):
+        self.assertEqual(_classify("what should I improve in adwi"), "what_next")
+
+    def test_recommend_new_features(self):
+        self.assertEqual(_classify("recommend new features for my ai"), "what_next")
+
+
+class TestFIXGHC002GithubConnectedExtra(unittest.TestCase):
+    """FIX-GHC-002: additional github_connected phrasings."""
+
+    def test_github_account_connected(self):
+        self.assertEqual(_classify("is my github account connected"), "github_connected")
+
+    def test_github_linked(self):
+        self.assertEqual(_classify("is github linked to adwi"), "github_connected")
+
+    def test_github_working(self):
+        self.assertEqual(_classify("is github working"), "github_connected")
+
+
 if __name__ == "__main__":
     unittest.main(verbosity=2)

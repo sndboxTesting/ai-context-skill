@@ -650,11 +650,20 @@ REGEX_INTENTS = [
     # FIX-S3-009: typo "patcch adwi" + "apply adwi improvements" imperative
     (re.compile(r"\bpat[ct]ch\b.{0,15}\badwi\b", re.I), "patch_adwi"),
     (re.compile(r"\bapply\b.{0,20}\badwi\b.{0,20}\b(improvements?|patches?|fixes?|updates?)\b", re.I), "patch_adwi"),
+    # FIX-PATCH-003: "apply [adj] patches to adwi", "let adwi improve itself", "improve adwi's code"
+    (re.compile(r"\bapply\b.{0,30}\bpatches?\b.{0,20}\badwi\b", re.I), "patch_adwi"),
+    (re.compile(r"\badwi\s+improve\s+itself\b", re.I), "patch_adwi"),
+    (re.compile(r"\bimprove\b.{0,20}\badwi.{0,10}\bcode\b", re.I), "patch_adwi"),
+    (re.compile(r"\bapply\b.{0,30}\bcode\s+improvements?\b.{0,30}\badwi\b", re.I), "patch_adwi"),
 
     # ── Inspect code — NHR-008: code review of adwi source files ─────────────────
     (re.compile(r"\b(inspect|review|look at|examine).{0,20}(adwi.{0,10}\.py|adwi.?code|adwi.?source)\b", re.I), "inspect_code"),
     (re.compile(r"\b(inspect|review).{0,15}(adwi_cli|nightly\.py|memory\.py|backup\.py|grader\.py)\b", re.I), "inspect_code"),
     (re.compile(r"\b(find bugs in|check for bugs in|code review).{0,20}\badwi\b", re.I), "inspect_code"),
+    # FIX-INSPECT-001: "show me the adwi source code", "inspect the X module"
+    (re.compile(r"\bshow\b.{0,20}\badwi.{0,20}source\s+code\b", re.I), "inspect_code"),
+    (re.compile(r"\binspect\b.{0,30}\b(?:memory|nightly|backup|grader|routing)\b.{0,20}\bmodule\b", re.I), "inspect_code"),
+    (re.compile(r"\blook\s+at\b.{0,30}\b(?:nightly|backup|memory|grader)\b.{0,30}\b(?:code|routine|logic|module)\b", re.I), "inspect_code"),
 
     # FIX-PLAN-001: learn_from_error — must be BEFORE fix_error to avoid LLM routing to doctor
     (re.compile(r"\blearn\s+from\s+(?:my\s+)?(?:last\s+)?(?:recent\s+)?error\b", re.I), "learn_from_error"),

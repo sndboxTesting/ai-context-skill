@@ -2112,5 +2112,34 @@ class TestBenchmarkAdditionalPatterns(unittest.TestCase):
         self.assertEqual(_classify("test the speed of the model"), "benchmark")
 
 
+class TestPatchAdwiAdditional(unittest.TestCase):
+    """FIX-PATCH-003: additional patch_adwi patterns."""
+
+    def test_apply_patches_to_adwi(self):
+        self.assertEqual(_classify("apply the latest patches to adwi"), "patch_adwi")
+
+    def test_let_adwi_improve_itself(self):
+        self.assertEqual(_classify("let adwi improve itself"), "patch_adwi")
+
+    def test_improve_adwi_code_with_ai(self):
+        self.assertEqual(_classify("improve adwi's code with AI"), "patch_adwi")
+
+    def test_apply_code_improvements_to_adwi(self):
+        self.assertEqual(_classify("apply code improvements to adwi"), "patch_adwi")
+
+
+class TestInspectCodeAdditional(unittest.TestCase):
+    """FIX-INSPECT-001: additional inspect_code patterns."""
+
+    def test_show_adwi_source_code(self):
+        self.assertEqual(_classify("show me the adwi source code"), "inspect_code")
+
+    def test_inspect_memory_module(self):
+        self.assertEqual(_classify("inspect the memory module"), "inspect_code")
+
+    def test_look_at_nightly_routine_code(self):
+        self.assertEqual(_classify("look at the nightly routine code"), "inspect_code")
+
+
 if __name__ == "__main__":
     unittest.main(verbosity=2)

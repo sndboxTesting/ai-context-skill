@@ -1086,6 +1086,10 @@ _REGEX_INTENTS = [
     # require "my" to distinguish measurement ("my inference speed") from advisory ("what affects inference speed")
     (re.compile(r"\bmy\s+inference\s+(?:speed|rate|throughput|perf)\b", re.I), "benchmark"),
     (re.compile(r"\bhow\s+perf(?:ormant)?\b.{0,30}\b(llama|qwen|mistral|phi|gemma|ollama|model|llm)\d*", re.I), "benchmark"),
+    # FIX-006: "how do i benchmark it/my model" — verb form at end of sentence, model name may be far away
+    (re.compile(r"how\s+(?:do|can)\s+(?:i|you|we)\s+benchmark\s+(?:it|my\s+(?:model|ai|adwi|llm|ollama|local))\b", re.I), "benchmark"),
+    # FIX-006b: "slow model" + "benchmark" in longer context (model ref far from benchmark verb)
+    (re.compile(r"\b(?:my\s+)?(?:local\s+ai|ai\s+model|local\s+model)\b.{0,80}benchmark\b", re.I), "benchmark"),
 
     # ── Gmail Phase 8: remove-attachment intent — MUST precede gmail_attach_file ──────────────
     # Pattern 1: any remove/detach/drop + "attachment" keyword (unambiguous Gmail context)

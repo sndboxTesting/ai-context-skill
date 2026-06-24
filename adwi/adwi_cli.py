@@ -779,6 +779,8 @@ _REGEX_INTENTS = [
     (re.compile(r"\b(?:find|search|look)\b.{0,15}\bin\s+(?:obsidian|my\s+vault|the\s+vault)\b.{0,40}\b(?:for|about|on|regarding)?\b", re.I), "obsidian_search"),
     (re.compile(r"\blook\s+through\b.{0,20}\b(?:my\s+)?vault\b.{0,20}\b(?:for|about|on|regarding)\b", re.I), "obsidian_search"),
     (re.compile(r"\b(look|search|find)\b.{0,10}\bin\s+my\s+notes?\b.{0,5}\b(for|about|on)\b", re.I), "obsidian_search"),
+    (re.compile(r"\b(?:look|search|find)\b.{0,15}\b(?:in|through)\s+my\s+notes?\b.{0,40}\b(?:for|about|on|regarding)\b", re.I), "obsidian_search"),
+    (re.compile(r"\b(?:find|search\s+for|look\s+for)\b.{0,40}\bin\s+my\s+notes?\b", re.I), "obsidian_search"),
     # FIX-OBS-006: "find notes from last week", "find my notes on python" → obsidian_search
     (re.compile(r"\b(?:find|search\s+for|look\s+for)\b.{0,10}\bnotes?\b.{0,10}\b(?:from|about|on|regarding)\b", re.I), "obsidian_search"),
     (re.compile(r"\b(search|find|look up|recall|what do i know).{0,30}(my notes|my knowledge|local knowledge|knowledge base|from notes)", re.I), "rag_search"),
@@ -1000,6 +1002,8 @@ _REGEX_INTENTS = [
     # FIX-GTI-001: "who sent this", "what is this email about", sender/content queries → gmail_thread_intel
     (re.compile(r"\bwho\b.{0,15}\b(?:sent|wrote|authored|is\s+this\s+(?:email|from))\b", re.I), "gmail_thread_intel"),
     (re.compile(r"\bwhat\s+(?:is|was)\b.{0,15}\b(?:this|the)\b.{0,10}\b(?:email|message|thread)\b.{0,20}\b(?:about|regarding|on)\b", re.I), "gmail_thread_intel"),
+    (re.compile(r"\b(?:gist|recap|rundown|briefing)\b.{0,40}\b(?:gmail\s+)?(?:thread|conversation|email|message)\b", re.I), "gmail_thread_intel"),
+    (re.compile(r"\b(?:gmail\s+)?(?:thread|conversation|email|message)\b.{0,30}\b(?:gist|recap|rundown|briefing)\b", re.I), "gmail_thread_intel"),
     (re.compile(r"\b(?:analyze|analysis|sentiment)\b.{0,20}\b(?:this|the)\b.{0,15}\b(?:email|thread|message|conversation)\b", re.I), "gmail_thread_intel"),
     (re.compile(r"\bemail\b.{0,15}\bsentiment\b|\bsentiment\b.{0,15}\b(?:of|in)\b.{0,10}\b(?:this|the)\b.{0,10}\b(?:email|thread)\b", re.I), "gmail_thread_intel"),
     (re.compile(r"\bwhat\s+changed\b.{0,30}\b(?:reply|thread|email|message|conversation)\b", re.I), "gmail_thread_intel"),
@@ -1506,6 +1510,8 @@ _REGEX_INTENTS = [
     (re.compile(r"\bremind\s+me\b.{0,40}\b(?:about\s+(?:those|these|each)\b|about\s+(?:the\s+)?(?:action\s+items?|deadlines?|tasks?))\b", re.I), "gmail_tasks_remind"),
     # gmail_tasks_save — "save those tasks to Obsidian", "export checklist", "add tasks to my notes"
     (re.compile(r"\b(?:save|add|put|write|export)\b.{0,30}\b(?:tasks?|items?|checklist|action\s+items?|todos?)\b.{0,40}\b(?:to|in(?:to)?)\b.{0,20}\b(?:obsidian|daily\s+note|my\s+notes?|my\s+list)\b", re.I), "gmail_tasks_save"),
+    (re.compile(r"\b(?:save|add|put)\b.{0,30}\b(?:this|the)?\s*(?:gmail|email|message|thread|conversation)\b.{0,30}\b(?:as|to|in(?:to)?|on)\b.{0,20}\b(?:tasks?|todos?|to-?dos?|my\s+tasks?|task\s+list)\b", re.I), "gmail_tasks_save"),
+    (re.compile(r"\b(?:make|create)\b.{0,20}\b(?:a\s+)?(?:task(?!\s+list)|todo(?!\s+list)|to-?do(?!\s+list))\b.{0,25}\b(?:from|for)\b.{0,20}\b(?:this|the)\s+(?:gmail|email|message|thread|conversation)\b", re.I), "gmail_tasks_save"),
     (re.compile(r"\b(?:save|add|put|export)\b.{0,20}\b(?:those?|these?|them)\b.{0,20}\b(?:tasks?|items?|checklist|action\s+items?|todos?)\b", re.I), "gmail_tasks_save"),
     (re.compile(r"\b(?:save|export)\b.{0,20}\b(?:the\s+)?(?:extracted\s+)?(?:tasks?|checklist|action\s+items?)\b", re.I), "gmail_tasks_save"),
     # gmail_extract_tasks — "turn this email into tasks", "extract deadlines", "what deadlines are here"
@@ -1572,6 +1578,9 @@ _REGEX_INTENTS = [
     (re.compile(r"\b(?:show|list)\b.{0,15}\bsaved\b.{0,15}\b(?:rules|filters)\b", re.I), "gmail_filter_list"),
     # gmail_filter_build — "always label X", "create a rule for X", "auto archive X", "make a filter"
     (re.compile(r"\b(?:always|auto|automatically)\b.{0,30}\b(?:label|archive|star)\b", re.I), "gmail_filter_build"),
+    (re.compile(r"\b(?:label|archive|star)\b.{0,30}\b(?:invoice|receipt|newsletter|promotion|promo|marketing|billing|receipt|support|github|github\s+notification)s?\b.{0,30}\b(?:gmail|emails?|mail|messages?)\b", re.I), "gmail_filter_build"),
+    (re.compile(r"\b(?:label|star)\b.{0,25}\b(?:emails?|mail|messages?)\b.{0,20}\bfrom\b.{0,20}\b(?:invoice|receipt|newsletter|promotion|promo|marketing|billing|support|github|github\s+notification)s?\b", re.I), "gmail_filter_build"),
+    (re.compile(r"\b(?:filter|move|put)\b.{0,30}\b(?:invoice|receipt|newsletter|promotion|promo|marketing|billing|support|github|github\s+notification|emails?|messages?)s?\b.{0,40}\b(?:label|folder)\b", re.I), "gmail_filter_build"),
     (re.compile(r"\b(?:always|auto|automatically)\b.{0,40}\bmark\b.{0,30}\bread\b", re.I), "gmail_filter_build"),
     (re.compile(r"\bcreate\b.{0,20}\b(?:a\s+)?(?:rule|filter)\b.{0,25}\b(?:for|to|that|when)\b", re.I), "gmail_filter_build"),
     (re.compile(r"\b(?:make|build|set\s+up)\b.{0,20}\b(?:a\s+)?(?:rule|filter)\b", re.I), "gmail_filter_build"),

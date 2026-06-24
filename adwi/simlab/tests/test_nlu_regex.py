@@ -4348,6 +4348,69 @@ class TestPhase1OvernightInspectCodeRouting(unittest.TestCase):
             _classify("where is the route defined for login"),
             "inspect_code",
         )
+class TestFIXGmailThreadIntelRecap(unittest.TestCase):
+    """FIX-GTI-002: gist/recap wording should use thread intelligence."""
+
+    def test_gist_of_this_gmail_thread(self):
+        self.assertEqual(_classify("give me the gist of this gmail thread"), "gmail_thread_intel")
+
+    def test_recap_this_gmail_thread(self):
+        self.assertEqual(_classify("recap this gmail thread"), "gmail_thread_intel")
+
+    def test_thread_recap_for_this_email(self):
+        self.assertEqual(_classify("thread recap for this email"), "gmail_thread_intel")
+
+
+class TestFIXGmailTasksSaveEmailTodo(unittest.TestCase):
+    """FIX-GTS-001: saving email/thread as tasks should not fall to generic gmail."""
+
+    def test_save_this_gmail_as_todo(self):
+        self.assertEqual(_classify("save this gmail as a todo"), "gmail_tasks_save")
+
+    def test_add_this_email_thread_to_tasks(self):
+        self.assertEqual(_classify("add this email thread to my tasks"), "gmail_tasks_save")
+
+    def test_make_task_from_this_email(self):
+        self.assertEqual(_classify("make a task from this email"), "gmail_tasks_save")
+
+
+class TestFIXGmailFilterLabelEmailCategories(unittest.TestCase):
+    """FIX-GFB-001: label/archive email category phrasing should build filters."""
+
+    def test_label_newsletter_emails_automatically(self):
+        self.assertEqual(_classify("label newsletter emails automatically"), "gmail_filter_build")
+
+    def test_label_invoice_emails_in_gmail(self):
+        self.assertEqual(_classify("label invoice emails in gmail"), "gmail_filter_build")
+
+    def test_archive_promotion_messages(self):
+        self.assertEqual(_classify("archive promotion messages"), "gmail_filter_build")
+
+
+class TestFIXGmailFilterCategoryPlacement(unittest.TestCase):
+    """FIX-GFB-002: category placement variants should build Gmail filters."""
+
+    def test_label_emails_from_newsletters(self):
+        self.assertEqual(_classify("label emails from newsletters"), "gmail_filter_build")
+
+    def test_star_emails_from_github_notifications(self):
+        self.assertEqual(_classify("star emails from github notifications"), "gmail_filter_build")
+
+    def test_filter_emails_from_billing_into_label(self):
+        self.assertEqual(_classify("filter emails from billing into a label"), "gmail_filter_build")
+
+
+class TestFIXObsidianNotesSearchWordOrder(unittest.TestCase):
+    """FIX-OBS-SEARCH-001: my-notes search word order should route to Obsidian search."""
+
+    def test_look_through_my_notes_for_invoices(self):
+        self.assertEqual(_classify("look through my notes for invoices"), "obsidian_search")
+
+    def test_find_invoices_in_my_notes(self):
+        self.assertEqual(_classify("find invoices in my notes"), "obsidian_search")
+
+    def test_find_in_my_notes_project_alpha(self):
+        self.assertEqual(_classify("find in my notes project alpha"), "obsidian_search")
 
 
 if __name__ == "__main__":

@@ -204,16 +204,5 @@ adwi/infra/docker/cleanup-logs/
 # ── Telegram bridge job runner state (runtime, regenerable) ───────────────────────
 adwi/logs/telegram-jobs/
 
-# ── Nightly-generated logs and reports (runtime artifacts, not source) ───────────
-notes/nightly-improvement-logs/
-
 # ── Tool state directories (machine-local, not project code) ─────────────────────
 .serena/
-
-# ── Ollama runtime files (cache, history, generated keys) ────────────────────────
-# n8n workflow definitions and adwi tools NOT under ollama/ — safe to ignore whole tree
-ollama/
-
-# ── Nested project repos (separate private GitHub repos, not part of adwi) ───────
-iHelper/
-tailor/

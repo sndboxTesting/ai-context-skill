@@ -51,7 +51,6 @@ adwi/infra/docker/searxng-data/
 adwi/infra/docker/qdrant-data/
 adwi/infra/docker/data/
 adwi/services/mcp/qdrant-data/
-local-ai-stack/n8n-data/
 
 # ── Home Assistant runtime data ──────────────────────────────────────
 adwi/infra/docker/homeassistant-data/

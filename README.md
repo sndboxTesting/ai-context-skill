@@ -15,7 +15,6 @@ All new projects use the Claude API — not local models.
 | `adwi/` | private | **Active** | Local AI operating system — terminal REPL, 115 NLU intents, 193 commands, overnight self-improvement loop |
 | `iHelper/` | private | **In design** | AI interview prep assistant — practice sessions, question banks, real-time feedback |
 | `tailor/` | private | **In design** | AI resume editor — tailors resume to a job posting, keyword optimization, formatting |
-| `local-ai-stack/` | — | infra | Docker compose for Ollama, n8n, and local services |
 | `obsidian-vault/` | — | personal | Personal knowledge base (Obsidian) |
 
 ---

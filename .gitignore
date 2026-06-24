@@ -214,3 +214,7 @@ notes/nightly-improvement-logs/
 # ── Ollama runtime files (cache, history, generated keys) ────────────────────────
 # n8n workflow definitions and adwi tools NOT under ollama/ — safe to ignore whole tree
 ollama/
+
+# ── Nested project repos (separate private GitHub repos, not part of adwi) ───────
+iHelper/
+tailor/

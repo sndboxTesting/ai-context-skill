@@ -199,12 +199,19 @@ echo "[$(date '+%H:%M')] ── Phase 1: Codex starting (limit: ${CODEX_HOURS}h)
 echo "  Log: $CODEX_LOG"
 echo ""
 
-# codex exec is non-interactive — blocks until done, timed out, or token-exhausted.
-timeout "${CODEX_HOURS}h" \
-    codex exec --dangerously-bypass-approvals-and-sandbox "$CODEX_KICKOFF" \
-    2>&1 | tee "$CODEX_LOG" || true
+# codex exec is non-interactive — blocks until done or token-exhausted.
+# DIY time limit: kill Codex after CODEX_HOURS if it hasn't stopped naturally.
+codex exec --dangerously-bypass-approvals-and-sandbox "$CODEX_KICKOFF" \
+    >> "$CODEX_LOG" 2>&1 &
+CODEX_PID=$!
 
-CODEX_EXIT=${PIPESTATUS[0]}
+(sleep $((CODEX_HOURS * 3600)) && kill "$CODEX_PID" 2>/dev/null \
+    && echo "[$(date '+%H:%M')] Timer: Codex ${CODEX_HOURS}h limit reached, killed." >> "$CODEX_LOG") &
+TIMER_PID=$!
+
+wait "$CODEX_PID" 2>/dev/null
+CODEX_EXIT=$?
+kill "$TIMER_PID" 2>/dev/null || true
 echo ""
 echo "[$(date '+%H:%M')] ── Phase 1 complete (exit: $CODEX_EXIT) — preparing Claude handoff ──"
 

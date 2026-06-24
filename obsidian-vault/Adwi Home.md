@@ -91,7 +91,30 @@ How this workspace handles ideas, prioritization, and new projects.
 ## Daily Notes
 
 <!-- ADWI:HOME-STATUS:START -->
-*Not yet refreshed — will be populated by the nightly loop (2 AM).*
+*Updated 2026-06-23 02:00 by nightly loop*
+
+**Today:** [[daily-notes/2026-06-23]]
+
+**Recent notes:**
+- [[daily-notes/2026-06-23]]
+- [[daily-notes/2026-06-22]]
+- [[daily-notes/2026-06-21]]
+- [[daily-notes/2026-06-20]]
+- [[daily-notes/2026-06-19]]
+- [[daily-notes/2026-06-18]]
+- [[daily-notes/2026-06-17]]
+
+**Status:**
+- NLU: **Combined (dedup)** | **~2,283** | **75.8%** | **~91.7%** | **~96.5%** | **~97.0%** | **~95.8%** | 98.4% | **98.3%** | **+22.5pp** |
+- Disk: 12Gi used / 681Gi free
+- Obsidian vault: ✓ OK
+
+**Pending approval:**
+  - brew upgrade (26 packages)
+
+**⚑ Weekly review due:** Run `/obsidian-review-save 7`
+
+→ [[knowledge/Pending Approval]] · [[knowledge/Eval and Reliability Map]] · [[System Map.canvas]]
 <!-- ADWI:HOME-STATUS:END -->
 
 *New daily notes are written automatically by `adwi/nightly.py` at 2 AM. The `/daily-brief` command updates today's brief block.*

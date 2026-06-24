@@ -1,28 +1,28 @@
 #!/bin/bash
-# adwi-autoresearch-night — start overnight Adwi improvement sessions
+# adwi-autoresearch-night — Dual-phase overnight Adwi improvement
+#
+# Phase 1: Codex CLI  — up to 5h, burns Codex/OpenAI tokens (non-interactive)
+# Phase 2: Claude Code — hands off from Codex, runs until ~95% context limit
+# End:     commit + push all changes to main, clean source control
 #
 # Usage:
-#   adwi-autoresearch-night                  (1 session, tag = today e.g. jun23)
-#   adwi-autoresearch-night 2                (2 parallel sessions: jun23-1, jun23-2)
+#   adwi-autoresearch-night                  (1 session, tag = today e.g. jun25)
+#   adwi-autoresearch-night 2                (2 parallel sessions: jun25-1, jun25-2)
 #   adwi-autoresearch-night --dry-run [N]    (show what would launch; no sessions started)
 #   adwi-autoresearch-night --preflight-only (all checks, exit 0 if ready)
-#
-# Each session creates its own isolated git worktree so sessions never share
-# a working tree or pollute each other with runtime-dirty files.
-# Morning results: adwi-autoresearch-morning
 
 set -euo pipefail
 
-# ── Environment ───────────────────────────────────────────────────────────────
-# Full PATH: includes .local/bin (headroom), adwi/bin, homebrew, system
-export PATH="/Users/MAC/.local/bin:/Users/MAC/SuneelWorkSpace/adwi/bin:/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin"
+export PATH="/Users/MAC/bin:/Users/MAC/.local/bin:/Users/MAC/SuneelWorkSpace/adwi/bin:/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin"
 export HOME="/Users/MAC"
 
 WORKSPACE="$HOME/SuneelWorkSpace"
 WORKTREE_BASE="$WORKSPACE/.worktrees/adwi-autoresearch"
 LOG_DIR="$WORKSPACE/logs/autoresearch/adwi"
 PROGRAM_FILE="$WORKSPACE/adwi/autoresearch-program.md"
-BASE_TAG=$(date +%b%-d | tr '[:upper:]' '[:lower:]')  # e.g. jun23
+BASE_TAG=$(date +%b%-d | tr '[:upper:]' '[:lower:]')  # e.g. jun25
+
+CODEX_PHASE_HOURS=5
 
 DRY_RUN=0
 PREFLIGHT_ONLY=0
@@ -37,9 +37,9 @@ for arg in "$@"; do
     esac
 done
 
-# ── Preflight checks ──────────────────────────────────────────────────────────
+# ── Preflight ──────────────────────────────────────────────────────────────────
 
-echo "[$(date '+%H:%M')] Adwi autoresearch preflight..."
+echo "[$(date '+%H:%M')] Adwi autoresearch preflight (dual-phase: Codex ${CODEX_PHASE_HOURS}h → Claude)..."
 
 cd "$WORKSPACE"
 
@@ -54,7 +54,7 @@ if [ ! -f "$PROGRAM_FILE" ]; then
     echo "ERROR: $PROGRAM_FILE not found."
     exit 1
 fi
-echo "  [✓] Program file present"
+echo "  [✓] Program file present: $PROGRAM_FILE"
 
 if ! command -v screen &>/dev/null; then
     echo "ERROR: 'screen' not found. Install: brew install screen"
@@ -62,17 +62,18 @@ if ! command -v screen &>/dev/null; then
 fi
 echo "  [✓] screen: $(screen --version 2>&1 | head -1)"
 
+if ! command -v codex &>/dev/null; then
+    echo "ERROR: 'codex' not found in PATH."
+    exit 1
+fi
+echo "  [✓] codex: $(codex --version 2>/dev/null | head -1 || echo 'found')"
+
 if ! command -v claude &>/dev/null; then
     echo "ERROR: 'claude' not found in PATH."
     exit 1
 fi
 echo "  [✓] claude: $(claude --version 2>/dev/null | head -1 || echo 'found')"
 
-# Root repo may have runtime-dirty TRACKED files (obsidian vault, system log)
-# because the Adwi daemon runs continuously. This is expected and NOT a blocker —
-# each session runs in its own clean git worktree, completely isolated from the
-# root working tree. Block only on staged changes, which indicate in-progress
-# human work that should be committed first.
 STAGED=$(git diff --cached --name-only 2>/dev/null)
 if [ -n "$STAGED" ]; then
     echo "ERROR: Staged changes in root repo. Commit or unstage before autoresearch."
@@ -81,15 +82,13 @@ if [ -n "$STAGED" ]; then
 fi
 echo "  [✓] No staged changes in root repo"
 
-# Informational: show runtime-dirty files so the operator knows what the
-# running Adwi daemon is touching (not a blocker, worktrees are isolated).
 MODIFIED=$(git diff --name-only 2>/dev/null)
 UNTRACKED=$(git ls-files --others --exclude-standard 2>/dev/null | grep -v "^\.worktrees/" || true)
 if [ -n "$MODIFIED" ] || [ -n "$UNTRACKED" ]; then
     echo "  [i] Root repo has runtime-dirty files (normal — Adwi daemon is running):"
     [ -n "$MODIFIED" ]   && printf "%s\n" "$MODIFIED"  | head -5 | while read -r f; do printf "        modified:  %s\n" "$f"; done
     [ -n "$UNTRACKED" ]  && printf "%s\n" "$UNTRACKED" | head -3 | while read -r f; do printf "        untracked: %s\n" "$f"; done
-    echo "      Sessions will run in clean worktrees — root dirtiness is irrelevant."
+    echo "      Sessions run in clean worktrees — root dirtiness is irrelevant."
 fi
 
 python3 -m py_compile "$WORKSPACE/adwi/adwi_cli.py" 2>/dev/null \
@@ -97,26 +96,17 @@ python3 -m py_compile "$WORKSPACE/adwi/adwi_cli.py" 2>/dev/null \
     || echo "  [!] WARNING: adwi_cli.py has a syntax error"
 
 mkdir -p "$LOG_DIR" "$WORKTREE_BASE"
-echo "  [✓] Directories: logs and worktree base ready"
-
-# ── Preflight-only exits here ─────────────────────────────────────────────────
+echo "  [✓] Log and worktree directories ready"
 
 if [ "$PREFLIGHT_ONLY" -eq 1 ]; then
     echo ""
     echo "Preflight passed."
-    echo "  Root may have runtime-dirty files — that is expected and not a blocker."
-    echo "  Each session will create a clean git worktree from main."
-    echo ""
-    echo "Would launch: adwi-autoresearch-night $NUM_SESSIONS"
     for i in $(seq 1 "$NUM_SESSIONS"); do
         if [ "$NUM_SESSIONS" -eq 1 ]; then TAG="$BASE_TAG"; else TAG="${BASE_TAG}-${i}"; fi
-        echo "  → adwi-ar-${TAG}  branch: adwi-autoresearch/${TAG}"
-        echo "    worktree: $WORKTREE_BASE/${TAG}"
+        echo "  → adwi-ar-${TAG}  branch: adwi-autoresearch/${TAG}  worktree: $WORKTREE_BASE/${TAG}"
     done
     exit 0
 fi
-
-# ── Dry run ───────────────────────────────────────────────────────────────────
 
 if [ "$DRY_RUN" -eq 1 ]; then
     echo ""
@@ -124,19 +114,15 @@ if [ "$DRY_RUN" -eq 1 ]; then
     for i in $(seq 1 "$NUM_SESSIONS"); do
         if [ "$NUM_SESSIONS" -eq 1 ]; then TAG="$BASE_TAG"; else TAG="${BASE_TAG}-${i}"; fi
         SESSION="adwi-ar-${TAG}"
-        BRANCH="adwi-autoresearch/${TAG}"
-        WORKTREE="$WORKTREE_BASE/${TAG}"
         echo "  Session:  $SESSION"
-        echo "    Worktree: $WORKTREE  (clean, isolated from root)"
-        echo "    Branch:   $BRANCH"
-        echo "    Log:      $LOG_DIR/${TAG}.log"
+        echo "    Phase 1: codex exec (${CODEX_PHASE_HOURS}h limit) → $LOG_DIR/${TAG}-codex.log"
+        echo "    Phase 2: claude --dangerously-skip-permissions   → $LOG_DIR/${TAG}-claude.log"
+        echo "    Worktree: $WORKTREE_BASE/${TAG}  Branch: adwi-autoresearch/${TAG}"
     done
-    echo ""
-    echo "To start for real:  adwi-autoresearch-night $NUM_SESSIONS"
     exit 0
 fi
 
-# ── Launch sessions ───────────────────────────────────────────────────────────
+# ── Launch sessions ────────────────────────────────────────────────────────────
 
 echo ""
 echo "[$(date '+%H:%M')] Starting $NUM_SESSIONS session(s) — tag base: $BASE_TAG"
@@ -144,31 +130,30 @@ echo "[$(date '+%H:%M')] Starting $NUM_SESSIONS session(s) — tag base: $BASE_T
 for i in $(seq 1 "$NUM_SESSIONS"); do
     if [ "$NUM_SESSIONS" -eq 1 ]; then TAG="$BASE_TAG"; else TAG="${BASE_TAG}-${i}"; fi
     SESSION="adwi-ar-${TAG}"
-    LOG_FILE="$LOG_DIR/${TAG}.log"
+    CODEX_LOG="$LOG_DIR/${TAG}-codex.log"
+    CLAUDE_LOG="$LOG_DIR/${TAG}-claude.log"
     BRANCH="adwi-autoresearch/${TAG}"
     WORKTREE="$WORKTREE_BASE/${TAG}"
+    COORD_FILE="/tmp/adwi-coord-${TAG}.sh"
+    HANDOFF_FILE="/tmp/adwi-handoff-${TAG}.md"
 
-    # Guard: skip if screen already running
     if screen -ls 2>/dev/null | grep -q "\.${SESSION}"; then
         echo "  [!] Session $SESSION already running. Skipping."
         continue
     fi
 
-    # Guard: skip if worktree already exists
     if [ -d "$WORKTREE" ]; then
         echo "  [!] Worktree already exists: $WORKTREE"
         echo "      Remove with: git worktree remove '$WORKTREE' && git branch -d '$BRANCH'"
         continue
     fi
 
-    # Guard: skip if branch already exists
     if git branch --list "$BRANCH" | grep -q .; then
         echo "  [!] Branch '$BRANCH' already exists. Skipping."
         echo "      Remove with: git branch -d '$BRANCH'"
         continue
     fi
 
-    # Create isolated worktree at the session branch
     echo "  Creating worktree: $WORKTREE"
     if ! git worktree add "$WORKTREE" -b "$BRANCH" main 2>&1; then
         echo "  [!] ERROR: Failed to create worktree for $SESSION. Skipping."
@@ -176,40 +161,139 @@ for i in $(seq 1 "$NUM_SESSIONS"); do
     fi
     echo "  [✓] Worktree created (clean, on $BRANCH)"
 
-    # Session env — full PATH, headroom disabled (best-effort env vars), HOME set
-    SESSION_ENV="
-export PATH='/Users/MAC/.local/bin:/Users/MAC/SuneelWorkSpace/adwi/bin:/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin'
+    # ── Write coordinator script ───────────────────────────────────────────────
+    # Config block: outer-scope variables written as literal values.
+    # Body block: single-quote heredoc (no expansion) — uses the config vars above.
+
+    cat > "$COORD_FILE" << CONFIG_EOF
+#!/bin/bash
+SESSION='${SESSION}'
+WORKTREE='${WORKTREE}'
+BRANCH='${BRANCH}'
+CODEX_LOG='${CODEX_LOG}'
+CLAUDE_LOG='${CLAUDE_LOG}'
+HANDOFF_FILE='${HANDOFF_FILE}'
+CODEX_HOURS=${CODEX_PHASE_HOURS}
+TAG='${TAG}'
+CONFIG_EOF
+
+    cat >> "$COORD_FILE" << 'COORD_EOF'
+set -euo pipefail
+export PATH='/Users/MAC/bin:/Users/MAC/.local/bin:/Users/MAC/SuneelWorkSpace/adwi/bin:/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin'
 export HOME='/Users/MAC'
 export HEADROOM_DISABLE=1
 export CLAUDE_HEADROOM_DISABLE=1
 export HEADROOM_PASSTHROUGH=1
-"
 
-    # Launch: screen → bash (env setup + worktree cd) → script (log) → claude
-    screen -dmS "$SESSION" \
-        bash -c "${SESSION_ENV}
-cd '$WORKTREE' && exec script -q -F '$LOG_FILE' claude --dangerously-skip-permissions"
+cd "$WORKTREE"
 
-    # Wait for Claude TUI to fully initialise before injecting input.
-    # Do NOT send a dummy keypress first — just wait and then send the real kickoff.
-    sleep 8
+# ── Phase 1: Codex ─────────────────────────────────────────────────────────────
 
-    KICKOFF="You are running as an autonomous overnight Adwi improvement agent. Your working directory is an isolated git worktree: $WORKTREE (branch: $BRANCH). The root repo is at /Users/MAC/SuneelWorkSpace — do NOT cd there or modify its runtime files. Read adwi/autoresearch-program.md carefully — it contains your complete instructions. CRITICAL: If you see hook warnings, 'hook error', or 'non-blocking' messages from the terminal, IGNORE them and CONTINUE the loop without pausing. These are from background monitoring tools and do NOT indicate your commands failed. Do NOT ask the user for guidance at any point — the user is asleep. Run autonomously until manually interrupted. Tag: ${TAG}. Branch: ${BRANCH}."
+CODEX_KICKOFF="You are an autonomous overnight Adwi improvement agent running as Phase 1 (Codex).
+Working directory: $WORKTREE  Branch: $BRANCH
+Read adwi/autoresearch-program.md for your complete instructions.
+Make NLU fixes, test improvements, and commit each successful change.
+Run autonomously without pausing for confirmation. Do not stop until interrupted."
 
-    screen -S "$SESSION" -p 0 -X stuff "${KICKOFF}$(printf '\r')"
+echo "[$(date '+%H:%M')] ── Phase 1: Codex starting (limit: ${CODEX_HOURS}h) ──"
+echo "  Log: $CODEX_LOG"
+echo ""
 
-    # Belt-and-suspenders: if the \r above was consumed during TUI init, a
-    # second Enter after a short pause ensures the kickoff is always submitted.
-    sleep 3
+# codex exec is non-interactive — blocks until done, timed out, or token-exhausted.
+timeout "${CODEX_HOURS}h" \
+    codex exec --dangerously-bypass-approvals-and-sandbox "$CODEX_KICKOFF" \
+    2>&1 | tee "$CODEX_LOG" || true
+
+CODEX_EXIT=${PIPESTATUS[0]}
+echo ""
+echo "[$(date '+%H:%M')] ── Phase 1 complete (exit: $CODEX_EXIT) — preparing Claude handoff ──"
+
+# ── Generate handoff file ──────────────────────────────────────────────────────
+
+{
+    echo "# Adwi Autoresearch Handoff"
+    echo "Date: $(date)"
+    echo "Codex ran for up to ${CODEX_HOURS}h (exit code: $CODEX_EXIT)"
+    echo ""
+    echo "## Branch / Worktree"
+    echo "Branch:   $BRANCH"
+    echo "Worktree: $WORKTREE"
+    echo ""
+    echo "## What Codex committed (git log):"
+    git log --oneline -20 2>/dev/null || echo "  (no commits)"
+    echo ""
+    echo "## Current NLU test status:"
+    python3 -m unittest adwi/simlab/tests/test_nlu_regex.py 2>&1 | tail -3 || echo "  (could not run tests)"
+    echo ""
+    echo "## Codex last output (tail -80):"
+    tail -80 "$CODEX_LOG" 2>/dev/null || echo "  (log not found)"
+} > "$HANDOFF_FILE"
+
+echo "  [✓] Handoff file: $HANDOFF_FILE"
+
+# ── Phase 2: Claude ────────────────────────────────────────────────────────────
+
+CLAUDE_KICKOFF="You are continuing an overnight Adwi improvement session as Phase 2 (Claude). Codex ran Phase 1 for up to ${CODEX_HOURS} hours and has now handed off to you.
+
+HANDOFF CONTEXT:
+Read the full handoff at: $HANDOFF_FILE
+
+YOUR WORKING DIRECTORY: $WORKTREE  (branch: $BRANCH)
+Root repo: /Users/MAC/SuneelWorkSpace — do NOT cd there or modify its runtime files.
+
+INSTRUCTIONS:
+1. cat $HANDOFF_FILE to review what Codex did.
+2. Read adwi/autoresearch-program.md for the full program.
+3. Continue from where Codex left off — check git log and pick the next improvement.
+4. Run autonomously. Do NOT ask for user input — the user is asleep.
+5. If you see hook warnings or non-blocking messages, IGNORE them and continue the loop.
+
+CONTEXT LIMIT STOP CONDITION — CRITICAL:
+When you notice context compression messages appearing frequently (system messages like '[N items compressed to M. Retrieve more: hash=...]'), you are approaching 95% of your context limit. At that point, stop the improvement loop and do the following in order:
+  a. Finish the current experiment cleanly (keep if improved, revert if not).
+  b. python3 -m py_compile adwi/adwi_cli.py && echo 'syntax OK'
+  c. python3 -m unittest adwi/simlab/tests/test_nlu_regex.py 2>&1 | tail -3
+  d. If all tests pass — commit and push:
+       git add adwi/ README.md CLAUDE.md
+       git diff --cached --name-only
+       git commit -m 'chore: autoresearch session complete — context limit reached'
+       git push
+       git status --short
+  e. Print exactly: SESSION COMPLETE — all changes committed and pushed to $BRANCH
+  f. Stop. Do not start another experiment after the commit."
+
+echo "[$(date '+%H:%M')] ── Phase 2: Launching Claude ──"
+echo "  Log: $CLAUDE_LOG"
+echo ""
+
+# Schedule kickoff injection: Claude TUI needs ~10s to initialise.
+# This background process fires after Claude is up and injects the kickoff.
+(
+    sleep 12
+    screen -S "$SESSION" -p 0 -X stuff "${CLAUDE_KICKOFF}$(printf '\r')"
+    sleep 5
+    # Belt-and-suspenders: second Enter in case the first was swallowed during init
     screen -S "$SESSION" -p 0 -X stuff "$(printf '\r')"
+) &
 
-    echo "  [✓] Session '$SESSION' launched"
-    echo "      Worktree: $WORKTREE"
+# Replace this coordinator shell with the Claude TUI.
+# The screen session now shows Claude directly.
+exec script -q -F "$CLAUDE_LOG" claude --dangerously-skip-permissions
+COORD_EOF
+
+    chmod +x "$COORD_FILE"
+
+    # Launch the coordinator in a detached screen session
+    screen -dmS "$SESSION" bash "$COORD_FILE"
+
+    echo "  [✓] Session '$SESSION' launched (dual-phase)"
+    echo "      Phase 1: codex exec (${CODEX_PHASE_HOURS}h) → $CODEX_LOG"
+    echo "      Phase 2: claude                              → $CLAUDE_LOG"
+    echo "      Handoff:  $HANDOFF_FILE"
     echo "      Branch:   $BRANCH"
     echo "      Attach:   screen -r $SESSION"
-    echo "      Log:      $LOG_FILE"
+    echo ""
 done
 
-echo ""
 echo "Morning results:  adwi-autoresearch-morning"
 echo "All sessions:     screen -ls"

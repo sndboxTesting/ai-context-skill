@@ -653,6 +653,8 @@ _REGEX_INTENTS = [
     (re.compile(r"\b(?:what|how)\b.{0,15}\b(?:generates?|causes?|creates?|contributes?\s+to|fills?)\b.{0,25}\b(?:disk|storage)\b", re.I), "chat"),
     (re.compile(r"\bhow\s+does\b.{0,20}\b(?:disk|storage)\b", re.I), "chat"),
     (re.compile(r"(biggest|largest|heaviest|most space|taking up|using up|eating up).{0,40}(disk|storage|space)\b", re.I), "disk_usage"),
+    (re.compile(r"\b(?:show|check|report|get)\b.{0,20}\b(?:free|available|remaining)\b.{0,20}\b(?:disk|storage|space)\b", re.I), "disk_usage"),
+    (re.compile(r"\b(?:show|check|report|get)\b.{0,20}\b(?:disk|storage|space)\b.{0,20}\b(?:free|available|remaining|left)\b", re.I), "disk_usage"),
     (re.compile(r"(disk|storage|space).{0,40}(usage|breakdown|overview|used|free|full|analysis)", re.I), "disk_usage"),
     # FIX-SPRINT-005b: "what's using disk" is action; "what" alone without "'s" → too broad
     (re.compile(r"\bwhat.s\b.{0,30}(space|room|storage|disk)", re.I), "disk_usage"),
@@ -685,6 +687,10 @@ _REGEX_INTENTS = [
     (re.compile(r"\b(?:almost|nearly)\b.{0,10}\bout\s+of\b.{0,15}\b(?:space|storage|room)\b", re.I), "disk_usage"),
     (re.compile(r"\blow\s+on\b.{0,15}\b(?:space|disk|storage)\b", re.I), "disk_usage"),
     (re.compile(r"\bnot\s+much\b.{0,10}\b(?:space|storage)\b", re.I), "disk_usage"),
+    # FIX-DU-008: subject-first "storage/space is running low/out" (reverse word order)
+    (re.compile(r"\b(?:space|storage|disk|drive|ssd|hdd)\b.{0,20}\brunning\s+(?:out|low)\b", re.I), "disk_usage"),
+    # FIX-DU-009: "where has/did my disk/space go(ne)" queries
+    (re.compile(r"\bwhere\b.{0,30}\b(?:disk|storage|space|drive)\b.{0,20}\bgo(?:ne|ing)?\b", re.I), "disk_usage"),
     (re.compile(r"(free up|clean up).{0,20}(space|disk|storage|room)", re.I), "cleanup"),
 
     # FIX-SPRINT-004: "purge old X", "remove leftover X" → cleanup BEFORE old_files steals them
@@ -711,6 +717,10 @@ _REGEX_INTENTS = [
     (re.compile(r"\bfiles?\b.{0,20}\buntouched\b", re.I), "old_files"),
     # FIX-REL-003: "what hasn't been used in 2 years" — digit-year, handles hasn't/haven't/has not
     (re.compile(r"\b(?:haven.t|hasn.t|has\s+not|have\s+not)\b.{0,25}\b(?:been\s+)?(used|touched|opened|accessed)\b.{0,30}\bin\s+\d+\s+(?:months?|years?)\b", re.I), "old_files"),
+
+    # FIX-MC-004: "remove duplicate memories / dedup my memory" → memory_curate BEFORE duplicates section
+    (re.compile(r"\b(?:remove|delete|find|clean)\b.{0,20}\bdup(?:licate)?\s+memor(?:y|ies)\b", re.I), "memory_curate"),
+    (re.compile(r"\bdedup(?:licate)?\w*.{0,20}\b(?:my\s+)?memor(?:y|ies)\b", re.I), "memory_curate"),
 
     # ── Duplicates ───────────────────────────────────────────────────────────────
     (re.compile(r"(duplicate|identical|same file|copy|copies|redundant)", re.I), "duplicates"),
@@ -752,6 +762,8 @@ _REGEX_INTENTS = [
     (re.compile(r"\bfile\s+organization\b", re.I), "organize"),
     (re.compile(r"\b(help\s+me\s+)?(organize|structure|arrange)\b.{0,20}(my\s+)?notes?\s*folder\b", re.I), "organize"),
     (re.compile(r"\b(oragnaize|organzie|oragnize)\b", re.I), "organize"),
+    # FIX-ORG-003: "reorganize my notes/files", "re-organize my workspace" — re+organize prefix
+    (re.compile(r"\bre-?organiz\w*.{0,30}\b(?:my\s+)?(?:notes?|files?|folders?|workspace|project|downloads?)\b", re.I), "organize"),
 
     # ── Cleanup suggestions ──────────────────────────────────────────────────────
     (re.compile(r"(what|which).{0,20}(can|should|could|to).{0,20}(delete|remove|trash|clear|get rid)", re.I), "cleanup"),
@@ -761,6 +773,8 @@ _REGEX_INTENTS = [
 
     # ── RAG / knowledge search — BEFORE file_search (notes-specific guard) ───────
     # FIX-OBS-005: "look in my notes for X" → obsidian_search (verb-first form beats rag_search below)
+    (re.compile(r"\b(?:find|search|look)\b.{0,15}\bin\s+(?:obsidian|my\s+vault|the\s+vault)\b.{0,40}\b(?:for|about|on|regarding)?\b", re.I), "obsidian_search"),
+    (re.compile(r"\blook\s+through\b.{0,20}\b(?:my\s+)?vault\b.{0,20}\b(?:for|about|on|regarding)\b", re.I), "obsidian_search"),
     (re.compile(r"\b(look|search|find)\b.{0,10}\bin\s+my\s+notes?\b.{0,5}\b(for|about|on)\b", re.I), "obsidian_search"),
     # FIX-OBS-006: "find notes from last week", "find my notes on python" → obsidian_search
     (re.compile(r"\b(?:find|search\s+for|look\s+for)\b.{0,10}\bnotes?\b.{0,10}\b(?:from|about|on|regarding)\b", re.I), "obsidian_search"),
@@ -791,6 +805,9 @@ _REGEX_INTENTS = [
     (re.compile(r"\bfiles?\b.{0,15}\b(i\s+)?(no\s+longer\s+need|don.t\s+need|don.t\s+use)\b", re.I), "cleanup"),
     (re.compile(r"\bhelp\b.{0,15}\bclean\s+up\b.{0,20}\b(my\s+)?(drive|disk|mac|machine|computer|system)\b", re.I), "cleanup"),
     (re.compile(r"\b(find|search for|locate|look for)\b.{0,20}\bfiles?\b", re.I), "file_search"),
+    # FIX-FS-001: "where is the settings.py file" → file_search
+    (re.compile(r"\bwhere\b.{0,10}\b(?:is|are|can\s+I\s+find)\b.{0,30}\b\w+\.\w+\b", re.I), "file_search"),
+    (re.compile(r"\bwhere\b.{0,10}\b(?:is|are)\b.{0,30}\bthe\b.{0,20}\b(?:file|config|script|module)\b", re.I), "file_search"),
     (re.compile(r"\bfind (all |every )?.{0,10}\.(py|js|ts|yaml|yml|json|txt|md|sh|toml)\b", re.I), "file_search"),
     # FIX-REL-004: "find backup scripts", "find test scripts" — scripts lookup
     (re.compile(r"\bfind\b.{0,30}\bscripts?\b", re.I), "file_search"),
@@ -810,6 +827,8 @@ _REGEX_INTENTS = [
     (re.compile(r"\bls\b", re.I), "file_list"),
     # FIX-REL-009: "list the contents of X" — extend content → contents?
     (re.compile(r"\blist\s+(files?|dir(ectory)?|folder|contents?)\b", re.I), "file_list"),
+    # FIX-FL-002: "list all files in this folder" — add "all" optional middle word
+    (re.compile(r"\blist\s+all\s+(?:the\s+)?(?:files?|folders?|dir(?:ectory)?|contents?)\b", re.I), "file_list"),
     (re.compile(r"\blist\s+(the\s+)?contents?\s+(of|in)\b", re.I), "file_list"),
     (re.compile(r"\bwhat\s+files?\b.{0,20}(are in|in|inside)\b", re.I), "file_list"),
     # FIX-REL-006: "what's in my home directory" — dir contents without "files" keyword
@@ -823,6 +842,8 @@ _REGEX_INTENTS = [
     (re.compile(r"\bread\b.{0,25}\.(py|js|ts|md|yaml|yml|json|txt|sh|toml|cfg|gitignore)\b", re.I), "file_read"),
     (re.compile(r"\bread\b.{0,20}(the file\b|file contents?\b|contents? of)\b", re.I), "file_read"),
     (re.compile(r"\b(show|display|cat)\b.{0,20}(contents? of|the file\b)\b", re.I), "file_read"),
+    # FIX-FR-002: "show me the readme", "open CLAUDE.md", "display requirements.txt"
+    (re.compile(r"\b(?:show|open|display|read)\b.{0,20}\b(?:readme|CLAUDE\.md|\.env\.example|requirements\.txt|pyproject\.toml)\b", re.I), "file_read"),
     # FIX-FR-001: "cat memory.py", "read the config file"
     (re.compile(r"\bcat\b.{0,25}\.(py|js|ts|md|yaml|yml|json|txt|sh|toml|cfg)\b", re.I), "file_read"),
     (re.compile(r"\bread\b.{0,30}\b(the\s+)?(main|config|configuration|settings?)\s+(python\s+)?(file|script)\b", re.I), "file_read"),
@@ -843,16 +864,23 @@ _REGEX_INTENTS = [
     # FIX-DOC-001: "self-diagnostic", "run self-check", "comprehensive system check" → doctor
     (re.compile(r"\b(?:run\s+)?self.?(?:diagnos\w*|check)\b", re.I), "doctor"),
     (re.compile(r"\bcomprehensive\b.{0,20}\b(?:system\s+)?(?:check|diagnostic|health)\b", re.I), "doctor"),
+    # FIX-DOC-002: "is everything healthy/ok/fine", "run a health check" → doctor
+    (re.compile(r"\b(?:is|are)\b.{0,20}\beverything\b.{0,15}\b(?:healthy|fine)\b", re.I), "doctor"),
+    (re.compile(r"\brun\s+a\b.{0,10}\bhealth\s+check\b", re.I), "doctor"),
 
     # ── Self-heal — BEFORE status (Bug 3: service-error superset fix) ────────────
     # Pattern A: verb-first  — "fix/repair/broken/not working ... service"
     (re.compile(r"(fix|repair|restart|broken|not working|isn.t working|crashed|down).{0,20}(setup|stack|service|ollama|docker)", re.I), "self_heal"),
-    # Pattern B: subject-first — "docker/ollama/adwi ... not working/broken"
-    (re.compile(r"(adwi|setup|stack|docker|ollama|service).{0,20}(not working|isn.t working|broken|crashed|crashing|failing)", re.I), "self_heal"),
+    # Pattern B: subject-first — "docker/ollama/adwi ... not working/broken/acting weird"
+    (re.compile(r"(adwi|setup|stack|docker|ollama|service).{0,20}(not working|isn.t working|broken|crashed|crashing|failing|acting\s+(?:weird|up|strange)|misbehaving|glitching)", re.I), "self_heal"),
     # NHR-004: generic repair — "something is broken", "fix yourself", "self-heal"
-    (re.compile(r"(something|things|everything).{0,20}(broken|not working|failing|crashed)", re.I), "self_heal"),
+    (re.compile(r"(something|things|everything).{0,20}(broken|not working|failing|crashed|wrong|off)", re.I), "self_heal"),
+    # FIX-SH-002: "something is wrong with adwi/it" → self_heal
+    (re.compile(r"\bsomething\b.{0,20}\bwrong\b.{0,20}\b(?:adwi|setup|stack|docker|ollama|it|this)\b", re.I), "self_heal"),
     (re.compile(r"\b(repair|fix|heal)\b.{0,15}\b(yourself|itself|adwi|setup|system|stack)(\s|$)", re.I), "self_heal"),
     (re.compile(r"\bself.?heal\b", re.I), "self_heal"),
+    # FIX-SH-003: "self repair", "self fix" bare commands → self_heal
+    (re.compile(r"^self\s+(?:repair|fix|heal)\s*$", re.I), "self_heal"),
     # FIX-HEAL-001: "service is down fix it" and "repair my local AI" patterns
     (re.compile(r"\b(services?|containers?|docker|ollama|stack)\b.{0,15}\bdown\b.{0,20}\b(fix|repair|restart)\b", re.I), "self_heal"),
     (re.compile(r"\bnothing\b.{0,20}(working|running|connecting)\b.{0,20}(fix|repair|help)\b", re.I), "self_heal"),
@@ -875,6 +903,8 @@ _REGEX_INTENTS = [
     (re.compile(r"\bhow\s+is\b.{0,15}\b(?:adwi|the\s+system|everything)\b.{0,15}\bdoing\b", re.I), "status"),
     (re.compile(r"\bis\b.{0,10}\b(?:adwi|the\s+system)\b.{0,20}\b(?:healthy|running\s+well|ok|okay|fine)\b", re.I), "status"),
     (re.compile(r"\ball\s+systems?\s+(?:go|running|ok|good|fine|operational)\b", re.I), "status"),
+    # FIX-STA-003: "adwi status" bare two-word form — must be AFTER the doctor check (which uses "healthy/fine")
+    (re.compile(r"\badwi\s+status\b", re.I), "status"),
     # CYCLE-4: "is the model slow/fast" → status (diagnostic); "why is X slow" stays in chat (advisory)
     (re.compile(r"\bis\b.{0,15}\b(?:the\s+)?(?:model|adwi|ollama)\b.{0,15}\b(?:slow|fast|sluggish|lagging|unresponsive|not\s+responding)\b", re.I), "status"),
     # CYCLE-5: status for "how's my AI doing"
@@ -908,6 +938,10 @@ _REGEX_INTENTS = [
     (re.compile(r"\blist\s+(?:all\s+)?(?:your|adwi.?s?)\s+commands?\b", re.I), "capabilities"),
     (re.compile(r"\bshow\s+(?:all\s+)?(?:your|adwi.?s?)\s+commands?\b", re.I), "capabilities"),
     (re.compile(r"\b(?:show|display|list)\s+(?:all\s+)?(?:available\s+)?commands?\b", re.I), "capabilities"),
+    # FIX-CAP-002: "what can adwi do", "show me all adwi features", "list adwi capabilities"
+    (re.compile(r"\bwhat\s+can\s+(?:adwi|you)\s+do\b", re.I), "capabilities"),
+    (re.compile(r"\b(?:show|list|display)\b.{0,20}\b(?:all\s+)?(?:adwi|your)\b.{0,20}\b(?:features?|capabilities|functions?|abilities)\b", re.I), "capabilities"),
+    (re.compile(r"\badwi\b.{0,20}\bcapabilit", re.I), "capabilities"),
 
     # ── What next ────────────────────────────────────────────────────────────────
     (re.compile(r"(what|what.s).{0,20}(next|build|improve|add|create).{0,20}(adwi|setup|ai|local)", re.I), "what_next"),
@@ -916,6 +950,11 @@ _REGEX_INTENTS = [
     (re.compile(r"\b(adwi|local.?ai|my.?ai).{0,30}(improvement|enhancement|feature|idea|roadmap)\b", re.I), "what_next"),
     (re.compile(r"\bnext.{0,20}(feature|capability|improvement).{0,20}(adwi|ai|local|stack)\b", re.I), "what_next"),
 
+    # FIX-WN-002: "what should I build/add/work on next", "what feature should I work on"
+    (re.compile(r"\bwhat\b.{0,20}\bshould\s+(?:i|we)\b.{0,30}\b(?:build|add|create|work\s+on|implement|focus\s+on)\b.{0,20}\b(?:next|first|now)\b", re.I), "what_next"),
+    (re.compile(r"\bwhat\b.{0,15}\b(?:feature|capability|task|improvement)\b.{0,30}\bshould\s+(?:i|we)\b.{0,20}\b(?:build|add|work|create|implement|focus)\b", re.I), "what_next"),
+    # FIX-WN-003: "what should I focus on" (no time qualifier) → what_next; "today/this week" stays daily_brief
+    (re.compile(r"\bwhat\b.{0,20}\bshould\s+(?:i|we)\s+focus\s+on\b(?!\s*(?:today|this\s+week|this\s+morning|tonight|right\s+now|this\s+month|now|this\s+afternoon))", re.I), "what_next"),
     # FIX-WHAT-002: advisory improvement questions → what_next BEFORE daily_improve
     (re.compile(r"\b(how|what)\b.{0,15}\b(should|can|could|would)\b.{0,20}(improv|refactor|enhanc|optimiz).{0,20}\badwi\b", re.I), "what_next"),
     (re.compile(r"\bwhat\b.{0,15}\b(code\s+changes?|improvements?|refactors?)\b.{0,20}\b(adwi|better|make)\b", re.I), "what_next"),
@@ -926,6 +965,9 @@ _REGEX_INTENTS = [
     # FIX-DB-003: extend to match "briefing" (word boundary after "brief" doesn't match "briefing")
     (re.compile(r"\b(daily.?brief(?:ing)?|morning.?brief(?:ing)?|today.{0,5}brief(?:ing)?)\b", re.I), "daily_brief"),
     (re.compile(r"\b(give me|show me|run|start)\b.{0,15}\b(my\s+)?(daily|morning|today.{0,5})\s+(brief|summary|digest|rundown)\b", re.I), "daily_brief"),
+    (re.compile(r"\b(?:what(?:'?s|\s+is)|show|tell\s+me)\b.{0,20}\b(?:on|in)\b.{0,10}\b(?:my\s+)?(?:calendar|schedule|agenda)\b.{0,15}\b(?:today|tomorrow)\b", re.I), "daily_brief"),
+    (re.compile(r"\b(?:show|what(?:'?s|\s+is))\b.{0,15}\b(?:today|tomorrow)\b.{0,10}\b(?:agenda|calendar|schedule|meetings?)\b", re.I), "daily_brief"),
+    (re.compile(r"\b(?:meetings?|calls?)\b.{0,10}\b(?:today|tomorrow)\b", re.I), "daily_brief"),
     (re.compile(r"\bwhat.{0,10}(my|today.{0,5})\s+(day|agenda|priorities|focus|schedule)\b", re.I), "daily_brief"),
     # FIX-DAILY-001: "what do i need to know today", "what should i focus on today"
     (re.compile(r"\bwhat\b.{0,20}\b(?:need|should)\b.{0,15}\b(?:know|focus)\b.{0,10}\btoday\b", re.I), "daily_brief"),
@@ -934,6 +976,10 @@ _REGEX_INTENTS = [
     (re.compile(r"\b(?:brief|walk)\s+me\b.{0,20}\b(?:through\s+)?(?:my\s+)?(?:day|today)\b", re.I), "daily_brief"),
     (re.compile(r"\bwhat\b.{0,15}\bdo\s+i\s+have\b.{0,20}\btoday\b", re.I), "daily_brief"),
     (re.compile(r"\bwhat.{0,5}(?:on|in)\s+my\s+(?:plate|calendar|schedule|agenda)\b.{0,15}\btoday\b", re.I), "daily_brief"),
+    # FIX-DB-004: "plan my day/today" → daily_brief
+    (re.compile(r"\bplan\b.{0,10}\b(?:my|the|your)\s+day\b", re.I), "daily_brief"),
+    # FIX-DB-005: object-first calendar: "show me my calendar for today" (calendar before today)
+    (re.compile(r"\b(?:show|check|see|view|pull\s+up)\b.{0,20}\b(?:my\s+)?(?:calendar|schedule|agenda)\b.{0,15}\b(?:for\s+)?(?:today|this\s+week|tomorrow)\b", re.I), "daily_brief"),
     # ── Daily improve — NHR-006: no regex existed; LLM was routing to status/chat ─
     # FIX-DI-001: extend stem patterns to match full words (improve → improvement, improving, etc.)
     (re.compile(r"\b(daily.?improv\w*|daily.?enhanc\w*|daily.?routine)\b", re.I), "daily_improve"),
@@ -979,10 +1025,18 @@ _REGEX_INTENTS = [
     (re.compile(r"\bresearch\b.{0,10}\b(MCP|LLM|AI|ML|API|protocol|framework)\b", re.I), "research"),
     (re.compile(r"\b(deep.?dive|deep.?research|research.?brief|cited\s+report|research\s+report)\b", re.I), "research"),
     # FIX-RES-001: expand window {0,15}→{0,25} — "investigate this topic deeply for me" has 19 chars between verb and "for me"
+    (re.compile(r"\bresearch\b.{0,40}\b(?:latest|recent|current|new|updated)\b.{0,60}\b(?:benchmarks?|docs?|documentation|release\s+notes?|changes?|updates?|versions?|specs?|auth|protocols?)\b", re.I), "research"),
+    (re.compile(r"\b(?:look\s+up|find|search\s+for)\b.{0,20}\b(?:latest|recent|current|new|updated)\b.{0,60}\b(?:docs?|documentation|release\s+notes?|changes?|updates?|versions?|specs?|auth|protocols?)\b", re.I), "research"),
+    (re.compile(r"\b(?:latest|recent|current|new|updated)\b.{0,60}\b(?:benchmarks?|docs?|documentation|release\s+notes?|changes?|updates?|versions?|specs?|auth|protocols?)\b.{0,30}\b(?:for|on|about)\b", re.I), "research"),
     (re.compile(r"\b(research|investigate|look\s+into).{0,25}\bfor\s+me\b", re.I), "research"),
+    # FIX-RES-005: "investigate X" without "for me" — exclude error/bug to avoid fix_error bleed
+    (re.compile(r"\binvestigate\b(?!.{0,30}\b(?:error|bug|exception|crash|traceback)\b).{0,60}", re.I), "research"),
     # FIX-RES-002: "investigate this topic", "research this", "look into this deeply"
     (re.compile(r"\b(?:research|investigate)\s+(?:this|that)\b", re.I), "research"),
-    (re.compile(r"\b(?:investigate|look\s+into)\b.{0,30}\b(?:topic|subject|area|question|further|deeply|thoroughly)\b", re.I), "research"),
+    (re.compile(r"\b(?:investigate|look\s+into)\b.{0,30}\b(?:topic|subject|area|question|issue|problem|matter|thing|further|deeply|thoroughly)\b", re.I), "research"),
+    # FIX-RES-003: "look up X on the web/online" → web_search-grade lookup phrases
+    (re.compile(r"\blook\s+up\b.{0,40}\b(?:on\s+(?:the\s+)?web|online|internet)\b", re.I), "web_search"),
+    (re.compile(r"\bfind\b.{0,20}\binfo(?:rmation)?\b.{0,20}\bonline\b", re.I), "web_search"),
     (re.compile(r"\b(write|produce|generate)\b.{0,20}\b(research|cited|sourced)\s+(brief|report|summary)\b", re.I), "research"),
     (re.compile(r"\bsave\b.{0,20}\bresearch\b.{0,30}\b(about|on|into)\b", re.I), "research"),
     # ── Browse — URL/domain visit patterns BEFORE web_search ─────────────────────
@@ -1036,7 +1090,8 @@ _REGEX_INTENTS = [
     (re.compile(r"\b(yt\s+video|youtu\.be|youtube\.com)\b", re.I), "youtube"),
     # FIX-YT-001: verb-before-youtube forms not covered by existing patterns
     (re.compile(r"\b(?:search|look\s+up|find)\b.{0,20}\byoutube\b", re.I), "youtube"),
-    (re.compile(r"\b(?:watch|play)\b.{0,10}\byoutube\b", re.I), "youtube"),
+    # FIX-YT-002: "play some lofi on youtube" — increased gap to .{0,30}
+    (re.compile(r"\b(?:watch|play)\b.{0,30}\byoutube\b", re.I), "youtube"),
 
     # ── Browse / fetch URL ───────────────────────────────────────────────────────
     (re.compile(r"(browse|visit|open|fetch|go to|check out|navigate to).{0,15}(https?://|website|site|webpage|url|\.(com|io|org|dev|net))", re.I), "browse"),
@@ -1057,8 +1112,10 @@ _REGEX_INTENTS = [
     # FIX-NR-001: "rn nightly" — casual abbreviation of "run nightly"
     (re.compile(r"^\s*rn\s+nightly\s*$", re.I), "nightly_run"),
     # FIX-NR-002: "kick off nightly", "run the nightly job"
-    (re.compile(r"\b(?:kick\s+off|start\s+the)\b.{0,10}\bnightly\b", re.I), "nightly_run"),
+    (re.compile(r"\b(?:kick\s+off|start\s+the|start)\b.{0,10}\bnightly\b", re.I), "nightly_run"),
     (re.compile(r"\brun\s+(?:the\s+)?nightly\s+(?:job|task|script|process|routine)\b", re.I), "nightly_run"),
+    # FIX-NR-004: "start nightly tasks/jobs/script" → nightly_run
+    (re.compile(r"\bstart\s+nightly\s+(?:tasks?|jobs?|scripts?|process|routine)\b", re.I), "nightly_run"),
     # FIX-NR-003: "run maintenance", "schedule maintenance" → nightly_run
     (re.compile(r"\b(?:run|trigger|schedule|start)\b.{0,15}\bmaintenance\b", re.I), "nightly_run"),
 
@@ -1078,6 +1135,8 @@ _REGEX_INTENTS = [
     (re.compile(r"\b(switch|change|move)\b.{0,20}\bto\b.{0,15}\b(?:a\s+)?local\b.{0,20}\b(?:one|model|llm|ai)\b", re.I), "use_local"),
     (re.compile(r"\buse\b.{0,10}\b(qwen|llama|mistral|phi|gemma)\b", re.I), "use_local"),
     # FIX-REL-014: benchmark guard — "benchmark my local model" must beat "local model" → use_local
+    (re.compile(r"\b(?:benchmark|measure|test)\b.{0,30}\b(?:inference|llm|model|ollama|adwi)\b.{0,20}\b(?:speed|throughput|latency|benchmark)\b", re.I), "benchmark"),
+    (re.compile(r"\b(?:what(?:'?s|\s+is)|show|check|measure)\b.{0,30}\b(?:my\s+)?(?:model|llm|ollama|adwi|inference)\b.{0,20}\b(?:latency|throughput|speed|tokens?\s+per\s+second)\b", re.I), "benchmark"),
     (re.compile(r"\b(benchmark|speed.?test|latency)\b.{0,30}\blocal\b.{0,20}\b(model|llm)\b", re.I), "benchmark"),
     (re.compile(r"\blocal\b.{0,20}\b(model|llm)\b.{0,20}\b(speed|latency|benchmark)\b", re.I), "benchmark"),
     # FIX-REL-012: "local llm please", "run local model", "switch model to local"
@@ -1087,7 +1146,8 @@ _REGEX_INTENTS = [
     (re.compile(r"\b(switch|change|use)\b.{0,15}(to\s+)?(cloud model|cloud api|cloud llm|gemini|openai)\b", re.I), "use_cloud"),
     (re.compile(r"\bswitch to cloud\b", re.I), "use_cloud"),
     # FIX-UC-001: "use cloud for this", "fallback to cloud", "offload to cloud" → use_cloud
-    (re.compile(r"\b(?:use|try)\b.{0,10}\bcloud\b.{0,20}\b(?:for\s+this|model|api|llm|inference|instead)\b", re.I), "use_cloud"),
+    # FIX-UC-002: added "version" to catch "use the cloud version"
+    (re.compile(r"\b(?:use|try)\b.{0,10}\bcloud\b.{0,20}\b(?:for\s+this|model|api|llm|inference|instead|version)\b", re.I), "use_cloud"),
     (re.compile(r"\b(?:fallback|fall\s+back|offload|route)\b.{0,15}\b(?:to\s+)?cloud\b", re.I), "use_cloud"),
 
     # ── Voice I/O ────────────────────────────────────────────────────────────────
@@ -1098,6 +1158,8 @@ _REGEX_INTENTS = [
     (re.compile(r"^voice\s+out\s*$", re.I), "voice_out"),
     (re.compile(r"\b(voice input|voice mode|voice.{0,10}recording|start.{0,10}voice|listen.{0,10}voice)\b", re.I), "voice_in"),
     (re.compile(r"\bstart.{0,15}(recording|listening)\b", re.I), "voice_in"),
+    # FIX-VI-003: "stop recording/dictation" → voice_in (toggle off)
+    (re.compile(r"\bstop.{0,15}(?:recording|listening|transcription|dictation)\b", re.I), "voice_in"),
     # FIX-VI-002: "begin transcription/dictation/recording" → voice_in
     (re.compile(r"\bbegin\b.{0,10}\b(?:transcription|dictation|recording|listening)\b", re.I), "voice_in"),
     # FIX-VI-001: "use microphone/mic", "dictate", "turn on voice" → voice_in
@@ -1113,11 +1175,16 @@ _REGEX_INTENTS = [
     # ── Backup now / status / log ─────────────────────────────────────────────────
     # FIX-REL-007: "backup now", "commit and push", "save work to github" — no regex existed
     (re.compile(r"\bbackup\s+now\b", re.I), "backup_now"),
+    # FIX-BU-004: "take a snapshot" → backup_now
+    (re.compile(r"\btake\b.{0,15}\b(?:a\s+)?snapshot\b", re.I), "backup_now"),
     (re.compile(r"\bcommit\s+and\s+push\b", re.I), "backup_now"),
     (re.compile(r"\bpush\s+and\s+commit\b", re.I), "backup_now"),
     # FIX-BU-001: "push my changes/code/work" → backup_now
     (re.compile(r"\bpush\b.{0,15}\bmy\b.{0,10}\b(changes|code|work|commits?|updates?)\b", re.I), "backup_now"),
     (re.compile(r"\bsave\b.{0,20}\b(my\s+)?(work|changes|code)\b.{0,20}\b(to\s+)?github\b", re.I), "backup_now"),
+    # FIX-BU-003: "backup everything/all", "save my work" → backup_now
+    (re.compile(r"\bbackup\b.{0,10}\b(?:everything|all|my\s+(?:work|code|changes|files))\b", re.I), "backup_now"),
+    (re.compile(r"\bsave\s+my\s+(?:work|changes|progress)(?!\s+to\s+a\s+file|\s+as)\b", re.I), "backup_now"),
     # FIX-BU-002: "push to github", "sync to github" → backup_now
     (re.compile(r"\bpush\b.{0,20}\b(?:to\s+)?github\b", re.I), "backup_now"),
     (re.compile(r"\bsync\b.{0,20}\bgithub\b", re.I), "backup_now"),
@@ -1140,6 +1207,10 @@ _REGEX_INTENTS = [
     (re.compile(r"\bapply\b.{0,30}\bpatches?\b.{0,20}\badwi\b", re.I), "patch_adwi"),
     (re.compile(r"\badwi\s+improve\s+itself\b", re.I), "patch_adwi"),
     (re.compile(r"\bimprove\b.{0,20}\badwi.{0,10}\bcode\b", re.I), "patch_adwi"),
+    # FIX-PA-001: "update adwi", "run adwi update", "apply latest patches (to adwi)"
+    (re.compile(r"\b(?:update|upgrade)\b.{0,10}\badwi\b", re.I), "patch_adwi"),
+    (re.compile(r"\b(?:run|do)\b.{0,15}\badwi\b.{0,10}\b(?:update|upgrade|patch)\b", re.I), "patch_adwi"),
+    (re.compile(r"\bapply\b.{0,25}\b(?:latest|new|pending|available)\b.{0,15}\bpatches?\b", re.I), "patch_adwi"),
     (re.compile(r"\bapply\b.{0,30}\bcode\s+improvements?\b.{0,30}\badwi\b", re.I), "patch_adwi"),
 
     # ── Inspect code — NHR-008: code review of adwi source files ─────────────────
@@ -1172,7 +1243,12 @@ _REGEX_INTENTS = [
     (re.compile(r"\b(fix|help.{0,5}fix)\s+this\s+(error|exception|bug)\b", re.I), "fix_error"),
     (re.compile(r"\[Errno\s+\d+\]", re.I), "fix_error"),
     # FIX-FE-003: "debug/troubleshoot/diagnose this error/bug/issue/crash" → fix_error
-    (re.compile(r"\b(?:debug|troubleshoot|diagnose)\b.{0,25}\b(?:this|the|my|that)\b.{0,20}\b(?:error|exception|bug|issue|problem|crash|failure)\b", re.I), "fix_error"),
+    # FIX-FE-007: added "investigate" alongside debug/troubleshoot/diagnose
+    (re.compile(r"\b(?:debug|troubleshoot|diagnose|investigate)\b.{0,25}\b(?:this|the|my|that)\b.{0,20}\b(?:error|exception|bug|issue|problem|crash|failure)\b", re.I), "fix_error"),
+    # FIX-FE-005: "there is an error/bug here" → fix_error (subject-first error statement)
+    (re.compile(r"\bthere\s+(?:is|are|was|were)\b.{0,15}\b(?:an?\s+)?(?:error|bug|exception|issue|problem|crash)\b", re.I), "fix_error"),
+    # FIX-FE-006: bare exception class name at start of input (user pasted exception)
+    (re.compile(r"^(?:ModuleNotFoundError|ValueError|TypeError|AttributeError|KeyError|IndexError|RuntimeError|ImportError|NameError|OSError|FileNotFoundError|ZeroDivisionError|StopIteration)\b", re.I), "fix_error"),
     (re.compile(r"\b(?:debug|troubleshoot)\s+(?:this|that|my|the)\s+code\b", re.I), "fix_error"),
     # FIX-FE-004: "look at this traceback/stack trace", "here's the stack trace" — pasted crash context
     (re.compile(r"\b(?:look\s+at|check\s+out|here(?:['']s|\s+is))\b.{0,20}\b(?:this|the|my|a)\b.{0,20}\b(?:traceback|stack\s+trace|exception|crash)\b", re.I), "fix_error"),
@@ -1246,8 +1322,10 @@ _REGEX_INTENTS = [
     (re.compile(r"\brepo\b.{0,15}\b(clean|dirty|status|changes)\b", re.I), "git_status"),
     # FIX-S3-008: "what did I change", "what's modified", "show me what's changed"
     (re.compile(r"\bwhat\s+(did\s+i|have\s+i).{0,10}(change|modify|edit|commit)\b", re.I), "git_status"),
-    # FIX-GIT-001: "what branch am I on", "uncommitted changes", "show git changes"
-    (re.compile(r"\bwhat\s+branch\b.{0,20}\b(?:am\s+i|are\s+we)\b.{0,10}\bon\b", re.I), "git_status"),
+    # FIX-GIT-001: "what/which branch am I on", "uncommitted changes", "show git changes"
+    (re.compile(r"\b(?:what|which)\s+branch\b.{0,20}\b(?:am\s+i|are\s+we)\b", re.I), "git_status"),
+    # FIX-GIT-002: bare "which branch" / "what branch" → git_status
+    (re.compile(r"^(?:which|what)\s+branch\b", re.I), "git_status"),
     (re.compile(r"\buncommitted\b.{0,20}\bchanges?\b", re.I), "git_status"),
     (re.compile(r"\bshow\b.{0,10}\bgit\b.{0,20}\bchanges?\b", re.I), "git_status"),
     (re.compile(r"\bwhat.{0,5}(is|has|s)\s+(changed|modified|staged)\b", re.I), "git_status"),
@@ -1257,6 +1335,8 @@ _REGEX_INTENTS = [
     (re.compile(r"\bany\s+(?:changes?|commits?|files?)\b.{0,20}\b(?:to\s+(?:push|commit|stage)|not\s+committed|uncommitted|pending)\b", re.I), "git_status"),
     (re.compile(r"\buntracked\s+files?\b", re.I), "git_status"),
     (re.compile(r"\bchanges?\b.{0,15}\b(?:ready\s+to\s+)?(?:commit|push|stage)\b.{0,20}\b(?:\?|ready|pending|waiting)\b", re.I), "git_status"),
+    # FIX-GS-002: "git pull", "pull latest" → git_status (no git_pull intent; state-check covers it)
+    (re.compile(r"\bgit\s+pull\b", re.I), "git_status"),
 
     # FIX-SPRINT-003: "cmd_name function/handler in adwi" → inspect_code before generate_image
     # catches "generate_image function in adwi" — the _ + "function" + "in adwi" signal code lookup
@@ -1292,6 +1372,9 @@ _REGEX_INTENTS = [
     (re.compile(r"\b(tokens?[/_]s|tok[/_]s|t[/_]s)\b", re.I), "benchmark"),
     (re.compile(r"\b(inference|llm|model|ollama).{0,20}\b(throughput|latency\s+benchmark|speed\s+test)\b", re.I), "benchmark"),
     (re.compile(r"\b(bechmark|benchamrk|benchmarck)\b", re.I), "benchmark"),
+    # FIX-BEN-002: "run a speed test", "test my inference speed" without requiring 'local' keyword
+    (re.compile(r"\b(?:run|do|perform)\b.{0,15}\b(?:a\s+)?(?:speed|performance|inference)\s+test\b", re.I), "benchmark"),
+    (re.compile(r"\btest\b.{0,20}\b(?:my\s+)?(?:inference|model|llm)\s+(?:speed|performance|latency)\b", re.I), "benchmark"),
     (re.compile(r"(benchmark|speed.?test|how fast|tokens? per second).{0,20}(adwi|model|local|ollama)\b", re.I), "benchmark"),
     # FIX-SPRINT-001c: "tokens per second", "inference speed", "how performant" without requiring model name
     (re.compile(r"\b(?:how\s+many\s+)?tokens?\s+per\s+(?:sec(?:ond)?|s)\b", re.I), "benchmark"),
@@ -1581,6 +1664,7 @@ _REGEX_INTENTS = [
 
     # ── Gmail open (search + open first result) — MUST precede gmail_read ────────
     # "open latest email from Amazon", "open the email about the budget"
+    (re.compile(r"\b(?:show|open|read|get|view)\b.{0,20}\b(?:email\s+)?(?:thread|conversation|email\s+chain|message\s+chain)\b.{0,30}\b(?:from|about|regarding|with|on)\b", re.I), "gmail_thread_intel"),
     (re.compile(r"\b(open|read)\b.{0,20}\b(email|mail|message)\b.{0,30}\b(from|about|regarding|by)\b", re.I), "gmail_open"),
     (re.compile(r"\b(open|read)\b.{0,15}\b(latest|newest|recent|last)\b.{0,25}\b(email|mail|message)\b.{0,30}\b(from|about)\b", re.I), "gmail_open"),
     (re.compile(r"\b(find\s+and\s+open|search\s+and\s+open)\b.{0,30}\b(email|mail|message)\b", re.I), "gmail_open"),
@@ -1599,6 +1683,8 @@ _REGEX_INTENTS = [
     (re.compile(r"\bsummarize\b.{0,15}\b(?:this|the)\b.{0,10}\b(?:page|article|site|url|webpage|link)\b(?!\s*(?:from\s+)?(?:email|mail|message|thread))", re.I), "browse"),
     # FIX-SPRINT-007: "search web for X and summarize it" → web_search, not gmail_summarize
     # MUST precede the "summarize it" gmail_summarize pattern below
+    (re.compile(r"\b(?:search|look\s+up|find)\b.{0,15}\b(?:the\s+)?(?:web|internet|online)\b.{0,20}\bfor\b", re.I), "web_search"),
+    (re.compile(r"\blook\s+up\b.{0,20}\b(?:latest|current|recent)\b.{0,30}\b(?:ai|llm|tech|model|ollama|home\s+assistant)\b.{0,20}\b(?:news|release|update|version|changelog)\b", re.I), "web_search"),
     (re.compile(r"\b(?:search|look\s+up|find)\b.{0,20}\b(?:web|internet|online|for)\b.{0,60}\b(?:summarize|tldr|summary)\b", re.I), "web_search"),
     (re.compile(r"\b(?:search\s+for|look\s+up)\b.{0,25}\b(?:changelog|alternatives?|integrations?|plugins?|extensions?|updates?|docs?)\b", re.I), "web_search"),
     (re.compile(r"\bsearch\s+for\b.{0,20}\b(?:adwi|ollama|docker|python|n8n|home\s+assistant)\b.{0,20}\b(?:alternatives?|equivalent|similar|replacement)\b", re.I), "web_search"),
@@ -1613,6 +1699,11 @@ _REGEX_INTENTS = [
     (re.compile(r"\bbrief\s+me\b.{0,20}\b(?:on\s+)?(?:this|that|the)\b.{0,15}\b(?:email|mail|message|thread)\b", re.I), "gmail_summarize"),
     (re.compile(r"\bwhat.s\s+in\s+(?:this|that|the)\b.{0,15}\b(?:email|mail|message|thread)\b", re.I), "gmail_summarize"),
     (re.compile(r"\bwhat\s+(?:does\s+(?:this|the)\s+)?(?:email|message|mail)\s+(?:say|contain|talk\s+about)\b", re.I), "gmail_summarize"),
+
+    # FIX-AUS-002: "check for adwi updates", "what version of adwi" — BEFORE gmail_list_category captures "updates?"
+    (re.compile(r"\b(?:check|are\s+there|is\s+there|any)\b.{0,20}\b(?:new\s+)?updates?\b.{0,20}\badwi\b", re.I), "assistant_upgrade_status"),
+    (re.compile(r"\bwhat\s+version\b.{0,20}\badwi\b", re.I), "assistant_upgrade_status"),
+    (re.compile(r"\badwi\b.{0,20}\bversion\b", re.I), "assistant_upgrade_status"),
 
     # ── Gmail list category ────────────────────────────────────────────────────
     (re.compile(r"\b(show|list|check|open|display)\b.{0,20}\b(promotions?|promo|promotional|newsletters?)\b", re.I), "gmail_list_category"),
@@ -1635,6 +1726,9 @@ _REGEX_INTENTS = [
     (re.compile(r"\b(do\s+i\s+have\s+any|any\s+(new|unread)?\s*)(emails?|messages?|mail)\b", re.I), "gmail"),
     (re.compile(r"\binbox\b.{0,15}\b(check|status|new|unread|count|messages?)\b", re.I), "gmail"),
     (re.compile(r"\bwhat.{0,10}in\s+(?:my\s+)?inbox\b", re.I), "gmail"),
+    # FIX-GMAIL-005: "anything in my inbox", "got any mail" → gmail
+    (re.compile(r"\b(?:anything|something)\b.{0,20}\bin\b.{0,10}\b(?:my\s+)?inbox\b", re.I), "gmail"),
+    (re.compile(r"\bgot\b.{0,15}\b(?:any|some|new)\b.{0,10}\b(?:mail|emails?|messages?)\b", re.I), "gmail"),
     (re.compile(r"\b(gm[i]?al|emial)\b", re.I), "gmail"),
     (re.compile(r"(check|show|read|open|get|fetch|look\s+at|list).{0,20}(my )?(email|gmail|inbox|mail|messages?|emial|emil)\b", re.I), "gmail"),
     (re.compile(r"\bhow\s+many\b.{0,20}\b(?:unread|emails?|messages?)\b", re.I), "gmail"),
@@ -1651,6 +1745,10 @@ _REGEX_INTENTS = [
     # FIX-TR-002: "what is trending" (space form) + "what is new in AI"
     (re.compile(r"\bwhat(?:'?s|\s+is)\b.{0,20}\b(new|trending|interesting)\b.{0,20}\b(tech|ai|llm|ml|tools?)\b", re.I), "tech_radar"),
     (re.compile(r"\b(what.{0,20}(new|interesting|trending).{0,20}(tech|ai.?tools?|frameworks?|models?))\b.{0,30}\b(try|watch|ignore|adopt|for\s+me|my\s+setup)\b", re.I), "tech_radar"),
+    # FIX-TR-003: "what tools are trending", "any new AI tools", "latest tech trends"
+    (re.compile(r"\b(?:what|which)\b.{0,15}\b(?:tools?|tech|technology|software|AI|LLMs?|frameworks?)\b.{0,20}\b(?:trending|popular|emerging|hot|latest)\b", re.I), "tech_radar"),
+    (re.compile(r"\b(?:any|new)\b.{0,10}\bnew\b.{0,15}\b(?:AI|ML|LLM|tech|tools?|frameworks?|models?)\b", re.I), "tech_radar"),
+    (re.compile(r"\blatest\b.{0,20}\b(?:tech|technology|AI|ML)\b.{0,15}\btrends?\b", re.I), "tech_radar"),
     # ── Memory curate (propose + confirm durable memories, BEFORE memory_scan) ───
     (re.compile(r"\bmemory.{0,2}curat\w+\b", re.I), "memory_curate"),
     (re.compile(r"\bcurat\w*.{0,10}\bmemor(?:y|ies)\b", re.I), "memory_curate"),
@@ -1660,6 +1758,8 @@ _REGEX_INTENTS = [
     (re.compile(r"\blearn\s+(from|about)\b.{0,30}\b(my\s+)?(recent\s+)?(logs?|history|sessions?|notes?)\b", re.I), "memory_curate"),
     # FIX-MEM-001: prune/trim/consolidate synonyms for curating memory
     (re.compile(r"\b(prune|trim|consolidate)\b.{0,20}\bmemor(?:y|ies)\b", re.I), "memory_curate"),
+    # FIX-MEM-002: clear/delete/wipe (old) memories → memory_curate
+    (re.compile(r"\b(?:clear|delete|wipe)\b.{0,10}\b(?:old\s+)?memor(?:y|ies)\b", re.I), "memory_curate"),
     # ── Assistant upgrade status ──────────────────────────────────────────────────
     (re.compile(r"\b(upgrade.?pack.?status|assistant.?upgrade.?status)\b", re.I), "assistant_upgrade_status"),
     (re.compile(r"\b(research|browser.?delegate|tech.?radar|memory.?curat).{0,20}\b(status|ready|installed|available)\b", re.I), "assistant_upgrade_status"),
@@ -1676,20 +1776,29 @@ _REGEX_INTENTS = [
     # CYCLE-5: embeddings generation → memory_scan
     (re.compile(r"\bgenerate\b.{0,20}\bembeddings?\b", re.I), "memory_scan"),
     # FIX-MR-001: "what did I say/mention/note about X" → memory_recall
-    (re.compile(r"\bwhat\b.{0,10}\bi\b.{0,10}\b(?:said|say|mentioned|mention|noted|note|wrote|recorded)\b.{0,10}\babout\b", re.I), "memory_recall"),
+    # FIX-MR-003: added "write" (did-write form) alongside "wrote" (past perfect)
+    # FIX-MR-004: added "think/thought" for "what did I think about X"
+    (re.compile(r"\bwhat\b.{0,10}\bi\b.{0,10}\b(?:said|say|mentioned|mention|noted|note|wrote|write|recorded|think|thought)\b.{0,10}\babout\b", re.I), "memory_recall"),
+    # FIX-MR-005: "what were my notes on X" → memory_recall
+    (re.compile(r"\bwhat\b.{0,20}\b(?:were|are)\b.{0,20}\bmy\b.{0,20}\bnotes?\b.{0,15}\b(?:on|about|for)\b", re.I), "memory_recall"),
     (re.compile(r"(what do you (remember|know|recall)|do you remember|tell me what you know).{0,40}(about|regarding)\b", re.I), "memory_recall"),
     (re.compile(r"(remember|recall|what do you know about|memory).{0,30}\?", re.I), "memory_recall"),
     # FIX-MR-002: "what do you have in memory" → memory_recall (have-in-memory form)
     (re.compile(r"\bwhat\b.{0,10}\bdo\s+you\b.{0,15}\bhave\b.{0,20}\bin\s+(?:your\s+)?memory\b", re.I), "memory_recall"),
     (re.compile(r"memory (stats|status|ledger|database|db)\b", re.I), "memory_stats"),
     # NHR-009: additional synonyms — "memory statistics/metrics/entries"
+    (re.compile(r"\b(?:audit|check|review|scan|inspect)\b.{0,20}\b(?:my\s+|the\s+)?(?:memories|memory\s+(?:entries|records|items|store|database|db))\b", re.I), "memory_scan"),
     (re.compile(r"memory\s+(statistics|metrics|size|count|entries|records)\b", re.I), "memory_stats"),
     # FIX-MEMST-001: "how many X in memory" / "entries in memory"
     (re.compile(r"\bhow\s+many\b.{0,20}\b(things?|entries?|items?|records?)\b.{0,20}\bin\s+(your\s+|adwi.s\s+)?memory\b", re.I), "memory_stats"),
     (re.compile(r"\b(entries?|items?|records?)\s+in\s+(your\s+|my\s+|adwi.s\s+)?memory\b", re.I), "memory_stats"),
     (re.compile(r"\bmemry\s+(stats?|status|count|size)\b", re.I), "memory_stats"),
     # FIX-MS-002: "memory usage stats/statistics/metrics" → memory_stats ("usage" separates memory+stats)
+    (re.compile(r"\b(?:audit|check|review|scan|inspect)\b.{0,20}\b(?:my\s+|the\s+)?(?:memories|memory\s+(?:entries|records|items|store|database|db))\b", re.I), "memory_scan"),
     (re.compile(r"\bmemory\b.{0,20}\busage\b.{0,15}\b(?:stats?|statistics|metrics|data|info)\b", re.I), "memory_stats"),
+    # FIX-MS-003: "memory usage" bare anchor and "adwi memory usage" → memory_stats
+    (re.compile(r"^memory\s+usage\s*$", re.I), "memory_stats"),
+    (re.compile(r"\badwi\b.{0,15}\bmemory\s+usage\b", re.I), "memory_stats"),
     # FIX-MSCAN-002: "list/show my memories" → memory_scan
     (re.compile(r"\b(?:list|show|display)\b.{0,15}\bmy\s+(?:memories|memory\s+entries)\b", re.I), "memory_scan"),
     # CYCLE-3: "what context do you have about me/my system" → memory_recall (not memory_context)

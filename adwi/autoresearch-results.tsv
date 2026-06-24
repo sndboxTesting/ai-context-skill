@@ -54,3 +54,12 @@ a00eb85	879	879	25	25	17	17	keep	FIX-DU-007: almost-out-of-space, low-on-disk, n
 ec8a4e1	892	892	25	25	17	17	keep	FIX-LF-002/GIT-001/ST-002: largest files, what branch am I on, health check (892 tests)
 8c8d854	905	905	25	25	17	17	keep	FIX-RAG-001/IMPL-001/VO-001/VI-002: notes-say, build-feature, read-back, begin-transcription (905 tests)
 648913a	914	914	25	25	17	17	keep	FIX-GCC-001/GCANCEL-001: add-person-to-CC/BCC, cancel-this-email forms (914 tests)
+f66a2c7	939	940	25	25	17	17	keep	FIX-DU-008/009: disk_usage subject-first phrasing + where-space-gone; sync DU-006/007 gap to eval harnesses
+3b485a3	952	953	25	25	17	17	keep	FIX-DB-004/005/MEM-002: plan-my-day+calendar+clear-memories; sync daily_brief pattern gaps to eval harnesses
+195bd5b	971	972	25	25	17	17	keep	FIX-SH-002/BU-003/GIT-002/VI-003/GMAIL-005: 8 multi-intent coverage gaps + eval harness sync
+7cb072b	984	985	25	25	17	17	keep	FIX-RES-003/004/FE-005/NR-004: research-issue, web-lookup-online, error-statement, start-nightly
+87aeaac	999	1000	25	25	17	17	keep	FIX-TR-003/PA-001/FE-006/DOC-002: tech-trending, update-adwi, bare-exception, health-check
+cbab981	1015	1016	25	25	17	17	keep	FIX-ORG-003/YT-002/FR-002/MS-003/UC-002/WN-002: reorganize, play-lofi-youtube, show-readme, memory-usage, use-cloud-version, what-should-I-build-next
+e28c563	1025	1026	25	25	17	17	keep	FIX-STA-003/CAP-002/BEN-002/WN-003: adwi-status, what-can-adwi-do, run-speed-test, what-should-I-focus-on
+c849d19	1033	1034	25	25	17	17	keep	FIX-MC-004/MR-003/004/005/GS-002: dedup-memories, write/think-about, notes-on, git-pull
+a7f6efb	1045	1046	25	25	17	17	keep	FIX-AUS-002/FL-002/SH-003/RES-005/BU-004/FS-001/FE-007: adwi-updates-guard, list-all-files, self-repair, investigate-research, snapshot, where-is-file, investigate-error

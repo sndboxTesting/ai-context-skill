@@ -16,12 +16,15 @@ from __future__ import annotations
 
 import datetime
 import json
+import os
 import re
 import sys
 import urllib.request
 from pathlib import Path
 
-WORKSPACE    = Path.home() / "SuneelWorkSpace"
+_DEFAULT_WORKSPACE = Path.home() / "SuneelWorkSpace"
+_CWD_WORKSPACE = Path.cwd() if (Path.cwd() / "adwi").is_dir() else _DEFAULT_WORKSPACE
+WORKSPACE    = Path(os.environ.get("ADWI_WORKSPACE") or os.environ.get("ROOT") or _CWD_WORKSPACE).resolve()
 README       = WORKSPACE / "README.md"
 CLAUDE_MD    = WORKSPACE / "CLAUDE.md"
 CLI_PATH     = WORKSPACE / "adwi" / "adwi_cli.py"

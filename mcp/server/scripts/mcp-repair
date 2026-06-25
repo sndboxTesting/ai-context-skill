@@ -41,7 +41,7 @@ shutil.copy2(path, bak)
 data = json.load(open(path))
 data.setdefault("mcpServers", {})["workspace-brain"] = {
     "command": "uv",
-    "args": ["run", "--with", "mcp>=1.0.0", "python3", server_main]
+    "args": ["run", "--with", "mcp==1.28.0", "python3", server_main]
 }
 open(path, "w").write(json.dumps(data, indent=2))
 print("Done. Backup:", bak)
@@ -62,7 +62,7 @@ if [ -f "$CODEX_CONFIG" ]; then
 # --- workspace-brain MCP server ---
 [mcp_servers.workspace-brain]
 command = "uv"
-args = ["run", "--with", "mcp>=1.0.0", "python3", "$MCP_ROOT/server/main.py"]
+args = ["run", "--with", "mcp==1.28.0", "python3", "$MCP_ROOT/server/main.py"]
 # --- end workspace-brain MCP server ---
 TOML
         echo "[OK] Codex config updated"

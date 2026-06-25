@@ -5,4 +5,4 @@
 set -eu
 MCP_ROOT="$(cd "$(dirname "$0")/../.." && pwd)"
 SERVER="$MCP_ROOT/server/main.py"
-exec uv run --with "mcp>=1.0.0" python3 "$SERVER"
+exec uv run --with-requirements "$MCP_ROOT/server/requirements.txt" python3 "$SERVER"

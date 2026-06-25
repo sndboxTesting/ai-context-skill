@@ -87,10 +87,15 @@ except Exception:
     pass
 
 def _read_workspace_file(rel_or_abs: str) -> str:
-    """Read a file relative to WORKSPACE or as absolute path."""
+    """Read a file relative to WORKSPACE or as absolute path.
+    Absolute paths that escape WORKSPACE are rejected."""
     p = pathlib.Path(rel_or_abs)
     if not p.is_absolute():
         p = WORKSPACE / rel_or_abs
+    resolved = p.resolve()
+    workspace_resolved = WORKSPACE.resolve()
+    if not str(resolved).startswith(str(workspace_resolved) + os.sep) and resolved != workspace_resolved:
+        return f"[Access denied: path escapes workspace: {rel_or_abs}]"
     if not p.exists():
         return f"[File not found: {p}]"
     try:

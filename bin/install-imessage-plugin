@@ -1,0 +1,58 @@
+#!/bin/sh
+# Guide for installing the official Claude iMessage plugin.
+# The plugin requires an interactive Claude Code session to install.
+#
+# Run this script to see the exact steps. It does NOT install automatically
+# because plugin installation requires a live Claude session.
+
+ROOT="${SUNEEL_WORKSPACE:-$HOME/SuneelWorkSpace}"
+INV="$ROOT/comms/config/plugin_inventory.json"
+
+echo "iMessage Plugin Installation Guide"
+echo "==================================="
+echo
+echo "The official Claude Code iMessage plugin must be installed interactively."
+echo "Here are the exact steps:"
+echo
+echo "STEP 1 — Open a new Claude Code session:"
+echo "  claude"
+echo
+echo "STEP 2 — In the Claude session, type:"
+echo "  /plugin install imessage@claude-plugins-official"
+echo
+echo "STEP 3 — Once installed, launch Claude with the iMessage channel:"
+echo "  use-claude-imessage"
+echo "  (or: claude --channels plugin:imessage@claude-plugins-official)"
+echo
+echo "STEP 4 — After installation, update the plugin inventory:"
+python3 -c "
+import json, pathlib, subprocess
+from datetime import datetime, timezone
+
+inv_path = pathlib.Path('$INV')
+try:
+    inv = json.loads(inv_path.read_text())
+    # Check if plugin is now installed
+    result = subprocess.run(['claude', 'plugin', 'list'], capture_output=True, text=True, timeout=15)
+    if 'imessage' in result.stdout.lower():
+        inv['imessage_plugin']['status'] = 'installed'
+        inv['imessage_plugin']['installed_at'] = datetime.now(timezone.utc).isoformat()
+        inv_path.write_text(json.dumps(inv, indent=2))
+        print('  Plugin detected and inventory updated: INSTALLED')
+    else:
+        print('  Plugin not detected yet — follow steps above first.')
+except Exception as e:
+    print(f'  (could not auto-update inventory: {e})')
+" 2>/dev/null
+echo
+echo "CURRENT STATUS:"
+python3 -c "
+import json, pathlib
+p = pathlib.Path('$INV')
+if p.exists():
+    d = json.loads(p.read_text())
+    s = d['imessage_plugin']['status']
+    print(f'  iMessage plugin: {s}')
+" 2>/dev/null || echo "  (inventory not found)"
+echo
+echo "Docs: ~/SuneelWorkSpace/comms/docs/PERMISSIONS.md"

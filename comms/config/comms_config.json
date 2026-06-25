@@ -1,0 +1,41 @@
+{
+  "_meta": {
+    "version": "1.0",
+    "description": "Communications subsystem configuration",
+    "created": "2026-06-24",
+    "workspace": "~/SuneelWorkSpace"
+  },
+  "imessage": {
+    "enabled": true,
+    "db_path": "~/Library/Messages/chat.db",
+    "read_mode": "sqlite_direct",
+    "send_mode": "applescript",
+    "fda_required": true,
+    "fda_confirmed": true,
+    "automation_permission_required": true,
+    "plugin_status": "not_installed",
+    "plugin_name": "imessage@claude-plugins-official",
+    "recent_limit": 20,
+    "search_limit": 50,
+    "self_chat_handle": null
+  },
+  "mail": {
+    "enabled": false,
+    "reason_disabled": "Mail.app not installed at /Applications/Mail.app",
+    "adapter": "applescript",
+    "mailapp_installed": false,
+    "accounts_configured": false,
+    "fallback": "see comms/reports/plugin_recommendations.md for Gmail/IMAP options"
+  },
+  "safety": {
+    "auto_reply": false,
+    "auto_send": false,
+    "confirmation_required": true,
+    "allowlist_enforced": false,
+    "log_outbound": true,
+    "log_blocked": true,
+    "dry_run_by_default": true,
+    "body_logging": false,
+    "body_logging_debug_mode": false
+  }
+}

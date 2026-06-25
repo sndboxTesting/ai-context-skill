@@ -1,0 +1,25 @@
+#!/bin/sh
+# Communications subsystem status overview
+ROOT="${SUNEEL_WORKSPACE:-$HOME/SuneelWorkSpace}"
+
+echo "Communications Subsystem Status"
+echo "==============================="
+echo
+echo "--- iMessage ---"
+python3 "$ROOT/comms/imessage/scripts/imessage-status" 2>&1
+
+echo
+echo "--- Mail ---"
+python3 "$ROOT/comms/mail/scripts/mail-status" 2>&1
+
+echo
+echo "--- Plugin inventory ---"
+python3 -c "
+import json, pathlib
+p = pathlib.Path('$ROOT/comms/config/plugin_inventory.json')
+if p.exists():
+    d = json.loads(p.read_text())
+    for k, v in d.items():
+        if k != '_meta':
+            print(f'  {k}: {v.get(\"status\", \"?\")}')
+" 2>/dev/null || echo "  (config not found)"

@@ -1,0 +1,37 @@
+{
+  "_meta": {
+    "version": "1.0",
+    "description": "Plugin inventory for the comms subsystem",
+    "updated": "2026-06-24"
+  },
+  "imessage_plugin": {
+    "name": "imessage@claude-plugins-official",
+    "status": "not_installed",
+    "install_command": "claude plugin install imessage@claude-plugins-official",
+    "launch_command": "claude --channels plugin:imessage@claude-plugins-official",
+    "helper_script": "bin/install-imessage-plugin",
+    "wrapper_script": "bin/use-claude-imessage",
+    "source": "anthropics/claude-plugins-official",
+    "commit": null,
+    "version": null,
+    "installed_at": null,
+    "last_verified": null,
+    "requires_interactive_session": true,
+    "notes": "Must be installed in an interactive Claude Code session. Run bin/install-imessage-plugin for guidance."
+  },
+  "gmail_plugin": {
+    "name": "gmail@claude-plugins-official",
+    "status": "not_installed",
+    "reason": "Requires Google OAuth — not configured. See plugin_recommendations.md.",
+    "recommendation": "evaluate_later"
+  },
+  "fallback_adapter": {
+    "name": "local_sqlite_imessage",
+    "type": "local_script",
+    "status": "active",
+    "path": "comms/imessage/scripts/",
+    "method": "sqlite_direct_read",
+    "fda_required": true,
+    "fda_confirmed": true
+  }
+}

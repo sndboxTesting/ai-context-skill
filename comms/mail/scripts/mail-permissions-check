@@ -1,0 +1,24 @@
+#!/usr/bin/env python3
+"""Check Mail.app permissions and system readiness."""
+import sys, pathlib
+
+MAIL_APP = pathlib.Path("/Applications/Mail.app")
+
+def main():
+    print("Mail Permissions Check")
+    print("=" * 40)
+    ok = MAIL_APP.exists()
+    print(f"  [{'OK' if ok else 'FAIL'}] Mail.app installed at /Applications/Mail.app")
+    if not ok:
+        print()
+        print("  Mail.app is not installed.")
+        print("  Install from App Store (free) or use Gmail plugin instead.")
+        print("  See: ~/SuneelWorkSpace/comms/reports/plugin_recommendations.md")
+        return 1
+    print()
+    print("  Mail.app is present. Automation permission may be needed.")
+    print("  Check: System Settings → Privacy & Security → Automation → Terminal → Mail")
+    return 0
+
+if __name__ == "__main__":
+    sys.exit(main())

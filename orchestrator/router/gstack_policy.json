@@ -4,12 +4,12 @@
     "description": "Maps task types to recommended gstack skills. Updated by route-learn when skill outcome data is available.",
     "last_updated": null,
     "gstack_skills_path": "~/.claude/skills/gstack/",
-    "policy": "advisory — skills are shown as hints, never auto-invoked"
+    "policy": "advisory \u2014 skills are shown as hints, never auto-invoked"
   },
   "skill_map": {
     "debugging": {
       "gstack_skill": "/investigate",
-      "description": "Systematic root-cause analysis: 5-phase methodology (observe → hypothesis → test → fix → verify)",
+      "description": "Systematic root-cause analysis: 5-phase methodology (observe \u2192 hypothesis \u2192 test \u2192 fix \u2192 verify)",
       "when_to_use": "Error with unknown root cause, multi-file failures, intermittent bugs",
       "confidence_boost": 0.05
     },
@@ -54,11 +54,40 @@
       "description": "Review docs for accuracy and completeness",
       "when_to_use": "After writing documentation",
       "confidence_boost": 0.02
+    },
+    "imessage_reply": {
+      "gstack_skill": "/review",
+      "description": "Review outbound iMessage drafts for tone, appropriateness, and safety before send",
+      "when_to_use": "Before sending any iMessage \u2014 check tone, recipient, no sensitive info leaked",
+      "confidence_boost": 0.05
+    },
+    "email_reply": {
+      "gstack_skill": "/review",
+      "description": "Review outbound email drafts for tone, format, and safety",
+      "when_to_use": "Before sending any email draft \u2014 check professionalism, accuracy, recipient",
+      "confidence_boost": 0.05
+    },
+    "comms_triage": {
+      "gstack_skill": "/office-hours",
+      "description": "Challenge and frame communications workflow before building triage system",
+      "when_to_use": "When designing a comms triage workflow or inbox management strategy",
+      "confidence_boost": 0.03
+    },
+    "outbound_review": {
+      "gstack_skill": "/cso",
+      "description": "Security-focused review of outbound comms \u2014 data leakage, privacy, recipient validation",
+      "when_to_use": "Any security or privacy concern about outbound messages or email",
+      "confidence_boost": 0.07
     }
   },
   "always_available": [
-    "/investigate", "/office-hours", "/review", "/cso",
-    "/plan-eng-review", "/ship", "/qa"
+    "/investigate",
+    "/office-hours",
+    "/review",
+    "/cso",
+    "/plan-eng-review",
+    "/ship",
+    "/qa"
   ],
   "skill_outcomes": {}
 }

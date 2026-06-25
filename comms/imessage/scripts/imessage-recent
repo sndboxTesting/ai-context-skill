@@ -1,0 +1,120 @@
+#!/usr/bin/env python3
+"""Show recent iMessages from chat.db.
+
+Usage:
+  imessage-recent [--limit N] [--hours H] [--json]
+"""
+import sys
+import sqlite3
+import json
+import pathlib
+import argparse
+from datetime import datetime, timedelta, timezone
+
+DB = pathlib.Path.home() / "Library/Messages/chat.db"
+# Apple Core Data epoch: 2001-01-01 00:00:00 UTC
+APPLE_EPOCH_OFFSET = 978307200
+
+
+def format_ts(apple_ts):
+    if not apple_ts:
+        return "unknown"
+    unix_ts = int(apple_ts) / 1_000_000_000 + APPLE_EPOCH_OFFSET
+    return datetime.fromtimestamp(unix_ts).strftime("%Y-%m-%d %H:%M")
+
+
+def get_recent(limit=20, hours=24):
+    conn = sqlite3.connect(str(DB))
+    conn.row_factory = sqlite3.Row
+    c = conn.cursor()
+    cutoff_apple = (int((datetime.now() - timedelta(hours=hours)).timestamp()) - APPLE_EPOCH_OFFSET) * 1_000_000_000
+    c.execute("""
+        SELECT
+            m.rowid,
+            m.text,
+            m.is_from_me,
+            m.date,
+            m.is_read,
+            m.service,
+            h.id AS handle_id,
+            chat.display_name,
+            chat.chat_identifier
+        FROM message m
+        LEFT JOIN handle h ON m.handle_id = h.rowid
+        LEFT JOIN chat_message_join cmj ON cmj.message_id = m.rowid
+        LEFT JOIN chat ON chat.rowid = cmj.chat_id
+        WHERE m.date > ? AND m.text IS NOT NULL AND m.text != ''
+        ORDER BY m.date DESC
+        LIMIT ?
+    """, (cutoff_apple, limit))
+    rows = [dict(r) for r in c.fetchall()]
+    conn.close()
+    return rows
+
+
+def redact_handle(h):
+    """Partially redact phone/email for report safety — show first 4 chars."""
+    if not h:
+        return "unknown"
+    if "@" in h:
+        parts = h.split("@")
+        return parts[0][:4] + "***@" + parts[1]
+    h = h.replace("+", "").replace("-", "").replace(" ", "")
+    return h[:4] + "****" + h[-2:] if len(h) > 6 else "****"
+
+
+def main():
+    parser = argparse.ArgumentParser(description="Show recent iMessages")
+    parser.add_argument("--limit", type=int, default=20)
+    parser.add_argument("--hours", type=int, default=24)
+    parser.add_argument("--json", action="store_true", dest="json_out")
+    parser.add_argument("--full", action="store_true", help="Show unredacted handles (use carefully)")
+    args = parser.parse_args()
+
+    if not DB.exists():
+        print("[ERROR] chat.db not found. Messages may not be enabled on this Mac.", file=sys.stderr)
+        sys.exit(1)
+
+    try:
+        rows = get_recent(args.limit, args.hours)
+    except Exception as e:
+        print(f"[ERROR] Cannot read chat.db: {e}", file=sys.stderr)
+        print("  → Grant Full Disk Access to Terminal/VS Code in System Settings → Privacy & Security", file=sys.stderr)
+        sys.exit(1)
+
+    if args.json_out:
+        out = []
+        for r in rows:
+            out.append({
+                "id": r["rowid"],
+                "from_me": bool(r["is_from_me"]),
+                "handle": r["handle_id"] if args.full else redact_handle(r["handle_id"]),
+                "chat": r["chat_identifier"] or r["display_name"],
+                "text_preview": (r["text"] or "")[:120],
+                "timestamp": format_ts(r["date"]),
+                "read": bool(r["is_read"]),
+            })
+        print(json.dumps(out, indent=2))
+        return
+
+    if not rows:
+        print(f"No messages in the last {args.hours} hours.")
+        return
+
+    print(f"Recent iMessages (last {args.hours}h, limit {args.limit})")
+    print("=" * 60)
+    for r in rows:
+        direction = "→ ME" if r["is_from_me"] else "FROM"
+        handle = r["handle_id"] if args.full else redact_handle(r["handle_id"])
+        ts = format_ts(r["date"])
+        text = (r["text"] or "").replace("\n", " ").strip()[:100]
+        chat_name = r["display_name"] or r["chat_identifier"] or ""
+        if chat_name and not args.full:
+            chat_name = chat_name[:20] + "..." if len(chat_name) > 20 else chat_name
+        print(f"  [{ts}] {direction} {handle}  ({chat_name})")
+        print(f"    {text}")
+        print()
+
+
+if __name__ == "__main__":
+    main()

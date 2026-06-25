@@ -1,0 +1,21 @@
+{
+  "_meta": {
+    "version": "1.0",
+    "description": "Mail subsystem configuration"
+  },
+  "adapter": "mailapp_applescript",
+  "mailapp_installed": false,
+  "mailapp_path": "/Applications/Mail.app",
+  "accounts_configured": false,
+  "enabled": false,
+  "disabled_reason": "Mail.app not installed at /Applications/Mail.app",
+  "next_steps": [
+    "Install Apple Mail.app or use Gmail plugin",
+    "See comms/reports/plugin_recommendations.md"
+  ],
+  "imap_fallback": {
+    "enabled": false,
+    "configured": false,
+    "note": "IMAP/SMTP mode available as future upgrade — requires credentials from user"
+  }
+}

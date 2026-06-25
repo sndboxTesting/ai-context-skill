@@ -1,0 +1,54 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "comms: status",
+      "type": "shell",
+      "command": "${workspaceFolder}/bin/comms-status",
+      "group": "none",
+      "presentation": { "reveal": "always", "panel": "shared" }
+    },
+    {
+      "label": "comms: recent iMessages",
+      "type": "shell",
+      "command": "${workspaceFolder}/bin/imsg-recent",
+      "group": "none",
+      "presentation": { "reveal": "always", "panel": "shared" }
+    },
+    {
+      "label": "comms: recent emails",
+      "type": "shell",
+      "command": "${workspaceFolder}/bin/mail-recent",
+      "group": "none",
+      "presentation": { "reveal": "always", "panel": "shared" }
+    },
+    {
+      "label": "comms: report",
+      "type": "shell",
+      "command": "${workspaceFolder}/bin/comms-report",
+      "group": "none",
+      "presentation": { "reveal": "always", "panel": "shared" }
+    },
+    {
+      "label": "comms: permissions check",
+      "type": "shell",
+      "command": "${workspaceFolder}/bin/comms-permissions-check",
+      "group": "none",
+      "presentation": { "reveal": "always", "panel": "shared" }
+    },
+    {
+      "label": "comms: doctor",
+      "type": "shell",
+      "command": "${workspaceFolder}/bin/comms-doctor",
+      "group": "none",
+      "presentation": { "reveal": "always", "panel": "shared" }
+    },
+    {
+      "label": "comms: launch Claude with iMessage",
+      "type": "shell",
+      "command": "${workspaceFolder}/bin/use-claude-imessage",
+      "group": "none",
+      "presentation": { "reveal": "always", "panel": "new" }
+    }
+  ]
+}

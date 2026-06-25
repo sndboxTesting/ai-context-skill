@@ -1,0 +1,133 @@
+#!/usr/bin/env python3
+"""Send a confirmed iMessage draft via AppleScript.
+
+SAFETY: This script sends a real iMessage. It requires:
+  1. A draft created by imessage-send-draft
+  2. Explicit draft ID argument
+  3. Automation permission for Messages.app in System Settings
+
+Usage:
+  imessage-send-confirmed <draft_id>
+  imessage-send-confirmed draft_20260624_143000
+"""
+import sys
+import json
+import hashlib
+import pathlib
+import subprocess
+from datetime import datetime, timezone
+
+ROOT = pathlib.Path.home() / "SuneelWorkSpace"
+DRAFTS_DIR = ROOT / "comms/imessage/state/drafts"
+OUTBOUND_LOG = ROOT / "comms/imessage/logs/imessage_outbound.log"
+POLICY = ROOT / "comms/config/outbound_policy.json"
+
+
+def _log(event: str, draft_id: str, recipient: str, body_hash: str, success: bool, error: str = ""):
+    OUTBOUND_LOG.parent.mkdir(parents=True, exist_ok=True)
+    ts = datetime.now(timezone.utc).isoformat()
+    status = "SENT" if success else "FAILED"
+    # Never log message body — only hash
+    entry = f"[{ts}] {status} | draft={draft_id} | to={recipient[:4]}**** | hash={body_hash} | err={error}\n"
+    with open(OUTBOUND_LOG, "a") as f:
+        f.write(entry)
+
+
+def _applescript_escape(s: str) -> str:
+    """Escape a string for safe embedding in AppleScript double-quoted context."""
+    # AppleScript only needs backslash and double-quote escaped inside "..."
+    return s.replace("\\", "\\\\").replace('"', '\\"')
+
+
+def _send_applescript(recipient: str, message: str) -> tuple[bool, str]:
+    """Send iMessage via osascript. Returns (success, error_message)."""
+    # Escape recipient and message to prevent AppleScript injection
+    safe_recipient = _applescript_escape(recipient)
+    safe_message = _applescript_escape(message)
+    script = (
+        'tell application "Messages"\n'
+        f'  set targetService to first service whose service type is iMessage\n'
+        f'  set targetBuddy to buddy "{safe_recipient}" of targetService\n'
+        f'  send "{safe_message}" to targetBuddy\n'
+        'end tell'
+    )
+    result = subprocess.run(
+        ["osascript", "-e", script],
+        capture_output=True, text=True, timeout=30
+    )
+    if result.returncode == 0:
+        return True, ""
+    else:
+        return False, result.stderr.strip()
+
+
+def main():
+    if len(sys.argv) < 2:
+        print("Usage: imessage-send-confirmed <draft_id>", file=sys.stderr)
+        sys.exit(1)
+
+    draft_id = sys.argv[1].strip()
+    if not draft_id.startswith("draft_"):
+        print(f"[ERROR] Invalid draft ID: {draft_id}. Expected format: draft_YYYYMMDD_HHMMSS", file=sys.stderr)
+        sys.exit(1)
+
+    draft_file = DRAFTS_DIR / f"{draft_id}.json"
+    if not draft_file.exists():
+        print(f"[ERROR] Draft not found: {draft_file}", file=sys.stderr)
+        sys.exit(1)
+
+    try:
+        draft = json.loads(draft_file.read_text())
+    except Exception as e:
+        print(f"[ERROR] Cannot read draft: {e}", file=sys.stderr)
+        sys.exit(1)
+
+    if draft.get("status") == "sent":
+        print(f"[ERROR] Draft {draft_id} was already sent at {draft.get('sent_at')}.", file=sys.stderr)
+        sys.exit(1)
+
+    recipient = draft["recipient"]
+    message = draft["message"]
+    body_hash = draft.get("body_hash", hashlib.sha256(message.encode()).hexdigest()[:16])
+
+    print("=" * 50)
+    print("OUTBOUND iMESSAGE — FINAL CONFIRMATION")
+    print("=" * 50)
+    print(f"  To:      {recipient}")
+    print(f"  Message: {message[:300]}")
+    print(f"  Draft:   {draft_id}")
+    print()
+    print("Type 'SEND' (all caps) and press Enter to send, or anything else to cancel:")
+    try:
+        answer = input("> ").strip()
+    except (KeyboardInterrupt, EOFError):
+        answer = ""
+
+    if answer != "SEND":
+        print("Cancelled. Draft preserved.")
+        _log("cancelled", draft_id, recipient, body_hash, False, "user_cancelled")
+        sys.exit(0)
+
+    print("Sending via AppleScript...")
+    success, err = _send_applescript(recipient, message)
+
+    if success:
+        draft["status"] = "sent"
+        draft["sent_at"] = datetime.now(timezone.utc).isoformat()
+        draft_file.write_text(json.dumps(draft, indent=2))
+        _log("send", draft_id, recipient, body_hash, True)
+        print(f"Sent successfully at {draft['sent_at']}")
+    else:
+        _log("send", draft_id, recipient, body_hash, False, err)
+        print(f"[ERROR] Send failed: {err}", file=sys.stderr)
+        print()
+        print("Common causes:")
+        print("  - Automation permission for Messages.app not granted")
+        print("    → System Settings → Privacy & Security → Automation → Terminal → Messages")
+        print("  - Messages.app not configured/signed in")
+        print("  - Recipient not in Messages contacts")
+        sys.exit(1)
+
+
+if __name__ == "__main__":
+    main()

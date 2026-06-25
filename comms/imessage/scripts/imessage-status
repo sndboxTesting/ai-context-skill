@@ -1,0 +1,99 @@
+#!/usr/bin/env python3
+"""Show iMessage subsystem status."""
+import sys
+import json
+import sqlite3
+import pathlib
+import subprocess
+from datetime import datetime, timezone
+
+ROOT = pathlib.Path.home() / "SuneelWorkSpace"
+DB = pathlib.Path.home() / "Library/Messages/chat.db"
+STATE = ROOT / "comms/imessage/state/imessage_state.json"
+CONFIG = ROOT / "comms/config/imessage_config.json"
+
+
+def _msg_count():
+    try:
+        conn = sqlite3.connect(str(DB))
+        c = conn.cursor()
+        c.execute("SELECT count(*) FROM message")
+        n = c.fetchone()[0]
+        conn.close()
+        return n
+    except Exception as e:
+        return f"error: {e}"
+
+
+def _recent_activity():
+    try:
+        conn = sqlite3.connect(str(DB))
+        c = conn.cursor()
+        # Apple epoch: 2001-01-01 = 978307200 Unix
+        c.execute("""
+            SELECT datetime(MAX(date)/1000000000 + 978307200, 'unixepoch', 'localtime')
+            FROM message WHERE date > 0
+        """)
+        row = c.fetchone()
+        conn.close()
+        return row[0] if row else "unknown"
+    except Exception:
+        return "unknown"
+
+
+def main():
+    print("iMessage Subsystem Status")
+    print("=" * 40)
+
+    # DB access
+    db_ok = DB.exists()
+    fda_ok = False
+    msg_count = "N/A"
+    if db_ok:
+        try:
+            conn = sqlite3.connect(str(DB))
+            conn.cursor().execute("SELECT count(*) FROM message LIMIT 1")
+            fda_ok = True
+            conn.close()
+            msg_count = _msg_count()
+        except Exception:
+            pass
+
+    print(f"  DB exists:         {'YES' if db_ok else 'NO'}")
+    print(f"  Full Disk Access:  {'GRANTED' if fda_ok else 'DENIED'}")
+    print(f"  Message count:     {msg_count}")
+    print(f"  Last activity:     {_recent_activity()}")
+
+    # Plugin
+    plugin_inv = ROOT / "comms/config/plugin_inventory.json"
+    plugin_status = "unknown"
+    if plugin_inv.exists():
+        try:
+            plugin_status = json.loads(plugin_inv.read_text())["imessage_plugin"]["status"]
+        except Exception:
+            pass
+    print(f"  iMessage plugin:   {plugin_status}")
+
+    # State
+    try:
+        state = json.loads(STATE.read_text()) if STATE.exists() else {}
+    except Exception:
+        state = {}
+    print(f"  Drafts pending:    {len(state.get('drafts', []))}")
+
+    # Outbound log count
+    log = ROOT / "comms/imessage/logs/imessage_outbound.log"
+    sent_count = 0
+    if log.exists():
+        try:
+            sent_count = sum(1 for line in log.read_text().splitlines() if "SENT" in line)
+        except Exception:
+            pass
+    print(f"  Messages sent:     {sent_count}")
+    print()
+    print("Scripts:  ~/SuneelWorkSpace/comms/imessage/scripts/")
+    print("Docs:     ~/SuneelWorkSpace/comms/docs/HOW_IT_WORKS.md")
+
+
+if __name__ == "__main__":
+    main()

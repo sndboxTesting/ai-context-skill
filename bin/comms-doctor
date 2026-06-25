@@ -1,0 +1,42 @@
+#!/bin/sh
+# Diagnose communications subsystem health
+ROOT="${SUNEEL_WORKSPACE:-$HOME/SuneelWorkSpace}"
+
+echo "Communications Doctor"
+echo "====================="
+echo
+
+echo "[iMessage]"
+python3 "$ROOT/comms/imessage/scripts/imessage-permissions-check" 2>&1
+echo
+
+echo "[Mail]"
+python3 "$ROOT/comms/mail/scripts/mail-permissions-check" 2>&1
+echo
+
+echo "[MCP tools]"
+grep -c "comms_" "$ROOT/mcp/server/main.py" 2>/dev/null && echo "comms MCP tools present" || echo "no comms MCP tools found"
+echo
+
+echo "[Scripts executable]"
+for s in \
+  "$ROOT/comms/imessage/scripts/imessage-status" \
+  "$ROOT/comms/imessage/scripts/imessage-recent" \
+  "$ROOT/comms/imessage/scripts/imessage-search" \
+  "$ROOT/comms/imessage/scripts/imessage-send-draft" \
+  "$ROOT/comms/imessage/scripts/imessage-send-confirmed" \
+  "$ROOT/bin/imsg-recent" \
+  "$ROOT/bin/imsg-search" \
+  "$ROOT/bin/imsg-draft"
+do
+  if [ -x "$s" ]; then
+    echo "  [OK]   $(basename $s)"
+  elif [ -f "$s" ]; then
+    echo "  [WARN] $(basename $s) — not executable (run: chmod +x $s)"
+  else
+    echo "  [MISS] $(basename $s) — not found"
+  fi
+done
+echo
+
+echo "Docs: ~/SuneelWorkSpace/comms/docs/"

@@ -26,7 +26,7 @@ run_test "tool_policies.json valid" "python3 -c \"import json; json.load(open('$
 run_test "resource_map.json valid" "python3 -c \"import json; json.load(open('$MCP_ROOT/server/config/resource_map.json'))\""
 
 # 2. mcp package importable via uv
-run_test "mcp importable via uv" "uv run --with 'mcp>=1.0.0' python3 -c 'import mcp'"
+run_test "mcp importable via uv" "uv run --with-requirements '$MCP_ROOT/server/requirements.txt' python3 -c 'import mcp'"
 
 # 3. Index readable
 run_test "SQLite index readable" "python3 -c \"import sqlite3; c=sqlite3.connect('$MCP_ROOT/server/storage/memory_index.db'); c.execute('SELECT COUNT(*) FROM entries')\""

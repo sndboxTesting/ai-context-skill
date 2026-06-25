@@ -1,0 +1,104 @@
+#!/usr/bin/env python3
+"""Create a draft iMessage (no send). Saves to state/drafts/.
+
+Usage:
+  imessage-send-draft <recipient> <message>
+  imessage-send-draft "+15551234567" "Hi, following up on our meeting."
+
+This does NOT send. Use imessage-send-confirmed <draft_id> to send after review.
+"""
+import sys
+import json
+import pathlib
+import argparse
+import hashlib
+from datetime import datetime, timezone
+
+ROOT = pathlib.Path.home() / "SuneelWorkSpace"
+DRAFTS_DIR = ROOT / "comms/imessage/state/drafts"
+STATE = ROOT / "comms/imessage/state/imessage_state.json"
+
+
+def _load_state():
+    if STATE.exists():
+        try:
+            return json.loads(STATE.read_text())
+        except Exception:
+            pass
+    return {"drafts": []}
+
+
+def _save_state(state):
+    STATE.parent.mkdir(parents=True, exist_ok=True)
+    STATE.write_text(json.dumps(state, indent=2))
+
+
+def _validate_recipient(recipient):
+    """Minimal validation — recipient must look like a phone number or email."""
+    r = recipient.strip()
+    if not r:
+        return False, "Recipient cannot be empty"
+    # Phone: starts with + or digit, reasonable length
+    digits = r.replace("+", "").replace("-", "").replace(" ", "").replace("(", "").replace(")", "")
+    if digits.isdigit() and 7 <= len(digits) <= 15:
+        return True, None
+    if "@" in r and "." in r.split("@")[-1]:
+        return True, None
+    return False, f"Recipient '{r}' doesn't look like a phone number or email. Use +15551234567 or user@example.com"
+
+
+def main():
+    parser = argparse.ArgumentParser(description="Create iMessage draft")
+    parser.add_argument("recipient", help="Phone number (+1XXXXXXXXXX) or Apple ID email")
+    parser.add_argument("message", help="Message text")
+    parser.add_argument("--json", action="store_true", dest="json_out")
+    args = parser.parse_args()
+
+    ok, err = _validate_recipient(args.recipient)
+    if not ok:
+        print(f"[ERROR] {err}", file=sys.stderr)
+        sys.exit(1)
+
+    if len(args.message.strip()) == 0:
+        print("[ERROR] Message cannot be empty.", file=sys.stderr)
+        sys.exit(1)
+
+    # Create draft
+    draft_id = "draft_" + datetime.now(timezone.utc).strftime("%Y%m%d_%H%M%S")
+    body_hash = hashlib.sha256(args.message.encode()).hexdigest()[:16]
+    draft = {
+        "id": draft_id,
+        "recipient": args.recipient,
+        "message": args.message,
+        "body_hash": body_hash,
+        "created_at": datetime.now(timezone.utc).isoformat(),
+        "status": "draft",
+        "sent_at": None,
+    }
+
+    DRAFTS_DIR.mkdir(parents=True, exist_ok=True)
+    draft_file = DRAFTS_DIR / f"{draft_id}.json"
+    draft_file.write_text(json.dumps(draft, indent=2))
+
+    state = _load_state()
+    state.setdefault("drafts", []).append({"id": draft_id, "created_at": draft["created_at"]})
+    _save_state(state)
+
+    if args.json_out:
+        print(json.dumps({"draft_id": draft_id, "recipient": args.recipient, "status": "draft"}))
+        return
+
+    print("Draft created — NOT SENT")
+    print(f"  Draft ID:  {draft_id}")
+    print(f"  To:        {args.recipient}")
+    print(f"  Message:   {args.message[:200]}")
+    print()
+    print(f"Review the draft:")
+    print(f"  cat ~/SuneelWorkSpace/comms/imessage/state/drafts/{draft_id}.json")
+    print()
+    print(f"To send (requires Automation permission for Messages.app):")
+    print(f"  imessage-send-confirmed {draft_id}")
+
+
+if __name__ == "__main__":
+    main()

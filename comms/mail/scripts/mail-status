@@ -1,0 +1,33 @@
+#!/usr/bin/env python3
+"""Show Mail subsystem status."""
+import sys
+import pathlib
+import json
+
+ROOT = pathlib.Path.home() / "SuneelWorkSpace"
+CONFIG = ROOT / "comms/config/mail_config.json"
+MAIL_APP = pathlib.Path("/Applications/Mail.app")
+
+
+def main():
+    print("Mail Subsystem Status")
+    print("=" * 40)
+    print(f"  Mail.app installed:  {'YES' if MAIL_APP.exists() else 'NO'}")
+    if not MAIL_APP.exists():
+        print()
+        print("  Status: DISABLED — Mail.app not installed.")
+        print()
+        print("  Options to enable email:")
+        print("    1. Install Apple Mail.app from the App Store")
+        print("    2. Use Gmail plugin (see comms/reports/plugin_recommendations.md)")
+        print("    3. Configure IMAP/SMTP (requires credentials — ask agent when ready)")
+        print()
+        print("  Docs: ~/SuneelWorkSpace/comms/reports/plugin_recommendations.md")
+        return 1
+    print(f"  Mail.app installed:  YES")
+    print("  (Automation permission may be required — check System Settings)")
+    return 0
+
+
+if __name__ == "__main__":
+    sys.exit(main())

@@ -1,0 +1,17 @@
+#!/usr/bin/env python3
+"""Search emails (stub — Mail.app not installed)."""
+import sys, pathlib
+
+MAIL_APP = pathlib.Path("/Applications/Mail.app")
+
+def main():
+    if not MAIL_APP.exists():
+        print("[mail-search] DISABLED — Mail.app not installed.")
+        print("See: ~/SuneelWorkSpace/comms/reports/plugin_recommendations.md")
+        return 1
+    print("[mail-search] Mail.app present but search not yet implemented.")
+    print("Planned: AppleScript search via Spotlight integration.")
+    return 1
+
+if __name__ == "__main__":
+    sys.exit(main())

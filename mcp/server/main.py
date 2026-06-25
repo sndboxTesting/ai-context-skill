@@ -87,10 +87,15 @@ except Exception:
     pass
 
 def _read_workspace_file(rel_or_abs: str) -> str:
-    """Read a file relative to WORKSPACE or as absolute path."""
+    """Read a file relative to WORKSPACE or as absolute path.
+    Absolute paths that escape WORKSPACE are rejected."""
     p = pathlib.Path(rel_or_abs)
     if not p.is_absolute():
         p = WORKSPACE / rel_or_abs
+    resolved = p.resolve()
+    workspace_resolved = WORKSPACE.resolve()
+    if not str(resolved).startswith(str(workspace_resolved) + os.sep) and resolved != workspace_resolved:
+        return f"[Access denied: path escapes workspace: {rel_or_abs}]"
     if not p.exists():
         return f"[File not found: {p}]"
     try:
@@ -1037,6 +1042,274 @@ def routing_context() -> str:
     )
 
 # ---------------------------------------------------------------------------
+# GSTACK — resources, tools, prompts
+# ---------------------------------------------------------------------------
+
+GSTACK_PATH = pathlib.Path.home() / ".claude" / "skills" / "gstack"
+GSTACK_POLICY = WORKSPACE / "orchestrator" / "router" / "gstack_policy.json"
+GSTACK_VERSION_CONFIG = WORKSPACE / "mcp" / "config" / "gstack_version.json"
+
+def _gstack_skill_list() -> list[dict]:
+    """Return list of available gstack skills with descriptions."""
+    skills = []
+    if not GSTACK_PATH.exists():
+        return skills
+    for entry in sorted(GSTACK_PATH.iterdir()):
+        skill_md = entry / "SKILL.md"
+        if skill_md.exists() and entry.is_dir():
+            try:
+                header = skill_md.read_text(errors="replace")[:400]
+                desc = ""
+                for line in header.splitlines():
+                    if line.startswith("description:"):
+                        desc = line.split(":", 1)[1].strip()
+                        break
+                skills.append({"skill": f"/{entry.name}", "description": desc, "path": str(skill_md)})
+            except Exception:
+                pass
+    return skills
+
+@mcp.resource("workspace://gstack/skills")
+def res_gstack_skills() -> str:
+    """Available gstack skills and their descriptions."""
+    skills = _gstack_skill_list()
+    if not skills:
+        return "[gstack not installed — run: git clone https://github.com/garrytan/gstack ~/.claude/skills/gstack]"
+    lines = ["# Available gstack Skills\n"]
+    for s in skills:
+        lines.append(f"- **{s['skill']}**: {s['description']}")
+    return "\n".join(lines)
+
+@mcp.resource("workspace://gstack/policy")
+def res_gstack_policy() -> str:
+    """gstack skill selection policy — maps task types to recommended skills."""
+    if not GSTACK_POLICY.exists():
+        return "[gstack_policy.json not found]"
+    return GSTACK_POLICY.read_text(errors="replace")[:MAX_BYTES]
+
+@mcp.tool()
+def get_gstack_recommendation(task: str) -> str:
+    """Get the recommended gstack skill for a task description.
+
+    Runs route-task and extracts the gstack_skill field from the decision.
+    Returns the skill name, hint, and how to invoke it.
+
+    Args:
+        task: Task description to classify
+    """
+    try:
+        result = subprocess.run(
+            [str(WORKSPACE / "orchestrator" / "scripts" / "route-task"), "--json", "--dry-run", task],
+            capture_output=True, text=True, timeout=15
+        )
+        data = json.loads(result.stdout)
+        skill = data.get("gstack_skill")
+        hint  = data.get("gstack_hint")
+        agent = data.get("agent", "claude")
+        ttype = data.get("task_type", "unknown")
+        if skill:
+            return (
+                f"Task type: {ttype}\n"
+                f"Agent: {agent}\n"
+                f"Recommended gstack skill: {skill}\n"
+                f"Why: {hint}\n"
+                f"How to use: Open Claude Code and type `{skill}` at the start of your session."
+            )
+        else:
+            return (
+                f"Task type: {ttype}\n"
+                f"Agent: {agent}\n"
+                f"No specific gstack skill needed — use standard reasoning."
+            )
+    except Exception as e:
+        return f"[Error: {e}]"
+
+@mcp.tool()
+def list_available_gstack_skills() -> str:
+    """List all gstack skills installed at ~/.claude/skills/gstack/ with descriptions."""
+    skills = _gstack_skill_list()
+    if not skills:
+        return "[gstack not installed]"
+    lines = [f"gstack skills ({len(skills)} total, at {GSTACK_PATH}):\n"]
+    for s in skills:
+        lines.append(f"  {s['skill']:25s}  {s['description']}")
+    lines.append("\nKey skills for this workspace:")
+    key = ["/investigate", "/cso", "/review", "/office-hours", "/plan-eng-review", "/ship", "/careful"]
+    for k in key:
+        match = next((s for s in skills if s["skill"] == k), None)
+        if match:
+            lines.append(f"  {k:25s}  {match['description']}")
+    return "\n".join(lines)
+
+@mcp.tool()
+def suggest_cognitive_mode(task: str) -> str:
+    """Suggest the best cognitive mode (gstack skill + agent) for a task.
+
+    Returns a structured recommendation covering: agent, gstack skill,
+    how to think about the task, and the expected output shape.
+
+    Args:
+        task: Task description
+    """
+    try:
+        result = subprocess.run(
+            [str(WORKSPACE / "orchestrator" / "scripts" / "route-task"), "--json", "--dry-run", task],
+            capture_output=True, text=True, timeout=15
+        )
+        data = json.loads(result.stdout)
+    except Exception as e:
+        return f"[Error classifying task: {e}]"
+
+    skill = data.get("gstack_skill")
+    hint  = data.get("gstack_hint")
+    agent = data.get("agent", "claude")
+    ttype = data.get("task_type", "unknown")
+    conf  = data.get("confidence", 0.0)
+
+    skill_modes = {
+        "/investigate": "Systematic 5-phase debugging: Observe → Hypothesize → Test → Fix → Verify",
+        "/cso": "Security threat model: STRIDE + OWASP Top 10 sweep, trust boundary analysis",
+        "/review": "Pre-commit audit: auto-fix obvious bugs, flag production risks, check error paths",
+        "/office-hours": "10-star product challenge: interrogate scope, find the real problem, tighten the plan",
+        "/plan-eng-review": "Architecture lock: define interfaces, scope, dependencies, risks before coding",
+        "/ship": "Release sequence: tests → diff review → version bump → CHANGELOG → PR",
+        "/careful": "Safety preview: show commands before running, confirm destructive steps",
+        "/qa": "Browser QA: navigate flows, screenshot, file bugs automatically",
+    }
+
+    lines = [
+        f"Cognitive Mode Recommendation",
+        f"  Task: {task[:80]}",
+        f"  Classified as: {ttype} (confidence: {conf:.0%})",
+        f"  Agent: {agent.upper()}",
+    ]
+    if skill:
+        lines += [
+            f"  gstack skill: {skill}",
+            f"  Mode: {skill_modes.get(skill, hint or '')}",
+            f"  Trigger: type `{skill}` in Claude Code at session start",
+        ]
+    else:
+        lines.append("  Mode: Standard reasoning — no specific gstack skill needed")
+    return "\n".join(lines)
+
+# gstack supply chain security — version pin + integrity tools
+
+def _gstack_integrity_status() -> dict:
+    """Run gstack-verify and return parsed result dict."""
+    verify_script = WORKSPACE / "bin" / "gstack-verify"
+    if not verify_script.exists():
+        return {"status": "error", "reason": "gstack-verify script not found"}
+    try:
+        result = subprocess.run(
+            ["python3", str(verify_script), "--json"],
+            capture_output=True, text=True, timeout=15
+        )
+        return json.loads(result.stdout)
+    except Exception as e:
+        return {"status": "error", "reason": str(e)}
+
+@mcp.resource("workspace://gstack/version")
+def res_gstack_version() -> str:
+    """Pinned gstack version info — commit hash, version, and last verified timestamp."""
+    if not GSTACK_VERSION_CONFIG.exists():
+        return "[gstack version config not found — run: bin/gstack-verify]"
+    return GSTACK_VERSION_CONFIG.read_text(errors="replace")
+
+@mcp.resource("workspace://gstack/integrity")
+def res_gstack_integrity() -> str:
+    """Live gstack integrity check — compares installed commit to pinned commit."""
+    data = _gstack_integrity_status()
+    lines = [f"# gstack Integrity Status\n"]
+    lines.append(f"Status: **{data.get('status', 'unknown').upper()}**")
+    if data.get("pinned_commit"):
+        lines.append(f"Pinned:  {data['pinned_commit'][:16]}  (v{data.get('pinned_version', '?')})")
+    if data.get("issues"):
+        lines.append("\nIssues:")
+        for i in data["issues"]:
+            lines.append(f"  - {i}")
+        lines.append("\nRun `bin/gstack-repair` to restore the pinned version.")
+    if data.get("checked_at"):
+        lines.append(f"\nChecked: {data['checked_at']}")
+    return "\n".join(lines)
+
+@mcp.tool()
+def get_gstack_version() -> str:
+    """Return the pinned gstack version and install metadata.
+
+    Shows: pinned commit hash, version tag, install path, last verified time,
+    and the upgrade policy. Use verify_gstack_integrity() to check live status.
+    """
+    _access("get_gstack_version")
+    if not GSTACK_VERSION_CONFIG.exists():
+        return "[gstack_version.json not found — run bin/gstack-verify to initialise]"
+    try:
+        cfg = json.loads(GSTACK_VERSION_CONFIG.read_text())
+        return (
+            f"gstack Supply Chain Pin\n"
+            f"  Version:        {cfg.get('pinned_version', 'unknown')}\n"
+            f"  Commit:         {cfg.get('pinned_commit', 'unknown')[:16]}\n"
+            f"  Install path:   {cfg.get('installed_path', '~/.claude/skills/gstack')}\n"
+            f"  Mode:           {cfg.get('mode', 'pinned')}\n"
+            f"  Last verified:  {cfg.get('last_verified', 'never')}\n"
+            f"  Last status:    {cfg.get('last_verified_status', 'unknown')}\n"
+            f"  Upgrade policy: {cfg.get('upgrade_policy', 'manual')}"
+        )
+    except Exception as e:
+        return f"[Error reading version config: {e}]"
+
+@mcp.tool()
+def verify_gstack_integrity() -> str:
+    """Run a live integrity check on the gstack install.
+
+    Compares the installed commit to the pinned commit in mcp/config/gstack_version.json.
+    Also checks for dirty working tree and broken skill symlinks.
+    Returns OK, DRIFT, or ERROR.
+    """
+    _access("verify_gstack_integrity")
+    data = _gstack_integrity_status()
+    status = data.get("status", "error")
+    if status == "ok":
+        return (
+            f"[gstack-verify] OK\n"
+            f"  Version: {data.get('pinned_version', '?')}\n"
+            f"  Commit:  {data.get('pinned_commit', '?')[:16]}\n"
+            f"  Checked: {data.get('checked_at', 'now')}"
+        )
+    elif status == "drift":
+        issues = "\n".join(f"  - {i}" for i in data.get("issues", []))
+        return (
+            f"[gstack-verify] DRIFT DETECTED\n"
+            f"  Pinned:  {data.get('pinned_commit', '?')[:16]}\n"
+            f"  Issues:\n{issues}\n"
+            f"  Fix: run bin/gstack-repair"
+        )
+    else:
+        return f"[gstack-verify] ERROR: {data.get('reason', 'unknown')}"
+
+@mcp.tool()
+def repair_gstack_if_needed() -> str:
+    """Run gstack-repair in dry-run mode to see what would be fixed.
+
+    This tool only PREVIEWS the repair (dry-run). To actually repair,
+    run bin/gstack-repair directly in the terminal. This prevents
+    accidental automated repo manipulation.
+    """
+    _access("repair_gstack_if_needed")
+    repair_script = WORKSPACE / "bin" / "gstack-repair"
+    if not repair_script.exists():
+        return "[gstack-repair script not found]"
+    try:
+        result = subprocess.run(
+            ["python3", str(repair_script), "--dry-run"],
+            capture_output=True, text=True, timeout=15
+        )
+        out = (result.stdout + result.stderr).strip()
+        return f"[gstack-repair dry-run]\n{out}\n\nTo apply: run `bin/gstack-repair` in terminal."
+    except Exception as e:
+        return f"[Error: {e}]"
+
+# ---------------------------------------------------------------------------
 # GOAL ENGINE — resources, tools, prompts
 # ---------------------------------------------------------------------------
 
@@ -1220,6 +1493,712 @@ _update_mcp_state("server_started_at", _now())
 _update_mcp_state("server_version", "1.0.0")
 _ensure_index()
 log.info("workspace-brain MCP server ready")
+
+# ---------------------------------------------------------------------------
+# COMMS — iMessage and Mail tools/resources
+# ---------------------------------------------------------------------------
+
+COMMS_ROOT = WORKSPACE / "comms"
+IMSG_DB = pathlib.Path.home() / "Library/Messages/chat.db"
+IMSG_SCRIPTS = COMMS_ROOT / "imessage/scripts"
+MAIL_SCRIPTS = COMMS_ROOT / "mail/scripts"
+COMMS_CONFIG = COMMS_ROOT / "config/comms_config.json"
+IMSG_OUTBOUND_LOG = COMMS_ROOT / "imessage/logs/imessage_outbound.log"
+IMSG_DRAFTS_DIR = COMMS_ROOT / "imessage/state/drafts"
+_APPLE_EPOCH = 978307200  # 2001-01-01 00:00:00 UTC
+
+
+def _comms_config() -> dict:
+    try:
+        return json.loads(COMMS_CONFIG.read_text()) if COMMS_CONFIG.exists() else {}
+    except Exception:
+        return {}
+
+
+def _imsg_readable() -> bool:
+    if not IMSG_DB.exists():
+        return False
+    try:
+        conn = sqlite3.connect(str(IMSG_DB))
+        conn.cursor().execute("SELECT count(*) FROM message LIMIT 1")
+        conn.close()
+        return True
+    except Exception:
+        return False
+
+
+def _imsg_format_ts(apple_ts) -> str:
+    if not apple_ts:
+        return "unknown"
+    import datetime as dt
+    unix_ts = int(apple_ts) / 1_000_000_000 + _APPLE_EPOCH
+    return dt.datetime.fromtimestamp(unix_ts).strftime("%Y-%m-%d %H:%M")
+
+
+def _redact_handle(h: str) -> str:
+    if not h:
+        return "unknown"
+    if "@" in h:
+        parts = h.split("@")
+        return parts[0][:4] + "***@" + parts[1]
+    d = h.replace("+", "").replace("-", "").replace(" ", "")
+    return d[:4] + "****" + d[-2:] if len(d) > 6 else "****"
+
+
+# --- iMessage resources ---
+
+@mcp.resource("workspace://comms/status")
+def res_comms_status() -> str:
+    """Communications subsystem status overview."""
+    cfg = _comms_config()
+    imsg_ok = _imsg_readable()
+    mail_installed = pathlib.Path("/Applications/Mail.app").exists()
+    return (
+        f"# Communications Status\n"
+        f"iMessage DB accessible: {'YES' if imsg_ok else 'NO'}\n"
+        f"Mail.app installed: {'YES' if mail_installed else 'NO'}\n"
+        f"Auto-send: DISABLED\n"
+        f"Auto-reply: DISABLED\n"
+        f"Confirmation required: YES\n"
+    )
+
+@mcp.resource("workspace://comms/policy")
+def res_comms_policy() -> str:
+    """Communications outbound policy."""
+    p = COMMS_ROOT / "config/outbound_policy.json"
+    return p.read_text() if p.exists() else "[outbound_policy.json not found]"
+
+@mcp.resource("workspace://comms/imessage/status")
+def res_imsg_status() -> str:
+    """iMessage subsystem status — FDA, message count, plugin status."""
+    ok = _imsg_readable()
+    count = "N/A"
+    if ok:
+        try:
+            conn = sqlite3.connect(str(IMSG_DB))
+            count = conn.cursor().execute("SELECT count(*) FROM message").fetchone()[0]
+            conn.close()
+        except Exception:
+            pass
+    return (
+        f"# iMessage Status\n"
+        f"DB accessible: {'YES' if ok else 'NO'}\n"
+        f"Total messages: {count}\n"
+        f"Plugin: {_comms_config().get('imessage', {}).get('plugin_status', 'unknown')}\n"
+    )
+
+@mcp.resource("workspace://comms/imessage/recent")
+def res_imsg_recent() -> str:
+    """Recent iMessages (last 24h, up to 10, text previews only)."""
+    if not _imsg_readable():
+        return "[iMessage DB not readable — FDA required]"
+    import datetime as dt
+    cutoff = (int((dt.datetime.now() - dt.timedelta(hours=24)).timestamp()) - _APPLE_EPOCH) * 1_000_000_000
+    try:
+        conn = sqlite3.connect(str(IMSG_DB))
+        conn.row_factory = sqlite3.Row
+        rows = conn.cursor().execute("""
+            SELECT m.text, m.is_from_me, m.date, h.id AS handle_id
+            FROM message m
+            LEFT JOIN handle h ON m.handle_id = h.rowid
+            WHERE m.date > ? AND m.text IS NOT NULL AND m.text != ''
+            ORDER BY m.date DESC LIMIT 10
+        """, (cutoff,)).fetchall()
+        conn.close()
+        if not rows:
+            return "No messages in the last 24 hours."
+        lines = ["# Recent iMessages (last 24h)\n"]
+        for r in rows:
+            direction = "→ ME" if r["is_from_me"] else "FROM"
+            handle = _redact_handle(r["handle_id"])
+            ts = _imsg_format_ts(r["date"])
+            text = (r["text"] or "").replace("\n", " ")[:100]
+            lines.append(f"[{ts}] {direction} {handle}: {text}")
+        return "\n".join(lines)
+    except Exception as e:
+        return f"[Error reading messages: {e}]"
+
+@mcp.resource("workspace://comms/mail/status")
+def res_mail_status() -> str:
+    """Mail subsystem status."""
+    mail_ok = pathlib.Path("/Applications/Mail.app").exists()
+    return (
+        f"# Mail Status\n"
+        f"Mail.app installed: {'YES' if mail_ok else 'NO'}\n"
+        f"Status: {'enabled (limited)' if mail_ok else 'disabled — Mail.app not installed'}\n"
+        f"See: comms/reports/plugin_recommendations.md for Gmail/IMAP options\n"
+    )
+
+@mcp.resource("workspace://comms/mail/recent")
+def res_mail_recent() -> str:
+    """Recent emails (stub — Mail.app not installed)."""
+    if not pathlib.Path("/Applications/Mail.app").exists():
+        return "[Mail.app not installed — email disabled. See comms/reports/plugin_recommendations.md]"
+    return "[Mail.app present but adapter not yet configured]"
+
+@mcp.resource("workspace://comms/reports/latest")
+def res_comms_latest_report() -> str:
+    """Latest communications report."""
+    p = COMMS_ROOT / "reports/latest_comms_report.md"
+    return p.read_text() if p.exists() else "[No report yet — run comms-report]"
+
+
+# --- iMessage tools ---
+
+@mcp.tool()
+def comms_get_imessage_status() -> str:
+    """Return iMessage subsystem status: DB access, message count, plugin install status.
+
+    Checks: chat.db accessible, Full Disk Access granted, total message count,
+    Claude plugin install status.
+    """
+    _access("comms_get_imessage_status")
+    ok = _imsg_readable()
+    count = "N/A"
+    if ok:
+        try:
+            conn = sqlite3.connect(str(IMSG_DB))
+            count = conn.cursor().execute("SELECT count(*) FROM message").fetchone()[0]
+            conn.close()
+        except Exception as e:
+            count = f"error: {e}"
+    cfg = _comms_config()
+    plugin_status = cfg.get("imessage", {}).get("plugin_status", "unknown")
+    return (
+        f"iMessage Status\n"
+        f"  DB accessible:   {'YES (FDA granted)' if ok else 'NO — grant Full Disk Access in System Settings'}\n"
+        f"  Total messages:  {count}\n"
+        f"  Plugin:          {plugin_status}\n"
+        f"  Auto-reply:      DISABLED\n"
+        f"  Confirmation:    REQUIRED for sends\n"
+        f"\nTo read messages: comms_list_recent_imessages()\n"
+        f"To send: comms_create_imessage_draft() → comms_send_imessage_confirmed(draft_id)"
+    )
+
+
+@mcp.tool()
+def comms_list_recent_imessages(hours: int = 24, limit: int = 20) -> str:
+    """List recent iMessages from the local chat.db.
+
+    Returns metadata and text previews. Handles are partially redacted.
+    For full output, use bin/imsg-recent --full in terminal.
+
+    Args:
+        hours: Look back this many hours (default 24)
+        limit: Max messages to return (default 20, max 50)
+    """
+    _access("comms_list_recent_imessages")
+    if not _imsg_readable():
+        return "[ERROR] chat.db not readable. Grant Full Disk Access to Terminal/VS Code in System Settings → Privacy & Security."
+    import datetime as dt
+    limit = min(limit, 50)
+    cutoff = (int((dt.datetime.now() - dt.timedelta(hours=hours)).timestamp()) - _APPLE_EPOCH) * 1_000_000_000
+    try:
+        conn = sqlite3.connect(str(IMSG_DB))
+        conn.row_factory = sqlite3.Row
+        rows = conn.cursor().execute("""
+            SELECT m.rowid, m.text, m.is_from_me, m.date, m.is_read,
+                   h.id AS handle_id, chat.display_name, chat.chat_identifier
+            FROM message m
+            LEFT JOIN handle h ON m.handle_id = h.rowid
+            LEFT JOIN chat_message_join cmj ON cmj.message_id = m.rowid
+            LEFT JOIN chat ON chat.rowid = cmj.chat_id
+            WHERE m.date > ? AND m.text IS NOT NULL AND m.text != ''
+            ORDER BY m.date DESC LIMIT ?
+        """, (cutoff, limit)).fetchall()
+        conn.close()
+    except Exception as e:
+        return f"[Error: {e}]"
+    if not rows:
+        return f"No messages in the last {hours} hours."
+    lines = [f"Recent iMessages (last {hours}h, {len(rows)} found)\n"]
+    for r in rows:
+        direction = "→ ME" if r["is_from_me"] else "FROM"
+        handle = _redact_handle(r["handle_id"])
+        ts = _imsg_format_ts(r["date"])
+        text = (r["text"] or "").replace("\n", " ")[:120]
+        lines.append(f"[{ts}] {direction} {handle}: {text}")
+    lines.append(f"\nTo see full handles: bin/imsg-recent --full")
+    return "\n".join(lines)
+
+
+@mcp.tool()
+def comms_search_imessages(query: str, days: int = 30, limit: int = 20) -> str:
+    """Search iMessages in local chat.db for a text string.
+
+    Args:
+        query: Text to search for (case-insensitive LIKE match)
+        days: Search this many days back (default 30)
+        limit: Max results (default 20)
+    """
+    _access("comms_search_imessages")
+    if not _imsg_readable():
+        return "[ERROR] chat.db not readable — grant Full Disk Access."
+    if not query.strip():
+        return "[ERROR] Query cannot be empty."
+    import datetime as dt
+    limit = min(limit, 50)
+    cutoff = (int((dt.datetime.now() - dt.timedelta(days=days)).timestamp()) - _APPLE_EPOCH) * 1_000_000_000
+    try:
+        conn = sqlite3.connect(str(IMSG_DB))
+        conn.row_factory = sqlite3.Row
+        rows = conn.cursor().execute("""
+            SELECT m.rowid, m.text, m.is_from_me, m.date, h.id AS handle_id
+            FROM message m
+            LEFT JOIN handle h ON m.handle_id = h.rowid
+            WHERE m.date > ? AND m.text LIKE ? AND m.text IS NOT NULL
+            ORDER BY m.date DESC LIMIT ?
+        """, (cutoff, f"%{query}%", limit)).fetchall()
+        conn.close()
+    except Exception as e:
+        return f"[Error: {e}]"
+    if not rows:
+        return f"No messages matching '{query}' in the last {days} days."
+    lines = [f"Search: '{query}' — {len(rows)} result(s) in last {days} days\n"]
+    for r in rows:
+        direction = "→ ME" if r["is_from_me"] else "FROM"
+        handle = _redact_handle(r["handle_id"])
+        ts = _imsg_format_ts(r["date"])
+        text = (r["text"] or "").replace("\n", " ")[:200]
+        lines.append(f"[{ts}] {direction} {handle}: {text}")
+    return "\n".join(lines)
+
+
+@mcp.tool()
+def comms_create_imessage_draft(recipient: str, message: str) -> str:
+    """Create a draft iMessage. Does NOT send — use comms_send_imessage_confirmed() to send.
+
+    Args:
+        recipient: Phone number (+1XXXXXXXXXX) or Apple ID email
+        message: Message text to draft
+    """
+    _access("comms_create_imessage_draft")
+    import hashlib
+    import datetime as dt
+
+    recipient = recipient.strip()
+    if not recipient:
+        return "[ERROR] Recipient cannot be empty."
+    if not message.strip():
+        return "[ERROR] Message cannot be empty."
+
+    # Basic validation
+    digits = recipient.replace("+", "").replace("-", "").replace(" ", "").replace("(", "").replace(")", "")
+    is_phone = digits.isdigit() and 7 <= len(digits) <= 15
+    is_email = "@" in recipient and "." in recipient.split("@")[-1]
+    if not (is_phone or is_email):
+        return f"[ERROR] Recipient '{recipient}' doesn't look like a phone number (+1XXXXXXXXXX) or email."
+
+    draft_id = "draft_" + dt.datetime.now(dt.timezone.utc).strftime("%Y%m%d_%H%M%S")
+    body_hash = hashlib.sha256(message.encode()).hexdigest()[:16]
+    draft = {
+        "id": draft_id,
+        "recipient": recipient,
+        "message": message,
+        "body_hash": body_hash,
+        "created_at": dt.datetime.now(dt.timezone.utc).isoformat(),
+        "status": "draft",
+        "sent_at": None,
+        "created_by": "mcp_tool",
+    }
+    IMSG_DRAFTS_DIR.mkdir(parents=True, exist_ok=True)
+    draft_file = IMSG_DRAFTS_DIR / f"{draft_id}.json"
+    draft_file.write_text(json.dumps(draft, indent=2))
+
+    return (
+        f"Draft created — NOT SENT\n"
+        f"  Draft ID:  {draft_id}\n"
+        f"  To:        {recipient}\n"
+        f"  Preview:   {message[:200]}\n"
+        f"\nReview: cat ~/SuneelWorkSpace/comms/imessage/state/drafts/{draft_id}.json\n"
+        f"Send (in terminal): imsg-send-confirmed {draft_id}\n"
+        f"Or call: comms_send_imessage_confirmed('{draft_id}')"
+    )
+
+
+@mcp.tool()
+def comms_send_imessage_confirmed(draft_id: str) -> str:
+    """PREVIEW ONLY — show what imsg-send-confirmed would do for a draft.
+
+    For safety, actual sends require running imsg-send-confirmed in the terminal.
+    This tool shows the draft details and the exact terminal command to send.
+
+    Args:
+        draft_id: Draft ID from comms_create_imessage_draft
+    """
+    _access("comms_send_imessage_confirmed")
+    draft_file = IMSG_DRAFTS_DIR / f"{draft_id}.json"
+    if not draft_file.exists():
+        return f"[ERROR] Draft not found: {draft_id}"
+    try:
+        draft = json.loads(draft_file.read_text())
+    except Exception as e:
+        return f"[ERROR] Cannot read draft: {e}"
+    if draft.get("status") == "sent":
+        return f"[INFO] Draft {draft_id} was already sent at {draft.get('sent_at')}."
+    return (
+        f"Draft ready to send — requires terminal confirmation\n"
+        f"  Draft ID:  {draft_id}\n"
+        f"  To:        {draft['recipient']}\n"
+        f"  Message:   {draft['message'][:300]}\n"
+        f"  Status:    {draft['status']}\n"
+        f"\n[SAFETY] MCP send tools are dry-run only. To actually send:\n"
+        f"  imsg-send-confirmed {draft_id}\n"
+        f"  (will prompt for 'SEND' confirmation before executing)"
+    )
+
+
+@mcp.tool()
+def comms_get_imessage_policy() -> str:
+    """Return the current iMessage outbound safety policy."""
+    _access("comms_get_imessage_policy")
+    p = COMMS_ROOT / "config/outbound_policy.json"
+    if not p.exists():
+        return "[outbound_policy.json not found]"
+    try:
+        policy = json.loads(p.read_text())
+        return (
+            f"iMessage Outbound Policy\n"
+            f"  Default behavior:    {policy.get('default_behavior', 'draft_only')}\n"
+            f"  Auto-send:           {policy.get('auto_send', False)}\n"
+            f"  Auto-reply:          {policy.get('auto_reply', False)}\n"
+            f"  Confirmation:        {policy.get('send_requires', 'explicit_confirmation')}\n"
+            f"  Bulk send:           {policy.get('bulk_send', False)}\n"
+            f"  Body logging:        {policy.get('logging', {}).get('log_body', False)}\n"
+        )
+    except Exception as e:
+        return f"[Error: {e}]"
+
+
+# --- Mail tools (stubs — Mail.app not installed) ---
+
+@mcp.tool()
+def comms_get_mail_status() -> str:
+    """Return Mail subsystem status. Mail.app must be installed for email to work."""
+    _access("comms_get_mail_status")
+    mail_ok = pathlib.Path("/Applications/Mail.app").exists()
+    if not mail_ok:
+        return (
+            "Mail Status: DISABLED\n"
+            "  Mail.app not installed at /Applications/Mail.app\n"
+            "\nOptions:\n"
+            "  1. Install Apple Mail.app from the App Store\n"
+            "  2. Use Gmail plugin: see comms/reports/plugin_recommendations.md\n"
+            "  3. Configure IMAP/SMTP (requires credentials — ask agent when ready)\n"
+        )
+    return "Mail Status: Mail.app present (Automation permission may be required)"
+
+
+@mcp.tool()
+def comms_list_recent_emails(limit: int = 10) -> str:
+    """List recent emails. Requires Mail.app to be installed and configured.
+
+    Args:
+        limit: Max emails to return (default 10)
+    """
+    _access("comms_list_recent_emails")
+    if not pathlib.Path("/Applications/Mail.app").exists():
+        return "[DISABLED] Mail.app not installed. See comms/reports/plugin_recommendations.md"
+    return "[Mail.app present but adapter not yet configured — run mail-recent in terminal]"
+
+
+@mcp.tool()
+def comms_search_emails(query: str) -> str:
+    """Search emails. Requires Mail.app to be installed.
+
+    Args:
+        query: Search terms
+    """
+    _access("comms_search_emails")
+    if not pathlib.Path("/Applications/Mail.app").exists():
+        return "[DISABLED] Mail.app not installed. See comms/reports/plugin_recommendations.md"
+    return "[Mail.app present but search adapter not yet configured]"
+
+
+@mcp.tool()
+def comms_read_email(email_id: str) -> str:
+    """Read an email by ID. Requires Mail.app.
+
+    Args:
+        email_id: Email identifier
+    """
+    _access("comms_read_email")
+    if not pathlib.Path("/Applications/Mail.app").exists():
+        return "[DISABLED] Mail.app not installed."
+    return "[Mail.app present but read adapter not yet configured]"
+
+
+@mcp.tool()
+def comms_create_email_reply_draft(email_id: str, reply_body: str) -> str:
+    """Create an email reply draft. Requires Mail.app.
+
+    Args:
+        email_id: Email to reply to
+        reply_body: Reply text
+    """
+    _access("comms_create_email_reply_draft")
+    if not pathlib.Path("/Applications/Mail.app").exists():
+        return "[DISABLED] Mail.app not installed. Install from App Store to enable email drafts."
+    return "[Mail.app present but draft adapter not yet configured — use mail-draft-reply in terminal]"
+
+
+@mcp.tool()
+def comms_send_email_confirmed(draft_id: str) -> str:
+    """PREVIEW ONLY — show email send details. Actual send requires terminal confirmation.
+
+    Args:
+        draft_id: Email draft ID
+    """
+    _access("comms_send_email_confirmed")
+    if not pathlib.Path("/Applications/Mail.app").exists():
+        return "[DISABLED] Mail.app not installed."
+    return "[Mail.app present but send adapter not yet configured — use mail-send-confirmed in terminal]"
+
+
+@mcp.tool()
+def comms_get_mail_policy() -> str:
+    """Return the mail outbound safety policy."""
+    _access("comms_get_mail_policy")
+    p = COMMS_ROOT / "config/outbound_policy.json"
+    if not p.exists():
+        return "[outbound_policy.json not found]"
+    try:
+        policy = json.loads(p.read_text())
+        return (
+            f"Mail Outbound Policy\n"
+            f"  Auto-send:        {policy.get('auto_send', False)}\n"
+            f"  Auto-reply:       {policy.get('auto_reply', False)}\n"
+            f"  Confirmation:     {policy.get('send_requires', 'explicit_confirmation')}\n"
+            f"  Body logging:     {policy.get('logging', {}).get('log_body', False)}\n"
+        )
+    except Exception as e:
+        return f"[Error: {e}]"
+
+
+# --- Shared comms tools ---
+
+@mcp.tool()
+def comms_triage_item(item_type: str, item_id: str, summary: str) -> str:
+    """Triage a message or email: classify urgency and suggest action.
+
+    Args:
+        item_type: 'imessage' or 'email'
+        item_id: Message/email identifier or draft_id
+        summary: Brief summary of the item content (do not include full body)
+    """
+    _access("comms_triage_item")
+    return (
+        f"Triage for {item_type} [{item_id}]\n"
+        f"Summary: {summary[:300]}\n"
+        f"\nClassify as one of:\n"
+        f"  - urgent_reply: needs response within hours\n"
+        f"  - normal_reply: respond today/tomorrow\n"
+        f"  - fyi: no action needed, archive\n"
+        f"  - task: convert to workspace task (use comms_convert_to_task)\n"
+        f"  - goal: large enough for goal engine (use comms_convert_to_goal)\n"
+        f"  - spam: ignore\n"
+        f"\nTo convert to task: comms_convert_to_task(item_type, item_id, description)"
+    )
+
+
+@mcp.tool()
+def comms_convert_to_task(item_type: str, item_id: str, task_description: str, priority: str = "medium") -> str:
+    """Convert a message or email into a workspace task.
+
+    Args:
+        item_type: 'imessage' or 'email'
+        item_id: Message/email identifier
+        task_description: Task description derived from the message
+        priority: Task priority ('low', 'medium', 'high')
+    """
+    _access("comms_convert_to_task")
+    try:
+        result = subprocess.run(
+            [str(WORKSPACE / "goal-engine/scripts/create-task"), "--description", task_description, "--priority", priority, "--source", f"comms:{item_type}:{item_id}"],
+            capture_output=True, text=True, timeout=15
+        )
+        if result.returncode == 0:
+            return f"Task created from {item_type} [{item_id}]:\n{result.stdout.strip()}"
+    except FileNotFoundError:
+        pass
+    # Fallback: write to ACTIVE_TASKS.md
+    import datetime as dt
+    ts = dt.datetime.now(dt.timezone.utc).strftime("%Y-%m-%d")
+    task_line = f"\n- [ ] [{ts}] (from {item_type}:{item_id}) {task_description}\n"
+    tasks_file = WORKSPACE / "agent-system/tasks/ACTIVE_TASKS.md"
+    if tasks_file.exists():
+        with open(tasks_file, "a") as f:
+            f.write(task_line)
+        return f"Task appended to ACTIVE_TASKS.md:\n  {task_description}"
+    return f"Task noted (ACTIVE_TASKS.md not found): {task_description}"
+
+
+@mcp.tool()
+def comms_convert_to_goal(item_type: str, item_id: str, goal_description: str, complexity: str = "medium") -> str:
+    """Convert a message or email into a workspace goal in the goal engine.
+
+    Args:
+        item_type: 'imessage' or 'email'
+        item_id: Message/email identifier
+        goal_description: Goal description
+        complexity: 'simple', 'medium', or 'complex'
+    """
+    _access("comms_convert_to_goal")
+    try:
+        result = subprocess.run(
+            [str(WORKSPACE / "goal-engine/scripts/goal-create"), goal_description, "--complexity", complexity, "--source", f"comms:{item_type}:{item_id}"],
+            capture_output=True, text=True, timeout=15
+        )
+        if result.returncode == 0:
+            return f"Goal created from {item_type} [{item_id}]:\n{result.stdout.strip()}"
+        return f"[goal-create] {result.stderr.strip() or result.stdout.strip()}"
+    except Exception as e:
+        return f"[Error creating goal: {e}]\nManually run: goal-create '{goal_description}'"
+
+
+@mcp.tool()
+def comms_generate_reply_draft(context: str, tone: str = "professional", length: str = "brief") -> str:
+    """Generate a suggested reply draft based on message context.
+
+    This generates a DRAFT for human review — it does not send anything.
+
+    Args:
+        context: Message or email context to reply to (do not include full private body)
+        tone: 'professional', 'friendly', 'concise', 'formal'
+        length: 'brief' (1-3 sentences), 'medium' (1-2 paragraphs), 'detailed'
+    """
+    _access("comms_generate_reply_draft")
+    return (
+        f"Reply Draft Suggestion\n"
+        f"Context: {context[:300]}\n"
+        f"Tone: {tone} | Length: {length}\n"
+        f"\n[This tool is a scaffold — Claude will draft the reply inline.]\n"
+        f"Suggested approach:\n"
+        f"  1. Acknowledge the key point from the message\n"
+        f"  2. Address the main question or request\n"
+        f"  3. Close with next steps if applicable\n"
+        f"\nAfter reviewing, use comms_create_imessage_draft() or comms_create_email_reply_draft() to save it."
+    )
+
+
+@mcp.tool()
+def comms_review_outbound(draft_id: str, channel: str = "imessage") -> str:
+    """Review a draft before sending — check tone, safety, and policy compliance.
+
+    Args:
+        draft_id: Draft ID to review
+        channel: 'imessage' or 'email'
+    """
+    _access("comms_review_outbound")
+    if channel == "imessage":
+        draft_file = IMSG_DRAFTS_DIR / f"{draft_id}.json"
+        if not draft_file.exists():
+            return f"[ERROR] Draft not found: {draft_id}"
+        try:
+            draft = json.loads(draft_file.read_text())
+        except Exception as e:
+            return f"[ERROR] {e}"
+        return (
+            f"Outbound Review — {channel}\n"
+            f"  Draft ID:  {draft_id}\n"
+            f"  To:        {draft.get('recipient', 'unknown')}\n"
+            f"  Status:    {draft.get('status', 'unknown')}\n"
+            f"  Preview:   {draft.get('message', '')[:300]}\n"
+            f"\nSafety checklist:\n"
+            f"  [ ] Recipient is correct\n"
+            f"  [ ] Tone is appropriate\n"
+            f"  [ ] No sensitive info in message\n"
+            f"  [ ] Not replying to wrong thread\n"
+            f"\nIf OK: imsg-send-confirmed {draft_id}"
+        )
+    return f"[review] Channel '{channel}' review not yet implemented."
+
+
+@mcp.tool()
+def comms_run_doctor() -> str:
+    """Run the communications subsystem doctor check."""
+    _access("comms_run_doctor")
+    script = WORKSPACE / "bin/comms-doctor"
+    if not script.exists():
+        return "[comms-doctor script not found]"
+    try:
+        result = subprocess.run(["sh", str(script)], capture_output=True, text=True, timeout=30)
+        return result.stdout + result.stderr
+    except Exception as e:
+        return f"[Error running comms-doctor: {e}]"
+
+
+@mcp.tool()
+def comms_run_report() -> str:
+    """Generate and return the latest communications report."""
+    _access("comms_run_report")
+    script = WORKSPACE / "bin/comms-report"
+    if not script.exists():
+        return "[comms-report script not found]"
+    try:
+        result = subprocess.run(["python3", str(script)], capture_output=True, text=True, timeout=30)
+        return result.stdout
+    except Exception as e:
+        return f"[Error: {e}]"
+
+
+# --- Comms MCP prompts ---
+
+@mcp.prompt()
+def imessage_reply_context() -> str:
+    """System prompt context for drafting iMessage replies."""
+    return (
+        "You are helping draft an iMessage reply. Rules:\n"
+        "- Be concise — iMessages are conversational, not essays\n"
+        "- Match the tone of the original message\n"
+        "- Never include sensitive workspace info in message drafts\n"
+        "- Always create a draft first; never send directly\n"
+        "- Ask the user to confirm before any send\n"
+        "- Suggest: comms_create_imessage_draft(recipient, message) to save the draft\n"
+    )
+
+
+@mcp.prompt()
+def email_reply_context() -> str:
+    """System prompt context for drafting email replies."""
+    return (
+        "You are helping draft an email reply. Rules:\n"
+        "- Email is more formal than iMessage — use clear subject + greeting\n"
+        "- Default to professional tone unless instructed otherwise\n"
+        "- Never send automatically — always create a draft first\n"
+        "- Confirm recipient and subject before finalizing\n"
+        "- Note: Mail.app not installed — recommend Gmail plugin or IMAP setup\n"
+    )
+
+
+@mcp.prompt()
+def comms_triage_context() -> str:
+    """System prompt for triaging messages and emails."""
+    return (
+        "You are triaging communications for the workspace. Rules:\n"
+        "- Classify each item: urgent_reply / normal_reply / fyi / task / goal / spam\n"
+        "- For task items: use comms_convert_to_task()\n"
+        "- For goal items: use comms_convert_to_goal()\n"
+        "- Never expose full message bodies in reports\n"
+        "- Log timestamps and categories, not content\n"
+        "- Suggest gstack /review before any outbound send\n"
+    )
+
+
+@mcp.prompt()
+def outbound_safety_review() -> str:
+    """System prompt for reviewing outbound messages before send."""
+    return (
+        "You are reviewing an outbound message for safety. Check:\n"
+        "1. Recipient is correct and intended\n"
+        "2. Content is appropriate for the recipient\n"
+        "3. No sensitive workspace/personal info leaked\n"
+        "4. Tone matches the relationship\n"
+        "5. Not a response to spam or phishing\n"
+        "6. Bulk send is not happening\n"
+        "If any check fails, BLOCK and explain. Use /cso for deeper security review.\n"
+    )
+
 
 if __name__ == "__main__":
     mcp.run()

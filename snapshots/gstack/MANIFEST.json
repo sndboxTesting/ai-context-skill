@@ -1,0 +1,12 @@
+{
+  "snapshots": [
+    {
+      "file": "gstack-v1.58.4.0-9fd03fae-20260625T001719Z.tar.gz",
+      "version": "1.58.4.0",
+      "commit": "9fd03fae9e74f5daa7a138366aca8f86c7367c5c",
+      "created_at": "2026-06-25T00:17:47Z",
+      "source": "garrytan/gstack",
+      "purpose": "initial pinned snapshot for supply chain safety"
+    }
+  ]
+}

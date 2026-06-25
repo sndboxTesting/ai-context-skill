@@ -113,6 +113,42 @@ MCPPY
   fi
 fi
 
+# gstack supply chain integrity check
+if [ -f "$ROOT/bin/gstack-verify" ]; then
+  GSTACK_STATUS="$(python3 "$ROOT/bin/gstack-verify" --json 2>/dev/null | python3 -c "import json,sys; d=json.load(sys.stdin); print(d.get('status','error'))" 2>/dev/null || echo "error")"
+  if [ "$GSTACK_STATUS" != "ok" ]; then
+    # Log drift as a warning but do NOT auto-repair — requires human confirmation
+    DRIFT_MSG="gstack integrity drift detected (status: $GSTACK_STATUS) — run bin/gstack-repair to inspect"
+    python3 - "$ROOT/agent-system/logs/MAINTENANCE_LOG.md" "$DRIFT_MSG" <<'GSTACKPY'
+import sys, pathlib
+from datetime import datetime, timezone
+log = pathlib.Path(sys.argv[1])
+msg = sys.argv[2]
+stamp = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
+log.parent.mkdir(parents=True, exist_ok=True)
+with open(log, "a") as f:
+    f.write(f"\n## {stamp} agent-maintain\nWARNING: {msg}\n")
+GSTACKPY
+  fi
+fi
+
+# Communications subsystem: lightweight health check
+if [ -f "$ROOT/comms/imessage/scripts/imessage-status" ]; then
+  IMSG_STATUS="$(python3 "$ROOT/comms/imessage/scripts/imessage-status" 2>/dev/null | grep "Full Disk Access" | head -1 || echo "")"
+  if echo "$IMSG_STATUS" | grep -q "DENIED"; then
+    python3 - "$ROOT/agent-system/logs/MAINTENANCE_LOG.md" "iMessage FDA denied — grant Full Disk Access in System Settings" <<'COMMSWARPY'
+import sys, pathlib
+from datetime import datetime, timezone
+log = pathlib.Path(sys.argv[1])
+msg = sys.argv[2]
+stamp = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
+log.parent.mkdir(parents=True, exist_ok=True)
+with open(log, "a") as f:
+    f.write(f"\n## {stamp} agent-maintain\nWARNING: {msg}\n")
+COMMSWARPY
+  fi
+fi
+
 # Orchestrator: run route-learn to update patterns from history + autolab
 if [ -f "$ROOT/orchestrator/scripts/route-learn" ]; then
   # Only run if there is routing history to learn from

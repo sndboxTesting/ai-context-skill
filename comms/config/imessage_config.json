@@ -1,0 +1,18 @@
+{
+  "_meta": {
+    "version": "1.0",
+    "description": "iMessage subsystem configuration"
+  },
+  "db_path": "~/Library/Messages/chat.db",
+  "recent_limit": 20,
+  "search_limit": 50,
+  "fda_status": "confirmed",
+  "send_method": "applescript",
+  "draft_dir": "comms/imessage/state/drafts/",
+  "self_phone": null,
+  "self_email": null,
+  "allowlist": [],
+  "blocked_recipients": [],
+  "log_outbound": true,
+  "log_body": false
+}

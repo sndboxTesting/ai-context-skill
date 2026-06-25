@@ -1,0 +1,126 @@
+#!/usr/bin/env python3
+"""Verify gstack install matches the pinned commit in mcp/config/gstack_version.json.
+
+Exit codes:
+  0 — integrity OK, on pinned commit
+  1 — drift detected (commit mismatch, dirty, or install missing)
+  2 — config missing or unreadable
+"""
+import json
+import subprocess
+import sys
+from pathlib import Path
+
+WORKSPACE = Path(__file__).resolve().parent.parent
+CONFIG = WORKSPACE / "mcp" / "config" / "gstack_version.json"
+GSTACK = Path.home() / ".claude" / "skills" / "gstack"
+
+
+def _git(args: list[str], cwd: Path) -> str:
+    r = subprocess.run(["git", "-C", str(cwd)] + args,
+                       capture_output=True, text=True)
+    return r.stdout.strip()
+
+
+def main(json_out: bool = False) -> int:
+    if not CONFIG.exists():
+        msg = {"status": "error", "reason": f"config not found: {CONFIG}"}
+        if json_out:
+            print(json.dumps(msg))
+        else:
+            print(f"[gstack-verify] ERROR: {msg['reason']}")
+        return 2
+
+    try:
+        cfg = json.loads(CONFIG.read_text())
+    except Exception as e:
+        msg = {"status": "error", "reason": f"config parse error: {e}"}
+        if json_out:
+            print(json.dumps(msg))
+        else:
+            print(f"[gstack-verify] ERROR: {msg['reason']}")
+        return 2
+
+    pinned = cfg.get("pinned_commit", "")
+    version = cfg.get("pinned_version", "unknown")
+    issues = []
+
+    # 1. Install directory exists
+    if not GSTACK.exists():
+        issues.append("gstack not installed at ~/.claude/skills/gstack")
+    else:
+        # 2. Current HEAD matches pinned commit
+        current = _git(["rev-parse", "HEAD"], GSTACK)
+        if current != pinned:
+            issues.append(f"commit drift: pinned={pinned[:12]} current={current[:12]}")
+
+        # 3. Working tree is clean (no unexpected modifications)
+        dirty = _git(["status", "--short"], GSTACK)
+        if dirty:
+            issues.append(f"working tree dirty: {dirty[:120]}")
+
+    # 4. Verify symlinks still point to gstack
+    skills_dir = Path.home() / ".claude" / "skills"
+    expected_skills = [
+        "cso", "investigate", "review", "office-hours", "ship",
+        "plan-eng-review", "qa", "careful", "autoplan", "plan-design-review"
+    ]
+    broken = []
+    for skill in expected_skills:
+        link = skills_dir / skill
+        if not link.exists() and not link.is_symlink():
+            broken.append(skill)
+        elif link.is_symlink() and not link.resolve().exists():
+            broken.append(f"{skill}(dangling)")
+    if broken:
+        issues.append(f"broken skill symlinks: {', '.join(broken)}")
+
+    # Build result
+    from datetime import datetime, timezone
+    now = datetime.now(timezone.utc).isoformat(timespec="seconds")
+
+    if issues:
+        result = {
+            "status": "drift",
+            "pinned_commit": pinned,
+            "pinned_version": version,
+            "issues": issues,
+            "checked_at": now,
+        }
+        if json_out:
+            print(json.dumps(result, indent=2))
+        else:
+            print(f"[gstack-verify] DRIFT DETECTED (v{version}):")
+            for i in issues:
+                print(f"  - {i}")
+            print(f"  Run: ~/SuneelWorkSpace/bin/gstack-repair")
+        # Update last_verified even on drift so we know when we last checked
+        _update_verified(cfg, now, "drift")
+        return 1
+    else:
+        result = {
+            "status": "ok",
+            "pinned_commit": pinned,
+            "pinned_version": version,
+            "checked_at": now,
+        }
+        if json_out:
+            print(json.dumps(result, indent=2))
+        else:
+            print(f"[gstack-verify] OK — gstack v{version} at pinned commit {pinned[:12]}")
+        _update_verified(cfg, now, "ok")
+        return 0
+
+
+def _update_verified(cfg: dict, now: str, status: str):
+    cfg["last_verified"] = now
+    cfg["last_verified_status"] = status
+    try:
+        CONFIG.write_text(json.dumps(cfg, indent=2) + "\n")
+    except Exception:
+        pass  # non-fatal
+
+
+if __name__ == "__main__":
+    json_mode = "--json" in sys.argv
+    sys.exit(main(json_out=json_mode))

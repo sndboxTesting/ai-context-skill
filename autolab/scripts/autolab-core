@@ -80,6 +80,11 @@ SCRIPTS = [
     "autolab-evolve-strategy", "autolab-core",
 ]
 
+# Paths that require AUTOLAB_ALLOW_BIN=1 env var to snapshot/restore.
+# This converts the mutation_policy.md "agent-approved" prose rule into a code gate.
+_BIN_PROTECTED = {"bin", "bin/agent-start", "bin/agent-autoclose", "bin/agent-doctor",
+                  "bin/agent-repair", "bin/agent-maintain", "bin/agent-finish"}
+
 SNAPSHOT_PATHS = [
     "autolab/program.md",
     "autolab/evaluator.md",
@@ -276,6 +281,20 @@ def check_eval():
     doctor_ok = doctor.returncode == 0 and "healthy" in (doctor.stdout + doctor.stderr).lower()
     add("doctor_health", 12, 12 if doctor_ok else 0, True, (doctor.stdout + doctor.stderr).strip()[:300])
 
+    # gstack supply chain integrity gate
+    skip_gstack = os.environ.get("AUTOLAB_SKIP_GSTACK_CHECK", "").lower() in ("1", "true", "yes")
+    if skip_gstack:
+        add("gstack_integrity", 0, 0, False, "skipped via AUTOLAB_SKIP_GSTACK_CHECK")
+    else:
+        gstack_verify = ROOT / "bin" / "gstack-verify"
+        if gstack_verify.exists():
+            gv = run(["python3", str(gstack_verify)], timeout=10)
+            gstack_ok = gv.returncode == 0
+            add("gstack_integrity", 0, 0, True if not gstack_ok else False,
+                (gv.stdout + gv.stderr).strip()[:200] if not gstack_ok else "ok")
+        else:
+            add("gstack_integrity", 0, 0, False, "gstack-verify not found (non-critical)")
+
     startup_ready = (ROOT / "bin/agent-start").exists() and (ROOT / "bin/agent-autoclose").exists()
     state = read_json(ROOT / "agent-system/state/CURRENT_STATE.json")
     closeout_seen = bool(state.get("last_auto_closeout_timestamp") or state.get("last_summary"))
@@ -364,12 +383,16 @@ def append_score_history(data):
 
 def snapshot(name=None):
     ensure_dirs()
+    _allow_bin = os.environ.get("AUTOLAB_ALLOW_BIN", "").lower() in ("1", "true", "yes")
     snap = SNAPSHOTS / (name or f"snapshot-{short_stamp()}")
     if snap.exists():
         shutil.rmtree(snap)
     snap.mkdir(parents=True)
     manifest = {"created_at": stamp(), "paths": []}
     for item in SNAPSHOT_PATHS:
+        if item in _BIN_PROTECTED and not _allow_bin:
+            print(f"[snapshot] SKIPPED protected path {item!r} (set AUTOLAB_ALLOW_BIN=1 to include)", file=sys.stderr)
+            continue
         src = ROOT / item
         if not src.exists() and not src.is_symlink():
             continue
@@ -401,6 +424,10 @@ def _safe_restore_path(root: Path, item: str, label: str) -> Path:
     # Must also be in the known-safe SNAPSHOT_PATHS set
     if item not in SNAPSHOT_PATHS:
         raise ValueError(f"manifest {label} {item!r} not in allowed SNAPSHOT_PATHS")
+    # bin/ items require explicit opt-in at restore time too
+    _allow_bin = os.environ.get("AUTOLAB_ALLOW_BIN", "").lower() in ("1", "true", "yes")
+    if item in _BIN_PROTECTED and not _allow_bin:
+        raise ValueError(f"manifest {label} {item!r} is a protected bin path — set AUTOLAB_ALLOW_BIN=1 to allow")
     return resolved
 
 

@@ -1,0 +1,39 @@
+#!/bin/sh
+# Launch Claude Code with the iMessage plugin channel.
+# Runs agent-start and comms-doctor first, then opens Claude with the plugin.
+
+ROOT="${SUNEEL_WORKSPACE:-$HOME/SuneelWorkSpace}"
+cd "$ROOT" || exit 1
+
+echo "Launching Claude with iMessage channel..."
+echo
+
+# Light health check
+if [ -x "$ROOT/bin/comms-doctor" ]; then
+    python3 "$ROOT/comms/imessage/scripts/imessage-permissions-check" 2>/dev/null | grep -E "^\s+\[(OK|FAIL)\]" || true
+    echo
+fi
+
+# Check plugin installed
+INV="$ROOT/comms/config/plugin_inventory.json"
+PLUGIN_STATUS="$(python3 -c "
+import json, pathlib
+p = pathlib.Path('$INV')
+if p.exists():
+    d = json.loads(p.read_text())
+    print(d.get('imessage_plugin', {}).get('status', 'unknown'))
+else:
+    print('unknown')
+" 2>/dev/null)"
+
+if [ "$PLUGIN_STATUS" != "installed" ]; then
+    echo "WARNING: iMessage plugin is not installed (status: $PLUGIN_STATUS)."
+    echo "Run: install-imessage-plugin"
+    echo "Continuing — Claude will still open but without iMessage plugin channel."
+    echo
+    # Open Claude without plugin channel
+    exec claude
+else
+    # Open Claude with iMessage plugin channel
+    exec claude --channels plugin:imessage@claude-plugins-official
+fi

@@ -1,0 +1,36 @@
+{
+  "_meta": {
+    "version": "1.0",
+    "description": "Access policy — what the comms subsystem may read/write"
+  },
+  "imessage_read": {
+    "allowed": true,
+    "method": "sqlite_direct",
+    "requires": ["full_disk_access"],
+    "restrictions": ["no_bulk_export", "no_full_body_logging", "metadata_only_in_reports"]
+  },
+  "imessage_send": {
+    "allowed": true,
+    "method": "applescript",
+    "requires": ["automation_permission_messages_app", "explicit_confirmation"],
+    "restrictions": [
+      "no_auto_reply",
+      "no_bulk_send",
+      "no_unknown_recipients_without_confirmation",
+      "confirmation_required_every_send"
+    ]
+  },
+  "mail_read": {
+    "allowed": false,
+    "reason": "Mail.app not installed"
+  },
+  "mail_send": {
+    "allowed": false,
+    "reason": "Mail.app not installed"
+  },
+  "allowlist": {
+    "enabled": false,
+    "recipients": [],
+    "note": "Add phone numbers/emails here to restrict outbound to known contacts only"
+  }
+}

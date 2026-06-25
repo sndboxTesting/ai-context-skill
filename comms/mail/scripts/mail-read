@@ -1,0 +1,15 @@
+#!/usr/bin/env python3
+"""Read an email by ID (stub — Mail.app not installed)."""
+import sys, pathlib
+
+MAIL_APP = pathlib.Path("/Applications/Mail.app")
+
+def main():
+    if not MAIL_APP.exists():
+        print("[mail-read] DISABLED — Mail.app not installed.")
+        return 1
+    print("[mail-read] Mail.app present but individual read not yet implemented.")
+    return 1
+
+if __name__ == "__main__":
+    sys.exit(main())

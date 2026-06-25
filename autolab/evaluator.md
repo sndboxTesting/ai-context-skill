@@ -14,6 +14,7 @@ An experiment is rejected if any of these fail:
 - `agent-doctor` reports no errors.
 - Safety files exist.
 - Autolab safeguards and mutation policy exist.
+- **gstack integrity**: `bin/gstack-verify` must exit 0 (pinned commit matches). Drift blocks experiments — a tampered skill installation cannot be trusted to guide the evaluation. Skip this gate only if `AUTOLAB_SKIP_GSTACK_CHECK=1` is set explicitly.
 
 ## Score Categories
 

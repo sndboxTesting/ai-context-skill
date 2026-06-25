@@ -1,0 +1,190 @@
+#!/usr/bin/env python3
+"""Repair or upgrade gstack install.
+
+Usage:
+  gstack-repair             # restore to pinned commit
+  gstack-repair --upgrade   # fetch latest, update pin, snapshot old
+  gstack-repair --dry-run   # show what would happen, no changes
+  gstack-repair --json      # machine-readable output
+
+This script never force-pushes, never deletes history, and always
+creates a snapshot backup before touching the install.
+"""
+import json
+import os
+import shutil
+import subprocess
+import sys
+import tarfile
+from datetime import datetime, timezone
+from pathlib import Path
+
+WORKSPACE = Path(__file__).resolve().parent.parent
+CONFIG = WORKSPACE / "mcp" / "config" / "gstack_version.json"
+GSTACK = Path.home() / ".claude" / "skills" / "gstack"
+SNAPSHOTS = WORKSPACE / "snapshots" / "gstack"
+LOG = WORKSPACE / "agent-system" / "logs" / "MAINTENANCE_LOG.md"
+
+
+def _git(args: list[str], cwd: Path = GSTACK) -> tuple[int, str, str]:
+    r = subprocess.run(["git", "-C", str(cwd)] + args,
+                       capture_output=True, text=True)
+    return r.returncode, r.stdout.strip(), r.stderr.strip()
+
+
+def _now() -> str:
+    return datetime.now(timezone.utc).isoformat(timespec="seconds")
+
+
+def _log(msg: str):
+    LOG.parent.mkdir(parents=True, exist_ok=True)
+    entry = f"\n## {_now()} gstack-repair\n{msg}\n"
+    with open(LOG, "a") as f:
+        f.write(entry)
+
+
+def _snapshot(label: str, dry_run: bool) -> Path:
+    """Tar the current gstack install to snapshots/gstack/."""
+    SNAPSHOTS.mkdir(parents=True, exist_ok=True)
+    stamp = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%SZ")
+    tar_path = SNAPSHOTS / f"gstack-{label}-{stamp}.tar.gz"
+    if dry_run:
+        print(f"[dry-run] Would create snapshot: {tar_path}")
+        return tar_path
+    print(f"  Creating snapshot: {tar_path.name} ...", end=" ", flush=True)
+    with tarfile.open(tar_path, "w:gz") as tar:
+        tar.add(GSTACK, arcname="gstack")
+    print("OK")
+    return tar_path
+
+
+def _load_config() -> dict:
+    if not CONFIG.exists():
+        raise FileNotFoundError(f"Version config not found: {CONFIG}")
+    return json.loads(CONFIG.read_text())
+
+
+def _save_config(cfg: dict):
+    CONFIG.write_text(json.dumps(cfg, indent=2) + "\n")
+
+
+def restore_to_pinned(dry_run: bool, json_out: bool) -> int:
+    """Reset gstack to the pinned commit."""
+    try:
+        cfg = _load_config()
+    except Exception as e:
+        print(f"[gstack-repair] ERROR loading config: {e}")
+        return 2
+
+    pinned = cfg["pinned_commit"]
+    _, current, _ = _git(["rev-parse", "HEAD"])
+
+    if current == pinned:
+        msg = {"status": "ok", "message": f"already at pinned commit {pinned[:12]}"}
+        if json_out:
+            print(json.dumps(msg))
+        else:
+            print(f"[gstack-repair] Already at pinned commit {pinned[:12]} — nothing to do.")
+        return 0
+
+    print(f"[gstack-repair] Drift detected: {current[:12]} → {pinned[:12]}")
+
+    # Backup before restoring
+    snap = _snapshot("pre-restore", dry_run)
+
+    if not dry_run:
+        rc, _, err = _git(["checkout", pinned])
+        if rc != 0:
+            print(f"[gstack-repair] ERROR: git checkout failed: {err}")
+            return 1
+        print(f"[gstack-repair] Restored to pinned commit {pinned[:12]}")
+        cfg["last_verified"] = _now()
+        cfg["last_verified_status"] = "repaired"
+        _save_config(cfg)
+        _log(f"Restored gstack to pinned commit {pinned[:12]}. Snapshot: {snap.name}")
+    else:
+        print(f"[dry-run] Would: git checkout {pinned[:12]}")
+
+    return 0
+
+
+def upgrade(dry_run: bool, json_out: bool) -> int:
+    """Fetch latest gstack, prompt for confirmation, update pin."""
+    try:
+        cfg = _load_config()
+    except Exception as e:
+        print(f"[gstack-repair] ERROR loading config: {e}")
+        return 2
+
+    old_pinned = cfg["pinned_commit"]
+    old_version = cfg.get("pinned_version", "unknown")
+
+    print("[gstack-repair] Fetching upstream garrytan/gstack ...")
+    if not dry_run:
+        rc, _, err = _git(["fetch", "origin"])
+        if rc != 0:
+            print(f"[gstack-repair] ERROR: git fetch failed: {err}")
+            return 1
+
+    _, new_commit, _ = _git(["rev-parse", "origin/main"])
+    _, new_version_raw, _ = _git(["show", "origin/main:VERSION"])
+    new_version = new_version_raw.strip() or "unknown"
+
+    if new_commit == old_pinned:
+        print(f"[gstack-repair] Already at latest: v{old_version} ({old_pinned[:12]})")
+        return 0
+
+    print(f"\n  Current pin: v{old_version} ({old_pinned[:12]})")
+    print(f"  Available:   v{new_version} ({new_commit[:12]})")
+    print(f"\n  IMPORTANT: Review changes before upgrading:")
+    print(f"  https://github.com/garrytan/gstack/compare/{old_pinned[:12]}...{new_commit[:12]}")
+    print()
+
+    if not dry_run:
+        confirm = input("  Upgrade to new version? [y/N] ").strip().lower()
+        if confirm != "y":
+            print("[gstack-repair] Upgrade cancelled.")
+            return 0
+
+        # Snapshot current before upgrading
+        snap = _snapshot(f"pre-upgrade-{old_pinned[:8]}", dry_run=False)
+
+        rc, _, err = _git(["checkout", "main"])
+        if rc != 0:
+            print(f"[gstack-repair] ERROR: checkout main failed: {err}")
+            return 1
+        rc, _, err = _git(["merge", "--ff-only", "origin/main"])
+        if rc != 0:
+            print(f"[gstack-repair] ERROR: merge failed: {err}")
+            return 1
+
+        _, final_commit, _ = _git(["rev-parse", "HEAD"])
+        cfg["pinned_commit"] = final_commit
+        cfg["pinned_version"] = new_version
+        cfg["last_verified"] = _now()
+        cfg["last_verified_status"] = "upgraded"
+        _save_config(cfg)
+        _log(f"Upgraded gstack v{old_version}→v{new_version} ({old_pinned[:12]}→{final_commit[:12]}). Snapshot: {snap.name}")
+        print(f"[gstack-repair] Upgraded to v{new_version} ({final_commit[:12]})")
+    else:
+        print(f"[dry-run] Would upgrade to v{new_version} ({new_commit[:12]})")
+
+    return 0
+
+
+def main() -> int:
+    dry_run = "--dry-run" in sys.argv
+    json_out = "--json" in sys.argv
+    do_upgrade = "--upgrade" in sys.argv
+
+    if dry_run:
+        print("[gstack-repair] DRY RUN — no changes will be made")
+
+    if do_upgrade:
+        return upgrade(dry_run, json_out)
+    else:
+        return restore_to_pinned(dry_run, json_out)
+
+
+if __name__ == "__main__":
+    sys.exit(main())

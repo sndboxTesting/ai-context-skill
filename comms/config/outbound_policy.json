@@ -1,0 +1,29 @@
+{
+  "_meta": {
+    "version": "1.0",
+    "description": "Outbound message and email safety policy"
+  },
+  "default_behavior": "draft_only",
+  "send_requires": "explicit_confirmation",
+  "auto_send": false,
+  "auto_reply": false,
+  "bulk_send": false,
+  "unknown_recipient_send": false,
+  "background_daemon": false,
+  "confirmation_flow": {
+    "step_1": "Generate draft and show to user",
+    "step_2": "User reviews and edits if needed",
+    "step_3": "User types 'CONFIRM SEND' or calls imsg-send-confirmed/mail-send-confirmed",
+    "step_4": "System logs the send attempt before executing",
+    "step_5": "Send via AppleScript",
+    "step_6": "Log result (success/failure), not the body"
+  },
+  "logging": {
+    "log_recipient": true,
+    "log_timestamp": true,
+    "log_draft_id": true,
+    "log_body": false,
+    "log_body_hash": true,
+    "log_blocked_attempts": true
+  }
+}

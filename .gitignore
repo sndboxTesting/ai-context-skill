@@ -11,3 +11,10 @@ autolab/sandboxes/
 autolab/snapshots/
 autolab/quarantine/
 mcp/server/storage/
+snapshots/gstack/*.tar.gz
+**/__pycache__/
+**/*.pyc
+automation/reports/*.log
+automation/reports/*.out.log
+mcp/server/logs/
+.rtk/

@@ -93,7 +93,7 @@ done
 
 echo ""
 echo "-- MCP Python Dependency --"
-uv run --with "mcp>=1.0.0" python3 -c "import mcp; print('mcp', mcp.__version__ if hasattr(mcp,'__version__') else 'ok')" 2>/dev/null \
+uv run --with-requirements "$HOME/SuneelWorkSpace/mcp/server/requirements.txt" python3 -c "import mcp; print('mcp', mcp.__version__ if hasattr(mcp,'__version__') else 'ok')" 2>/dev/null \
     && check "mcp package installable via uv" "ok" \
     || check "mcp package not available (check uv/network)" "fail"
 

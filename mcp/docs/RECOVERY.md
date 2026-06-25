@@ -35,14 +35,14 @@ Or just run:
 
 ## Server won't start (mcp package missing)
 
-The server uses `uv run --with mcp>=1.0.0`. If uv is not installed:
+The server uses `uv run --with-requirements mcp/server/requirements.txt` (pinned to `mcp==1.28.0`). If uv is not installed:
 ```sh
 brew install uv
 ```
 
 If the mcp package fails to install, check your network connection. uv downloads it from PyPI on first use.
 
-Test: `uv run --with "mcp>=1.0.0" python3 -c "import mcp; print('ok')"`
+Test: `uv run --with-requirements mcp/server/requirements.txt python3 -c "import mcp; print('ok')"`
 
 ## Corrupted config files
 

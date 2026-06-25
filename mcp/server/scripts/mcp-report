@@ -15,7 +15,7 @@ echo ""
 
 echo "## Server"
 echo "  Entrypoint: $MCP_ROOT/server/main.py"
-echo "  Runtime: uv run --with mcp>=1.0.0"
+echo "  Runtime: uv run --with-requirements server/requirements.txt (mcp==1.28.0)"
 echo "  Mode: stdio (clients start on demand)"
 echo ""
 

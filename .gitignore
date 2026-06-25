@@ -18,3 +18,17 @@ automation/reports/*.log
 automation/reports/*.out.log
 mcp/server/logs/
 .rtk/
+
+# Auto-generated autolab state & logs (regenerated automatically)
+autolab/reports/*.log
+autolab/reports/*.out.log
+autolab/reports/*.err.log
+autolab/state/
+autolab/meta/
+
+# Auto-generated MCP server state (regenerated automatically)
+mcp/server/state/
+
+# Auto-generated workspace state & logs
+agent-system/logs/
+agent-system/state/

@@ -13,6 +13,8 @@
 - Avoid destructive actions without explicit approval.
 - Prefer clean organization, minimal duplication, and a single source of truth.
 - Suneel wants the workspace to feel alive, self-maintaining, self-repairing, and state of the art while staying simple and transparent.
+- Suneel uses the Microsoft 365 Copilot Chat Mac app to brainstorm ideas and engineer prompts. These prompts are pasted into the active workspace agent, which must execute the instructions precisely while aligning with the workspace architecture.
+
 
 ## Environment Notes
 

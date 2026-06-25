@@ -105,8 +105,29 @@ To optimize LLM token usage, all primary reasoning agents (Claude Code, Codex CL
 
 ---
 
+## 🤖 Microsoft 365 Copilot Prompt Engineering Context
+
+This section is written specifically for **Microsoft 365 Copilot Chat** (running on Suneel's Mac). When Suneel pastes this file into the chat to brainstorm or engineer prompts, Copilot should adhere to the following workspace layout and guidelines:
+
+### 1. Workspace Layout & Key Files
+- **Canonical Instructions**: [agent-system/shared/AGENT_SYSTEM.md](file:///Users/MAC/SuneelWorkSpace/agent-system/shared/AGENT_SYSTEM.md) is the primary rule book.
+- **Durable Memory**: [agent-system/memory/MEMORY.md](file:///Users/MAC/SuneelWorkSpace/agent-system/memory/MEMORY.md) contains stable workspace facts.
+- **Important Decisions**: [agent-system/memory/DECISIONS.md](file:///Users/MAC/SuneelWorkSpace/agent-system/memory/DECISIONS.md) logs architecture and workflow decisions.
+- **Active Tasks**: [agent-system/tasks/ACTIVE_TASKS.md](file:///Users/MAC/SuneelWorkSpace/agent-system/tasks/ACTIVE_TASKS.md) records current work items.
+- **Session Handoff**: [agent-system/memory/SESSION_HANDOFF.md](file:///Users/MAC/SuneelWorkSpace/agent-system/memory/SESSION_HANDOFF.md) describes changes, verifications, and open tasks.
+
+### 2. Execution Guidelines for Copilot Prompts
+When designing prompts for Suneel to paste into his workspace agents, Copilot should write them in a way that instructs the active agent to:
+1. **Load Context First**: Always read the checklist files (under `agent-system/`) before modifying code.
+2. **Use RTK Aliases**: Prefix all terminal commands with `rtk` (e.g., `rtk git diff`, `rtk cargo test`) for token savings.
+3. **Run Health Checks**: Run `./bin/agent-doctor` to verify workspace status before and after edits.
+4. **Follow Safety Bounds**: Never propose money-related actions or destructive commands without backups.
+5. **Update State Files**: Close out sessions by writing a handoff, session log, and running `agent-finish`.
+
+---
 
 ## 📄 Key Entrypoints & Guidance
+
 
 - **Main Agent system Guidelines**: [agent-system/shared/AGENT_SYSTEM.md](file:///Users/MAC/SuneelWorkSpace/agent-system/shared/AGENT_SYSTEM.md) (Symlinked from root [AGENTS.md](file:///Users/MAC/SuneelWorkSpace/AGENTS.md) and [CLAUDE.md](file:///Users/MAC/SuneelWorkSpace/CLAUDE.md)).
 - **Durable Memory & Facts**: [agent-system/memory/MEMORY.md](file:///Users/MAC/SuneelWorkSpace/agent-system/memory/MEMORY.md) and [agent-system/memory/DECISIONS.md](file:///Users/MAC/SuneelWorkSpace/agent-system/memory/DECISIONS.md).

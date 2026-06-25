@@ -170,6 +170,13 @@ gstack is installed at `~/.claude/skills/gstack/`. These skills are invoked as s
 
 **Policy file:** `orchestrator/router/gstack_policy.json`
 
+## Copilot Prompt Engineering Workflow
+
+Suneel uses Microsoft 365 Copilot Chat (running locally on his Mac) as his primary prompt engineering companion:
+- **Role**: Copilot brainstorms ideas and designs/engineers the execution prompts.
+- **Workflow**: Suneel refines ideas in Copilot, and then copy-pastes the engineered prompts into whichever workspace agent is active.
+- **Execution**: Active agents must execute the pasted Copilot-engineered prompts precisely, aligning the requested tasks with the workspace's directories, CLI tools, safety boundaries, and closeout routines.
+
 ## Existing Note
 
 Before this shared system was created, Claude had a global `CLAUDE.md` pointing at `@RTK.md`. That file was preserved in backups. It appeared to be a technical note, not the main workspace policy.

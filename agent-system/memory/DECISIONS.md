@@ -47,3 +47,9 @@ Reason: Suneel wants the workspace to improve its own prompts, rules, automation
 Decision: Extend Autolab with local meta-learning files, pattern analysis, failure intelligence, strategy versioning, and heuristic experiment selection.
 
 Reason: The workspace should learn from its own experiment history. Patterns and failures remain plain JSON/Markdown files so Claude and Codex can inspect and share the same learning without external services.
+
+## 2026-06-25 - Use Microsoft 365 Copilot as Prompt Engineer
+
+Decision: Brainstorm new ideas in Microsoft 365 Copilot Chat (local Mac app) and paste its engineered prompts into the active workspace agents.
+
+Reason: Copilot acts as a specialized prompt engineer to refine tasks, while the workspace agents execute them. Pasting Copilot-engineered prompts ensures high-quality planning and execution, and sharing the README provides Copilot with full context of SuneelWorkSpace.

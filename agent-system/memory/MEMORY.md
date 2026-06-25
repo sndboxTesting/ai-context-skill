@@ -40,6 +40,7 @@
 - **workflow-audit**: Level 1 Agentic OS auditing tool. Analyzes prompt history to find repeated tasks and recommend new skills.
 - **gstack-create**: Automates GStack skill stubbing and Claude Code slash-command symlinking.
 - **self-repair skill**: A GStack reasoning skill (`/self-repair`) providing systematic diagnostic, health-check, code-fix, and rollback procedures.
+- **copilot-optimizer skill**: A GStack reasoning skill (`/copilot-optimizer`) to brainstorm and package raw ideas into structured prompts optimized for Microsoft 365 Copilot Chat.
 
 
 ## Memory Rules

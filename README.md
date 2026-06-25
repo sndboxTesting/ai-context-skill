@@ -87,6 +87,7 @@ For Claude Code sessions, **gstack** adds specialized expert methodologies (slas
 - `/qa`: Browser UI Testing — Automated client verification with bug-filing logic.
 - `/autoplan`: CEO & Design Pipeline — Sequential automation of engineering design review.
 - `/self-repair`: Self-Healing — Diagnoses failures, verifies workspace health, repairs compilation/test errors, and manages safe rollbacks.
+- `/copilot-optimizer`: Prompt Engineering — Brainstorms and packages raw ideas into structured prompts optimized for Microsoft 365 Copilot Chat.
 
 
 ### Supply Chain Protection:

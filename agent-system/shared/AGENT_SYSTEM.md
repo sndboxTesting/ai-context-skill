@@ -161,6 +161,7 @@ gstack is installed at `~/.claude/skills/gstack/`. These skills are invoked as s
 | `/qa` | UI testing — browser-based flow testing with auto bug filing |
 | `/autoplan` | Full pipeline — runs CEO + design + eng review sequentially |
 | `/self-repair` | Self-Healing — diagnoses failures, runs doctor/repair, fixes syntax, and manages rollbacks |
+| `/copilot-optimizer` | Prompt Engineering — packages raw brainstorm ideas into structured prompts for Copilot Chat |
 
 **Routing integration:** The orchestrator's `route-task` recommends a gstack skill alongside agent selection. The goal engine shows skill hints in task cards.
 

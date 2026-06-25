@@ -1,19 +1,17 @@
 # Workspace Status Report
 
-Generated: 2026-06-24T20:09:06-0500
+Generated: 2026-06-24T20:43:49-0500
 
 ## State
 
 - Status: auto-closed
-- Last summary: Automatic closeout checkpoint (shell-exit). 27 git status entries detected.
-- Updated: 2026-06-24T20:08:08-0500
+- Last summary: Automatic closeout checkpoint (shell-exit). 9 git status entries detected.
+- Updated: 2026-06-24T20:43:48-0500
 
 ## Health
 
 - Status: healthy
-- Issue count: 2
-- info: codex CLI is not on PATH
-- info: claude CLI is not on PATH
+- Issue count: 0
 
 ## Recent Handoff
 
@@ -23,28 +21,28 @@ Generated: 2026-06-24T20:09:06-0500
 
 Date: 2026-06-24
 
-Summary: Automatic closeout checkpoint (shell-exit). 27 git status entries detected.
+Summary: Automatic closeout checkpoint (shell-exit). 9 git status entries detected.
 
 Changed:
 
 - ` M agent-system/logs/MAINTENANCE_LOG.md`
 - ` M agent-system/logs/SESSION_LOG.md`
-- ` M agent-system/memory/SESSION_HANDOFF.md`
 - ` M agent-system/shared/AGENT_SYSTEM.md`
 - ` M agent-system/state/ACTIVE_SESSION.json`
 - ` M agent-system/state/CURRENT_STATE.json`
 - ` M agent-system/state/INDEX.json`
 - ` M agent-system/state/WORKSPACE_HEALTH.json`
-- ` M autolab/meta/experiment_embeddings.json`
-- ` M autolab/meta/failure_patterns.json`
-- ` M autolab/meta/insights.md`
-- ` M autolab/meta/learning_log.md`
-- ` M autolab/meta/patterns.json`
-- ` M autolab/reports/latest_report.md`
-- ` M autolab/reports/score_history.md`
-- ` M autolab/scripts/__pycache__/autolab-corecpython-314.pyc`
-- ` M autolab/state/latest_eval.json`
-- ` M automation/reports/launchd-maintenance.out.log`
+- `?? GEMINI.md`
+- `?? opencode.json`
+
+Verification:
+
+- Workspace health: healthy (0 issues)
+- Exit code: not recorded
+- Auto-closeout reason: `shell-exit`
+
+Open Items:
+
 
 ## Active Tasks
 

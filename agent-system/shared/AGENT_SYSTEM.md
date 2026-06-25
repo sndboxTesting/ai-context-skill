@@ -172,7 +172,38 @@ gstack is installed at `~/.claude/skills/gstack/`. These skills are invoked as s
 
 Before this shared system was created, Claude had a global `CLAUDE.md` pointing at `@RTK.md`. That file was preserved in backups. It appeared to be a technical note, not the main workspace policy.
 
+## Free Fallback Agents
+
+When Claude Code or Codex CLI tokens are exhausted, two free alternatives are configured for this workspace:
+
+### 1. Gemini CLI (`swgemini`)
+- **Model**: Gemini 2.5 Pro (1M context window)
+- **Cost**: Free — 1,000 requests/day with personal Google account
+- **Auth**: OAuth via Google account (sign in on first run with `gemini auth login`)
+- **Launch**: `swgemini` or `cd ~/SuneelWorkSpace && gemini`
+- **Workspace instructions**: `~/SuneelWorkSpace/GEMINI.md` (auto-loaded by Gemini CLI)
+
+### 2. OpenCode + Groq (`swopencode`)
+- **Model**: Llama 3.3 70B via Groq (fastest free inference available)
+- **Cost**: Free — generous rate limits on Groq's free tier
+- **Auth**: `GROQ_API_KEY` env var in `~/.zshrc` (set after getting key from console.groq.com)
+- **Launch**: `swopencode` or `cd ~/SuneelWorkSpace && opencode`
+- **Workspace config**: `~/SuneelWorkSpace/opencode.json` (auto-loaded by OpenCode)
+- **Alternate free models**: `groq/qwen/qwen3-32b`, `groq/meta-llama/llama-4-scout-17b-16e-instruct`
+
+### Agent Comparison
+
+| Agent | Model | Free Limit | Best For |
+|---|---|---|---|
+| Claude Code | claude-sonnet/opus | Subscription | Primary agent |
+| Codex CLI | gpt-4o | Subscription | Secondary agent |
+| Gemini CLI | Gemini 2.5 Pro | 1K req/day | Free fallback, large context |
+| OpenCode | Llama 3.3 70B (Groq) | Free API | Free fallback, fast responses |
+
+All agents read/write the same shared memory and task files in `~/SuneelWorkSpace/agent-system/`.
+
 <!-- rtk-instructions v2 -->
+
 # RTK (Rust Token Killer) - Token-Optimized Commands
 
 ## Golden Rule

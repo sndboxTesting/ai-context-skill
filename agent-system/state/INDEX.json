@@ -1,7 +1,7 @@
 {
   "entrypoints": [
     {
-      "modified_epoch": 1782349687,
+      "modified_epoch": 1782351780,
       "path": "/Users/MAC/SuneelWorkSpace/AGENTS.md",
       "relative_path": "AGENTS.md",
       "size": 62,
@@ -9,7 +9,7 @@
       "type": "symlink"
     },
     {
-      "modified_epoch": 1782349687,
+      "modified_epoch": 1782351780,
       "path": "/Users/MAC/SuneelWorkSpace/CLAUDE.md",
       "relative_path": "CLAUDE.md",
       "size": 62,
@@ -17,7 +17,7 @@
       "type": "symlink"
     },
     {
-      "modified_epoch": 1782349687,
+      "modified_epoch": 1782351780,
       "path": "/Users/MAC/.codex/AGENTS.md",
       "relative_path": null,
       "size": 62,
@@ -25,7 +25,7 @@
       "type": "symlink"
     },
     {
-      "modified_epoch": 1782349687,
+      "modified_epoch": 1782351780,
       "path": "/Users/MAC/.claude/CLAUDE.md",
       "relative_path": null,
       "size": 62,
@@ -33,7 +33,7 @@
       "type": "symlink"
     }
   ],
-  "generated_at": "2026-06-24T20:09:06-0500",
+  "generated_at": "2026-06-24T20:43:48-0500",
   "groups": {
     "automation": [
       {
@@ -77,18 +77,18 @@
         "type": "file"
       },
       {
-        "modified_epoch": 1782346145,
+        "modified_epoch": 1782349747,
         "path": "/Users/MAC/SuneelWorkSpace/automation/reports/launchd-maintenance.out.log",
         "relative_path": "automation/reports/launchd-maintenance.out.log",
-        "size": 115,
+        "size": 138,
         "target": null,
         "type": "file"
       },
       {
-        "modified_epoch": 1782349688,
+        "modified_epoch": 1782349746,
         "path": "/Users/MAC/SuneelWorkSpace/automation/reports/status-latest.md",
         "relative_path": "automation/reports/status-latest.md",
-        "size": 1604,
+        "size": 1671,
         "target": null,
         "type": "file"
       }
@@ -145,18 +145,18 @@
         "type": "file"
       },
       {
-        "modified_epoch": 1782349746,
+        "modified_epoch": 1782351781,
         "path": "/Users/MAC/SuneelWorkSpace/agent-system/logs/MAINTENANCE_LOG.md",
         "relative_path": "agent-system/logs/MAINTENANCE_LOG.md",
-        "size": 4498,
+        "size": 4931,
         "target": null,
         "type": "file"
       },
       {
-        "modified_epoch": 1782349688,
+        "modified_epoch": 1782351828,
         "path": "/Users/MAC/SuneelWorkSpace/agent-system/logs/SESSION_LOG.md",
         "relative_path": "agent-system/logs/SESSION_LOG.md",
-        "size": 4482,
+        "size": 4705,
         "target": null,
         "type": "file"
       }
@@ -187,10 +187,10 @@
         "type": "file"
       },
       {
-        "modified_epoch": 1782349688,
+        "modified_epoch": 1782351828,
         "path": "/Users/MAC/SuneelWorkSpace/agent-system/memory/SESSION_HANDOFF.md",
         "relative_path": "agent-system/memory/SESSION_HANDOFF.md",
-        "size": 1588,
+        "size": 791,
         "target": null,
         "type": "file"
       }
@@ -647,10 +647,10 @@
     ],
     "shared": [
       {
-        "modified_epoch": 1782349231,
+        "modified_epoch": 1782351370,
         "path": "/Users/MAC/SuneelWorkSpace/agent-system/shared/AGENT_SYSTEM.md",
         "relative_path": "agent-system/shared/AGENT_SYSTEM.md",
-        "size": 12688,
+        "size": 14185,
         "target": null,
         "type": "file"
       },
@@ -697,7 +697,7 @@
     ],
     "state": [
       {
-        "modified_epoch": 1782349688,
+        "modified_epoch": 1782351828,
         "path": "/Users/MAC/SuneelWorkSpace/agent-system/state/ACTIVE_SESSION.json",
         "relative_path": "agent-system/state/ACTIVE_SESSION.json",
         "size": 122,
@@ -705,15 +705,15 @@
         "type": "file"
       },
       {
-        "modified_epoch": 1782349688,
+        "modified_epoch": 1782351828,
         "path": "/Users/MAC/SuneelWorkSpace/agent-system/state/CURRENT_STATE.json",
         "relative_path": "agent-system/state/CURRENT_STATE.json",
-        "size": 1947,
+        "size": 1945,
         "target": null,
         "type": "file"
       },
       {
-        "modified_epoch": 1782349688,
+        "modified_epoch": 1782351781,
         "path": "/Users/MAC/SuneelWorkSpace/agent-system/state/INDEX.json",
         "relative_path": "agent-system/state/INDEX.json",
         "size": 25898,
@@ -729,10 +729,10 @@
         "type": "file"
       },
       {
-        "modified_epoch": 1782349746,
+        "modified_epoch": 1782351781,
         "path": "/Users/MAC/SuneelWorkSpace/agent-system/state/WORKSPACE_HEALTH.json",
         "relative_path": "agent-system/state/WORKSPACE_HEALTH.json",
-        "size": 746,
+        "size": 546,
         "target": null,
         "type": "file"
       }
@@ -799,8 +799,8 @@
     ]
   },
   "tools": {
-    "claude": null,
-    "codex": null
+    "claude": "/opt/homebrew/bin/claude",
+    "codex": "/Users/MAC/bin/codex"
   },
   "workspace_root": "/Users/MAC/SuneelWorkSpace"
 }

@@ -92,3 +92,10 @@
 - Recommendation: Prefer `strategy` when it targets a real score gap.
 - Failure lesson: Avoid repeating `no_score_improvement` without a specific mitigation.
 - Failure lesson: Avoid repeating `safety_gate_failed` without a specific mitigation.
+
+## 2026-06-24T21:09:08-0500
+
+- Confidence score: 0.6.
+- Recommendation: Prefer `strategy` when it targets a real score gap.
+- Failure lesson: Avoid repeating `no_score_improvement` without a specific mitigation.
+- Failure lesson: Avoid repeating `safety_gate_failed` without a specific mitigation.

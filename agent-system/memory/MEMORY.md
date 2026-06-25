@@ -3,26 +3,38 @@
 ## Durable Facts
 
 - Canonical workspace path: `~/SuneelWorkSpace`.
-- This workspace is intended as a central library for both Claude Code and Codex CLI.
-- This workspace is also intended as a shared control center for automation, maintenance, health checks, and handoff.
-- Suneel may use either agent at any time.
-- Both agents should read and write shared instructions, memory, task state, and handoff files.
+- This workspace is shared by ALL agents: Antigravity (agy), Claude Code, Codex CLI, Gemini CLI, and OpenCode.
+- All agents read and write the same shared memory, task state, handoff, and log files.
+- Suneel may use any agent at any time — they all share one brain.
 - Suneel wants local automation and workflows.
 - Suneel is new to development and prefers clear, precise, step-by-step behavior.
 - Approved local setup actions should be performed directly by the agent when safe.
 - Avoid money-related actions.
 - Avoid destructive actions without explicit approval.
 - Prefer clean organization, minimal duplication, and a single source of truth.
-- Suneel prefers a final clearly labeled summary block that can be copied back into Copilot when requested.
 - Suneel wants the workspace to feel alive, self-maintaining, self-repairing, and state of the art while staying simple and transparent.
 
 ## Environment Notes
 
-- Prior workspace README noted: Suneel Bikkasani, Apple M4 Max, macOS 15.
+- Suneel Bikkasani, Apple M4 Max, macOS 15.
 - New projects should generally live under `~/SuneelWorkSpace/projects/`.
-- Existing README noted Codex bootstrap files may live in `~/SuneelWorkSpace/codex/`.
-- Existing README noted previous work: Adwi local AI OS archive at `https://github.com/sndboxTesting/adwi`.
-- Background maintenance, if enabled, should be local, lightweight, and implemented with launchd calling scripts inside the workspace.
+- Codex bootstrap files live in `~/SuneelWorkSpace/codex/`.
+- Adwi local AI OS archive: `https://github.com/sndboxTesting/adwi`.
+- Background maintenance is local, lightweight, implemented with launchd calling workspace scripts.
+
+## Agent Roster
+
+- **Antigravity (agy)**: Primary orchestrator. Global: `~/.gemini/config/AGENTS.md`. Workspace: `~/SuneelWorkSpace/.agents/AGENTS.md`. MCP: headroom + workspace-brain.
+- **Claude Code**: Deep coding. Global: `~/.claude/CLAUDE.md`. Workspace: `~/SuneelWorkSpace/CLAUDE.md` + `.claude/settings.local.json`.
+- **Codex CLI**: Agentic runs. Global: `~/.codex/AGENTS.md`. Config: `~/.codex/config.toml`.
+- **Gemini CLI**: Free fallback (1K req/day). Launch: `swgemini`. Config: `~/.gemini/settings.json`. Workspace: `~/SuneelWorkSpace/GEMINI.md`.
+- **OpenCode**: Free fallback (Groq). Launch: `swopencode`. Config: `~/SuneelWorkSpace/opencode.json`.
+
+## Token Optimization Infrastructure
+
+- **Headroom proxy** at `http://127.0.0.1:8787`: Compresses context on every API call. Saves ~$197+ lifetime. Claude, Codex, and Antigravity all route through it.
+- **RTK**: Auto-rewrites bash commands for 50-90% CLI output token savings. Configured as PreToolUse hook for Claude Code + workspace, and as a skill for Antigravity.
+- **savings** alias: Run `savings` in terminal to see combined savings report.
 
 ## Memory Rules
 

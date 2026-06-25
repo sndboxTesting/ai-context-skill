@@ -33,7 +33,7 @@
       "type": "symlink"
     }
   ],
-  "generated_at": "2026-06-24T20:43:48-0500",
+  "generated_at": "2026-06-24T21:09:08-0500",
   "groups": {
     "automation": [
       {
@@ -85,10 +85,10 @@
         "type": "file"
       },
       {
-        "modified_epoch": 1782349746,
+        "modified_epoch": 1782351829,
         "path": "/Users/MAC/SuneelWorkSpace/automation/reports/status-latest.md",
         "relative_path": "automation/reports/status-latest.md",
-        "size": 1671,
+        "size": 1300,
         "target": null,
         "type": "file"
       }
@@ -145,10 +145,10 @@
         "type": "file"
       },
       {
-        "modified_epoch": 1782351781,
+        "modified_epoch": 1782353348,
         "path": "/Users/MAC/SuneelWorkSpace/agent-system/logs/MAINTENANCE_LOG.md",
         "relative_path": "agent-system/logs/MAINTENANCE_LOG.md",
-        "size": 4931,
+        "size": 4961,
         "target": null,
         "type": "file"
       },
@@ -171,10 +171,10 @@
         "type": "file"
       },
       {
-        "modified_epoch": 1782331488,
+        "modified_epoch": 1782353118,
         "path": "/Users/MAC/SuneelWorkSpace/agent-system/memory/MEMORY.md",
         "relative_path": "agent-system/memory/MEMORY.md",
-        "size": 1761,
+        "size": 2558,
         "target": null,
         "type": "file"
       },
@@ -605,6 +605,30 @@
         "type": "file"
       },
       {
+        "modified_epoch": 1782352093,
+        "path": "/Users/MAC/SuneelWorkSpace/bin/use-gemini",
+        "relative_path": "bin/use-gemini",
+        "size": 747,
+        "target": null,
+        "type": "file"
+      },
+      {
+        "modified_epoch": 1782352085,
+        "path": "/Users/MAC/SuneelWorkSpace/bin/use-opencode",
+        "relative_path": "bin/use-opencode",
+        "size": 864,
+        "target": null,
+        "type": "file"
+      },
+      {
+        "modified_epoch": 1782352088,
+        "path": "/Users/MAC/SuneelWorkSpace/bin/use-opencode-gemini",
+        "relative_path": "bin/use-opencode-gemini",
+        "size": 638,
+        "target": null,
+        "type": "file"
+      },
+      {
         "modified_epoch": 1782331634,
         "path": "/Users/MAC/SuneelWorkSpace/bin/workspace-backup",
         "relative_path": "bin/workspace-backup",
@@ -647,10 +671,10 @@
     ],
     "shared": [
       {
-        "modified_epoch": 1782351370,
+        "modified_epoch": 1782353094,
         "path": "/Users/MAC/SuneelWorkSpace/agent-system/shared/AGENT_SYSTEM.md",
         "relative_path": "agent-system/shared/AGENT_SYSTEM.md",
-        "size": 14185,
+        "size": 14972,
         "target": null,
         "type": "file"
       },
@@ -713,10 +737,10 @@
         "type": "file"
       },
       {
-        "modified_epoch": 1782351781,
+        "modified_epoch": 1782351828,
         "path": "/Users/MAC/SuneelWorkSpace/agent-system/state/INDEX.json",
         "relative_path": "agent-system/state/INDEX.json",
-        "size": 25898,
+        "size": 25897,
         "target": null,
         "type": "file"
       },
@@ -729,10 +753,10 @@
         "type": "file"
       },
       {
-        "modified_epoch": 1782351781,
+        "modified_epoch": 1782353348,
         "path": "/Users/MAC/SuneelWorkSpace/agent-system/state/WORKSPACE_HEALTH.json",
         "relative_path": "agent-system/state/WORKSPACE_HEALTH.json",
-        "size": 546,
+        "size": 1053,
         "target": null,
         "type": "file"
       }
@@ -799,8 +823,8 @@
     ]
   },
   "tools": {
-    "claude": "/opt/homebrew/bin/claude",
-    "codex": "/Users/MAC/bin/codex"
+    "claude": null,
+    "codex": null
   },
   "workspace_root": "/Users/MAC/SuneelWorkSpace"
 }

@@ -13,8 +13,10 @@ Claude Code and Codex CLI must use this workspace as the shared source for instr
 - Canonical workspace: `~/SuneelWorkSpace`
 - Canonical instruction file: `~/SuneelWorkSpace/agent-system/shared/AGENT_SYSTEM.md`
 - Workspace entrypoints: `~/SuneelWorkSpace/AGENTS.md` and `~/SuneelWorkSpace/CLAUDE.md`
-- Codex global entrypoint: `~/.codex/AGENTS.md`
 - Claude global entrypoint: `~/.claude/CLAUDE.md`
+- Codex global entrypoint: `~/.codex/AGENTS.md`
+- Antigravity global entrypoint: `~/.gemini/config/AGENTS.md`
+- Antigravity workspace customization: `~/SuneelWorkSpace/.agents/AGENTS.md`
 
 If instructions conflict inside this workspace, the canonical shared docs under `~/SuneelWorkSpace/agent-system/` are the source of truth. Project-specific instructions may add local detail, but they must not weaken safety boundaries.
 
@@ -193,14 +195,23 @@ When Claude Code or Codex CLI tokens are exhausted, two free alternatives are co
 
 ### Agent Comparison
 
-| Agent | Model | Free Limit | Best For |
-|---|---|---|---|
-| Claude Code | claude-sonnet/opus | Subscription | Primary agent |
-| Codex CLI | gpt-4o | Subscription | Secondary agent |
-| Gemini CLI | Gemini 2.5 Pro | 1K req/day | Free fallback, large context |
-| OpenCode | Llama 3.3 70B (Groq) | Free API | Free fallback, fast responses |
+| Agent | Shell Alias | Model | Routing | Best For |
+|---|---|---|---|---|
+| Antigravity (agy) | *(this tool)* | claude-sonnet/opus | Headroom proxy | Primary orchestrator |
+| Claude Code | `swclaude` | claude-sonnet/opus | Headroom proxy | Deep coding sessions |
+| Codex CLI | `swcodex` | gpt-5.5 | Headroom proxy | Agentic task runs |
+| Gemini CLI | `swgemini` | Gemini 2.5 Pro | Direct (free) | Free fallback, 1M ctx |
+| OpenCode | `swopencode` | Llama 3.3 70B (Groq) | Direct (free) | Free fallback, fast |
 
 All agents read/write the same shared memory and task files in `~/SuneelWorkSpace/agent-system/`.
+
+### Antigravity (agy) Integration
+
+- **Global entrypoint**: `~/.gemini/config/AGENTS.md` (always loaded)
+- **Workspace customization**: `~/SuneelWorkSpace/.agents/AGENTS.md` (loaded when in SuneelWorkSpace)
+- **MCP servers**: `headroom` + `workspace-brain` (configured in `~/.gemini/config/mcp_config.json`)
+- **RTK skill**: `~/SuneelWorkSpace/.agents/skills/headroom-rtk/SKILL.md`
+- **Headroom**: Routes via `ANTHROPIC_BASE_URL=http://127.0.0.1:8787` (set in env at launch)
 
 <!-- rtk-instructions v2 -->
 

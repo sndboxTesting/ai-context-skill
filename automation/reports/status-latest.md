@@ -1,6 +1,6 @@
 # Workspace Status Report
 
-Generated: 2026-06-24T20:43:49-0500
+Generated: 2026-06-24T21:09:08-0500
 
 ## State
 
@@ -11,7 +11,10 @@ Generated: 2026-06-24T20:43:49-0500
 ## Health
 
 - Status: healthy
-- Issue count: 0
+- Issue count: 3
+- info: codex CLI is not on PATH
+- info: claude CLI is not on PATH
+- info: Additional AGENTS.md/CLAUDE.md files exist; inspect before consolidating
 
 ## Recent Handoff
 

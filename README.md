@@ -722,7 +722,9 @@ Bounded adaptation:
 
 Anticipation safety:
 
-- Suggestions are not execution.
+- SAFE actions (read-only, status checks) are automatically executed when the suggestion has high confidence (>= 0.8) AND context strength is strong (> 0.7).
+- SAFE actions that do not meet these criteria, and all CONTROLLED actions (drafting, planning, creating files), require explicit user confirmation.
+- RESTRICTED actions (destructives, installs, comms) are blocked by default and require explicit justification/reasoning.
 - Suggestions can pre-plan or pre-compute only.
 - User approval is required before risky action.
 

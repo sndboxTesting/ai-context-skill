@@ -1,15 +1,15 @@
 {
-  "generated": "2026-06-26T01:22:19.363716",
+  "generated": "2026-06-26T01:26:19.533115",
   "total_files": 923,
   "files": [
     {
       "path": "README.md",
       "type": "doc",
-      "size": 38439,
+      "size": 38835,
       "ext": ".md",
       "subsystem": "root",
-      "modified": "2026-06-26T01:22:12.910996",
-      "hash": "b8b5c98369e6345064a940d51a0b7ed6"
+      "modified": "2026-06-26T01:26:16.638674",
+      "hash": "e061ace1a060d2a05231bf2ccc53aac4"
     },
     {
       "path": ".gitignore",
@@ -59,11 +59,11 @@
     {
       "path": "agent-system/tasks/COMPLETED_TASKS.md",
       "type": "task",
-      "size": 2885,
+      "size": 3244,
       "ext": ".md",
       "subsystem": "agent-system",
-      "modified": "2026-06-26T01:16:07.484379",
-      "hash": "3ab98ad8ee12876c6ea7b2888202602f"
+      "modified": "2026-06-26T01:22:42.788804",
+      "hash": "fc86431548529b8b77018efe32339181"
     },
     {
       "path": "agent-system/tasks/TASK_QUEUE.md",
@@ -86,11 +86,11 @@
     {
       "path": "agent-system/memory/SESSION_HANDOFF.md",
       "type": "memory",
-      "size": 2669,
+      "size": 3238,
       "ext": ".md",
       "subsystem": "agent-system",
-      "modified": "2026-06-26T01:19:57.873109",
-      "hash": "7275997aca360a58695acbc0e82405fa"
+      "modified": "2026-06-26T01:22:32.437603",
+      "hash": "8529fbfb7b8ff346501939e7c8f3909a"
     },
     {
       "path": "agent-system/memory/INSIGHTS.md",
@@ -251,8 +251,8 @@
       "size": 982,
       "ext": ".json",
       "subsystem": "agent-system",
-      "modified": "2026-06-26T01:22:17.347277",
-      "hash": "15fc183aa2a061ced50f11784fc7aa60"
+      "modified": "2026-06-26T01:26:12.993850",
+      "hash": "a85e0869679c32a3c5db81f07d195b2a"
     },
     {
       "path": "agent-system/state/ACTIVE_SESSION.json",
@@ -302,11 +302,11 @@
     {
       "path": "agent-system/logs/MAINTENANCE_LOG.md",
       "type": "log",
-      "size": 19278,
+      "size": 19308,
       "ext": ".md",
       "subsystem": "agent-system",
-      "modified": "2026-06-26T01:22:17.312087",
-      "hash": "6ac1f0dab742df4c58d610a973b1c207"
+      "modified": "2026-06-26T01:26:12.961889",
+      "hash": "f8b24036a2fad53072684aaa8c888cdf"
     },
     {
       "path": "agent-system/logs/SESSION_LOG.md",
@@ -662,11 +662,11 @@
     {
       "path": "bin/next",
       "type": "script",
-      "size": 4356,
+      "size": 5763,
       "ext": "",
       "subsystem": "bin",
-      "modified": "2026-06-26T01:03:51.231570",
-      "hash": "7fe05ad9ce428f3ac5d5f7b0835b5eb8"
+      "modified": "2026-06-26T01:26:08.960402",
+      "hash": "776567bdc95775e29cdd7208df77da45"
     },
     {
       "path": "bin/agent-autoclose",
@@ -2555,8 +2555,8 @@
       "size": 178,
       "ext": ".json",
       "subsystem": "mcp",
-      "modified": "2026-06-26T01:22:17.239882",
-      "hash": "2d1881a5e923007eb07834c88f3925c9"
+      "modified": "2026-06-26T01:26:12.889676",
+      "hash": "481220e7e103bd8cb38ad8e41c8226e1"
     },
     {
       "path": "mcp/server/state/capability_report.json",
@@ -2813,11 +2813,11 @@
     {
       "path": "audit/file_graph.json",
       "type": "data",
-      "size": 345543,
+      "size": 346138,
       "ext": ".json",
       "subsystem": "audit",
-      "modified": "2026-06-26T01:19:36.893661",
-      "hash": "7542e49ba637b9ab6c790fe32ab09223"
+      "modified": "2026-06-26T01:22:19.366999",
+      "hash": "df3d9ece10ee2b7f1dff0a143bd574d9"
     },
     {
       "path": "audit/duplication_clusters.json",
@@ -8313,11 +8313,11 @@
   "subsystem_stats": {
     "root": {
       "count": 485,
-      "total_size": 4402678
+      "total_size": 4403074
     },
     "agent-system": {
       "count": 37,
-      "total_size": 131119
+      "total_size": 132077
     },
     "tools": {
       "count": 2,
@@ -8329,7 +8329,7 @@
     },
     "bin": {
       "count": 75,
-      "total_size": 252625
+      "total_size": 254032
     },
     "obsidian-vault": {
       "count": 73,
@@ -8373,7 +8373,7 @@
     },
     "audit": {
       "count": 6,
-      "total_size": 359921
+      "total_size": 360516
     },
     "rtk-config": {
       "count": 1,
@@ -8653,11 +8653,6 @@
       ".agent-backups/20260626-011542/workspace-core/bin/install-imessage-plugin",
       ".agent-backups/20260626-010355/workspace-core/bin/install-imessage-plugin",
       ".agent-backups/20260626-005629/workspace-core/bin/install-imessage-plugin"
-    ],
-    "7fe05ad9ce428f3ac5d5f7b0835b5eb8": [
-      "bin/next",
-      ".agent-backups/20260626-011542/workspace-core/bin/next",
-      ".agent-backups/20260626-010355/workspace-core/bin/next"
     ],
     "a6f279fbe4f8107c7beba19c1d691954": [
       "bin/agent-autoclose",
@@ -9228,6 +9223,10 @@
       ".agent-backups/20260626-011542/workspace-core/bin/agent-doctor",
       ".agent-backups/20260626-010355/workspace-core/bin/agent-doctor",
       ".agent-backups/20260626-005629/workspace-core/bin/agent-doctor"
+    ],
+    "7fe05ad9ce428f3ac5d5f7b0835b5eb8": [
+      ".agent-backups/20260626-011542/workspace-core/bin/next",
+      ".agent-backups/20260626-010355/workspace-core/bin/next"
     ]
   },
   "name_based_clusters": {

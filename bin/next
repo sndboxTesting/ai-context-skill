@@ -27,6 +27,7 @@ def run():
         
     # Load and print active context
     active_context_path = ROOT / "agent-system" / "state" / "ACTIVE_CONTEXT.json"
+    context_strength = "weak"
     if active_context_path.exists():
         try:
             import json
@@ -38,6 +39,7 @@ def run():
             conf = ctx.get('confidence', 0.0)
             if conf > 0.7:
                 strength = f"Strong ({conf})"
+                context_strength = "strong"
             elif conf >= 0.4:
                 strength = f"Weak ({conf})"
             else:
@@ -45,6 +47,19 @@ def run():
             print(f"  - Strength   : {strength}")
         except Exception:
             pass
+
+    # Check if the top suggestion is SAFE and meets the criteria for immediate auto-execution
+    if suggestions:
+        top_action = suggestions[0]
+        level = top_action.get("execution_level")
+        conf_score = top_action.get("confidence_score", 0.0)
+        ready = top_action.get("readiness_flag", False)
+        
+        if level == "SAFE" and conf_score >= 0.8 and context_strength == "strong" and ready:
+            print(f"\n✅ Auto-running SAFE action: {top_action['text']} (confidence: {conf_score})")
+            success, msg = execution_engine.execute_action(top_action)
+            print(msg)
+            return
 
     print("\nSuggested next actions:")
     top_3 = suggestions[:3]
@@ -85,11 +100,22 @@ def run():
             return
             
         level = action["execution_level"]
+        conf_score = action.get("confidence_score", 0.0)
         
         if level == "SAFE":
-            print("Action is SAFE. Auto-executing...")
-            success, msg = execution_engine.execute_action(action)
-            print(msg)
+            # If manually chosen but did not auto-run immediately, check if it meets the criteria
+            if conf_score >= 0.8 and context_strength == "strong":
+                print(f"✅ Auto-running SAFE action: {action['text']} (confidence: {conf_score})")
+                success, msg = execution_engine.execute_action(action)
+                print(msg)
+            else:
+                # Follow existing confirmation flow (controlled-style query)
+                confirm = input(f"Run this SAFE action now? '{action['text']}' (y/n): ").strip().lower()
+                if confirm in ['y', 'yes']:
+                    success, msg = execution_engine.execute_action(action)
+                    print(msg)
+                else:
+                    print("Execution cancelled.")
             
         elif level == "CONTROLLED":
             confirm = input("Run this now? (y/n): ").strip().lower()
@@ -116,6 +142,7 @@ def run():
         print("\nCancelled.")
     except Exception as e:
         print(f"\nError: {e}")
+
 
 if __name__ == "__main__":
     run()

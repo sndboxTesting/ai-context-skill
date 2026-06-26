@@ -127,3 +127,6 @@ except Exception as e:
     print(f"Warning: could not update mcp_state.json: {e}")
 print(f"Done: {total} entries from {len(indexed)} sources")
 PY
+
+# Run auto-discovery to surface any new unregistered files
+python3 "${SUNEEL_WORKSPACE:-$HOME/SuneelWorkSpace}/mcp/server/scripts/auto_discover.py" --propose 2>/dev/null || true

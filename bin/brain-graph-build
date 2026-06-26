@@ -1,0 +1,4 @@
+#!/usr/bin/env bash
+# brain-graph-build — Build knowledge graph from brain/ notes
+WORKSPACE="${WORKSPACE:-$HOME/SuneelWorkSpace}"
+python3 "$WORKSPACE/brain/graph/build_graph.py" "$@"

@@ -191,6 +191,14 @@
     },
     "workspace://memory/insights": "agent-system/memory/INSIGHTS.md",
     "workspace://memory/patterns": "agent-system/memory/PATTERNS.md",
+    "workspace://memory/vector/index": {
+      "file": "agent-system/memory/vector/chroma_store",
+      "label": "Vector memory index storage"
+    },
+    "workspace://memory/vector/search": {
+      "file": "agent-system/memory/vector/semantic_search.py",
+      "label": "Semantic search query endpoint"
+    },
     "workspace://notes": {
       "file": "agent-system/memory/NOTES.md",
       "label": "Temporary notes"
@@ -277,5 +285,45 @@
   "workspace://comms/mail/status": "comms/config/mail_config.json",
   "workspace://comms/policy": "comms/config/outbound_policy.json",
   "workspace://comms/reports/latest": "comms/reports/latest_comms_report.md",
-  "workspace://comms/status": "comms/config/comms_config.json"
+  "workspace://comms/status": "comms/config/comms_config.json",
+  "workspace://brain/graph": {
+    "file": "brain/graph/knowledge_graph.json",
+    "description": "Knowledge graph of brain/ notes with backlinks"
+  },
+  "workspace://brain/graph/orphans": {
+    "file": "brain/graph/reports/orphan_notes.md",
+    "description": "Notes with no connections"
+  },
+  "workspace://orchestrator/mesh/agents": {
+    "file": "orchestrator/mesh/agent_registry.json",
+    "description": "Multi-agent registry"
+  },
+  "workspace://orchestrator/mesh/queue": {
+    "file": "orchestrator/mesh/task_queue.json",
+    "description": "Active multi-agent task queue"
+  },
+  "workspace://automation/evolution_scores": {
+    "file": "brain/system/evolution_scores.json",
+    "description": "Daily evolution scores"
+  },
+  "workspace://research/arxiv": {
+    "file": "bin/arxiv-mcp",
+    "description": "Arxiv research paper connector"
+  },
+  "workspace://ollama/status": {
+    "file": "bin/ollama-mcp",
+    "description": "Ollama local model connector"
+  },
+  "workspace://docker/status": {
+    "file": "bin/docker-mcp",
+    "description": "Docker container connector"
+  },
+  "workspace://jupyter/notebooks": {
+    "file": "bin/jupyter-mcp",
+    "description": "Jupyter notebook connector"
+  },
+  "workspace://gateway/api": {
+    "file": "gateway/api.py",
+    "description": "Agent REST API gateway (port 8888)"
+  }
 }

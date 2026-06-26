@@ -1,0 +1,59 @@
+{
+  "agents": {
+    "claude": {
+      "name": "Claude Code",
+      "alias": "swclaude",
+      "strengths": ["deep coding", "architecture", "complex reasoning", "identity alignment"],
+      "weaknesses": ["token cost", "rate limits"],
+      "cost_tier": "paid",
+      "speed_tier": "medium",
+      "performance_scores": { "reasoning": 0.95, "coding": 0.95, "research": 0.90 },
+      "last_active": null,
+      "status": "available"
+    },
+    "codex": {
+      "name": "Codex CLI",
+      "alias": "swcodex",
+      "strengths": ["agentic task runs", "shell automation", "code generation"],
+      "weaknesses": ["context window", "no persistent memory"],
+      "cost_tier": "paid",
+      "speed_tier": "fast",
+      "performance_scores": { "reasoning": 0.80, "coding": 0.90, "research": 0.70 },
+      "last_active": null,
+      "status": "available"
+    },
+    "gemini": {
+      "name": "Gemini CLI",
+      "alias": "swgemini",
+      "strengths": ["1M context", "research", "free tier", "summarization"],
+      "weaknesses": ["coding depth", "identity alignment"],
+      "cost_tier": "free",
+      "speed_tier": "fast",
+      "performance_scores": { "reasoning": 0.85, "coding": 0.75, "research": 0.90 },
+      "last_active": null,
+      "status": "available"
+    },
+    "opencode": {
+      "name": "OpenCode + Groq",
+      "alias": "swopencode",
+      "strengths": ["speed", "free", "batch tasks"],
+      "weaknesses": ["reasoning depth", "identity alignment"],
+      "cost_tier": "free",
+      "speed_tier": "fast",
+      "performance_scores": { "reasoning": 0.65, "coding": 0.85, "research": 0.55 },
+      "last_active": null,
+      "status": "available"
+    },
+    "antigravity": {
+      "name": "Antigravity (agy)",
+      "alias": "agy",
+      "strengths": ["orchestration", "MCP integration", "web apps", "planning"],
+      "weaknesses": ["deep shell ops"],
+      "cost_tier": "paid",
+      "speed_tier": "medium",
+      "performance_scores": { "reasoning": 0.90, "coding": 0.88, "research": 0.85 },
+      "last_active": null,
+      "status": "available"
+    }
+  }
+}

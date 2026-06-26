@@ -4,7 +4,7 @@
 
 Date: 2026-06-26
 
-Summary: Auto-suggest execution mode integrated and README upgraded to AI Spec spec.
+Summary: Phase 2 complete: dashboard live at localhost:7777
 
 Changed:
 

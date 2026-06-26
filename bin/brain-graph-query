@@ -1,0 +1,4 @@
+#!/usr/bin/env bash
+# brain-graph-query — Query the knowledge graph
+WORKSPACE="${WORKSPACE:-$HOME/SuneelWorkSpace}"
+python3 "$WORKSPACE/brain/graph/graph_query.py" "$@"

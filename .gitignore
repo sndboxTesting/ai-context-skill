@@ -39,3 +39,8 @@ testing/failure_log.json
 testing/repair_log.json
 testing/reports/
 
+# Vector memory cache and database
+agent-system/memory/vector/.hf_cache/
+agent-system/memory/vector/chroma_store/
+
+

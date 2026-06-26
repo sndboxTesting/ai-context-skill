@@ -1,6 +1,18 @@
 #!/bin/sh
 ROOT="${SUNEEL_WORKSPACE:-$HOME/SuneelWorkSpace}"
+WORKSPACE="${WORKSPACE:-$ROOT}"
+
+# Capture health score BEFORE
+BEFORE_SCORE=$(python3 "$ROOT/automation/evolution_scorer.py" before 2>/dev/null | grep BEFORE_SCORE | cut -d= -f2 || echo "0")
+
 python3 "$ROOT/scripts/daily_evolve.py" "$@"
 STATUS="$?"
+
+# Capture health score AFTER and log delta
+BEFORE_SCORE="$BEFORE_SCORE" python3 "$ROOT/automation/evolution_scorer.py" after 2>/dev/null || true
+
+# Also run MCP auto-discovery to surface new unregistered files
+python3 "$ROOT/mcp/server/scripts/auto_discover.py" --propose 2>/dev/null || true
+
 python3 "$ROOT/anticipation/prediction_engine.py" record --command daily-evolve --context system --exit-code "$STATUS" 2>/dev/null || true
 exit "$STATUS"

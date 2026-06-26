@@ -23,3 +23,8 @@ The following useful binaries were found installed on your Mac, but may not be f
 
 > [!NOTE]
 > **Safety Notice:** None of the proposed tools or connectors are auto-installed. Run manual setup or explicitly request installation.
+
+## 4. Missing Required Libraries
+- **sentence-transformers**: Required for Phase 1 Vector Memory Layer.
+- **chromadb**: Required for Phase 1 Vector Memory Layer (already installed but version check might be needed).
+

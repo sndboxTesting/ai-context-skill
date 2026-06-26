@@ -1,0 +1,16 @@
+#!/usr/bin/env bash
+WORKSPACE="${WORKSPACE:-$HOME/SuneelWorkSpace}"
+SESSION="agent-gateway"
+if tmux has-session -t "$SESSION" 2>/dev/null; then
+  echo "✅ Gateway: RUNNING (tmux: $SESSION)"
+else
+  echo "❌ Gateway: STOPPED"
+fi
+TOKEN=$(cat "$WORKSPACE/gateway/.token" 2>/dev/null | cut -c1-12 || echo "no token")
+echo "   Token: ${TOKEN}..."
+echo "   URL: http://localhost:8888"
+if curl -sf -H "Authorization: Bearer $(cat $WORKSPACE/gateway/.token 2>/dev/null)" http://localhost:8888/health &>/dev/null; then
+  echo "   Health: ✅ responding"
+else
+  echo "   Health: ❌ not responding"
+fi

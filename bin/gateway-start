@@ -1,0 +1,18 @@
+#!/usr/bin/env bash
+# gateway-start — Start the Agent API Gateway on port 8888
+set -euo pipefail
+WORKSPACE="${WORKSPACE:-$HOME/SuneelWorkSpace}"
+SESSION="agent-gateway"
+if tmux has-session -t "$SESSION" 2>/dev/null; then
+  echo "Gateway already running (tmux: $SESSION)"
+  exit 0
+fi
+tmux new-session -d -s "$SESSION" -x 200 -y 50
+tmux send-keys -t "$SESSION" "cd $WORKSPACE && WORKSPACE=$WORKSPACE python3 gateway/api.py" Enter
+sleep 1
+TOKEN=$(cat "$WORKSPACE/gateway/.token" 2>/dev/null | cut -c1-8)
+echo "✅ Gateway started on http://localhost:8888"
+echo "   Token (first 8): ${TOKEN}..."
+echo "   Full token: gateway-token"
+echo "   Docs: http://localhost:8888/docs"
+echo "   Stop: gateway-stop"

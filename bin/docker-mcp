@@ -1,0 +1,74 @@
+#!/usr/bin/env bash
+# docker-mcp — Docker MCP connector
+# Usage: docker-mcp [status|ps|images|logs <container>|run <image> <cmd>]
+set -euo pipefail
+
+WORKSPACE="${WORKSPACE:-$HOME/SuneelWorkSpace}"
+
+if ! command -v docker &>/dev/null; then
+  echo "❌ Docker not installed or not in PATH."
+  echo "   Install from: https://docker.com"
+  echo "   Logging to brain/system/tool_discovery.md..."
+  DISCOVER="$WORKSPACE/brain/system/tool_discovery.md"
+  if [[ -f "$DISCOVER" ]] && ! grep -q "docker" "$DISCOVER"; then
+    echo -e "\n## Docker\n- Status: NOT INSTALLED\n- Install: https://docker.com\n- Required for: container isolation, sandboxed experiments" >> "$DISCOVER"
+  fi
+  exit 1
+fi
+
+cmd="${1:-status}"
+shift || true
+
+case "$cmd" in
+  status)
+    echo "=== Docker Status ==="
+    docker version --format 'Version: {{.Server.Version}}' 2>/dev/null || echo "Docker daemon not running"
+    echo "Resource: workspace://docker/status"
+    ;;
+
+  ps)
+    echo "=== Running Containers ==="
+    docker ps --format "table {{.Names}}\t{{.Image}}\t{{.Status}}\t{{.Ports}}"
+    ;;
+
+  images)
+    echo "=== Available Images ==="
+    docker images --format "table {{.Repository}}\t{{.Tag}}\t{{.Size}}\t{{.CreatedSince}}"
+    ;;
+
+  logs)
+    CONTAINER="${1:-}"
+    if [[ -z "$CONTAINER" ]]; then
+      echo "Usage: docker-mcp logs <container_name>"
+      exit 1
+    fi
+    docker logs --tail 50 "$CONTAINER"
+    ;;
+
+  start|stop)
+    CONTAINER="${1:-}"
+    if [[ -z "$CONTAINER" ]]; then
+      echo "Usage: docker-mcp $cmd <container_name>"
+      exit 1
+    fi
+    echo "⚠️  CONTROLLED: About to $cmd container: $CONTAINER"
+    read -r -p "Confirm? (y/N) " reply
+    [[ "$reply" =~ ^[Yy]$ ]] && docker "$cmd" "$CONTAINER" || echo "Cancelled."
+    ;;
+
+  exec)
+    CONTAINER="${1:-}"; shift || true
+    CMD="${*:-bash}"
+    if [[ -z "$CONTAINER" ]]; then
+      echo "Usage: docker-mcp exec <container> <command>"
+      exit 1
+    fi
+    echo "⚠️  CONTROLLED: Running '$CMD' in container: $CONTAINER"
+    read -r -p "Confirm? (y/N) " reply
+    [[ "$reply" =~ ^[Yy]$ ]] && docker exec -it "$CONTAINER" $CMD || echo "Cancelled."
+    ;;
+
+  *)
+    echo "Usage: docker-mcp [status|ps|images|logs <c>|start <c>|stop <c>|exec <c> <cmd>]"
+    ;;
+esac

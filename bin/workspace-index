@@ -61,4 +61,9 @@ tmp.write_text(json.dumps(data, indent=2, sort_keys=True) + "\n")
 tmp.replace(out)
 PY
 
+# Call memory write hook on any memory/decision/pattern/insight/handoff files modified in the last 10 minutes
+find "$ROOT" -type f -mmin -10 -not -path "*/.git/*" -not -path "*/.agent-backups/*" -not -path "*/vector/.hf_cache/*" -not -path "*/vector/chroma_store/*" 2>/dev/null | while read -r file; do
+  "$ROOT/scripts/memory_write_hook.sh" "$file" >/dev/null 2>&1 || true
+done
+
 [ "${1:-}" = "--quiet" ] || echo "Updated $INDEX_JSON"

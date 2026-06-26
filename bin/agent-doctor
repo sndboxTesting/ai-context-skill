@@ -200,14 +200,28 @@ core_runner_files = {
     "workspace-backup", "workspace-changes", "workspace-context", "workspace-index",
     "workspace-report", "anticipate", "idea-run", "idea-start", "identity-accept",
     "identity-adjust", "identity-reject", "improve-system", "next", "system-audit",
-    "system-capabilities", "system-gaps", "system-recommend", "duplication-guard"
+    "system-capabilities", "system-gaps", "system-recommend", "duplication-guard",
+    # Phase 4: Multi-agent mesh
+    "mesh-status", "mesh-assign", "mesh-monitor-start", "mesh-monitor-stop",
+    # Phase 5: MCP connectors
+    "ollama-mcp", "arxiv-mcp", "docker-mcp", "jupyter-mcp",
+    # Phase 6: Knowledge graph
+    "brain-graph-build", "brain-graph-query", "brain-graph-orphans",
+    # Phase 9: API gateway
+    "gateway-start", "gateway-stop", "gateway-status", "gateway-token",
+    # Phase 10: Fixes
+    "evolution-trend", "workspace-ci", "build-training-data", "mcp-autodiscover",
+    # Other core scripts
+    "daily-evolve", "integrity-guard", "mcp-reindex", "mcp-status",
+    "prompt-eval", "workflow-analyze", "workspace-dashboard",
 }
+
 
 subsystem_dirs = {
     "agent-system", "anticipation", "autolab", "automation", "comms",
     "codex", "docs", "goal-engine", "identity", "mcp", "obsidian-vault",
     "orchestrator", "projects", "research-engine", "scripts", "system-context",
-    "tools", "testing"
+    "tools", "testing", "dashboard", "gateway"
 }
 
 
@@ -228,7 +242,7 @@ for p in root.rglob("*"):
     filename = parts[-1]
     
     # Skip standard folders
-    if any(k in parts for k in (".git", ".agent-backups", "__pycache__", "node_modules", "snapshots")):
+    if any(k in parts for k in (".git", ".agent-backups", "__pycache__", "node_modules", "snapshots", ".hf_cache", "chroma_store")):
         continue
         
     # Check duplicate instruction files

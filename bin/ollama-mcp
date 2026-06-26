@@ -1,0 +1,76 @@
+#!/usr/bin/env bash
+# ollama-mcp — Ollama MCP connector
+# Usage: ollama-mcp [list-models|run <model> <prompt>|status]
+set -euo pipefail
+
+WORKSPACE="${WORKSPACE:-$HOME/SuneelWorkSpace}"
+LOG_FILE="$WORKSPACE/agent-system/logs/ollama_calls.log"
+RESOURCE_MAP="$WORKSPACE/mcp/server/config/resource_map.json"
+
+log_call() {
+  local model="$1" prompt_len="$2" latency="$3"
+  echo "$(date -u +"%Y-%m-%dT%H:%M:%SZ") | model=$model prompt_tokens_approx=$prompt_len latency=${latency}s" >> "$LOG_FILE"
+}
+
+cmd="${1:-status}"
+shift || true
+
+case "$cmd" in
+  status)
+    if ! command -v ollama &>/dev/null; then
+      echo "❌ Ollama not installed. Visit: https://ollama.ai"
+      exit 1
+    fi
+    echo "✅ Ollama available: $(ollama --version 2>/dev/null || echo 'unknown version')"
+    echo "   Resource: workspace://ollama/status"
+    ;;
+
+  list-models)
+    if ! command -v ollama &>/dev/null; then
+      echo "❌ Ollama not installed. Visit: https://ollama.ai"
+      exit 1
+    fi
+    echo "=== Available Ollama Models ==="
+    ollama list 2>/dev/null || echo "(no models installed)"
+    echo ""
+    echo "Resource: workspace://ollama/models"
+    ;;
+
+  run)
+    MODEL="${1:-llama3}"
+    shift || true
+    PROMPT="${*:-Hello}"
+    if ! command -v ollama &>/dev/null; then
+      echo "❌ Ollama not installed."
+      exit 1
+    fi
+    echo "Running model: $MODEL"
+    echo "Prompt: $PROMPT"
+    echo "---"
+    START=$(date +%s)
+    ollama run "$MODEL" "$PROMPT"
+    END=$(date +%s)
+    LATENCY=$((END - START))
+    mkdir -p "$(dirname "$LOG_FILE")"
+    log_call "$MODEL" "${#PROMPT}" "$LATENCY"
+    ;;
+
+  download)
+    MODEL="${1:-}"
+    if [[ -z "$MODEL" ]]; then
+      echo "Usage: ollama-mcp download <model_name>"
+      exit 1
+    fi
+    echo "⚠️  This will download model: $MODEL"
+    read -r -p "Confirm download? (y/N) " reply
+    if [[ "$reply" =~ ^[Yy]$ ]]; then
+      ollama pull "$MODEL"
+    else
+      echo "Cancelled."
+    fi
+    ;;
+
+  *)
+    echo "Usage: ollama-mcp [status|list-models|run <model> <prompt>|download <model>]"
+    ;;
+esac

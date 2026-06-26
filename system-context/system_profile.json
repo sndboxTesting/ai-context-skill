@@ -1,46 +1,46 @@
 {
   "development_environments": [
     {
-      "available": true,
+      "available": false,
       "name": "rtk",
-      "path": "/Users/MAC/.local/bin/rtk",
-      "version": "rtk 0.28.2"
-    },
-    {
-      "available": true,
-      "name": "git",
-      "path": "/opt/homebrew/bin/git",
-      "version": "git version 2.54.0"
-    },
-    {
-      "available": true,
-      "name": "gh",
-      "path": "/opt/homebrew/bin/gh",
-      "version": "gh version 2.94.0 (2026-06-10)"
-    },
-    {
-      "available": true,
-      "name": "python3",
-      "path": "/opt/homebrew/bin/python3",
-      "version": "Python 3.14.5"
-    },
-    {
-      "available": true,
-      "name": "pip3",
-      "path": "/opt/homebrew/bin/pip3",
+      "path": null,
       "version": null
     },
     {
       "available": true,
-      "name": "node",
-      "path": "/opt/homebrew/bin/node",
-      "version": "v26.3.0"
+      "name": "git",
+      "path": "/usr/bin/git",
+      "version": "git version 2.50.1 (Apple Git-155)"
+    },
+    {
+      "available": false,
+      "name": "gh",
+      "path": null,
+      "version": null
     },
     {
       "available": true,
+      "name": "python3",
+      "path": "/usr/bin/python3",
+      "version": "Python 3.9.6"
+    },
+    {
+      "available": true,
+      "name": "pip3",
+      "path": "/usr/bin/pip3",
+      "version": null
+    },
+    {
+      "available": false,
+      "name": "node",
+      "path": null,
+      "version": null
+    },
+    {
+      "available": false,
       "name": "npm",
-      "path": "/opt/homebrew/bin/npm",
-      "version": "11.16.0"
+      "path": null,
+      "version": null
     },
     {
       "available": false,
@@ -49,45 +49,45 @@
       "version": null
     },
     {
-      "available": true,
+      "available": false,
       "name": "uv",
-      "path": "/opt/homebrew/bin/uv",
-      "version": "uv 0.11.21 (Homebrew 2026-06-11 aarch64-apple-darwin)"
-    },
-    {
-      "available": true,
-      "name": "brew",
-      "path": "/opt/homebrew/bin/brew",
+      "path": null,
       "version": null
     },
     {
-      "available": true,
+      "available": false,
+      "name": "brew",
+      "path": null,
+      "version": null
+    },
+    {
+      "available": false,
       "name": "codex",
-      "path": "/Users/MAC/bin/codex",
-      "version": "codex-cli 0.133.0-alpha.1"
+      "path": null,
+      "version": null
     },
     {
-      "available": true,
+      "available": false,
       "name": "claude",
-      "path": "/opt/homebrew/bin/claude",
-      "version": "2.1.193 (Claude Code)"
+      "path": null,
+      "version": null
     },
     {
-      "available": true,
+      "available": false,
       "name": "gemini",
-      "path": "/opt/homebrew/bin/gemini",
-      "version": "0.47.0"
+      "path": null,
+      "version": null
     },
     {
-      "available": true,
+      "available": false,
       "name": "opencode",
-      "path": "/opt/homebrew/bin/opencode",
-      "version": "1.17.10"
+      "path": null,
+      "version": null
     },
     {
-      "available": true,
+      "available": false,
       "name": "rg",
-      "path": "/opt/homebrew/bin/rg",
+      "path": null,
       "version": null
     },
     {
@@ -122,18 +122,18 @@
     }
   ],
   "disk": {
-    "home_free_gb": 649.5,
+    "home_free_gb": 648.1,
     "home_total_gb": 926.4,
-    "home_used_gb": 276.8
+    "home_used_gb": 278.2
   },
-  "generated_at": "2026-06-26T09:08:02.580774-05:00",
+  "generated_at": "2026-06-26T09:48:39.356860-05:00",
   "hardware": {
     "cpu_count": 16,
     "mac_model": "Mac16,5",
     "machine": "arm64",
     "memory_bytes": 68719476736,
     "memory_gb": 64.0,
-    "platform": "macOS-26.5.1-arm64-arm-64bit-Mach-O",
+    "platform": "macOS-26.5.1-arm64-arm-64bit",
     "processor": "arm"
   },
   "home_top_level_directories": [
@@ -307,7 +307,7 @@
     "private_file_contents": "not scanned"
   },
   "workspace": {
-    "bin_command_count": 92,
+    "bin_command_count": 95,
     "bin_commands": [
       "agent-autoclose",
       "agent-doctor",
@@ -368,6 +368,8 @@
       "mcp-status",
       "mcp-stop",
       "mcp-test",
+      "memory-reindex",
+      "memory-search",
       "next",
       "route-analyze",
       "route-execute",
@@ -399,6 +401,7 @@
       "workspace-backup",
       "workspace-changes",
       "workspace-context",
+      "workspace-dashboard",
       "workspace-index",
       "workspace-report"
     ],
@@ -415,16 +418,16 @@
       "scripts": true
     },
     "files_by_subsystem": {
-      "agent-system": 37,
+      "agent-system": 84,
       "autolab": 163,
-      "bin": 94,
+      "bin": 97,
       "comms": 35,
       "configs": 0,
       "docs": 3,
       "goal-engine": 27,
       "mcp": 34,
       "orchestrator": 22,
-      "scripts": 36
+      "scripts": 37
     },
     "non_executable_bin_files": [],
     "root": "/Users/MAC/SuneelWorkSpace",
@@ -445,7 +448,9 @@
       "brain",
       "codex",
       "comms",
+      "dashboard",
       "docs",
+      "gateway",
       "goal-engine",
       "identity",
       "mcp",

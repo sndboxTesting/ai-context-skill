@@ -32,6 +32,8 @@ SUBSYSTEM_DIRS = {
     "system-context",
     "tools",
     "testing",
+    "dashboard",
+    "gateway",
 }
 
 

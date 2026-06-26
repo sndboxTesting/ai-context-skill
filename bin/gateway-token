@@ -1,0 +1,8 @@
+#!/usr/bin/env bash
+WORKSPACE="${WORKSPACE:-$HOME/SuneelWorkSpace}"
+TOKEN_FILE="$WORKSPACE/gateway/.token"
+if [[ -f "$TOKEN_FILE" ]]; then
+  cat "$TOKEN_FILE"
+else
+  python3 "$WORKSPACE/gateway/auth.py"
+fi

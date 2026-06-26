@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SuneelWorkSpace Live Control Center</title>
+    <!-- HTMX CDN -->
+    <script src="https://unpkg.com/htmx.org@1.9.10"></script>
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+    <header hx-get="/widgets/header" hx-trigger="load, every 30s" hx-swap="innerHTML">
+        <!-- Loaded dynamically -->
+    </header>
+
+    <main class="dashboard-grid">
+        <!-- Panel 1: Active Goals -->
+        <section class="panel">
+            <h2>Active Goals</h2>
+            <div id="goals-widget" hx-get="/widgets/goals" hx-trigger="load, every 30s" hx-swap="innerHTML">
+                <div class="loader">Loading goals...</div>
+            </div>
+        </section>
+
+        <!-- Panel 2: Agent Activity -->
+        <section class="panel">
+            <h2>Agent Activity</h2>
+            <div id="agent-widget" hx-get="/widgets/agent" hx-trigger="load, every 30s" hx-swap="innerHTML">
+                <div class="loader">Loading agent status...</div>
+            </div>
+        </section>
+
+        <!-- Panel 3: Memory Health -->
+        <section class="panel">
+            <h2>Memory Health</h2>
+            <div id="memory-widget" hx-get="/widgets/memory" hx-trigger="load, every 30s" hx-swap="innerHTML">
+                <div class="loader">Loading memory stats...</div>
+            </div>
+        </section>
+
+        <!-- Panel 4: MCP Status -->
+        <section class="panel">
+            <h2>MCP & Infrastructure</h2>
+            <div id="mcp-widget" hx-get="/widgets/mcp" hx-trigger="load, every 30s" hx-swap="innerHTML">
+                <div class="loader">Loading MCP status...</div>
+            </div>
+        </section>
+
+        <!-- Panel 5: Anticipation Suggestions -->
+        <section class="panel">
+            <h2>Anticipation suggestions</h2>
+            <div id="anticipation-widget" hx-get="/widgets/anticipation" hx-trigger="load, every 30s" hx-swap="innerHTML">
+                <div class="loader">Loading suggestions...</div>
+            </div>
+        </section>
+
+        <!-- Panel 6: System Health Score -->
+        <section class="panel flex-center">
+            <h2>Overall System Health</h2>
+            <div id="health-widget" hx-get="/widgets/health" hx-trigger="load, every 30s" hx-swap="innerHTML">
+                <div class="loader">Loading health score...</div>
+            </div>
+        </section>
+    </main>
+
+    <footer>
+        SuneelWorkSpace Live Control Center &copy; 2026. Bounded machine intelligence.
+    </footer>
+
+    <script src="/static/dashboard.js"></script>
+</body>
+</html>

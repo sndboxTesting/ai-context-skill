@@ -1,0 +1,8 @@
+#!/usr/bin/env bash
+# mesh-status — Print current multi-agent mesh state
+set -euo pipefail
+
+WORKSPACE="${WORKSPACE:-$HOME/SuneelWorkSpace}"
+cd "$WORKSPACE"
+
+python3 orchestrator/mesh/mesh_monitor.py --status

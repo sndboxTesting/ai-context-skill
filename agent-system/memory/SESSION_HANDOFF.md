@@ -4,36 +4,23 @@
 
 Date: 2026-06-26
 
-Summary: Automatic closeout checkpoint (inactivity). 20 git status entries detected.
+Summary: Automatic closeout checkpoint (startup-recovery). 7 git status entries detected.
 
 Changed:
 
-- ` M anticipation/action_suggestions.md`
-- ` M anticipation/current_context.json`
-- ` M anticipation/prediction_memory.json`
-- ` M anticipation/reports/anticipation_report.md`
 - ` M audit/gap_analysis.md`
 - ` M audit/improvement_plan.md`
 - ` M audit/system_audit.md`
-- ` M autolab/results.tsv`
-- ` M goal-engine/reports/goal_report.md`
-- ` M goal-engine/reports/system_progress.md`
-- ` M identity/adaptive/adaptation_state.json`
-- ` M identity/adaptive/feedback_log.json`
-- ` M identity/adaptive/pattern_updates.json`
-- ` M identity/adaptive/reports/adaptation_report.md`
-- ` M identity/adaptive/signal_memory.json`
-- ` M identity/integration/claude_identity.md`
-- ` M identity/prompts/identity_prompt.md`
+- ` M bin/agent-start`
 - ` M system-context/system_profile.json`
 - ` M tools/recommendations.md`
 - ` M tools/tool_inventory.json`
 
 Verification:
 
-- Workspace health: repairable (3 issues)
+- Workspace health: healthy (0 issues)
 - Exit code: not recorded
-- Auto-closeout reason: `inactivity`
+- Auto-closeout reason: `startup-recovery`
 
 Open Items:
 

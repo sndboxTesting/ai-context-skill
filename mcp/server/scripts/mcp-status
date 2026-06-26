@@ -4,7 +4,12 @@ set -eu
 # Resolve symlinks to get the real directory of this script
 TARGET="$0"
 while [ -L "$TARGET" ]; do
+    DIR="$(dirname "$TARGET")"
     TARGET="$(readlink "$TARGET")"
+    case "$TARGET" in
+        /*) ;;
+        *) TARGET="$DIR/$TARGET" ;;
+    esac
 done
 MCP_ROOT="$(cd "$(dirname "$TARGET")/../.." && pwd)"
 STATE="$MCP_ROOT/server/state/mcp_state.json"

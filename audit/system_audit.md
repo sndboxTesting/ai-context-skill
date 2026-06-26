@@ -1,6 +1,6 @@
 # System Audit
 
-Generated: 2026-06-26T04:48:28.015997-05:00
+Generated: 2026-06-26T07:48:33.322327-05:00
 
 ## Scope
 
@@ -58,7 +58,7 @@ No private home-directory file contents were ingested. Home awareness is limited
 
 - CPU count: 16
 - Memory GB: 64.0
-- Home disk free GB: 649.8
+- Home disk free GB: 650.6
 - Installed application names captured: 25
 - Home top-level directory names captured: 59
 

@@ -1,17 +1,17 @@
 {
-  "last_extracted_at": "2026-06-26T04:50:31.082511-05:00",
+  "last_extracted_at": "2026-06-26T08:43:48.107399-05:00",
   "signals": [
     {
       "confidence": 0.95,
-      "count": 102,
+      "count": 103,
       "signal": "reinforce_current_identity",
-      "weighted_score": 20.4
+      "weighted_score": 20.6
     },
     {
       "confidence": 0.95,
-      "count": 102,
+      "count": 103,
       "signal": "review_rejected_outputs",
-      "weighted_score": 102.0
+      "weighted_score": 103.0
     }
   ],
   "version": "1.0"

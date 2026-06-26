@@ -166,9 +166,10 @@ if active_context_path.exists():
                 print("Context reset. Starting fresh session.")
             else:
                 print("Continuity active. Resuming...")
-    except Exception as e:
         pass
+PY
 fi
+
 
 if [ "$QUIET" -eq 0 ]; then
   "$ROOT/bin/workspace-context"

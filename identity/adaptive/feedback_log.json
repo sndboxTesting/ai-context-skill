@@ -2243,6 +2243,28 @@
       "signal_weight": 1.0,
       "timestamp": "2026-06-26T04:50:31.081612-05:00",
       "user_action": "rejected"
+    },
+    {
+      "agent_used": "user",
+      "context": "manual_feedback",
+      "edit_distance_estimate": null,
+      "gstack_mode": null,
+      "notes": "",
+      "output_id": "test_output_id",
+      "signal_weight": 0.2,
+      "timestamp": "2026-06-26T08:43:48.067512-05:00",
+      "user_action": "accepted"
+    },
+    {
+      "agent_used": "user",
+      "context": "manual_feedback",
+      "edit_distance_estimate": null,
+      "gstack_mode": null,
+      "notes": "wrong formatting",
+      "output_id": "test_output_id",
+      "signal_weight": 1.0,
+      "timestamp": "2026-06-26T08:43:48.106513-05:00",
+      "user_action": "rejected"
     }
   ],
   "version": "1.0"

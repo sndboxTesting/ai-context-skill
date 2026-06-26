@@ -5,19 +5,19 @@
       "change_magnitude": 0.15,
       "confidence": 0.95,
       "signal": "reinforce_current_identity",
-      "support_count": 102,
-      "weighted_score": 20.4
+      "support_count": 103,
+      "weighted_score": 20.6
     }
   ],
-  "last_updated_at": "2026-06-26T04:50:31.082572-05:00",
+  "last_updated_at": "2026-06-26T08:43:48.107460-05:00",
   "proposed_adjustments": [
     {
       "adjustment": "Inspect rejected outputs for tone, length, and decision mismatch.",
       "change_magnitude": 0.15,
       "confidence": 0.95,
       "signal": "review_rejected_outputs",
-      "support_count": 102,
-      "weighted_score": 102.0
+      "support_count": 103,
+      "weighted_score": 103.0
     }
   ],
   "version": "1.0"

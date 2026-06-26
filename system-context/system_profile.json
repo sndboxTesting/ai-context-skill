@@ -122,11 +122,11 @@
     }
   ],
   "disk": {
-    "home_free_gb": 649.8,
+    "home_free_gb": 650.6,
     "home_total_gb": 926.4,
-    "home_used_gb": 276.5
+    "home_used_gb": 275.7
   },
-  "generated_at": "2026-06-26T04:48:28.015997-05:00",
+  "generated_at": "2026-06-26T07:48:33.322327-05:00",
   "hardware": {
     "cpu_count": 16,
     "mac_model": "Mac16,5",

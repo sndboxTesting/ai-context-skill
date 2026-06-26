@@ -2027,27 +2027,47 @@
       "notes": "",
       "outcome": "success",
       "timestamp": "2026-06-26T04:50:31.246197-05:00"
+    },
+    {
+      "command": "agent-status",
+      "context": "overnight_test",
+      "exit_code": 0,
+      "intent": "maintenance",
+      "intent_confidence": 0.9,
+      "notes": "",
+      "outcome": "success",
+      "timestamp": "2026-06-26T08:43:47.954763-05:00"
+    },
+    {
+      "command": "next",
+      "context": "overnight_test_loop",
+      "exit_code": 0,
+      "intent": "development",
+      "intent_confidence": 0.65,
+      "notes": "",
+      "outcome": "success",
+      "timestamp": "2026-06-26T08:43:48.276615-05:00"
     }
   ],
   "preferred_workflows": [
     {
-      "count": 101,
+      "count": 102,
       "intent_or_context": "maintenance"
     },
     {
-      "count": 101,
+      "count": 102,
       "intent_or_context": "development"
     }
   ],
   "sequence_patterns": [
     {
       "after": "agent-status",
-      "count": 101,
+      "count": 102,
       "next": "next"
     },
     {
       "after": "next",
-      "count": 100,
+      "count": 101,
       "next": "agent-status"
     }
   ],
@@ -2055,12 +2075,12 @@
     {
       "command": "agent-status",
       "failure_count": 0,
-      "success_count": 101
+      "success_count": 102
     },
     {
       "command": "next",
       "failure_count": 0,
-      "success_count": 101
+      "success_count": 102
     },
     {
       "command": "system-gaps",

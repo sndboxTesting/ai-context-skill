@@ -781,6 +781,20 @@ Run `duplication-guard` to pre-check any proposed file creation or modification:
 - `duplication-guard <file_path> [--intent "description of purpose"]`: Validates that a file's proposed path conforms to canonical location rules and scans `audit/file_graph.json` to reject files with duplicate stems or overlapping functional intents.
 - Use `--force` flag to bypass warnings if intentionally creating a fork (explicit confirmation required).
 
+## Canonical Integrity
+
+To keep the codebase maintainable and free of redundant logic, `SuneelWorkSpace` enforces an internal code integrity standard for modifying existing files.
+
+### Integrity Policies
+- **Duplication vs. Integrity**: While the **Duplication Guard** prevents the creation of duplicate files, the **Canonical Integrity Guard** prevents the introduction of copy-paste function clones, repeated logic blocks, or parallel implementations inside existing core files.
+- **Merge Audits**: All code modifications and merges must enhance code reuse and structure, not degrade it with repeated blocks of code.
+- **Canonical Code Cleanliness**: Canonical scripts and programs must maintain clean definitions. Duplicate function declarations inside the same script are strictly blocked.
+
+### Command Reference
+Run `integrity-guard` before staging or merging edits into any existing file:
+- `integrity-guard <target_file> [--proposed <proposed_content_file>]`: Parses the current code AST and structure (AST-based validation for Python, regex-based validation for Shell/JS) to detect internal duplicates. If duplicate function names or duplicate body logic are detected, it blocks with a Warning.
+- Use `--override-integrity` flag to bypass warnings if a duplicate or fork is explicitly required.
+
 ## 8. How To Extend The System
 
 ### Add A New Tool

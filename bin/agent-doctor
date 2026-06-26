@@ -248,6 +248,22 @@ for p in root.rglob("*"):
         # Don't flag root level markdown files
         if ext != ".md":
             misplaced_scripts.append(str(p))
+            
+    # Check internal duplication in workspace scripts
+    if is_script and not p.is_symlink() and top_dir in subsystem_dirs:
+        try:
+            content = p.read_text(errors="ignore")
+            if ext == ".py":
+                import ast
+                tree = ast.parse(content)
+                seen_names = set()
+                for node in ast.walk(tree):
+                    if isinstance(node, ast.FunctionDef):
+                        if node.name in seen_names:
+                            issue("warning", "internal_script_duplication", f"Script '{p.relative_to(root)}' contains duplicate definition for function '{node.name}' (line {node.lineno}).", p)
+                        seen_names.add(node.name)
+        except Exception:
+            pass
         
     # Check misplaced configs
     is_config = ext in (".json", ".yaml", ".yml", ".toml") and ("config" in filename.lower() or "policy" in filename.lower() or "weights" in filename.lower())
@@ -255,6 +271,7 @@ for p in root.rglob("*"):
         in_config_dir = any(part in ("config", "router", "adaptive", "settings") for part in parts)
         if not in_config_dir and top_dir not in (".agents", ".claude", ".gstack", ".rtk", ".serena"):
             misplaced_configs.append(str(p))
+
 
 if dupes:
     issue("info", "duplicate_instruction_files", "Additional AGENTS.md/CLAUDE.md files exist; inspect before consolidating", None)

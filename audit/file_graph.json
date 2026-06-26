@@ -1,15 +1,15 @@
 {
-  "generated": "2026-06-26T01:19:36.890186",
-  "total_files": 921,
+  "generated": "2026-06-26T01:22:19.363716",
+  "total_files": 923,
   "files": [
     {
       "path": "README.md",
       "type": "doc",
-      "size": 37135,
+      "size": 38439,
       "ext": ".md",
       "subsystem": "root",
-      "modified": "2026-06-26T01:19:13.891395",
-      "hash": "bed5ded1f7f912f25a8d11f3c34fc399"
+      "modified": "2026-06-26T01:22:12.910996",
+      "hash": "b8b5c98369e6345064a940d51a0b7ed6"
     },
     {
       "path": ".gitignore",
@@ -86,11 +86,11 @@
     {
       "path": "agent-system/memory/SESSION_HANDOFF.md",
       "type": "memory",
-      "size": 1878,
+      "size": 2669,
       "ext": ".md",
       "subsystem": "agent-system",
-      "modified": "2026-06-26T01:16:10.816608",
-      "hash": "d9cb4cf04bc5b4dcba9cba06ab9e737f"
+      "modified": "2026-06-26T01:19:57.873109",
+      "hash": "7275997aca360a58695acbc0e82405fa"
     },
     {
       "path": "agent-system/memory/INSIGHTS.md",
@@ -185,11 +185,11 @@
     {
       "path": "agent-system/shared/WORKFLOW_RULES.md",
       "type": "doc",
-      "size": 2324,
+      "size": 2500,
       "ext": ".md",
       "subsystem": "agent-system",
-      "modified": "2026-06-26T01:19:19.793391",
-      "hash": "4e8c8284eacc76189ebbb81597675b35"
+      "modified": "2026-06-26T01:22:16.138886",
+      "hash": "62064be5717b2ab57e1285268033ad51"
     },
     {
       "path": "agent-system/shared/AGENT_SYSTEM.md",
@@ -251,8 +251,8 @@
       "size": 982,
       "ext": ".json",
       "subsystem": "agent-system",
-      "modified": "2026-06-26T01:19:35.384309",
-      "hash": "5d453d56f62a7bf5e161ea62308714ec"
+      "modified": "2026-06-26T01:22:17.347277",
+      "hash": "15fc183aa2a061ced50f11784fc7aa60"
     },
     {
       "path": "agent-system/state/ACTIVE_SESSION.json",
@@ -302,11 +302,11 @@
     {
       "path": "agent-system/logs/MAINTENANCE_LOG.md",
       "type": "log",
-      "size": 19218,
+      "size": 19278,
       "ext": ".md",
       "subsystem": "agent-system",
-      "modified": "2026-06-26T01:19:35.352071",
-      "hash": "ea5cf336826da360b1c9fc9b5273259b"
+      "modified": "2026-06-26T01:22:17.312087",
+      "hash": "6ac1f0dab742df4c58d610a973b1c207"
     },
     {
       "path": "agent-system/logs/SESSION_LOG.md",
@@ -1175,11 +1175,11 @@
     {
       "path": "bin/agent-doctor",
       "type": "script",
-      "size": 13589,
+      "size": 14365,
       "ext": "",
       "subsystem": "bin",
-      "modified": "2026-06-26T01:19:33.569653",
-      "hash": "8f780fdbe3728abc324b8996c43c328f"
+      "modified": "2026-06-26T01:22:05.419772",
+      "hash": "3b5b1f5c36652ae3c42ae609b2043313"
     },
     {
       "path": "bin/comms-report",
@@ -1261,6 +1261,15 @@
       "subsystem": "bin",
       "modified": "2026-06-25T23:26:37.037720",
       "hash": "22c4fcbbb47e0c326a3a43ecba12c959"
+    },
+    {
+      "path": "bin/integrity-guard",
+      "type": "script",
+      "size": 7987,
+      "ext": "",
+      "subsystem": "bin",
+      "modified": "2026-06-26T01:21:47.807151",
+      "hash": "738c2c15fe359af9acf0646775b48407"
     },
     {
       "path": "bin/gstack-verify",
@@ -2546,8 +2555,8 @@
       "size": 178,
       "ext": ".json",
       "subsystem": "mcp",
-      "modified": "2026-06-26T01:19:35.314436",
-      "hash": "fce5a75462cecacd7ddde83aa00ac7ad"
+      "modified": "2026-06-26T01:22:17.239882",
+      "hash": "2d1881a5e923007eb07834c88f3925c9"
     },
     {
       "path": "mcp/server/state/capability_report.json",
@@ -2804,11 +2813,11 @@
     {
       "path": "audit/file_graph.json",
       "type": "data",
-      "size": 294260,
+      "size": 345543,
       "ext": ".json",
       "subsystem": "audit",
-      "modified": "2026-06-26T01:15:31.407358",
-      "hash": "55d37a0bec57b010f83fc076f7528912"
+      "modified": "2026-06-26T01:19:36.893661",
+      "hash": "7542e49ba637b9ab6c790fe32ab09223"
     },
     {
       "path": "audit/duplication_clusters.json",
@@ -2836,6 +2845,15 @@
       "subsystem": "scripts",
       "modified": "2026-06-26T01:19:31.217758",
       "hash": "c3c639f10431b34431af9d4275bceeb4"
+    },
+    {
+      "path": "scripts/integrity_guard.py",
+      "type": "script",
+      "size": 7987,
+      "ext": ".py",
+      "subsystem": "scripts",
+      "modified": "2026-06-26T01:21:47.807151",
+      "hash": "738c2c15fe359af9acf0646775b48407"
     },
     {
       "path": "scripts/system_intelligence.py",
@@ -8295,11 +8313,11 @@
   "subsystem_stats": {
     "root": {
       "count": 485,
-      "total_size": 4401374
+      "total_size": 4402678
     },
     "agent-system": {
       "count": 37,
-      "total_size": 130092
+      "total_size": 131119
     },
     "tools": {
       "count": 2,
@@ -8310,8 +8328,8 @@
       "total_size": 52197
     },
     "bin": {
-      "count": 74,
-      "total_size": 243862
+      "count": 75,
+      "total_size": 252625
     },
     "obsidian-vault": {
       "count": 73,
@@ -8355,15 +8373,15 @@
     },
     "audit": {
       "count": 6,
-      "total_size": 308638
+      "total_size": 359921
     },
     "rtk-config": {
       "count": 1,
       "total_size": 477
     },
     "scripts": {
-      "count": 2,
-      "total_size": 33562
+      "count": 3,
+      "total_size": 41549
     },
     "research-engine": {
       "count": 14,
@@ -9080,6 +9098,10 @@
       ".agent-backups/20260626-011542/workspace-core/bin/agent-status",
       ".agent-backups/20260626-010355/workspace-core/bin/agent-status",
       ".agent-backups/20260626-005629/workspace-core/bin/agent-status"
+    ],
+    "738c2c15fe359af9acf0646775b48407": [
+      "bin/integrity-guard",
+      "scripts/integrity_guard.py"
     ],
     "726756603ae35981683bf3e7f019acc2": [
       "bin/gstack-verify",

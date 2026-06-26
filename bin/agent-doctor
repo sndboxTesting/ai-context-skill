@@ -82,6 +82,10 @@ autolab_scripts = [
     "autolab-revert", "autolab-report", "autolab-frontier",
     "autolab-enqueue", "autolab-watch", "autolab-analyze",
     "autolab-evolve-strategy", "autolab-core",
+    # Phase 8 new commands
+    "autolab-status", "autolab-promote", "autolab-rollback",
+    # Phase 3 prompt versioning
+    "prompt-eval", "prompt-new", "prompt-promote", "prompt-rollback",
 ]
 entrypoints = [
     root / "AGENTS.md",

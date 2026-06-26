@@ -1,0 +1,25 @@
+{
+  "experiment_id": "exp_002",
+  "name": "Anticipation pattern confidence boost",
+  "hypothesis": "Increasing bootstrap pattern confidence from 0.6 to 0.65 will produce more relevant suggestions without overriding learned patterns",
+  "execution_level": "SAFE",
+  "actions": [
+    {
+      "type": "parameter_tune",
+      "target": "anticipation/prediction_memory.json",
+      "description": "Update bootstrap pattern confidence scores from 0.6 to 0.65",
+      "command": "python3 -c \"import json; data=json.load(open('anticipation/prediction_memory.json')); [p.update({'confidence': 0.65}) for p in data.get('patterns', []) if p.get('source') == 'bootstrap' and p.get('confidence', 0) == 0.6]; json.dump(data, open('anticipation/prediction_memory.json', 'w'), indent=2)\""
+    }
+  ],
+  "success_metric": "Anticipation suggestion relevance (manual review score 1-10)",
+  "measurement_command": "echo 'manual_review_required'",
+  "baseline_value": null,
+  "result_value": null,
+  "score_delta": null,
+  "status": "queued",
+  "created_at": "2026-06-26T10:14:08Z",
+  "started_at": null,
+  "completed_at": null,
+  "rollback_path": null,
+  "notes": "Small bounded parameter change — rollback is trivial"
+}

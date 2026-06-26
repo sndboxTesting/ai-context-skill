@@ -1,0 +1,4 @@
+#!/bin/sh
+set -eu
+ROOT="${SUNEEL_WORKSPACE:-$HOME/SuneelWorkSpace}"
+exec "$ROOT/bin/autolab-status" "$@"

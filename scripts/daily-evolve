@@ -14,5 +14,8 @@ BEFORE_SCORE="$BEFORE_SCORE" python3 "$ROOT/automation/evolution_scorer.py" afte
 # Also run MCP auto-discovery to surface new unregistered files
 python3 "$ROOT/mcp/server/scripts/auto_discover.py" --propose 2>/dev/null || true
 
+# Run SAFE-level autolab experiments automatically
+python3 "$ROOT/autolab/runner.py" --safe-only 2>/dev/null || true
+
 python3 "$ROOT/anticipation/prediction_engine.py" record --command daily-evolve --context system --exit-code "$STATUS" 2>/dev/null || true
 exit "$STATUS"

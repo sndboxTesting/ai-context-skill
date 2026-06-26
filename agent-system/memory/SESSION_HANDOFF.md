@@ -4,7 +4,7 @@
 
 Date: 2026-06-26
 
-Summary: Phase 2 complete: dashboard live at localhost:7777
+Summary: Completed Phase 3 prompt evaluation runner/scripts and Phase 8 Autolab runner/evaluator/promotion gate/CLI implementation; fixed doctor warnings; verified doctor healthy and workspace CI 6/6.
 
 Changed:
 

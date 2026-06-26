@@ -1,24 +1,24 @@
 {
-  "generated": "2026-06-26T01:15:31.404425",
-  "total_files": 799,
+  "generated": "2026-06-26T01:19:36.890186",
+  "total_files": 921,
   "files": [
     {
       "path": "README.md",
       "type": "doc",
-      "size": 35751,
+      "size": 37135,
       "ext": ".md",
       "subsystem": "root",
-      "modified": "2026-06-26T01:00:11.965333",
-      "hash": "4a7aa5ec2ee568a3812e2754303fac16"
+      "modified": "2026-06-26T01:19:13.891395",
+      "hash": "bed5ded1f7f912f25a8d11f3c34fc399"
     },
     {
       "path": ".gitignore",
       "type": "script",
-      "size": 559,
+      "size": 577,
       "ext": "",
       "subsystem": "root",
-      "modified": "2026-06-24T22:52:01.272965",
-      "hash": "97722ceb87bf943dad438627b288e064"
+      "modified": "2026-06-26T01:15:51.833922",
+      "hash": "7625d24f7d7fbe1096f3af7c77d0c2f0"
     },
     {
       "path": "opencode.json",
@@ -59,11 +59,11 @@
     {
       "path": "agent-system/tasks/COMPLETED_TASKS.md",
       "type": "task",
-      "size": 2438,
+      "size": 2885,
       "ext": ".md",
       "subsystem": "agent-system",
-      "modified": "2026-06-26T00:51:07.785855",
-      "hash": "2c91a82fcdd8311bafbf718f2ec40623"
+      "modified": "2026-06-26T01:16:07.484379",
+      "hash": "3ab98ad8ee12876c6ea7b2888202602f"
     },
     {
       "path": "agent-system/tasks/TASK_QUEUE.md",
@@ -86,11 +86,11 @@
     {
       "path": "agent-system/memory/SESSION_HANDOFF.md",
       "type": "memory",
-      "size": 1552,
+      "size": 1878,
       "ext": ".md",
       "subsystem": "agent-system",
-      "modified": "2026-06-26T01:04:02.097086",
-      "hash": "9eb91b7a6791daf26b66e9215205c364"
+      "modified": "2026-06-26T01:16:10.816608",
+      "hash": "d9cb4cf04bc5b4dcba9cba06ab9e737f"
     },
     {
       "path": "agent-system/memory/INSIGHTS.md",
@@ -185,11 +185,11 @@
     {
       "path": "agent-system/shared/WORKFLOW_RULES.md",
       "type": "doc",
-      "size": 2169,
+      "size": 2324,
       "ext": ".md",
       "subsystem": "agent-system",
-      "modified": "2026-06-24T15:17:02.078680",
-      "hash": "e03c467259df43401204c361c3c5820a"
+      "modified": "2026-06-26T01:19:19.793391",
+      "hash": "4e8c8284eacc76189ebbb81597675b35"
     },
     {
       "path": "agent-system/shared/AGENT_SYSTEM.md",
@@ -251,8 +251,8 @@
       "size": 982,
       "ext": ".json",
       "subsystem": "agent-system",
-      "modified": "2026-06-26T01:04:00.502270",
-      "hash": "c4582daab22673c658df7cfea75cc5fc"
+      "modified": "2026-06-26T01:19:35.384309",
+      "hash": "5d453d56f62a7bf5e161ea62308714ec"
     },
     {
       "path": "agent-system/state/ACTIVE_SESSION.json",
@@ -278,17 +278,17 @@
       "size": 1976,
       "ext": ".json",
       "subsystem": "agent-system",
-      "modified": "2026-06-26T01:03:56.223693",
-      "hash": "22736912e5292a39e72203d040e17c34"
+      "modified": "2026-06-26T01:15:43.812500",
+      "hash": "3e170baa9b8f229e190afbcb958f14f4"
     },
     {
       "path": "agent-system/state/INDEX.json",
       "type": "state",
-      "size": 32639,
+      "size": 32159,
       "ext": ".json",
       "subsystem": "agent-system",
-      "modified": "2026-06-26T01:03:55.322925",
-      "hash": "cee92e19c5ee221d080f2727f5a53616"
+      "modified": "2026-06-26T01:15:42.629781",
+      "hash": "787c36e233c1e8f3804d19e306182174"
     },
     {
       "path": "agent-system/state/ACTIVE_CONTEXT.json",
@@ -302,11 +302,11 @@
     {
       "path": "agent-system/logs/MAINTENANCE_LOG.md",
       "type": "log",
-      "size": 18867,
+      "size": 19218,
       "ext": ".md",
       "subsystem": "agent-system",
-      "modified": "2026-06-26T01:04:00.465289",
-      "hash": "7766a58e4c7fd967b0d498285abae74f"
+      "modified": "2026-06-26T01:19:35.352071",
+      "hash": "ea5cf336826da360b1c9fc9b5273259b"
     },
     {
       "path": "agent-system/logs/SESSION_LOG.md",
@@ -395,8 +395,8 @@
       "size": 33276,
       "ext": ".json",
       "subsystem": "tools",
-      "modified": "2026-06-26T01:03:59.147744",
-      "hash": "92cb1ee4da28df940dca6bf24202d51d"
+      "modified": "2026-06-26T01:15:44.883555",
+      "hash": "d0313a21246d7d9d92efab80042ec523"
     },
     {
       "path": "tools/recommendations.md",
@@ -404,8 +404,8 @@
       "size": 2025,
       "ext": ".md",
       "subsystem": "tools",
-      "modified": "2026-06-26T01:03:59.148095",
-      "hash": "3ade9678ae3c8f1026118d7a1d4c3474"
+      "modified": "2026-06-26T01:15:44.883899",
+      "hash": "fbe18295259253d4b8f716794df4b32d"
     },
     {
       "path": "identity/README.md",
@@ -1175,11 +1175,11 @@
     {
       "path": "bin/agent-doctor",
       "type": "script",
-      "size": 9772,
+      "size": 13589,
       "ext": "",
       "subsystem": "bin",
-      "modified": "2026-06-25T23:21:47.277619",
-      "hash": "fa1ad2d5a9341ca563b4905231ceeca5"
+      "modified": "2026-06-26T01:19:33.569653",
+      "hash": "8f780fdbe3728abc324b8996c43c328f"
     },
     {
       "path": "bin/comms-report",
@@ -1198,6 +1198,15 @@
       "subsystem": "bin",
       "modified": "2026-06-24T22:49:19.193161",
       "hash": "c7790cbb65a7d1fa53c76dc4764ea869"
+    },
+    {
+      "path": "bin/duplication-guard",
+      "type": "script",
+      "size": 8156,
+      "ext": "",
+      "subsystem": "bin",
+      "modified": "2026-06-26T01:19:31.217758",
+      "hash": "c3c639f10431b34431af9d4275bceeb4"
     },
     {
       "path": "bin/use-claude-imessage",
@@ -2501,7 +2510,7 @@
       "size": 9998,
       "ext": ".json",
       "subsystem": "mcp",
-      "modified": "2026-06-26T01:03:59.148289",
+      "modified": "2026-06-26T01:15:44.884070",
       "hash": "11b8614912229d9270d9a4f5073da270"
     },
     {
@@ -2537,8 +2546,8 @@
       "size": 178,
       "ext": ".json",
       "subsystem": "mcp",
-      "modified": "2026-06-26T01:04:00.397057",
-      "hash": "6e5a49713a8329f6590213332e32d43b"
+      "modified": "2026-06-26T01:19:35.314436",
+      "hash": "fce5a75462cecacd7ddde83aa00ac7ad"
     },
     {
       "path": "mcp/server/state/capability_report.json",
@@ -2606,11 +2615,11 @@
     {
       "path": "mcp/server/logs/mcp_server.log",
       "type": "log",
-      "size": 0,
+      "size": 77,
       "ext": ".log",
       "subsystem": "mcp",
-      "modified": "2026-06-26T00:56:07.192055",
-      "hash": "d41d8cd98f00b204e9800998ecf8427e"
+      "modified": "2026-06-26T01:15:37.345236",
+      "hash": "102a046eece56dac969a86f43ed0e6c9"
     },
     {
       "path": "mcp/server/scripts/mcp-stop",
@@ -2732,11 +2741,11 @@
     {
       "path": "docs/WORKSPACE_MAP.md",
       "type": "doc",
-      "size": 3529,
+      "size": 4147,
       "ext": ".md",
       "subsystem": "docs",
-      "modified": "2026-06-26T00:56:09.598293",
-      "hash": "5ba8d44dc4887b63cfab02c5cd53282c"
+      "modified": "2026-06-26T01:15:36.111688",
+      "hash": "d14b3d0da4980e00630064d0813dd788"
     },
     {
       "path": "docs/GSTACK_INTEGRATION.md",
@@ -2771,17 +2780,17 @@
       "size": 2168,
       "ext": ".md",
       "subsystem": "audit",
-      "modified": "2026-06-26T01:03:59.147961",
-      "hash": "e634a9bb7ceb4f82590dbd0e914f36ca"
+      "modified": "2026-06-26T01:15:44.883758",
+      "hash": "7450e4e9caa8afb536dc8551563129a8"
     },
     {
       "path": "audit/system_audit.md",
       "type": "doc",
-      "size": 3828,
+      "size": 3827,
       "ext": ".md",
       "subsystem": "audit",
-      "modified": "2026-06-26T01:03:59.147885",
-      "hash": "0f9d33f208a7973ebd5fe15063dcd410"
+      "modified": "2026-06-26T01:15:44.883683",
+      "hash": "49c221cd6ec2625c2b03a78cf90b7e99"
     },
     {
       "path": "audit/improvement_plan.md",
@@ -2789,17 +2798,17 @@
       "size": 1509,
       "ext": ".md",
       "subsystem": "audit",
-      "modified": "2026-06-26T01:03:59.148026",
-      "hash": "047c932d5e64741345eb941af9a1eead"
+      "modified": "2026-06-26T01:15:44.883830",
+      "hash": "52ce62e85963d339ddd69b4e7f340e4a"
     },
     {
       "path": "audit/file_graph.json",
       "type": "data",
-      "size": 2393178,
+      "size": 294260,
       "ext": ".json",
       "subsystem": "audit",
-      "modified": "2026-06-26T01:10:42.694782",
-      "hash": null
+      "modified": "2026-06-26T01:15:31.407358",
+      "hash": "55d37a0bec57b010f83fc076f7528912"
     },
     {
       "path": "audit/duplication_clusters.json",
@@ -2818,6 +2827,15 @@
       "subsystem": "rtk-config",
       "modified": "2026-06-24T20:00:31.824827",
       "hash": "0165b9cba01dc2f46de55fdefed2cad9"
+    },
+    {
+      "path": "scripts/duplication_guard.py",
+      "type": "script",
+      "size": 8156,
+      "ext": ".py",
+      "subsystem": "scripts",
+      "modified": "2026-06-26T01:19:31.217758",
+      "hash": "c3c639f10431b34431af9d4275bceeb4"
     },
     {
       "path": "scripts/system_intelligence.py",
@@ -3227,11 +3245,11 @@
     {
       "path": "automation/reports/status-latest.md",
       "type": "doc",
-      "size": 2541,
+      "size": 2234,
       "ext": ".md",
       "subsystem": "automation",
-      "modified": "2026-06-26T01:03:55.346339",
-      "hash": "c7a04911921f4fb7014c1ad1afdf7662"
+      "modified": "2026-06-26T01:15:42.653667",
+      "hash": "3cf1cea37e7a3afe267b34437c15aaae"
     },
     {
       "path": "automation/reports/test-loop-latest.md",
@@ -3374,17 +3392,17 @@
       "size": 1438,
       "ext": ".json",
       "subsystem": "autolab",
-      "modified": "2026-06-26T01:03:55.653087",
-      "hash": "4a9a6efd3a4b064fbdff8626f4974fc6"
+      "modified": "2026-06-26T01:15:42.879868",
+      "hash": "209a498612713ffdb29fce31fe2babf9"
     },
     {
       "path": "autolab/meta/insights.md",
       "type": "memory",
-      "size": 16209,
+      "size": 16510,
       "ext": ".md",
       "subsystem": "autolab",
-      "modified": "2026-06-26T01:03:55.653228",
-      "hash": "add2ebe98f582fbe267bccd94a9896c8"
+      "modified": "2026-06-26T01:15:42.880026",
+      "hash": "7d6fd5c6922f805c20b5d613b7967380"
     },
     {
       "path": "autolab/meta/adaptive_identity_strategy.md",
@@ -3410,8 +3428,8 @@
       "size": 757,
       "ext": ".json",
       "subsystem": "autolab",
-      "modified": "2026-06-26T01:03:55.652922",
-      "hash": "cfb8360f36db27ca0ca0e26fcc2569bf"
+      "modified": "2026-06-26T01:15:42.879666",
+      "hash": "93dc788e19d7edfb0382cff078b05381"
     },
     {
       "path": "autolab/meta/patterns.json",
@@ -3419,17 +3437,17 @@
       "size": 1044,
       "ext": ".json",
       "subsystem": "autolab",
-      "modified": "2026-06-26T01:03:55.652768",
-      "hash": "5c4f15bbe6fc65f9ab03c8a8c20b8851"
+      "modified": "2026-06-26T01:15:42.879477",
+      "hash": "30b19c8d7d4aee85c7a0d0e9318e2c4a"
     },
     {
       "path": "autolab/meta/learning_log.md",
       "type": "log",
-      "size": 15771,
+      "size": 16072,
       "ext": ".md",
       "subsystem": "autolab",
-      "modified": "2026-06-26T01:03:55.653286",
-      "hash": "6d6cd8d8f928e88aec0ca568bb39a998"
+      "modified": "2026-06-26T01:15:42.880082",
+      "hash": "2bf9c9c36fea409785a0ab0697166e40"
     },
     {
       "path": "autolab/meta/system_improvement_strategy.md",
@@ -3473,8 +3491,8 @@
       "size": 1831,
       "ext": ".json",
       "subsystem": "autolab",
-      "modified": "2026-06-26T01:03:55.652131",
-      "hash": "53a273d9c770b59f19aba76e62f15607"
+      "modified": "2026-06-26T01:15:42.878792",
+      "hash": "8540245d3957c14ab03b6f6f7ed1fbd9"
     },
     {
       "path": "autolab/state/frontier.json",
@@ -3644,7 +3662,7 @@
       "size": 156,
       "ext": ".md",
       "subsystem": "autolab",
-      "modified": "2026-06-26T01:03:55.653372",
+      "modified": "2026-06-26T01:15:42.880154",
       "hash": "ef348a2775dd1b9b8003e2bbdde664d2"
     },
     {
@@ -3653,17 +3671,17 @@
       "size": 242,
       "ext": ".md",
       "subsystem": "autolab",
-      "modified": "2026-06-26T01:03:55.653435",
+      "modified": "2026-06-26T01:15:42.880215",
       "hash": "10da164c3ebb73579c1d0f754d704654"
     },
     {
       "path": "autolab/reports/score_history.md",
       "type": "doc",
-      "size": 3292,
+      "size": 3336,
       "ext": ".md",
       "subsystem": "autolab",
-      "modified": "2026-06-26T01:03:55.652452",
-      "hash": "7e4f856aa97a9fdaf066ffbfb4a3e900"
+      "modified": "2026-06-26T01:15:42.879137",
+      "hash": "330af7a306d5cff96fa37149d4f21ca0"
     },
     {
       "path": "autolab/reports/launchd-autolab.err.log",
@@ -3680,8 +3698,8 @@
       "size": 745,
       "ext": ".md",
       "subsystem": "autolab",
-      "modified": "2026-06-26T01:03:55.652369",
-      "hash": "8a3af8167805a65312de2e2e29ec483b"
+      "modified": "2026-06-26T01:15:42.879043",
+      "hash": "1117b6f8642e68120db796a9f815cd48"
     },
     {
       "path": "autolab/reports/what_improved_recently.md",
@@ -3689,7 +3707,7 @@
       "size": 289,
       "ext": ".md",
       "subsystem": "autolab",
-      "modified": "2026-06-26T01:03:55.653574",
+      "modified": "2026-06-26T01:15:42.880332",
       "hash": "fd4f9d30b26d07198ff2a5763d0a4fb1"
     },
     {
@@ -3698,7 +3716,7 @@
       "size": 210,
       "ext": ".md",
       "subsystem": "autolab",
-      "modified": "2026-06-26T01:03:55.653500",
+      "modified": "2026-06-26T01:15:42.880277",
       "hash": "a39eb5de6da92c40721347ff15276546"
     },
     {
@@ -5035,6 +5053,1086 @@
     },
     {
       "path": ".agent-backups/20260626-010016/workspace-core/automation/reports/launchd-maintenance.out.log",
+      "type": "log",
+      "size": 0,
+      "ext": ".log",
+      "subsystem": "root",
+      "modified": "2026-06-26T00:56:07.192387",
+      "hash": "d41d8cd98f00b204e9800998ecf8427e"
+    },
+    {
+      "path": ".agent-backups/20260626-011542/workspace-core/README.md",
+      "type": "doc",
+      "size": 35751,
+      "ext": ".md",
+      "subsystem": "root",
+      "modified": "2026-06-26T01:00:11.965333",
+      "hash": "4a7aa5ec2ee568a3812e2754303fac16"
+    },
+    {
+      "path": ".agent-backups/20260626-011542/workspace-core/.gitignore",
+      "type": "script",
+      "size": 559,
+      "ext": "",
+      "subsystem": "root",
+      "modified": "2026-06-24T22:52:01.272965",
+      "hash": "97722ceb87bf943dad438627b288e064"
+    },
+    {
+      "path": ".agent-backups/20260626-011542/workspace-core/agent-system/tasks/COMPLETED_TASKS.md",
+      "type": "task",
+      "size": 2438,
+      "ext": ".md",
+      "subsystem": "root",
+      "modified": "2026-06-26T00:51:07.785855",
+      "hash": "2c91a82fcdd8311bafbf718f2ec40623"
+    },
+    {
+      "path": ".agent-backups/20260626-011542/workspace-core/agent-system/tasks/TASK_QUEUE.md",
+      "type": "task",
+      "size": 223,
+      "ext": ".md",
+      "subsystem": "root",
+      "modified": "2026-06-24T15:04:48.413975",
+      "hash": "0954f37f96d19abf46284f0a3801a74c"
+    },
+    {
+      "path": ".agent-backups/20260626-011542/workspace-core/agent-system/tasks/ACTIVE_TASKS.md",
+      "type": "task",
+      "size": 368,
+      "ext": ".md",
+      "subsystem": "root",
+      "modified": "2026-06-24T15:10:14.517997",
+      "hash": "3fce6ebd69192dc2fe2820736289fcf1"
+    },
+    {
+      "path": ".agent-backups/20260626-011542/workspace-core/agent-system/memory/SESSION_HANDOFF.md",
+      "type": "memory",
+      "size": 1552,
+      "ext": ".md",
+      "subsystem": "root",
+      "modified": "2026-06-26T01:04:02.097086",
+      "hash": "9eb91b7a6791daf26b66e9215205c364"
+    },
+    {
+      "path": ".agent-backups/20260626-011542/workspace-core/agent-system/memory/INSIGHTS.md",
+      "type": "memory",
+      "size": 1150,
+      "ext": ".md",
+      "subsystem": "root",
+      "modified": "2026-06-26T00:51:07.785581",
+      "hash": "20f3433b8cfe5940f64505ccb182fe61"
+    },
+    {
+      "path": ".agent-backups/20260626-011542/workspace-core/agent-system/memory/PATTERNS.md",
+      "type": "memory",
+      "size": 1612,
+      "ext": ".md",
+      "subsystem": "root",
+      "modified": "2026-06-26T00:51:07.785278",
+      "hash": "c34005c49a8a07a42d9bcaea39b1cc65"
+    },
+    {
+      "path": ".agent-backups/20260626-011542/workspace-core/agent-system/memory/MEMORY.md",
+      "type": "memory",
+      "size": 5798,
+      "ext": ".md",
+      "subsystem": "root",
+      "modified": "2026-06-26T00:51:07.784469",
+      "hash": "af93dc36660e9ab705f31619eeae6af7"
+    },
+    {
+      "path": ".agent-backups/20260626-011542/workspace-core/agent-system/memory/NOTES.md",
+      "type": "memory",
+      "size": 207,
+      "ext": ".md",
+      "subsystem": "root",
+      "modified": "2026-06-24T14:52:54.859181",
+      "hash": "b3a7b71bb689e696bb9523effff5e78b"
+    },
+    {
+      "path": ".agent-backups/20260626-011542/workspace-core/agent-system/memory/DECISIONS.md",
+      "type": "memory",
+      "size": 6678,
+      "ext": ".md",
+      "subsystem": "root",
+      "modified": "2026-06-26T00:51:07.784907",
+      "hash": "6cb1a72238ecd16910a3b9d829959a26"
+    },
+    {
+      "path": ".agent-backups/20260626-011542/workspace-core/agent-system/shared/STARTUP_CHECKLIST.md",
+      "type": "doc",
+      "size": 872,
+      "ext": ".md",
+      "subsystem": "root",
+      "modified": "2026-06-24T15:04:48.413310",
+      "hash": "c32b9ae24f69d50ed8e1edf4be6c1b61"
+    },
+    {
+      "path": ".agent-backups/20260626-011542/workspace-core/agent-system/shared/BOUNDED_SELF_UPGRADE.md",
+      "type": "doc",
+      "size": 1221,
+      "ext": ".md",
+      "subsystem": "root",
+      "modified": "2026-06-25T23:22:21.450230",
+      "hash": "3f5b821d1035460853f68b0c39509677"
+    },
+    {
+      "path": ".agent-backups/20260626-011542/workspace-core/agent-system/shared/IDENTITY.md",
+      "type": "doc",
+      "size": 2441,
+      "ext": ".md",
+      "subsystem": "root",
+      "modified": "2026-06-26T00:12:39.338679",
+      "hash": "2f277089653eba4b12dcf6449723df58"
+    },
+    {
+      "path": ".agent-backups/20260626-011542/workspace-core/agent-system/shared/SAFETY_BOUNDARIES.md",
+      "type": "doc",
+      "size": 1367,
+      "ext": ".md",
+      "subsystem": "root",
+      "modified": "2026-06-24T15:04:48.413113",
+      "hash": "c4122ce21881b90af19cc29963f2e9d0"
+    },
+    {
+      "path": ".agent-backups/20260626-011542/workspace-core/agent-system/shared/SESSION_CLOSEOUT_CHECKLIST.md",
+      "type": "doc",
+      "size": 1010,
+      "ext": ".md",
+      "subsystem": "root",
+      "modified": "2026-06-24T15:17:02.078861",
+      "hash": "505c33908b98bb78052155fc9b7ac80a"
+    },
+    {
+      "path": ".agent-backups/20260626-011542/workspace-core/agent-system/shared/WORKFLOW_RULES.md",
+      "type": "doc",
+      "size": 2169,
+      "ext": ".md",
+      "subsystem": "root",
+      "modified": "2026-06-24T15:17:02.078680",
+      "hash": "e03c467259df43401204c361c3c5820a"
+    },
+    {
+      "path": ".agent-backups/20260626-011542/workspace-core/agent-system/shared/AGENT_SYSTEM.md",
+      "type": "doc",
+      "size": 16683,
+      "ext": ".md",
+      "subsystem": "root",
+      "modified": "2026-06-26T00:49:11.065696",
+      "hash": "8d5d4a8864bccbf04ef03a453f4225a0"
+    },
+    {
+      "path": ".agent-backups/20260626-011542/workspace-core/agent-system/docs/HOW_IT_WORKS.md",
+      "type": "doc",
+      "size": 3623,
+      "ext": ".md",
+      "subsystem": "root",
+      "modified": "2026-06-25T08:43:15.088507",
+      "hash": "a5ebbe62dfbd2df3476c7472f30df57d"
+    },
+    {
+      "path": ".agent-backups/20260626-011542/workspace-core/agent-system/docs/RECOVERY.md",
+      "type": "doc",
+      "size": 1715,
+      "ext": ".md",
+      "subsystem": "root",
+      "modified": "2026-06-24T15:08:04.272121",
+      "hash": "461bd8dfa9bb1f5464d60acff24032d9"
+    },
+    {
+      "path": ".agent-backups/20260626-011542/workspace-core/agent-system/docs/OPERATOR_GUIDE.md",
+      "type": "doc",
+      "size": 1651,
+      "ext": ".md",
+      "subsystem": "root",
+      "modified": "2026-06-25T08:43:18.345326",
+      "hash": "7f11732f53213a48897ad776ac2446f2"
+    },
+    {
+      "path": ".agent-backups/20260626-011542/workspace-core/agent-system/docs/FILE_MAP.md",
+      "type": "doc",
+      "size": 4761,
+      "ext": ".md",
+      "subsystem": "root",
+      "modified": "2026-06-24T15:40:15.909047",
+      "hash": "b3753281d4fb1619fa5fe15d68a64d5d"
+    },
+    {
+      "path": ".agent-backups/20260626-011542/workspace-core/agent-system/docs/AUTOMATION.md",
+      "type": "doc",
+      "size": 3052,
+      "ext": ".md",
+      "subsystem": "root",
+      "modified": "2026-06-24T15:40:15.908873",
+      "hash": "22e7706a4c07552b7c595f9a34551b77"
+    },
+    {
+      "path": ".agent-backups/20260626-011542/workspace-core/agent-system/state/WORKSPACE_HEALTH.json",
+      "type": "state",
+      "size": 982,
+      "ext": ".json",
+      "subsystem": "root",
+      "modified": "2026-06-26T01:15:42.810361",
+      "hash": "ea41b1d53775476a16de1ab4d407075a"
+    },
+    {
+      "path": ".agent-backups/20260626-011542/workspace-core/agent-system/state/ACTIVE_SESSION.json",
+      "type": "state",
+      "size": 106,
+      "ext": ".json",
+      "subsystem": "root",
+      "modified": "2026-06-26T00:54:52.972741",
+      "hash": "2747349f5b6b08573aa104820420a456"
+    },
+    {
+      "path": ".agent-backups/20260626-011542/workspace-core/agent-system/state/LAST_KNOWN_GOOD.json",
+      "type": "state",
+      "size": 259,
+      "ext": ".json",
+      "subsystem": "root",
+      "modified": "2026-06-24T15:19:21.192928",
+      "hash": "d33c4f0ff4ddb8074f42834506f5d4f2"
+    },
+    {
+      "path": ".agent-backups/20260626-011542/workspace-core/agent-system/state/CURRENT_STATE.json",
+      "type": "state",
+      "size": 1976,
+      "ext": ".json",
+      "subsystem": "root",
+      "modified": "2026-06-26T01:03:56.223693",
+      "hash": "22736912e5292a39e72203d040e17c34"
+    },
+    {
+      "path": ".agent-backups/20260626-011542/workspace-core/agent-system/state/INDEX.json",
+      "type": "state",
+      "size": 32159,
+      "ext": ".json",
+      "subsystem": "root",
+      "modified": "2026-06-26T01:15:42.629781",
+      "hash": "787c36e233c1e8f3804d19e306182174"
+    },
+    {
+      "path": ".agent-backups/20260626-011542/workspace-core/agent-system/state/ACTIVE_CONTEXT.json",
+      "type": "state",
+      "size": 290,
+      "ext": ".json",
+      "subsystem": "root",
+      "modified": "2026-06-26T01:03:32.283356",
+      "hash": "c623a44713f5d650acf0a2263e59b6fa"
+    },
+    {
+      "path": ".agent-backups/20260626-011542/workspace-core/agent-system/logs/MAINTENANCE_LOG.md",
+      "type": "log",
+      "size": 18957,
+      "ext": ".md",
+      "subsystem": "root",
+      "modified": "2026-06-26T01:15:42.778999",
+      "hash": "6ccce054d506a6f4820998391098b049"
+    },
+    {
+      "path": ".agent-backups/20260626-011542/workspace-core/agent-system/logs/SESSION_LOG.md",
+      "type": "log",
+      "size": 12061,
+      "ext": ".md",
+      "subsystem": "root",
+      "modified": "2026-06-26T01:04:04.727194",
+      "hash": "11b8f74d22e0be0eb5c610d25183456b"
+    },
+    {
+      "path": ".agent-backups/20260626-011542/workspace-core/agent-system/logs/CHANGE_LOG.md",
+      "type": "log",
+      "size": 676,
+      "ext": ".md",
+      "subsystem": "root",
+      "modified": "2026-06-24T15:41:38.651328",
+      "hash": "0ba19fb380bfc0919f464ddf58ef245b"
+    },
+    {
+      "path": ".agent-backups/20260626-011542/workspace-core/agent-system/logs/archive/server/mcp_server.log.gz",
+      "type": "archive",
+      "size": 249,
+      "ext": ".gz",
+      "subsystem": "root",
+      "modified": "2026-06-26T00:56:07.192016",
+      "hash": "9f96c35738cb010cc45381fe6e2ace25"
+    },
+    {
+      "path": ".agent-backups/20260626-011542/workspace-core/agent-system/logs/archive/automation/launchd-maintenance.out.log.gz",
+      "type": "archive",
+      "size": 78,
+      "ext": ".gz",
+      "subsystem": "root",
+      "modified": "2026-06-26T00:56:07.192363",
+      "hash": "31f7a579b565a96d0ce12f9032071160"
+    },
+    {
+      "path": ".agent-backups/20260626-011542/workspace-core/agent-system/logs/archive/autolab/launchd-autolab.out.log.gz",
+      "type": "archive",
+      "size": 92,
+      "ext": ".gz",
+      "subsystem": "root",
+      "modified": "2026-06-26T00:56:07.192809",
+      "hash": "3ee2303ee21939c9902a408925d65fbb"
+    },
+    {
+      "path": ".agent-backups/20260626-011542/workspace-core/agent-system/templates/TASK_TEMPLATE.md",
+      "type": "task",
+      "size": 96,
+      "ext": ".md",
+      "subsystem": "root",
+      "modified": "2026-06-24T14:52:54.860414",
+      "hash": "276fb2dbf5e896cf512ab6a9f1c4bd4a"
+    },
+    {
+      "path": ".agent-backups/20260626-011542/workspace-core/agent-system/templates/SESSION_SUMMARY_TEMPLATE.md",
+      "type": "doc",
+      "size": 114,
+      "ext": ".md",
+      "subsystem": "root",
+      "modified": "2026-06-24T14:52:54.860197",
+      "hash": "bf43cfde3c36e48c5ac3f1e7791a372e"
+    },
+    {
+      "path": ".agent-backups/20260626-011542/workspace-core/agent-system/templates/STATUS_REPORT_TEMPLATE.md",
+      "type": "doc",
+      "size": 126,
+      "ext": ".md",
+      "subsystem": "root",
+      "modified": "2026-06-24T15:04:48.414834",
+      "hash": "7117574ed0d51adf16f0d81b44ab2534"
+    },
+    {
+      "path": ".agent-backups/20260626-011542/workspace-core/agent-system/templates/DECISION_TEMPLATE.md",
+      "type": "doc",
+      "size": 91,
+      "ext": ".md",
+      "subsystem": "root",
+      "modified": "2026-06-24T14:52:54.860625",
+      "hash": "ece72b86dc8dc37eb609618f0abee6b5"
+    },
+    {
+      "path": ".agent-backups/20260626-011542/workspace-core/bin/workspace-changes",
+      "type": "script",
+      "size": 386,
+      "ext": "",
+      "subsystem": "root",
+      "modified": "2026-06-24T15:07:14.878848",
+      "hash": "84ddd094b7ccadd8f63573e2ff523e46"
+    },
+    {
+      "path": ".agent-backups/20260626-011542/workspace-core/bin/imessage-recent",
+      "type": "script",
+      "size": 125,
+      "ext": "",
+      "subsystem": "root",
+      "modified": "2026-06-24T22:49:19.188744",
+      "hash": "6d1d3e2eb94c33d73a6b4c152b5b9e97"
+    },
+    {
+      "path": ".agent-backups/20260626-011542/workspace-core/bin/install-imessage-plugin",
+      "type": "script",
+      "size": 2132,
+      "ext": "",
+      "subsystem": "root",
+      "modified": "2026-06-24T22:49:19.189209",
+      "hash": "083fbba4e8393b8c763d98ef23f4b54b"
+    },
+    {
+      "path": ".agent-backups/20260626-011542/workspace-core/bin/next",
+      "type": "script",
+      "size": 4356,
+      "ext": "",
+      "subsystem": "root",
+      "modified": "2026-06-26T01:03:51.231570",
+      "hash": "7fe05ad9ce428f3ac5d5f7b0835b5eb8"
+    },
+    {
+      "path": ".agent-backups/20260626-011542/workspace-core/bin/agent-autoclose",
+      "type": "script",
+      "size": 5851,
+      "ext": "",
+      "subsystem": "root",
+      "modified": "2026-06-24T15:15:52.061314",
+      "hash": "a6f279fbe4f8107c7beba19c1d691954"
+    },
+    {
+      "path": ".agent-backups/20260626-011542/workspace-core/bin/imsg-draft",
+      "type": "script",
+      "size": 215,
+      "ext": "",
+      "subsystem": "root",
+      "modified": "2026-06-24T22:49:19.188967",
+      "hash": "f67e62af8c505dca691611ef9f2bb50e"
+    },
+    {
+      "path": ".agent-backups/20260626-011542/workspace-core/bin/mcp-stop",
+      "type": "script",
+      "size": 0,
+      "ext": "",
+      "subsystem": "root",
+      "modified": null,
+      "hash": null
+    },
+    {
+      "path": ".agent-backups/20260626-011542/workspace-core/bin/goal-status",
+      "type": "script",
+      "size": 0,
+      "ext": "",
+      "subsystem": "root",
+      "modified": null,
+      "hash": null
+    },
+    {
+      "path": ".agent-backups/20260626-011542/workspace-core/bin/gstack-repair",
+      "type": "script",
+      "size": 6940,
+      "ext": "",
+      "subsystem": "root",
+      "modified": "2026-06-24T22:52:43.001714",
+      "hash": "523861f64d7e89686f49ef336f42f195"
+    },
+    {
+      "path": ".agent-backups/20260626-011542/workspace-core/bin/use-gemini",
+      "type": "script",
+      "size": 747,
+      "ext": "",
+      "subsystem": "root",
+      "modified": "2026-06-24T22:49:19.189557",
+      "hash": "5e1b26e04c150b0da933554860f94b41"
+    },
+    {
+      "path": ".agent-backups/20260626-011542/workspace-core/bin/gstack-create",
+      "type": "script",
+      "size": 3419,
+      "ext": "",
+      "subsystem": "root",
+      "modified": "2026-06-25T17:50:25.184601",
+      "hash": "2f5df2b530b386503f0497a3fa0740a7"
+    },
+    {
+      "path": ".agent-backups/20260626-011542/workspace-core/bin/mail-recent",
+      "type": "script",
+      "size": 117,
+      "ext": "",
+      "subsystem": "root",
+      "modified": "2026-06-24T22:49:19.189335",
+      "hash": "a8c9a144d630db96511995de98a22523"
+    },
+    {
+      "path": ".agent-backups/20260626-011542/workspace-core/bin/system-gaps",
+      "type": "script",
+      "size": 282,
+      "ext": "",
+      "subsystem": "root",
+      "modified": "2026-06-26T00:32:33.538585",
+      "hash": "020f6b87bd34f66322d32b66d27223e7"
+    },
+    {
+      "path": ".agent-backups/20260626-011542/workspace-core/bin/imsg-send-confirmed",
+      "type": "script",
+      "size": 217,
+      "ext": "",
+      "subsystem": "root",
+      "modified": "2026-06-24T22:49:19.189146",
+      "hash": "adc37397cdb2472910c20a7b1538d616"
+    },
+    {
+      "path": ".agent-backups/20260626-011542/workspace-core/bin/agent-finish",
+      "type": "script",
+      "size": 1534,
+      "ext": "",
+      "subsystem": "root",
+      "modified": "2026-06-24T22:49:19.187944",
+      "hash": "51210f98e88b6bd55fe4cc1b3e6dfe9c"
+    },
+    {
+      "path": ".agent-backups/20260626-011542/workspace-core/bin/comms-doctor",
+      "type": "script",
+      "size": 1157,
+      "ext": "",
+      "subsystem": "root",
+      "modified": "2026-06-24T22:49:19.188325",
+      "hash": "16f6d15e05c4c330adf0d42779c098dd"
+    },
+    {
+      "path": ".agent-backups/20260626-011542/workspace-core/bin/mcp-test",
+      "type": "script",
+      "size": 0,
+      "ext": "",
+      "subsystem": "root",
+      "modified": null,
+      "hash": null
+    },
+    {
+      "path": ".agent-backups/20260626-011542/workspace-core/bin/mcp-status",
+      "type": "script",
+      "size": 0,
+      "ext": "",
+      "subsystem": "root",
+      "modified": null,
+      "hash": null
+    },
+    {
+      "path": ".agent-backups/20260626-011542/workspace-core/bin/mail-search",
+      "type": "script",
+      "size": 117,
+      "ext": "",
+      "subsystem": "root",
+      "modified": "2026-06-24T22:49:19.189384",
+      "hash": "01567505794ee4f58284a39cacc966e2"
+    },
+    {
+      "path": ".agent-backups/20260626-011542/workspace-core/bin/goal-adapt",
+      "type": "script",
+      "size": 0,
+      "ext": "",
+      "subsystem": "root",
+      "modified": null,
+      "hash": null
+    },
+    {
+      "path": ".agent-backups/20260626-011542/workspace-core/bin/system-audit",
+      "type": "script",
+      "size": 284,
+      "ext": "",
+      "subsystem": "root",
+      "modified": "2026-06-26T00:32:33.538346",
+      "hash": "1fa90632ae246a6ca2fe281b8b7687bb"
+    },
+    {
+      "path": ".agent-backups/20260626-011542/workspace-core/bin/use-claude",
+      "type": "script",
+      "size": 517,
+      "ext": "",
+      "subsystem": "root",
+      "modified": "2026-06-24T15:17:23.959797",
+      "hash": "3ef13e732da11ffca9de9630589b0b46"
+    },
+    {
+      "path": ".agent-backups/20260626-011542/workspace-core/bin/anticipate",
+      "type": "script",
+      "size": 120,
+      "ext": "",
+      "subsystem": "root",
+      "modified": "2026-06-26T00:31:57.121286",
+      "hash": "fafac97eadc73c58e64178a18277245f"
+    },
+    {
+      "path": ".agent-backups/20260626-011542/workspace-core/bin/goal-complete",
+      "type": "script",
+      "size": 0,
+      "ext": "",
+      "subsystem": "root",
+      "modified": null,
+      "hash": null
+    },
+    {
+      "path": ".agent-backups/20260626-011542/workspace-core/bin/agent-start",
+      "type": "script",
+      "size": 7800,
+      "ext": "",
+      "subsystem": "root",
+      "modified": "2026-06-26T01:03:46.306053",
+      "hash": "4733d77e3de086b34e12db0f59ebf489"
+    },
+    {
+      "path": ".agent-backups/20260626-011542/workspace-core/bin/comms-status",
+      "type": "script",
+      "size": 684,
+      "ext": "",
+      "subsystem": "root",
+      "modified": "2026-06-24T22:49:19.188532",
+      "hash": "e626d804f2a2c74f327a99fab1530c78"
+    },
+    {
+      "path": ".agent-backups/20260626-011542/workspace-core/bin/mcp-doctor",
+      "type": "script",
+      "size": 0,
+      "ext": "",
+      "subsystem": "root",
+      "modified": null,
+      "hash": null
+    },
+    {
+      "path": ".agent-backups/20260626-011542/workspace-core/bin/workspace-context",
+      "type": "script",
+      "size": 1472,
+      "ext": "",
+      "subsystem": "root",
+      "modified": "2026-06-24T15:07:14.877811",
+      "hash": "d11f45e156646244a6bbad91dd35491f"
+    },
+    {
+      "path": ".agent-backups/20260626-011542/workspace-core/bin/goal-execute",
+      "type": "script",
+      "size": 0,
+      "ext": "",
+      "subsystem": "root",
+      "modified": null,
+      "hash": null
+    },
+    {
+      "path": ".agent-backups/20260626-011542/workspace-core/bin/imessage-send-draft",
+      "type": "script",
+      "size": 573,
+      "ext": "",
+      "subsystem": "root",
+      "modified": "2026-06-26T00:32:46.120316",
+      "hash": "d42feaa8b12875d9a65704ea2f5f6fac"
+    },
+    {
+      "path": ".agent-backups/20260626-011542/workspace-core/bin/imessage-search",
+      "type": "script",
+      "size": 125,
+      "ext": "",
+      "subsystem": "root",
+      "modified": "2026-06-24T22:49:19.188798",
+      "hash": "2ba9d3caa71e9565be9529e627692933"
+    },
+    {
+      "path": ".agent-backups/20260626-011542/workspace-core/bin/agent-repair",
+      "type": "script",
+      "size": 5044,
+      "ext": "",
+      "subsystem": "root",
+      "modified": "2026-06-25T17:50:28.877218",
+      "hash": "855a4b4dd5e0816954f33a36d02787e0"
+    },
+    {
+      "path": ".agent-backups/20260626-011542/workspace-core/bin/idea-start",
+      "type": "script",
+      "size": 290,
+      "ext": "",
+      "subsystem": "root",
+      "modified": "2026-06-26T00:32:33.539490",
+      "hash": "cdfe1376925d9d64e26ad3523846c5e2"
+    },
+    {
+      "path": ".agent-backups/20260626-011542/workspace-core/bin/improve-system",
+      "type": "script",
+      "size": 288,
+      "ext": "",
+      "subsystem": "root",
+      "modified": "2026-06-26T00:32:33.539263",
+      "hash": "e3846e49b1677b615e7725056b84eb4d"
+    },
+    {
+      "path": ".agent-backups/20260626-011542/workspace-core/bin/agent-test-loop",
+      "type": "script",
+      "size": 12794,
+      "ext": "",
+      "subsystem": "root",
+      "modified": "2026-06-24T22:49:19.188262",
+      "hash": "3fdc08934794e91766a34b5da3ff0b68"
+    },
+    {
+      "path": ".agent-backups/20260626-011542/workspace-core/bin/goal-monitor",
+      "type": "script",
+      "size": 0,
+      "ext": "",
+      "subsystem": "root",
+      "modified": null,
+      "hash": null
+    },
+    {
+      "path": ".agent-backups/20260626-011542/workspace-core/bin/system-recommend",
+      "type": "script",
+      "size": 292,
+      "ext": "",
+      "subsystem": "root",
+      "modified": "2026-06-26T00:32:33.539035",
+      "hash": "5733c91f3e8876e26a782b61d5577aad"
+    },
+    {
+      "path": ".agent-backups/20260626-011542/workspace-core/bin/identity-accept",
+      "type": "script",
+      "size": 132,
+      "ext": "",
+      "subsystem": "root",
+      "modified": "2026-06-26T00:20:28.442594",
+      "hash": "dc1f883d71f9c813d287baf092072ed9"
+    },
+    {
+      "path": ".agent-backups/20260626-011542/workspace-core/bin/imessage-status",
+      "type": "script",
+      "size": 125,
+      "ext": "",
+      "subsystem": "root",
+      "modified": "2026-06-24T22:49:19.188902",
+      "hash": "2f7978a3fe3b7cc96344cd01aa730cd6"
+    },
+    {
+      "path": ".agent-backups/20260626-011542/workspace-core/bin/route-execute",
+      "type": "script",
+      "size": 0,
+      "ext": "",
+      "subsystem": "root",
+      "modified": null,
+      "hash": null
+    },
+    {
+      "path": ".agent-backups/20260626-011542/workspace-core/bin/idea-run",
+      "type": "script",
+      "size": 284,
+      "ext": "",
+      "subsystem": "root",
+      "modified": "2026-06-26T00:32:33.539676",
+      "hash": "aae82da174ab5d34f31a47da9316231a"
+    },
+    {
+      "path": ".agent-backups/20260626-011542/workspace-core/bin/route-task",
+      "type": "script",
+      "size": 0,
+      "ext": "",
+      "subsystem": "root",
+      "modified": null,
+      "hash": null
+    },
+    {
+      "path": ".agent-backups/20260626-011542/workspace-core/bin/comms-permissions-check",
+      "type": "script",
+      "size": 243,
+      "ext": "",
+      "subsystem": "root",
+      "modified": "2026-06-24T22:49:19.188392",
+      "hash": "294608b9e8e0beebcd81d9cc87269821"
+    },
+    {
+      "path": ".agent-backups/20260626-011542/workspace-core/bin/workflow-audit",
+      "type": "script",
+      "size": 7160,
+      "ext": "",
+      "subsystem": "root",
+      "modified": "2026-06-25T17:48:25.409905",
+      "hash": "5f5d62c93fc523a618b90dc4eccd4857"
+    },
+    {
+      "path": ".agent-backups/20260626-011542/workspace-core/bin/context-reset",
+      "type": "script",
+      "size": 2840,
+      "ext": "",
+      "subsystem": "root",
+      "modified": "2026-06-26T01:00:06.854146",
+      "hash": "ea18f87ccb8b6d3317b082920e9c8a44"
+    },
+    {
+      "path": ".agent-backups/20260626-011542/workspace-core/bin/identity-reject",
+      "type": "script",
+      "size": 132,
+      "ext": "",
+      "subsystem": "root",
+      "modified": "2026-06-26T00:20:28.442775",
+      "hash": "7c3dfe19b71b983ba6b746c551f1a5e0"
+    },
+    {
+      "path": ".agent-backups/20260626-011542/workspace-core/bin/imsg-recent",
+      "type": "script",
+      "size": 125,
+      "ext": "",
+      "subsystem": "root",
+      "modified": "2026-06-24T22:49:19.189029",
+      "hash": "6d1d3e2eb94c33d73a6b4c152b5b9e97"
+    },
+    {
+      "path": ".agent-backups/20260626-011542/workspace-core/bin/workspace-index",
+      "type": "script",
+      "size": 2164,
+      "ext": "",
+      "subsystem": "root",
+      "modified": "2026-06-24T15:09:29.431706",
+      "hash": "f5d3b021fe9d7490a687f9ff95b7d772"
+    },
+    {
+      "path": ".agent-backups/20260626-011542/workspace-core/bin/mcp-reindex",
+      "type": "script",
+      "size": 0,
+      "ext": "",
+      "subsystem": "root",
+      "modified": null,
+      "hash": null
+    },
+    {
+      "path": ".agent-backups/20260626-011542/workspace-core/bin/goal-fail",
+      "type": "script",
+      "size": 0,
+      "ext": "",
+      "subsystem": "root",
+      "modified": null,
+      "hash": null
+    },
+    {
+      "path": ".agent-backups/20260626-011542/workspace-core/bin/use-codex",
+      "type": "script",
+      "size": 504,
+      "ext": "",
+      "subsystem": "root",
+      "modified": "2026-06-24T15:17:23.959556",
+      "hash": "cb82881046fe718c3fdd41e3184cd9c4"
+    },
+    {
+      "path": ".agent-backups/20260626-011542/workspace-core/bin/goal-create",
+      "type": "script",
+      "size": 0,
+      "ext": "",
+      "subsystem": "root",
+      "modified": null,
+      "hash": null
+    },
+    {
+      "path": ".agent-backups/20260626-011542/workspace-core/bin/system-capabilities",
+      "type": "script",
+      "size": 298,
+      "ext": "",
+      "subsystem": "root",
+      "modified": "2026-06-26T00:32:33.538815",
+      "hash": "615cbfd8bde3a10fac4a42f54fb939ef"
+    },
+    {
+      "path": ".agent-backups/20260626-011542/workspace-core/bin/identity-adjust",
+      "type": "script",
+      "size": 132,
+      "ext": "",
+      "subsystem": "root",
+      "modified": "2026-06-26T00:20:28.442960",
+      "hash": "e39f73cda2702ef9121848c7cad3a2a9"
+    },
+    {
+      "path": ".agent-backups/20260626-011542/workspace-core/bin/use-opencode-gemini",
+      "type": "script",
+      "size": 638,
+      "ext": "",
+      "subsystem": "root",
+      "modified": "2026-06-24T22:49:19.189686",
+      "hash": "77a79dfb52fef027d42615bd4d198869"
+    },
+    {
+      "path": ".agent-backups/20260626-011542/workspace-core/bin/mail-status",
+      "type": "script",
+      "size": 117,
+      "ext": "",
+      "subsystem": "root",
+      "modified": "2026-06-24T22:49:19.189434",
+      "hash": "27febd338a68f26e18dcce964b6213d1"
+    },
+    {
+      "path": ".agent-backups/20260626-011542/workspace-core/bin/agent-maintain",
+      "type": "script",
+      "size": 6988,
+      "ext": "",
+      "subsystem": "root",
+      "modified": "2026-06-25T23:21:47.278060",
+      "hash": "52719c33caba0eea7ff53c10add05c85"
+    },
+    {
+      "path": ".agent-backups/20260626-011542/workspace-core/bin/route-learn",
+      "type": "script",
+      "size": 0,
+      "ext": "",
+      "subsystem": "root",
+      "modified": null,
+      "hash": null
+    },
+    {
+      "path": ".agent-backups/20260626-011542/workspace-core/bin/use-opencode",
+      "type": "script",
+      "size": 864,
+      "ext": "",
+      "subsystem": "root",
+      "modified": "2026-06-24T22:49:19.189626",
+      "hash": "74798661b817997c2b5bb6a95f059778"
+    },
+    {
+      "path": ".agent-backups/20260626-011542/workspace-core/bin/mcp-start",
+      "type": "script",
+      "size": 0,
+      "ext": "",
+      "subsystem": "root",
+      "modified": null,
+      "hash": null
+    },
+    {
+      "path": ".agent-backups/20260626-011542/workspace-core/bin/agent-doctor",
+      "type": "script",
+      "size": 9772,
+      "ext": "",
+      "subsystem": "root",
+      "modified": "2026-06-25T23:21:47.277619",
+      "hash": "fa1ad2d5a9341ca563b4905231ceeca5"
+    },
+    {
+      "path": ".agent-backups/20260626-011542/workspace-core/bin/comms-report",
+      "type": "script",
+      "size": 2924,
+      "ext": "",
+      "subsystem": "root",
+      "modified": "2026-06-24T22:49:19.188457",
+      "hash": "80539e709070fa070c3f4a04c74f70ec"
+    },
+    {
+      "path": ".agent-backups/20260626-011542/workspace-core/bin/mcp-repair",
+      "type": "script",
+      "size": 0,
+      "ext": "",
+      "subsystem": "root",
+      "modified": null,
+      "hash": null
+    },
+    {
+      "path": ".agent-backups/20260626-011542/workspace-core/bin/use-claude-imessage",
+      "type": "script",
+      "size": 1210,
+      "ext": "",
+      "subsystem": "root",
+      "modified": "2026-06-24T22:49:19.189497",
+      "hash": "beaa40fff688b1acf052d446e8199575"
+    },
+    {
+      "path": ".agent-backups/20260626-011542/workspace-core/bin/mail-draft-reply",
+      "type": "script",
+      "size": 551,
+      "ext": "",
+      "subsystem": "root",
+      "modified": "2026-06-26T00:32:46.120105",
+      "hash": "5dfee08a3754df770981392ea0d428fa"
+    },
+    {
+      "path": ".agent-backups/20260626-011542/workspace-core/bin/goal-plan",
+      "type": "script",
+      "size": 0,
+      "ext": "",
+      "subsystem": "root",
+      "modified": null,
+      "hash": null
+    },
+    {
+      "path": ".agent-backups/20260626-011542/workspace-core/bin/imsg-search",
+      "type": "script",
+      "size": 125,
+      "ext": "",
+      "subsystem": "root",
+      "modified": "2026-06-24T22:49:19.189087",
+      "hash": "2ba9d3caa71e9565be9529e627692933"
+    },
+    {
+      "path": ".agent-backups/20260626-011542/workspace-core/bin/workspace-backup",
+      "type": "script",
+      "size": 507,
+      "ext": "",
+      "subsystem": "root",
+      "modified": "2026-06-24T15:07:14.878642",
+      "hash": "fe0f5914677bf5b1acc665ba9a1f46fb"
+    },
+    {
+      "path": ".agent-backups/20260626-011542/workspace-core/bin/agent-status",
+      "type": "script",
+      "size": 5969,
+      "ext": "",
+      "subsystem": "root",
+      "modified": "2026-06-25T23:26:37.037720",
+      "hash": "22c4fcbbb47e0c326a3a43ecba12c959"
+    },
+    {
+      "path": ".agent-backups/20260626-011542/workspace-core/bin/gstack-verify",
+      "type": "script",
+      "size": 4686,
+      "ext": "",
+      "subsystem": "root",
+      "modified": "2026-06-24T22:52:48.748450",
+      "hash": "726756603ae35981683bf3e7f019acc2"
+    },
+    {
+      "path": ".agent-backups/20260626-011542/workspace-core/bin/mcp-report",
+      "type": "script",
+      "size": 0,
+      "ext": "",
+      "subsystem": "root",
+      "modified": null,
+      "hash": null
+    },
+    {
+      "path": ".agent-backups/20260626-011542/workspace-core/bin/workspace-report",
+      "type": "script",
+      "size": 1606,
+      "ext": "",
+      "subsystem": "root",
+      "modified": "2026-06-24T15:07:14.878757",
+      "hash": "065aa24c0640b0477943601e69b3d954"
+    },
+    {
+      "path": ".agent-backups/20260626-011542/workspace-core/bin/route-analyze",
+      "type": "script",
+      "size": 0,
+      "ext": "",
+      "subsystem": "root",
+      "modified": null,
+      "hash": null
+    },
+    {
+      "path": ".agent-backups/20260626-011542/workspace-core/automation/hooks/shell-reminder.zsh",
+      "type": "script",
+      "size": 1411,
+      "ext": ".zsh",
+      "subsystem": "root",
+      "modified": "2026-06-24T15:19:50.267964",
+      "hash": "e959b3352d144c0eefe4c0b622719589"
+    },
+    {
+      "path": ".agent-backups/20260626-011542/workspace-core/automation/launchd/com.suneelworkspace.autolab.plist",
+      "type": "other",
+      "size": 779,
+      "ext": ".plist",
+      "subsystem": "root",
+      "modified": "2026-06-24T15:27:38.950867",
+      "hash": "9e8f9467dd258be3c20f62eb56c0cb1b"
+    },
+    {
+      "path": ".agent-backups/20260626-011542/workspace-core/automation/launchd/com.suneelworkspace.maintenance.plist",
+      "type": "other",
+      "size": 784,
+      "ext": ".plist",
+      "subsystem": "root",
+      "modified": "2026-06-24T15:08:18.118926",
+      "hash": "d12c9c9fbc6b909b0b4774e27480b73d"
+    },
+    {
+      "path": ".agent-backups/20260626-011542/workspace-core/automation/maintenance/common.sh",
+      "type": "script",
+      "size": 1789,
+      "ext": ".sh",
+      "subsystem": "root",
+      "modified": "2026-06-24T15:07:14.876797",
+      "hash": "be7dee17971ef971b1e25d3530b5a4b7"
+    },
+    {
+      "path": ".agent-backups/20260626-011542/workspace-core/automation/reports/launchd-maintenance.err.log",
+      "type": "log",
+      "size": 0,
+      "ext": ".log",
+      "subsystem": "root",
+      "modified": "2026-06-24T15:08:58.710722",
+      "hash": "d41d8cd98f00b204e9800998ecf8427e"
+    },
+    {
+      "path": ".agent-backups/20260626-011542/workspace-core/automation/reports/status-latest.md",
+      "type": "doc",
+      "size": 2234,
+      "ext": ".md",
+      "subsystem": "root",
+      "modified": "2026-06-26T01:15:42.653667",
+      "hash": "3cf1cea37e7a3afe267b34437c15aaae"
+    },
+    {
+      "path": ".agent-backups/20260626-011542/workspace-core/automation/reports/test-loop-latest.md",
+      "type": "doc",
+      "size": 1067,
+      "ext": ".md",
+      "subsystem": "root",
+      "modified": "2026-06-25T17:53:47.107637",
+      "hash": "a98613fb408e9bcd67a02da7120f98a2"
+    },
+    {
+      "path": ".agent-backups/20260626-011542/workspace-core/automation/reports/launchd-maintenance.out.log",
       "type": "log",
       "size": 0,
       "ext": ".log",
@@ -7187,21 +8285,21 @@
     {
       "path": "system-context/system_profile.json",
       "type": "state",
-      "size": 9048,
+      "size": 9047,
       "ext": ".json",
       "subsystem": "system-context",
-      "modified": "2026-06-26T01:03:59.147319",
-      "hash": "6a2a164f9d1d16553a576c3a7a990b5b"
+      "modified": "2026-06-26T01:15:44.883144",
+      "hash": "3329a65e03468286eaba123abf1b4b9f"
     }
   ],
   "subsystem_stats": {
     "root": {
-      "count": 365,
-      "total_size": 4118721
+      "count": 485,
+      "total_size": 4401374
     },
     "agent-system": {
       "count": 37,
-      "total_size": 129293
+      "total_size": 130092
     },
     "tools": {
       "count": 2,
@@ -7212,8 +8310,8 @@
       "total_size": 52197
     },
     "bin": {
-      "count": 73,
-      "total_size": 231889
+      "count": 74,
+      "total_size": 243862
     },
     "obsidian-vault": {
       "count": 73,
@@ -7249,23 +8347,23 @@
     },
     "mcp": {
       "count": 30,
-      "total_size": 1012374
+      "total_size": 1012451
     },
     "docs": {
       "count": 3,
-      "total_size": 15056
+      "total_size": 15674
     },
     "audit": {
       "count": 6,
-      "total_size": 2407557
+      "total_size": 308638
     },
     "rtk-config": {
       "count": 1,
       "total_size": 477
     },
     "scripts": {
-      "count": 1,
-      "total_size": 25406
+      "count": 2,
+      "total_size": 33562
     },
     "research-engine": {
       "count": 14,
@@ -7277,11 +8375,11 @@
     },
     "automation": {
       "count": 8,
-      "total_size": 8371
+      "total_size": 8064
     },
     "autolab": {
       "count": 50,
-      "total_size": 467547
+      "total_size": 468193
     },
     "vscode-config": {
       "count": 1,
@@ -7297,214 +8395,225 @@
     },
     "system-context": {
       "count": 1,
-      "total_size": 9048
+      "total_size": 9047
     }
   },
   "exact_duplicates": {
-    "4a7aa5ec2ee568a3812e2754303fac16": [
-      "README.md",
-      ".agent-backups/20260626-010016/workspace-core/README.md",
-      ".agent-backups/20260626-010355/workspace-core/README.md"
-    ],
-    "97722ceb87bf943dad438627b288e064": [
-      ".gitignore",
-      ".agent-backups/20260626-010016/workspace-core/.gitignore",
-      ".agent-backups/20260626-010355/workspace-core/.gitignore",
-      ".agent-backups/20260626-005629/workspace-core/.gitignore"
-    ],
     "8d5d4a8864bccbf04ef03a453f4225a0": [
       "AGENTS.md",
       "CLAUDE.md",
       "agent-system/shared/AGENT_SYSTEM.md",
       ".agent-backups/20260626-010016/workspace-core/agent-system/shared/AGENT_SYSTEM.md",
+      ".agent-backups/20260626-011542/workspace-core/agent-system/shared/AGENT_SYSTEM.md",
       ".agent-backups/20260626-010355/workspace-core/agent-system/shared/AGENT_SYSTEM.md",
       ".agent-backups/20260626-005629/workspace-core/agent-system/shared/AGENT_SYSTEM.md"
-    ],
-    "2c91a82fcdd8311bafbf718f2ec40623": [
-      "agent-system/tasks/COMPLETED_TASKS.md",
-      ".agent-backups/20260626-010016/workspace-core/agent-system/tasks/COMPLETED_TASKS.md",
-      ".agent-backups/20260626-010355/workspace-core/agent-system/tasks/COMPLETED_TASKS.md",
-      ".agent-backups/20260626-005629/workspace-core/agent-system/tasks/COMPLETED_TASKS.md"
     ],
     "0954f37f96d19abf46284f0a3801a74c": [
       "agent-system/tasks/TASK_QUEUE.md",
       ".agent-backups/20260626-010016/workspace-core/agent-system/tasks/TASK_QUEUE.md",
+      ".agent-backups/20260626-011542/workspace-core/agent-system/tasks/TASK_QUEUE.md",
       ".agent-backups/20260626-010355/workspace-core/agent-system/tasks/TASK_QUEUE.md",
       ".agent-backups/20260626-005629/workspace-core/agent-system/tasks/TASK_QUEUE.md"
     ],
     "3fce6ebd69192dc2fe2820736289fcf1": [
       "agent-system/tasks/ACTIVE_TASKS.md",
       ".agent-backups/20260626-010016/workspace-core/agent-system/tasks/ACTIVE_TASKS.md",
+      ".agent-backups/20260626-011542/workspace-core/agent-system/tasks/ACTIVE_TASKS.md",
       ".agent-backups/20260626-010355/workspace-core/agent-system/tasks/ACTIVE_TASKS.md",
       ".agent-backups/20260626-005629/workspace-core/agent-system/tasks/ACTIVE_TASKS.md"
     ],
     "20f3433b8cfe5940f64505ccb182fe61": [
       "agent-system/memory/INSIGHTS.md",
       ".agent-backups/20260626-010016/workspace-core/agent-system/memory/INSIGHTS.md",
+      ".agent-backups/20260626-011542/workspace-core/agent-system/memory/INSIGHTS.md",
       ".agent-backups/20260626-010355/workspace-core/agent-system/memory/INSIGHTS.md",
       ".agent-backups/20260626-005629/workspace-core/agent-system/memory/INSIGHTS.md"
     ],
     "c34005c49a8a07a42d9bcaea39b1cc65": [
       "agent-system/memory/PATTERNS.md",
       ".agent-backups/20260626-010016/workspace-core/agent-system/memory/PATTERNS.md",
+      ".agent-backups/20260626-011542/workspace-core/agent-system/memory/PATTERNS.md",
       ".agent-backups/20260626-010355/workspace-core/agent-system/memory/PATTERNS.md",
       ".agent-backups/20260626-005629/workspace-core/agent-system/memory/PATTERNS.md"
     ],
     "af93dc36660e9ab705f31619eeae6af7": [
       "agent-system/memory/MEMORY.md",
       ".agent-backups/20260626-010016/workspace-core/agent-system/memory/MEMORY.md",
+      ".agent-backups/20260626-011542/workspace-core/agent-system/memory/MEMORY.md",
       ".agent-backups/20260626-010355/workspace-core/agent-system/memory/MEMORY.md",
       ".agent-backups/20260626-005629/workspace-core/agent-system/memory/MEMORY.md"
     ],
     "b3a7b71bb689e696bb9523effff5e78b": [
       "agent-system/memory/NOTES.md",
       ".agent-backups/20260626-010016/workspace-core/agent-system/memory/NOTES.md",
+      ".agent-backups/20260626-011542/workspace-core/agent-system/memory/NOTES.md",
       ".agent-backups/20260626-010355/workspace-core/agent-system/memory/NOTES.md",
       ".agent-backups/20260626-005629/workspace-core/agent-system/memory/NOTES.md"
     ],
     "6cb1a72238ecd16910a3b9d829959a26": [
       "agent-system/memory/DECISIONS.md",
       ".agent-backups/20260626-010016/workspace-core/agent-system/memory/DECISIONS.md",
+      ".agent-backups/20260626-011542/workspace-core/agent-system/memory/DECISIONS.md",
       ".agent-backups/20260626-010355/workspace-core/agent-system/memory/DECISIONS.md",
       ".agent-backups/20260626-005629/workspace-core/agent-system/memory/DECISIONS.md"
     ],
     "c32b9ae24f69d50ed8e1edf4be6c1b61": [
       "agent-system/shared/STARTUP_CHECKLIST.md",
       ".agent-backups/20260626-010016/workspace-core/agent-system/shared/STARTUP_CHECKLIST.md",
+      ".agent-backups/20260626-011542/workspace-core/agent-system/shared/STARTUP_CHECKLIST.md",
       ".agent-backups/20260626-010355/workspace-core/agent-system/shared/STARTUP_CHECKLIST.md",
       ".agent-backups/20260626-005629/workspace-core/agent-system/shared/STARTUP_CHECKLIST.md"
     ],
     "3f5b821d1035460853f68b0c39509677": [
       "agent-system/shared/BOUNDED_SELF_UPGRADE.md",
       ".agent-backups/20260626-010016/workspace-core/agent-system/shared/BOUNDED_SELF_UPGRADE.md",
+      ".agent-backups/20260626-011542/workspace-core/agent-system/shared/BOUNDED_SELF_UPGRADE.md",
       ".agent-backups/20260626-010355/workspace-core/agent-system/shared/BOUNDED_SELF_UPGRADE.md",
       ".agent-backups/20260626-005629/workspace-core/agent-system/shared/BOUNDED_SELF_UPGRADE.md"
     ],
     "2f277089653eba4b12dcf6449723df58": [
       "agent-system/shared/IDENTITY.md",
       ".agent-backups/20260626-010016/workspace-core/agent-system/shared/IDENTITY.md",
+      ".agent-backups/20260626-011542/workspace-core/agent-system/shared/IDENTITY.md",
       ".agent-backups/20260626-010355/workspace-core/agent-system/shared/IDENTITY.md",
       ".agent-backups/20260626-005629/workspace-core/agent-system/shared/IDENTITY.md"
     ],
     "c4122ce21881b90af19cc29963f2e9d0": [
       "agent-system/shared/SAFETY_BOUNDARIES.md",
       ".agent-backups/20260626-010016/workspace-core/agent-system/shared/SAFETY_BOUNDARIES.md",
+      ".agent-backups/20260626-011542/workspace-core/agent-system/shared/SAFETY_BOUNDARIES.md",
       ".agent-backups/20260626-010355/workspace-core/agent-system/shared/SAFETY_BOUNDARIES.md",
       ".agent-backups/20260626-005629/workspace-core/agent-system/shared/SAFETY_BOUNDARIES.md"
     ],
     "505c33908b98bb78052155fc9b7ac80a": [
       "agent-system/shared/SESSION_CLOSEOUT_CHECKLIST.md",
       ".agent-backups/20260626-010016/workspace-core/agent-system/shared/SESSION_CLOSEOUT_CHECKLIST.md",
+      ".agent-backups/20260626-011542/workspace-core/agent-system/shared/SESSION_CLOSEOUT_CHECKLIST.md",
       ".agent-backups/20260626-010355/workspace-core/agent-system/shared/SESSION_CLOSEOUT_CHECKLIST.md",
       ".agent-backups/20260626-005629/workspace-core/agent-system/shared/SESSION_CLOSEOUT_CHECKLIST.md"
-    ],
-    "e03c467259df43401204c361c3c5820a": [
-      "agent-system/shared/WORKFLOW_RULES.md",
-      ".agent-backups/20260626-010016/workspace-core/agent-system/shared/WORKFLOW_RULES.md",
-      ".agent-backups/20260626-010355/workspace-core/agent-system/shared/WORKFLOW_RULES.md",
-      ".agent-backups/20260626-005629/workspace-core/agent-system/shared/WORKFLOW_RULES.md"
     ],
     "a5ebbe62dfbd2df3476c7472f30df57d": [
       "agent-system/docs/HOW_IT_WORKS.md",
       ".agent-backups/20260626-010016/workspace-core/agent-system/docs/HOW_IT_WORKS.md",
+      ".agent-backups/20260626-011542/workspace-core/agent-system/docs/HOW_IT_WORKS.md",
       ".agent-backups/20260626-010355/workspace-core/agent-system/docs/HOW_IT_WORKS.md",
       ".agent-backups/20260626-005629/workspace-core/agent-system/docs/HOW_IT_WORKS.md"
     ],
     "461bd8dfa9bb1f5464d60acff24032d9": [
       "agent-system/docs/RECOVERY.md",
       ".agent-backups/20260626-010016/workspace-core/agent-system/docs/RECOVERY.md",
+      ".agent-backups/20260626-011542/workspace-core/agent-system/docs/RECOVERY.md",
       ".agent-backups/20260626-010355/workspace-core/agent-system/docs/RECOVERY.md",
       ".agent-backups/20260626-005629/workspace-core/agent-system/docs/RECOVERY.md"
     ],
     "7f11732f53213a48897ad776ac2446f2": [
       "agent-system/docs/OPERATOR_GUIDE.md",
       ".agent-backups/20260626-010016/workspace-core/agent-system/docs/OPERATOR_GUIDE.md",
+      ".agent-backups/20260626-011542/workspace-core/agent-system/docs/OPERATOR_GUIDE.md",
       ".agent-backups/20260626-010355/workspace-core/agent-system/docs/OPERATOR_GUIDE.md",
       ".agent-backups/20260626-005629/workspace-core/agent-system/docs/OPERATOR_GUIDE.md"
     ],
     "b3753281d4fb1619fa5fe15d68a64d5d": [
       "agent-system/docs/FILE_MAP.md",
       ".agent-backups/20260626-010016/workspace-core/agent-system/docs/FILE_MAP.md",
+      ".agent-backups/20260626-011542/workspace-core/agent-system/docs/FILE_MAP.md",
       ".agent-backups/20260626-010355/workspace-core/agent-system/docs/FILE_MAP.md",
       ".agent-backups/20260626-005629/workspace-core/agent-system/docs/FILE_MAP.md"
     ],
     "22e7706a4c07552b7c595f9a34551b77": [
       "agent-system/docs/AUTOMATION.md",
       ".agent-backups/20260626-010016/workspace-core/agent-system/docs/AUTOMATION.md",
+      ".agent-backups/20260626-011542/workspace-core/agent-system/docs/AUTOMATION.md",
       ".agent-backups/20260626-010355/workspace-core/agent-system/docs/AUTOMATION.md",
       ".agent-backups/20260626-005629/workspace-core/agent-system/docs/AUTOMATION.md"
     ],
     "2747349f5b6b08573aa104820420a456": [
       "agent-system/state/ACTIVE_SESSION.json",
       ".agent-backups/20260626-010016/workspace-core/agent-system/state/ACTIVE_SESSION.json",
+      ".agent-backups/20260626-011542/workspace-core/agent-system/state/ACTIVE_SESSION.json",
       ".agent-backups/20260626-010355/workspace-core/agent-system/state/ACTIVE_SESSION.json",
       ".agent-backups/20260626-005629/workspace-core/agent-system/state/ACTIVE_SESSION.json"
     ],
     "d33c4f0ff4ddb8074f42834506f5d4f2": [
       "agent-system/state/LAST_KNOWN_GOOD.json",
       ".agent-backups/20260626-010016/workspace-core/agent-system/state/LAST_KNOWN_GOOD.json",
+      ".agent-backups/20260626-011542/workspace-core/agent-system/state/LAST_KNOWN_GOOD.json",
       ".agent-backups/20260626-010355/workspace-core/agent-system/state/LAST_KNOWN_GOOD.json",
       ".agent-backups/20260626-005629/workspace-core/agent-system/state/LAST_KNOWN_GOOD.json"
     ],
-    "cee92e19c5ee221d080f2727f5a53616": [
+    "787c36e233c1e8f3804d19e306182174": [
       "agent-system/state/INDEX.json",
-      ".agent-backups/20260626-010355/workspace-core/agent-system/state/INDEX.json"
+      ".agent-backups/20260626-011542/workspace-core/agent-system/state/INDEX.json"
     ],
     "c623a44713f5d650acf0a2263e59b6fa": [
       "agent-system/state/ACTIVE_CONTEXT.json",
+      ".agent-backups/20260626-011542/workspace-core/agent-system/state/ACTIVE_CONTEXT.json",
       ".agent-backups/20260626-010355/workspace-core/agent-system/state/ACTIVE_CONTEXT.json"
+    ],
+    "11b8f74d22e0be0eb5c610d25183456b": [
+      "agent-system/logs/SESSION_LOG.md",
+      ".agent-backups/20260626-011542/workspace-core/agent-system/logs/SESSION_LOG.md"
     ],
     "0ba19fb380bfc0919f464ddf58ef245b": [
       "agent-system/logs/CHANGE_LOG.md",
       ".agent-backups/20260626-010016/workspace-core/agent-system/logs/CHANGE_LOG.md",
+      ".agent-backups/20260626-011542/workspace-core/agent-system/logs/CHANGE_LOG.md",
       ".agent-backups/20260626-010355/workspace-core/agent-system/logs/CHANGE_LOG.md",
       ".agent-backups/20260626-005629/workspace-core/agent-system/logs/CHANGE_LOG.md"
     ],
     "9f96c35738cb010cc45381fe6e2ace25": [
       "agent-system/logs/archive/server/mcp_server.log.gz",
       ".agent-backups/20260626-010016/workspace-core/agent-system/logs/archive/server/mcp_server.log.gz",
+      ".agent-backups/20260626-011542/workspace-core/agent-system/logs/archive/server/mcp_server.log.gz",
       ".agent-backups/20260626-010355/workspace-core/agent-system/logs/archive/server/mcp_server.log.gz",
       ".agent-backups/20260626-005629/workspace-core/agent-system/logs/archive/server/mcp_server.log.gz"
     ],
     "31f7a579b565a96d0ce12f9032071160": [
       "agent-system/logs/archive/automation/launchd-maintenance.out.log.gz",
       ".agent-backups/20260626-010016/workspace-core/agent-system/logs/archive/automation/launchd-maintenance.out.log.gz",
+      ".agent-backups/20260626-011542/workspace-core/agent-system/logs/archive/automation/launchd-maintenance.out.log.gz",
       ".agent-backups/20260626-010355/workspace-core/agent-system/logs/archive/automation/launchd-maintenance.out.log.gz",
       ".agent-backups/20260626-005629/workspace-core/agent-system/logs/archive/automation/launchd-maintenance.out.log.gz"
     ],
     "3ee2303ee21939c9902a408925d65fbb": [
       "agent-system/logs/archive/autolab/launchd-autolab.out.log.gz",
       ".agent-backups/20260626-010016/workspace-core/agent-system/logs/archive/autolab/launchd-autolab.out.log.gz",
+      ".agent-backups/20260626-011542/workspace-core/agent-system/logs/archive/autolab/launchd-autolab.out.log.gz",
       ".agent-backups/20260626-010355/workspace-core/agent-system/logs/archive/autolab/launchd-autolab.out.log.gz",
       ".agent-backups/20260626-005629/workspace-core/agent-system/logs/archive/autolab/launchd-autolab.out.log.gz"
     ],
     "276fb2dbf5e896cf512ab6a9f1c4bd4a": [
       "agent-system/templates/TASK_TEMPLATE.md",
       ".agent-backups/20260626-010016/workspace-core/agent-system/templates/TASK_TEMPLATE.md",
+      ".agent-backups/20260626-011542/workspace-core/agent-system/templates/TASK_TEMPLATE.md",
       ".agent-backups/20260626-010355/workspace-core/agent-system/templates/TASK_TEMPLATE.md",
       ".agent-backups/20260626-005629/workspace-core/agent-system/templates/TASK_TEMPLATE.md"
     ],
     "bf43cfde3c36e48c5ac3f1e7791a372e": [
       "agent-system/templates/SESSION_SUMMARY_TEMPLATE.md",
       ".agent-backups/20260626-010016/workspace-core/agent-system/templates/SESSION_SUMMARY_TEMPLATE.md",
+      ".agent-backups/20260626-011542/workspace-core/agent-system/templates/SESSION_SUMMARY_TEMPLATE.md",
       ".agent-backups/20260626-010355/workspace-core/agent-system/templates/SESSION_SUMMARY_TEMPLATE.md",
       ".agent-backups/20260626-005629/workspace-core/agent-system/templates/SESSION_SUMMARY_TEMPLATE.md"
     ],
     "7117574ed0d51adf16f0d81b44ab2534": [
       "agent-system/templates/STATUS_REPORT_TEMPLATE.md",
       ".agent-backups/20260626-010016/workspace-core/agent-system/templates/STATUS_REPORT_TEMPLATE.md",
+      ".agent-backups/20260626-011542/workspace-core/agent-system/templates/STATUS_REPORT_TEMPLATE.md",
       ".agent-backups/20260626-010355/workspace-core/agent-system/templates/STATUS_REPORT_TEMPLATE.md",
       ".agent-backups/20260626-005629/workspace-core/agent-system/templates/STATUS_REPORT_TEMPLATE.md"
     ],
     "ece72b86dc8dc37eb609618f0abee6b5": [
       "agent-system/templates/DECISION_TEMPLATE.md",
       ".agent-backups/20260626-010016/workspace-core/agent-system/templates/DECISION_TEMPLATE.md",
+      ".agent-backups/20260626-011542/workspace-core/agent-system/templates/DECISION_TEMPLATE.md",
       ".agent-backups/20260626-010355/workspace-core/agent-system/templates/DECISION_TEMPLATE.md",
       ".agent-backups/20260626-005629/workspace-core/agent-system/templates/DECISION_TEMPLATE.md"
     ],
     "84ddd094b7ccadd8f63573e2ff523e46": [
       "bin/workspace-changes",
       ".agent-backups/20260626-010016/workspace-core/bin/workspace-changes",
+      ".agent-backups/20260626-011542/workspace-core/bin/workspace-changes",
       ".agent-backups/20260626-010355/workspace-core/bin/workspace-changes",
       ".agent-backups/20260626-005629/workspace-core/bin/workspace-changes"
     ],
@@ -7513,6 +8622,8 @@
       "bin/imsg-recent",
       ".agent-backups/20260626-010016/workspace-core/bin/imessage-recent",
       ".agent-backups/20260626-010016/workspace-core/bin/imsg-recent",
+      ".agent-backups/20260626-011542/workspace-core/bin/imessage-recent",
+      ".agent-backups/20260626-011542/workspace-core/bin/imsg-recent",
       ".agent-backups/20260626-010355/workspace-core/bin/imessage-recent",
       ".agent-backups/20260626-010355/workspace-core/bin/imsg-recent",
       ".agent-backups/20260626-005629/workspace-core/bin/imessage-recent",
@@ -7521,22 +8632,26 @@
     "083fbba4e8393b8c763d98ef23f4b54b": [
       "bin/install-imessage-plugin",
       ".agent-backups/20260626-010016/workspace-core/bin/install-imessage-plugin",
+      ".agent-backups/20260626-011542/workspace-core/bin/install-imessage-plugin",
       ".agent-backups/20260626-010355/workspace-core/bin/install-imessage-plugin",
       ".agent-backups/20260626-005629/workspace-core/bin/install-imessage-plugin"
     ],
     "7fe05ad9ce428f3ac5d5f7b0835b5eb8": [
       "bin/next",
+      ".agent-backups/20260626-011542/workspace-core/bin/next",
       ".agent-backups/20260626-010355/workspace-core/bin/next"
     ],
     "a6f279fbe4f8107c7beba19c1d691954": [
       "bin/agent-autoclose",
       ".agent-backups/20260626-010016/workspace-core/bin/agent-autoclose",
+      ".agent-backups/20260626-011542/workspace-core/bin/agent-autoclose",
       ".agent-backups/20260626-010355/workspace-core/bin/agent-autoclose",
       ".agent-backups/20260626-005629/workspace-core/bin/agent-autoclose"
     ],
     "f67e62af8c505dca691611ef9f2bb50e": [
       "bin/imsg-draft",
       ".agent-backups/20260626-010016/workspace-core/bin/imsg-draft",
+      ".agent-backups/20260626-011542/workspace-core/bin/imsg-draft",
       ".agent-backups/20260626-010355/workspace-core/bin/imsg-draft",
       ".agent-backups/20260626-005629/workspace-core/bin/imsg-draft"
     ],
@@ -7557,48 +8672,56 @@
     "523861f64d7e89686f49ef336f42f195": [
       "bin/gstack-repair",
       ".agent-backups/20260626-010016/workspace-core/bin/gstack-repair",
+      ".agent-backups/20260626-011542/workspace-core/bin/gstack-repair",
       ".agent-backups/20260626-010355/workspace-core/bin/gstack-repair",
       ".agent-backups/20260626-005629/workspace-core/bin/gstack-repair"
     ],
     "5e1b26e04c150b0da933554860f94b41": [
       "bin/use-gemini",
       ".agent-backups/20260626-010016/workspace-core/bin/use-gemini",
+      ".agent-backups/20260626-011542/workspace-core/bin/use-gemini",
       ".agent-backups/20260626-010355/workspace-core/bin/use-gemini",
       ".agent-backups/20260626-005629/workspace-core/bin/use-gemini"
     ],
     "2f5df2b530b386503f0497a3fa0740a7": [
       "bin/gstack-create",
       ".agent-backups/20260626-010016/workspace-core/bin/gstack-create",
+      ".agent-backups/20260626-011542/workspace-core/bin/gstack-create",
       ".agent-backups/20260626-010355/workspace-core/bin/gstack-create",
       ".agent-backups/20260626-005629/workspace-core/bin/gstack-create"
     ],
     "a8c9a144d630db96511995de98a22523": [
       "bin/mail-recent",
       ".agent-backups/20260626-010016/workspace-core/bin/mail-recent",
+      ".agent-backups/20260626-011542/workspace-core/bin/mail-recent",
       ".agent-backups/20260626-010355/workspace-core/bin/mail-recent",
       ".agent-backups/20260626-005629/workspace-core/bin/mail-recent"
     ],
     "020f6b87bd34f66322d32b66d27223e7": [
       "bin/system-gaps",
       ".agent-backups/20260626-010016/workspace-core/bin/system-gaps",
+      ".agent-backups/20260626-011542/workspace-core/bin/system-gaps",
       ".agent-backups/20260626-010355/workspace-core/bin/system-gaps",
       ".agent-backups/20260626-005629/workspace-core/bin/system-gaps"
     ],
     "adc37397cdb2472910c20a7b1538d616": [
       "bin/imsg-send-confirmed",
       ".agent-backups/20260626-010016/workspace-core/bin/imsg-send-confirmed",
+      ".agent-backups/20260626-011542/workspace-core/bin/imsg-send-confirmed",
       ".agent-backups/20260626-010355/workspace-core/bin/imsg-send-confirmed",
       ".agent-backups/20260626-005629/workspace-core/bin/imsg-send-confirmed"
     ],
     "51210f98e88b6bd55fe4cc1b3e6dfe9c": [
       "bin/agent-finish",
       ".agent-backups/20260626-010016/workspace-core/bin/agent-finish",
+      ".agent-backups/20260626-011542/workspace-core/bin/agent-finish",
       ".agent-backups/20260626-010355/workspace-core/bin/agent-finish",
       ".agent-backups/20260626-005629/workspace-core/bin/agent-finish"
     ],
     "16f6d15e05c4c330adf0d42779c098dd": [
       "bin/comms-doctor",
       ".agent-backups/20260626-010016/workspace-core/bin/comms-doctor",
+      ".agent-backups/20260626-011542/workspace-core/bin/comms-doctor",
       ".agent-backups/20260626-010355/workspace-core/bin/comms-doctor",
       ".agent-backups/20260626-005629/workspace-core/bin/comms-doctor"
     ],
@@ -7619,6 +8742,7 @@
     "01567505794ee4f58284a39cacc966e2": [
       "bin/mail-search",
       ".agent-backups/20260626-010016/workspace-core/bin/mail-search",
+      ".agent-backups/20260626-011542/workspace-core/bin/mail-search",
       ".agent-backups/20260626-010355/workspace-core/bin/mail-search",
       ".agent-backups/20260626-005629/workspace-core/bin/mail-search"
     ],
@@ -7632,18 +8756,21 @@
     "1fa90632ae246a6ca2fe281b8b7687bb": [
       "bin/system-audit",
       ".agent-backups/20260626-010016/workspace-core/bin/system-audit",
+      ".agent-backups/20260626-011542/workspace-core/bin/system-audit",
       ".agent-backups/20260626-010355/workspace-core/bin/system-audit",
       ".agent-backups/20260626-005629/workspace-core/bin/system-audit"
     ],
     "3ef13e732da11ffca9de9630589b0b46": [
       "bin/use-claude",
       ".agent-backups/20260626-010016/workspace-core/bin/use-claude",
+      ".agent-backups/20260626-011542/workspace-core/bin/use-claude",
       ".agent-backups/20260626-010355/workspace-core/bin/use-claude",
       ".agent-backups/20260626-005629/workspace-core/bin/use-claude"
     ],
     "fafac97eadc73c58e64178a18277245f": [
       "bin/anticipate",
       ".agent-backups/20260626-010016/workspace-core/bin/anticipate",
+      ".agent-backups/20260626-011542/workspace-core/bin/anticipate",
       ".agent-backups/20260626-010355/workspace-core/bin/anticipate",
       ".agent-backups/20260626-005629/workspace-core/bin/anticipate"
     ],
@@ -7656,11 +8783,13 @@
     ],
     "4733d77e3de086b34e12db0f59ebf489": [
       "bin/agent-start",
+      ".agent-backups/20260626-011542/workspace-core/bin/agent-start",
       ".agent-backups/20260626-010355/workspace-core/bin/agent-start"
     ],
     "e626d804f2a2c74f327a99fab1530c78": [
       "bin/comms-status",
       ".agent-backups/20260626-010016/workspace-core/bin/comms-status",
+      ".agent-backups/20260626-011542/workspace-core/bin/comms-status",
       ".agent-backups/20260626-010355/workspace-core/bin/comms-status",
       ".agent-backups/20260626-005629/workspace-core/bin/comms-status"
     ],
@@ -7674,6 +8803,7 @@
     "d11f45e156646244a6bbad91dd35491f": [
       "bin/workspace-context",
       ".agent-backups/20260626-010016/workspace-core/bin/workspace-context",
+      ".agent-backups/20260626-011542/workspace-core/bin/workspace-context",
       ".agent-backups/20260626-010355/workspace-core/bin/workspace-context",
       ".agent-backups/20260626-005629/workspace-core/bin/workspace-context"
     ],
@@ -7687,6 +8817,7 @@
     "d42feaa8b12875d9a65704ea2f5f6fac": [
       "bin/imessage-send-draft",
       ".agent-backups/20260626-010016/workspace-core/bin/imessage-send-draft",
+      ".agent-backups/20260626-011542/workspace-core/bin/imessage-send-draft",
       ".agent-backups/20260626-010355/workspace-core/bin/imessage-send-draft",
       ".agent-backups/20260626-005629/workspace-core/bin/imessage-send-draft"
     ],
@@ -7695,6 +8826,8 @@
       "bin/imsg-search",
       ".agent-backups/20260626-010016/workspace-core/bin/imessage-search",
       ".agent-backups/20260626-010016/workspace-core/bin/imsg-search",
+      ".agent-backups/20260626-011542/workspace-core/bin/imessage-search",
+      ".agent-backups/20260626-011542/workspace-core/bin/imsg-search",
       ".agent-backups/20260626-010355/workspace-core/bin/imessage-search",
       ".agent-backups/20260626-010355/workspace-core/bin/imsg-search",
       ".agent-backups/20260626-005629/workspace-core/bin/imessage-search",
@@ -7703,24 +8836,28 @@
     "855a4b4dd5e0816954f33a36d02787e0": [
       "bin/agent-repair",
       ".agent-backups/20260626-010016/workspace-core/bin/agent-repair",
+      ".agent-backups/20260626-011542/workspace-core/bin/agent-repair",
       ".agent-backups/20260626-010355/workspace-core/bin/agent-repair",
       ".agent-backups/20260626-005629/workspace-core/bin/agent-repair"
     ],
     "cdfe1376925d9d64e26ad3523846c5e2": [
       "bin/idea-start",
       ".agent-backups/20260626-010016/workspace-core/bin/idea-start",
+      ".agent-backups/20260626-011542/workspace-core/bin/idea-start",
       ".agent-backups/20260626-010355/workspace-core/bin/idea-start",
       ".agent-backups/20260626-005629/workspace-core/bin/idea-start"
     ],
     "e3846e49b1677b615e7725056b84eb4d": [
       "bin/improve-system",
       ".agent-backups/20260626-010016/workspace-core/bin/improve-system",
+      ".agent-backups/20260626-011542/workspace-core/bin/improve-system",
       ".agent-backups/20260626-010355/workspace-core/bin/improve-system",
       ".agent-backups/20260626-005629/workspace-core/bin/improve-system"
     ],
     "3fdc08934794e91766a34b5da3ff0b68": [
       "bin/agent-test-loop",
       ".agent-backups/20260626-010016/workspace-core/bin/agent-test-loop",
+      ".agent-backups/20260626-011542/workspace-core/bin/agent-test-loop",
       ".agent-backups/20260626-010355/workspace-core/bin/agent-test-loop",
       ".agent-backups/20260626-005629/workspace-core/bin/agent-test-loop"
     ],
@@ -7734,18 +8871,21 @@
     "5733c91f3e8876e26a782b61d5577aad": [
       "bin/system-recommend",
       ".agent-backups/20260626-010016/workspace-core/bin/system-recommend",
+      ".agent-backups/20260626-011542/workspace-core/bin/system-recommend",
       ".agent-backups/20260626-010355/workspace-core/bin/system-recommend",
       ".agent-backups/20260626-005629/workspace-core/bin/system-recommend"
     ],
     "dc1f883d71f9c813d287baf092072ed9": [
       "bin/identity-accept",
       ".agent-backups/20260626-010016/workspace-core/bin/identity-accept",
+      ".agent-backups/20260626-011542/workspace-core/bin/identity-accept",
       ".agent-backups/20260626-010355/workspace-core/bin/identity-accept",
       ".agent-backups/20260626-005629/workspace-core/bin/identity-accept"
     ],
     "2f7978a3fe3b7cc96344cd01aa730cd6": [
       "bin/imessage-status",
       ".agent-backups/20260626-010016/workspace-core/bin/imessage-status",
+      ".agent-backups/20260626-011542/workspace-core/bin/imessage-status",
       ".agent-backups/20260626-010355/workspace-core/bin/imessage-status",
       ".agent-backups/20260626-005629/workspace-core/bin/imessage-status"
     ],
@@ -7759,6 +8899,7 @@
     "aae82da174ab5d34f31a47da9316231a": [
       "bin/idea-run",
       ".agent-backups/20260626-010016/workspace-core/bin/idea-run",
+      ".agent-backups/20260626-011542/workspace-core/bin/idea-run",
       ".agent-backups/20260626-010355/workspace-core/bin/idea-run",
       ".agent-backups/20260626-005629/workspace-core/bin/idea-run"
     ],
@@ -7772,29 +8913,34 @@
     "294608b9e8e0beebcd81d9cc87269821": [
       "bin/comms-permissions-check",
       ".agent-backups/20260626-010016/workspace-core/bin/comms-permissions-check",
+      ".agent-backups/20260626-011542/workspace-core/bin/comms-permissions-check",
       ".agent-backups/20260626-010355/workspace-core/bin/comms-permissions-check",
       ".agent-backups/20260626-005629/workspace-core/bin/comms-permissions-check"
     ],
     "5f5d62c93fc523a618b90dc4eccd4857": [
       "bin/workflow-audit",
       ".agent-backups/20260626-010016/workspace-core/bin/workflow-audit",
+      ".agent-backups/20260626-011542/workspace-core/bin/workflow-audit",
       ".agent-backups/20260626-010355/workspace-core/bin/workflow-audit",
       ".agent-backups/20260626-005629/workspace-core/bin/workflow-audit"
     ],
     "ea18f87ccb8b6d3317b082920e9c8a44": [
       "bin/context-reset",
       ".agent-backups/20260626-010016/workspace-core/bin/context-reset",
+      ".agent-backups/20260626-011542/workspace-core/bin/context-reset",
       ".agent-backups/20260626-010355/workspace-core/bin/context-reset"
     ],
     "7c3dfe19b71b983ba6b746c551f1a5e0": [
       "bin/identity-reject",
       ".agent-backups/20260626-010016/workspace-core/bin/identity-reject",
+      ".agent-backups/20260626-011542/workspace-core/bin/identity-reject",
       ".agent-backups/20260626-010355/workspace-core/bin/identity-reject",
       ".agent-backups/20260626-005629/workspace-core/bin/identity-reject"
     ],
     "f5d3b021fe9d7490a687f9ff95b7d772": [
       "bin/workspace-index",
       ".agent-backups/20260626-010016/workspace-core/bin/workspace-index",
+      ".agent-backups/20260626-011542/workspace-core/bin/workspace-index",
       ".agent-backups/20260626-010355/workspace-core/bin/workspace-index",
       ".agent-backups/20260626-005629/workspace-core/bin/workspace-index"
     ],
@@ -7815,6 +8961,7 @@
     "cb82881046fe718c3fdd41e3184cd9c4": [
       "bin/use-codex",
       ".agent-backups/20260626-010016/workspace-core/bin/use-codex",
+      ".agent-backups/20260626-011542/workspace-core/bin/use-codex",
       ".agent-backups/20260626-010355/workspace-core/bin/use-codex",
       ".agent-backups/20260626-005629/workspace-core/bin/use-codex"
     ],
@@ -7828,30 +8975,35 @@
     "615cbfd8bde3a10fac4a42f54fb939ef": [
       "bin/system-capabilities",
       ".agent-backups/20260626-010016/workspace-core/bin/system-capabilities",
+      ".agent-backups/20260626-011542/workspace-core/bin/system-capabilities",
       ".agent-backups/20260626-010355/workspace-core/bin/system-capabilities",
       ".agent-backups/20260626-005629/workspace-core/bin/system-capabilities"
     ],
     "e39f73cda2702ef9121848c7cad3a2a9": [
       "bin/identity-adjust",
       ".agent-backups/20260626-010016/workspace-core/bin/identity-adjust",
+      ".agent-backups/20260626-011542/workspace-core/bin/identity-adjust",
       ".agent-backups/20260626-010355/workspace-core/bin/identity-adjust",
       ".agent-backups/20260626-005629/workspace-core/bin/identity-adjust"
     ],
     "77a79dfb52fef027d42615bd4d198869": [
       "bin/use-opencode-gemini",
       ".agent-backups/20260626-010016/workspace-core/bin/use-opencode-gemini",
+      ".agent-backups/20260626-011542/workspace-core/bin/use-opencode-gemini",
       ".agent-backups/20260626-010355/workspace-core/bin/use-opencode-gemini",
       ".agent-backups/20260626-005629/workspace-core/bin/use-opencode-gemini"
     ],
     "27febd338a68f26e18dcce964b6213d1": [
       "bin/mail-status",
       ".agent-backups/20260626-010016/workspace-core/bin/mail-status",
+      ".agent-backups/20260626-011542/workspace-core/bin/mail-status",
       ".agent-backups/20260626-010355/workspace-core/bin/mail-status",
       ".agent-backups/20260626-005629/workspace-core/bin/mail-status"
     ],
     "52719c33caba0eea7ff53c10add05c85": [
       "bin/agent-maintain",
       ".agent-backups/20260626-010016/workspace-core/bin/agent-maintain",
+      ".agent-backups/20260626-011542/workspace-core/bin/agent-maintain",
       ".agent-backups/20260626-010355/workspace-core/bin/agent-maintain",
       ".agent-backups/20260626-005629/workspace-core/bin/agent-maintain"
     ],
@@ -7865,6 +9017,7 @@
     "74798661b817997c2b5bb6a95f059778": [
       "bin/use-opencode",
       ".agent-backups/20260626-010016/workspace-core/bin/use-opencode",
+      ".agent-backups/20260626-011542/workspace-core/bin/use-opencode",
       ".agent-backups/20260626-010355/workspace-core/bin/use-opencode",
       ".agent-backups/20260626-005629/workspace-core/bin/use-opencode"
     ],
@@ -7875,15 +9028,10 @@
       ".agent-backups/20260626-010355/workspace-core/bin/mcp-start",
       ".agent-backups/20260626-005629/workspace-core/bin/mcp-start"
     ],
-    "fa1ad2d5a9341ca563b4905231ceeca5": [
-      "bin/agent-doctor",
-      ".agent-backups/20260626-010016/workspace-core/bin/agent-doctor",
-      ".agent-backups/20260626-010355/workspace-core/bin/agent-doctor",
-      ".agent-backups/20260626-005629/workspace-core/bin/agent-doctor"
-    ],
     "80539e709070fa070c3f4a04c74f70ec": [
       "bin/comms-report",
       ".agent-backups/20260626-010016/workspace-core/bin/comms-report",
+      ".agent-backups/20260626-011542/workspace-core/bin/comms-report",
       ".agent-backups/20260626-010355/workspace-core/bin/comms-report",
       ".agent-backups/20260626-005629/workspace-core/bin/comms-report"
     ],
@@ -7894,15 +9042,21 @@
       ".agent-backups/20260626-010355/workspace-core/bin/mcp-repair",
       ".agent-backups/20260626-005629/workspace-core/bin/mcp-repair"
     ],
+    "c3c639f10431b34431af9d4275bceeb4": [
+      "bin/duplication-guard",
+      "scripts/duplication_guard.py"
+    ],
     "beaa40fff688b1acf052d446e8199575": [
       "bin/use-claude-imessage",
       ".agent-backups/20260626-010016/workspace-core/bin/use-claude-imessage",
+      ".agent-backups/20260626-011542/workspace-core/bin/use-claude-imessage",
       ".agent-backups/20260626-010355/workspace-core/bin/use-claude-imessage",
       ".agent-backups/20260626-005629/workspace-core/bin/use-claude-imessage"
     ],
     "5dfee08a3754df770981392ea0d428fa": [
       "bin/mail-draft-reply",
       ".agent-backups/20260626-010016/workspace-core/bin/mail-draft-reply",
+      ".agent-backups/20260626-011542/workspace-core/bin/mail-draft-reply",
       ".agent-backups/20260626-010355/workspace-core/bin/mail-draft-reply",
       ".agent-backups/20260626-005629/workspace-core/bin/mail-draft-reply"
     ],
@@ -7916,18 +9070,21 @@
     "fe0f5914677bf5b1acc665ba9a1f46fb": [
       "bin/workspace-backup",
       ".agent-backups/20260626-010016/workspace-core/bin/workspace-backup",
+      ".agent-backups/20260626-011542/workspace-core/bin/workspace-backup",
       ".agent-backups/20260626-010355/workspace-core/bin/workspace-backup",
       ".agent-backups/20260626-005629/workspace-core/bin/workspace-backup"
     ],
     "22c4fcbbb47e0c326a3a43ecba12c959": [
       "bin/agent-status",
       ".agent-backups/20260626-010016/workspace-core/bin/agent-status",
+      ".agent-backups/20260626-011542/workspace-core/bin/agent-status",
       ".agent-backups/20260626-010355/workspace-core/bin/agent-status",
       ".agent-backups/20260626-005629/workspace-core/bin/agent-status"
     ],
     "726756603ae35981683bf3e7f019acc2": [
       "bin/gstack-verify",
       ".agent-backups/20260626-010016/workspace-core/bin/gstack-verify",
+      ".agent-backups/20260626-011542/workspace-core/bin/gstack-verify",
       ".agent-backups/20260626-010355/workspace-core/bin/gstack-verify",
       ".agent-backups/20260626-005629/workspace-core/bin/gstack-verify"
     ],
@@ -7941,6 +9098,7 @@
     "065aa24c0640b0477943601e69b3d954": [
       "bin/workspace-report",
       ".agent-backups/20260626-010016/workspace-core/bin/workspace-report",
+      ".agent-backups/20260626-011542/workspace-core/bin/workspace-report",
       ".agent-backups/20260626-010355/workspace-core/bin/workspace-report",
       ".agent-backups/20260626-005629/workspace-core/bin/workspace-report"
     ],
@@ -7960,13 +9118,14 @@
       "comms/mail/logs/mail_access.log",
       "comms/imessage/logs/imessage_outbound.log",
       "comms/imessage/logs/imessage_access.log",
-      "mcp/server/logs/mcp_server.log",
       "automation/reports/launchd-maintenance.err.log",
       "automation/reports/launchd-maintenance.out.log",
       "autolab/reports/launchd-autolab.out.log",
       "autolab/reports/launchd-autolab.err.log",
       ".agent-backups/20260626-010016/workspace-core/automation/reports/launchd-maintenance.err.log",
       ".agent-backups/20260626-010016/workspace-core/automation/reports/launchd-maintenance.out.log",
+      ".agent-backups/20260626-011542/workspace-core/automation/reports/launchd-maintenance.err.log",
+      ".agent-backups/20260626-011542/workspace-core/automation/reports/launchd-maintenance.out.log",
       ".agent-backups/20260626-010355/workspace-core/automation/reports/launchd-maintenance.err.log",
       ".agent-backups/20260626-010355/workspace-core/automation/reports/launchd-maintenance.out.log",
       ".agent-backups/20260626-005629/workspace-core/automation/reports/launchd-maintenance.err.log",
@@ -7975,44 +9134,78 @@
     "e959b3352d144c0eefe4c0b622719589": [
       "automation/hooks/shell-reminder.zsh",
       ".agent-backups/20260626-010016/workspace-core/automation/hooks/shell-reminder.zsh",
+      ".agent-backups/20260626-011542/workspace-core/automation/hooks/shell-reminder.zsh",
       ".agent-backups/20260626-010355/workspace-core/automation/hooks/shell-reminder.zsh",
       ".agent-backups/20260626-005629/workspace-core/automation/hooks/shell-reminder.zsh"
     ],
     "9e8f9467dd258be3c20f62eb56c0cb1b": [
       "automation/launchd/com.suneelworkspace.autolab.plist",
       ".agent-backups/20260626-010016/workspace-core/automation/launchd/com.suneelworkspace.autolab.plist",
+      ".agent-backups/20260626-011542/workspace-core/automation/launchd/com.suneelworkspace.autolab.plist",
       ".agent-backups/20260626-010355/workspace-core/automation/launchd/com.suneelworkspace.autolab.plist",
       ".agent-backups/20260626-005629/workspace-core/automation/launchd/com.suneelworkspace.autolab.plist"
     ],
     "d12c9c9fbc6b909b0b4774e27480b73d": [
       "automation/launchd/com.suneelworkspace.maintenance.plist",
       ".agent-backups/20260626-010016/workspace-core/automation/launchd/com.suneelworkspace.maintenance.plist",
+      ".agent-backups/20260626-011542/workspace-core/automation/launchd/com.suneelworkspace.maintenance.plist",
       ".agent-backups/20260626-010355/workspace-core/automation/launchd/com.suneelworkspace.maintenance.plist",
       ".agent-backups/20260626-005629/workspace-core/automation/launchd/com.suneelworkspace.maintenance.plist"
     ],
     "be7dee17971ef971b1e25d3530b5a4b7": [
       "automation/maintenance/common.sh",
       ".agent-backups/20260626-010016/workspace-core/automation/maintenance/common.sh",
+      ".agent-backups/20260626-011542/workspace-core/automation/maintenance/common.sh",
       ".agent-backups/20260626-010355/workspace-core/automation/maintenance/common.sh",
       ".agent-backups/20260626-005629/workspace-core/automation/maintenance/common.sh"
     ],
-    "c7a04911921f4fb7014c1ad1afdf7662": [
+    "3cf1cea37e7a3afe267b34437c15aaae": [
       "automation/reports/status-latest.md",
-      ".agent-backups/20260626-010355/workspace-core/automation/reports/status-latest.md"
+      ".agent-backups/20260626-011542/workspace-core/automation/reports/status-latest.md"
     ],
     "a98613fb408e9bcd67a02da7120f98a2": [
       "automation/reports/test-loop-latest.md",
       ".agent-backups/20260626-010016/workspace-core/automation/reports/test-loop-latest.md",
+      ".agent-backups/20260626-011542/workspace-core/automation/reports/test-loop-latest.md",
       ".agent-backups/20260626-010355/workspace-core/automation/reports/test-loop-latest.md",
       ".agent-backups/20260626-005629/workspace-core/automation/reports/test-loop-latest.md"
+    ],
+    "4a7aa5ec2ee568a3812e2754303fac16": [
+      ".agent-backups/20260626-010016/workspace-core/README.md",
+      ".agent-backups/20260626-011542/workspace-core/README.md",
+      ".agent-backups/20260626-010355/workspace-core/README.md"
+    ],
+    "97722ceb87bf943dad438627b288e064": [
+      ".agent-backups/20260626-010016/workspace-core/.gitignore",
+      ".agent-backups/20260626-011542/workspace-core/.gitignore",
+      ".agent-backups/20260626-010355/workspace-core/.gitignore",
+      ".agent-backups/20260626-005629/workspace-core/.gitignore"
+    ],
+    "2c91a82fcdd8311bafbf718f2ec40623": [
+      ".agent-backups/20260626-010016/workspace-core/agent-system/tasks/COMPLETED_TASKS.md",
+      ".agent-backups/20260626-011542/workspace-core/agent-system/tasks/COMPLETED_TASKS.md",
+      ".agent-backups/20260626-010355/workspace-core/agent-system/tasks/COMPLETED_TASKS.md",
+      ".agent-backups/20260626-005629/workspace-core/agent-system/tasks/COMPLETED_TASKS.md"
     ],
     "aad169fac1877fc462731677fb4cf6db": [
       ".agent-backups/20260626-010016/workspace-core/agent-system/memory/SESSION_HANDOFF.md",
       ".agent-backups/20260626-005629/workspace-core/agent-system/memory/SESSION_HANDOFF.md"
     ],
+    "e03c467259df43401204c361c3c5820a": [
+      ".agent-backups/20260626-010016/workspace-core/agent-system/shared/WORKFLOW_RULES.md",
+      ".agent-backups/20260626-011542/workspace-core/agent-system/shared/WORKFLOW_RULES.md",
+      ".agent-backups/20260626-010355/workspace-core/agent-system/shared/WORKFLOW_RULES.md",
+      ".agent-backups/20260626-005629/workspace-core/agent-system/shared/WORKFLOW_RULES.md"
+    ],
     "dd367c0a7f7b1c29ebde20c48db7b748": [
       ".agent-backups/20260626-010016/workspace-core/agent-system/logs/SESSION_LOG.md",
       ".agent-backups/20260626-005629/workspace-core/agent-system/logs/SESSION_LOG.md"
+    ],
+    "fa1ad2d5a9341ca563b4905231ceeca5": [
+      ".agent-backups/20260626-010016/workspace-core/bin/agent-doctor",
+      ".agent-backups/20260626-011542/workspace-core/bin/agent-doctor",
+      ".agent-backups/20260626-010355/workspace-core/bin/agent-doctor",
+      ".agent-backups/20260626-005629/workspace-core/bin/agent-doctor"
     ]
   },
   "name_based_clusters": {
@@ -8032,6 +9225,7 @@
       "autolab/meta/strategy_versions/README.md",
       "orchestrator/README.md",
       ".agent-backups/20260626-010016/workspace-core/README.md",
+      ".agent-backups/20260626-011542/workspace-core/README.md",
       ".agent-backups/20260626-010355/workspace-core/README.md",
       ".agent-backups/20260626-005629/workspace-core/README.md"
     ],
@@ -8039,6 +9233,7 @@
       ".gitignore",
       ".serena/.gitignore",
       ".agent-backups/20260626-010016/workspace-core/.gitignore",
+      ".agent-backups/20260626-011542/workspace-core/.gitignore",
       ".agent-backups/20260626-010355/workspace-core/.gitignore",
       ".agent-backups/20260626-005629/workspace-core/.gitignore"
     ],
@@ -8053,24 +9248,28 @@
     "completed_tasks": [
       "agent-system/tasks/COMPLETED_TASKS.md",
       ".agent-backups/20260626-010016/workspace-core/agent-system/tasks/COMPLETED_TASKS.md",
+      ".agent-backups/20260626-011542/workspace-core/agent-system/tasks/COMPLETED_TASKS.md",
       ".agent-backups/20260626-010355/workspace-core/agent-system/tasks/COMPLETED_TASKS.md",
       ".agent-backups/20260626-005629/workspace-core/agent-system/tasks/COMPLETED_TASKS.md"
     ],
     "task_queue": [
       "agent-system/tasks/TASK_QUEUE.md",
       ".agent-backups/20260626-010016/workspace-core/agent-system/tasks/TASK_QUEUE.md",
+      ".agent-backups/20260626-011542/workspace-core/agent-system/tasks/TASK_QUEUE.md",
       ".agent-backups/20260626-010355/workspace-core/agent-system/tasks/TASK_QUEUE.md",
       ".agent-backups/20260626-005629/workspace-core/agent-system/tasks/TASK_QUEUE.md"
     ],
     "active_tasks": [
       "agent-system/tasks/ACTIVE_TASKS.md",
       ".agent-backups/20260626-010016/workspace-core/agent-system/tasks/ACTIVE_TASKS.md",
+      ".agent-backups/20260626-011542/workspace-core/agent-system/tasks/ACTIVE_TASKS.md",
       ".agent-backups/20260626-010355/workspace-core/agent-system/tasks/ACTIVE_TASKS.md",
       ".agent-backups/20260626-005629/workspace-core/agent-system/tasks/ACTIVE_TASKS.md"
     ],
     "session_handoff": [
       "agent-system/memory/SESSION_HANDOFF.md",
       ".agent-backups/20260626-010016/workspace-core/agent-system/memory/SESSION_HANDOFF.md",
+      ".agent-backups/20260626-011542/workspace-core/agent-system/memory/SESSION_HANDOFF.md",
       ".agent-backups/20260626-010355/workspace-core/agent-system/memory/SESSION_HANDOFF.md",
       ".agent-backups/20260626-005629/workspace-core/agent-system/memory/SESSION_HANDOFF.md"
     ],
@@ -8078,6 +9277,7 @@
       "agent-system/memory/INSIGHTS.md",
       "autolab/meta/insights.md",
       ".agent-backups/20260626-010016/workspace-core/agent-system/memory/INSIGHTS.md",
+      ".agent-backups/20260626-011542/workspace-core/agent-system/memory/INSIGHTS.md",
       ".agent-backups/20260626-010355/workspace-core/agent-system/memory/INSIGHTS.md",
       ".agent-backups/20260626-005629/workspace-core/agent-system/memory/INSIGHTS.md"
     ],
@@ -8085,66 +9285,77 @@
       "agent-system/memory/PATTERNS.md",
       "autolab/meta/patterns.json",
       ".agent-backups/20260626-010016/workspace-core/agent-system/memory/PATTERNS.md",
+      ".agent-backups/20260626-011542/workspace-core/agent-system/memory/PATTERNS.md",
       ".agent-backups/20260626-010355/workspace-core/agent-system/memory/PATTERNS.md",
       ".agent-backups/20260626-005629/workspace-core/agent-system/memory/PATTERNS.md"
     ],
     "memory": [
       "agent-system/memory/MEMORY.md",
       ".agent-backups/20260626-010016/workspace-core/agent-system/memory/MEMORY.md",
+      ".agent-backups/20260626-011542/workspace-core/agent-system/memory/MEMORY.md",
       ".agent-backups/20260626-010355/workspace-core/agent-system/memory/MEMORY.md",
       ".agent-backups/20260626-005629/workspace-core/agent-system/memory/MEMORY.md"
     ],
     "notes": [
       "agent-system/memory/NOTES.md",
       ".agent-backups/20260626-010016/workspace-core/agent-system/memory/NOTES.md",
+      ".agent-backups/20260626-011542/workspace-core/agent-system/memory/NOTES.md",
       ".agent-backups/20260626-010355/workspace-core/agent-system/memory/NOTES.md",
       ".agent-backups/20260626-005629/workspace-core/agent-system/memory/NOTES.md"
     ],
     "decisions": [
       "agent-system/memory/DECISIONS.md",
       ".agent-backups/20260626-010016/workspace-core/agent-system/memory/DECISIONS.md",
+      ".agent-backups/20260626-011542/workspace-core/agent-system/memory/DECISIONS.md",
       ".agent-backups/20260626-010355/workspace-core/agent-system/memory/DECISIONS.md",
       ".agent-backups/20260626-005629/workspace-core/agent-system/memory/DECISIONS.md"
     ],
     "startup_checklist": [
       "agent-system/shared/STARTUP_CHECKLIST.md",
       ".agent-backups/20260626-010016/workspace-core/agent-system/shared/STARTUP_CHECKLIST.md",
+      ".agent-backups/20260626-011542/workspace-core/agent-system/shared/STARTUP_CHECKLIST.md",
       ".agent-backups/20260626-010355/workspace-core/agent-system/shared/STARTUP_CHECKLIST.md",
       ".agent-backups/20260626-005629/workspace-core/agent-system/shared/STARTUP_CHECKLIST.md"
     ],
     "bounded_self_upgrade": [
       "agent-system/shared/BOUNDED_SELF_UPGRADE.md",
       ".agent-backups/20260626-010016/workspace-core/agent-system/shared/BOUNDED_SELF_UPGRADE.md",
+      ".agent-backups/20260626-011542/workspace-core/agent-system/shared/BOUNDED_SELF_UPGRADE.md",
       ".agent-backups/20260626-010355/workspace-core/agent-system/shared/BOUNDED_SELF_UPGRADE.md",
       ".agent-backups/20260626-005629/workspace-core/agent-system/shared/BOUNDED_SELF_UPGRADE.md"
     ],
     "identity": [
       "agent-system/shared/IDENTITY.md",
       ".agent-backups/20260626-010016/workspace-core/agent-system/shared/IDENTITY.md",
+      ".agent-backups/20260626-011542/workspace-core/agent-system/shared/IDENTITY.md",
       ".agent-backups/20260626-010355/workspace-core/agent-system/shared/IDENTITY.md",
       ".agent-backups/20260626-005629/workspace-core/agent-system/shared/IDENTITY.md"
     ],
     "safety_boundaries": [
       "agent-system/shared/SAFETY_BOUNDARIES.md",
       ".agent-backups/20260626-010016/workspace-core/agent-system/shared/SAFETY_BOUNDARIES.md",
+      ".agent-backups/20260626-011542/workspace-core/agent-system/shared/SAFETY_BOUNDARIES.md",
       ".agent-backups/20260626-010355/workspace-core/agent-system/shared/SAFETY_BOUNDARIES.md",
       ".agent-backups/20260626-005629/workspace-core/agent-system/shared/SAFETY_BOUNDARIES.md"
     ],
     "session_closeout_checklist": [
       "agent-system/shared/SESSION_CLOSEOUT_CHECKLIST.md",
       ".agent-backups/20260626-010016/workspace-core/agent-system/shared/SESSION_CLOSEOUT_CHECKLIST.md",
+      ".agent-backups/20260626-011542/workspace-core/agent-system/shared/SESSION_CLOSEOUT_CHECKLIST.md",
       ".agent-backups/20260626-010355/workspace-core/agent-system/shared/SESSION_CLOSEOUT_CHECKLIST.md",
       ".agent-backups/20260626-005629/workspace-core/agent-system/shared/SESSION_CLOSEOUT_CHECKLIST.md"
     ],
     "workflow_rules": [
       "agent-system/shared/WORKFLOW_RULES.md",
       ".agent-backups/20260626-010016/workspace-core/agent-system/shared/WORKFLOW_RULES.md",
+      ".agent-backups/20260626-011542/workspace-core/agent-system/shared/WORKFLOW_RULES.md",
       ".agent-backups/20260626-010355/workspace-core/agent-system/shared/WORKFLOW_RULES.md",
       ".agent-backups/20260626-005629/workspace-core/agent-system/shared/WORKFLOW_RULES.md"
     ],
     "agent_system": [
       "agent-system/shared/AGENT_SYSTEM.md",
       ".agent-backups/20260626-010016/workspace-core/agent-system/shared/AGENT_SYSTEM.md",
+      ".agent-backups/20260626-011542/workspace-core/agent-system/shared/AGENT_SYSTEM.md",
       ".agent-backups/20260626-010355/workspace-core/agent-system/shared/AGENT_SYSTEM.md",
       ".agent-backups/20260626-005629/workspace-core/agent-system/shared/AGENT_SYSTEM.md"
     ],
@@ -8153,6 +9364,7 @@
       "comms/docs/HOW_IT_WORKS.md",
       "mcp/docs/HOW_IT_WORKS.md",
       ".agent-backups/20260626-010016/workspace-core/agent-system/docs/HOW_IT_WORKS.md",
+      ".agent-backups/20260626-011542/workspace-core/agent-system/docs/HOW_IT_WORKS.md",
       ".agent-backups/20260626-010355/workspace-core/agent-system/docs/HOW_IT_WORKS.md",
       ".agent-backups/20260626-005629/workspace-core/agent-system/docs/HOW_IT_WORKS.md"
     ],
@@ -8161,48 +9373,56 @@
       "comms/docs/RECOVERY.md",
       "mcp/docs/RECOVERY.md",
       ".agent-backups/20260626-010016/workspace-core/agent-system/docs/RECOVERY.md",
+      ".agent-backups/20260626-011542/workspace-core/agent-system/docs/RECOVERY.md",
       ".agent-backups/20260626-010355/workspace-core/agent-system/docs/RECOVERY.md",
       ".agent-backups/20260626-005629/workspace-core/agent-system/docs/RECOVERY.md"
     ],
     "operator_guide": [
       "agent-system/docs/OPERATOR_GUIDE.md",
       ".agent-backups/20260626-010016/workspace-core/agent-system/docs/OPERATOR_GUIDE.md",
+      ".agent-backups/20260626-011542/workspace-core/agent-system/docs/OPERATOR_GUIDE.md",
       ".agent-backups/20260626-010355/workspace-core/agent-system/docs/OPERATOR_GUIDE.md",
       ".agent-backups/20260626-005629/workspace-core/agent-system/docs/OPERATOR_GUIDE.md"
     ],
     "file_map": [
       "agent-system/docs/FILE_MAP.md",
       ".agent-backups/20260626-010016/workspace-core/agent-system/docs/FILE_MAP.md",
+      ".agent-backups/20260626-011542/workspace-core/agent-system/docs/FILE_MAP.md",
       ".agent-backups/20260626-010355/workspace-core/agent-system/docs/FILE_MAP.md",
       ".agent-backups/20260626-005629/workspace-core/agent-system/docs/FILE_MAP.md"
     ],
     "automation": [
       "agent-system/docs/AUTOMATION.md",
       ".agent-backups/20260626-010016/workspace-core/agent-system/docs/AUTOMATION.md",
+      ".agent-backups/20260626-011542/workspace-core/agent-system/docs/AUTOMATION.md",
       ".agent-backups/20260626-010355/workspace-core/agent-system/docs/AUTOMATION.md",
       ".agent-backups/20260626-005629/workspace-core/agent-system/docs/AUTOMATION.md"
     ],
     "workspace_health": [
       "agent-system/state/WORKSPACE_HEALTH.json",
       ".agent-backups/20260626-010016/workspace-core/agent-system/state/WORKSPACE_HEALTH.json",
+      ".agent-backups/20260626-011542/workspace-core/agent-system/state/WORKSPACE_HEALTH.json",
       ".agent-backups/20260626-010355/workspace-core/agent-system/state/WORKSPACE_HEALTH.json",
       ".agent-backups/20260626-005629/workspace-core/agent-system/state/WORKSPACE_HEALTH.json"
     ],
     "active_session": [
       "agent-system/state/ACTIVE_SESSION.json",
       ".agent-backups/20260626-010016/workspace-core/agent-system/state/ACTIVE_SESSION.json",
+      ".agent-backups/20260626-011542/workspace-core/agent-system/state/ACTIVE_SESSION.json",
       ".agent-backups/20260626-010355/workspace-core/agent-system/state/ACTIVE_SESSION.json",
       ".agent-backups/20260626-005629/workspace-core/agent-system/state/ACTIVE_SESSION.json"
     ],
     "last_known_good": [
       "agent-system/state/LAST_KNOWN_GOOD.json",
       ".agent-backups/20260626-010016/workspace-core/agent-system/state/LAST_KNOWN_GOOD.json",
+      ".agent-backups/20260626-011542/workspace-core/agent-system/state/LAST_KNOWN_GOOD.json",
       ".agent-backups/20260626-010355/workspace-core/agent-system/state/LAST_KNOWN_GOOD.json",
       ".agent-backups/20260626-005629/workspace-core/agent-system/state/LAST_KNOWN_GOOD.json"
     ],
     "current_state": [
       "agent-system/state/CURRENT_STATE.json",
       ".agent-backups/20260626-010016/workspace-core/agent-system/state/CURRENT_STATE.json",
+      ".agent-backups/20260626-011542/workspace-core/agent-system/state/CURRENT_STATE.json",
       ".agent-backups/20260626-010355/workspace-core/agent-system/state/CURRENT_STATE.json",
       ".agent-backups/20260626-005629/workspace-core/agent-system/state/CURRENT_STATE.json"
     ],
@@ -8212,77 +9432,90 @@
       "obsidian-vault/knowledge/index.md",
       "research-engine/ideas/index.json",
       ".agent-backups/20260626-010016/workspace-core/agent-system/state/INDEX.json",
+      ".agent-backups/20260626-011542/workspace-core/agent-system/state/INDEX.json",
       ".agent-backups/20260626-010355/workspace-core/agent-system/state/INDEX.json",
       ".agent-backups/20260626-005629/workspace-core/agent-system/state/INDEX.json"
     ],
     "active_context": [
       "agent-system/state/ACTIVE_CONTEXT.json",
       ".agent-backups/20260626-010016/workspace-core/agent-system/state/ACTIVE_CONTEXT.json",
+      ".agent-backups/20260626-011542/workspace-core/agent-system/state/ACTIVE_CONTEXT.json",
       ".agent-backups/20260626-010355/workspace-core/agent-system/state/ACTIVE_CONTEXT.json"
     ],
     "maintenance_log": [
       "agent-system/logs/MAINTENANCE_LOG.md",
       ".agent-backups/20260626-010016/workspace-core/agent-system/logs/MAINTENANCE_LOG.md",
+      ".agent-backups/20260626-011542/workspace-core/agent-system/logs/MAINTENANCE_LOG.md",
       ".agent-backups/20260626-010355/workspace-core/agent-system/logs/MAINTENANCE_LOG.md",
       ".agent-backups/20260626-005629/workspace-core/agent-system/logs/MAINTENANCE_LOG.md"
     ],
     "session_log": [
       "agent-system/logs/SESSION_LOG.md",
       ".agent-backups/20260626-010016/workspace-core/agent-system/logs/SESSION_LOG.md",
+      ".agent-backups/20260626-011542/workspace-core/agent-system/logs/SESSION_LOG.md",
       ".agent-backups/20260626-010355/workspace-core/agent-system/logs/SESSION_LOG.md",
       ".agent-backups/20260626-005629/workspace-core/agent-system/logs/SESSION_LOG.md"
     ],
     "change_log": [
       "agent-system/logs/CHANGE_LOG.md",
       ".agent-backups/20260626-010016/workspace-core/agent-system/logs/CHANGE_LOG.md",
+      ".agent-backups/20260626-011542/workspace-core/agent-system/logs/CHANGE_LOG.md",
       ".agent-backups/20260626-010355/workspace-core/agent-system/logs/CHANGE_LOG.md",
       ".agent-backups/20260626-005629/workspace-core/agent-system/logs/CHANGE_LOG.md"
     ],
     "mcp_server.log.gz": [
       "agent-system/logs/archive/server/mcp_server.log.gz",
       ".agent-backups/20260626-010016/workspace-core/agent-system/logs/archive/server/mcp_server.log.gz",
+      ".agent-backups/20260626-011542/workspace-core/agent-system/logs/archive/server/mcp_server.log.gz",
       ".agent-backups/20260626-010355/workspace-core/agent-system/logs/archive/server/mcp_server.log.gz",
       ".agent-backups/20260626-005629/workspace-core/agent-system/logs/archive/server/mcp_server.log.gz"
     ],
     "launchd-maintenance.out.log.gz": [
       "agent-system/logs/archive/automation/launchd-maintenance.out.log.gz",
       ".agent-backups/20260626-010016/workspace-core/agent-system/logs/archive/automation/launchd-maintenance.out.log.gz",
+      ".agent-backups/20260626-011542/workspace-core/agent-system/logs/archive/automation/launchd-maintenance.out.log.gz",
       ".agent-backups/20260626-010355/workspace-core/agent-system/logs/archive/automation/launchd-maintenance.out.log.gz",
       ".agent-backups/20260626-005629/workspace-core/agent-system/logs/archive/automation/launchd-maintenance.out.log.gz"
     ],
     "launchd-autolab.out.log.gz": [
       "agent-system/logs/archive/autolab/launchd-autolab.out.log.gz",
       ".agent-backups/20260626-010016/workspace-core/agent-system/logs/archive/autolab/launchd-autolab.out.log.gz",
+      ".agent-backups/20260626-011542/workspace-core/agent-system/logs/archive/autolab/launchd-autolab.out.log.gz",
       ".agent-backups/20260626-010355/workspace-core/agent-system/logs/archive/autolab/launchd-autolab.out.log.gz",
       ".agent-backups/20260626-005629/workspace-core/agent-system/logs/archive/autolab/launchd-autolab.out.log.gz"
     ],
     "task_template": [
       "agent-system/templates/TASK_TEMPLATE.md",
       ".agent-backups/20260626-010016/workspace-core/agent-system/templates/TASK_TEMPLATE.md",
+      ".agent-backups/20260626-011542/workspace-core/agent-system/templates/TASK_TEMPLATE.md",
       ".agent-backups/20260626-010355/workspace-core/agent-system/templates/TASK_TEMPLATE.md",
       ".agent-backups/20260626-005629/workspace-core/agent-system/templates/TASK_TEMPLATE.md"
     ],
     "session_summary_template": [
       "agent-system/templates/SESSION_SUMMARY_TEMPLATE.md",
       ".agent-backups/20260626-010016/workspace-core/agent-system/templates/SESSION_SUMMARY_TEMPLATE.md",
+      ".agent-backups/20260626-011542/workspace-core/agent-system/templates/SESSION_SUMMARY_TEMPLATE.md",
       ".agent-backups/20260626-010355/workspace-core/agent-system/templates/SESSION_SUMMARY_TEMPLATE.md",
       ".agent-backups/20260626-005629/workspace-core/agent-system/templates/SESSION_SUMMARY_TEMPLATE.md"
     ],
     "status_report_template": [
       "agent-system/templates/STATUS_REPORT_TEMPLATE.md",
       ".agent-backups/20260626-010016/workspace-core/agent-system/templates/STATUS_REPORT_TEMPLATE.md",
+      ".agent-backups/20260626-011542/workspace-core/agent-system/templates/STATUS_REPORT_TEMPLATE.md",
       ".agent-backups/20260626-010355/workspace-core/agent-system/templates/STATUS_REPORT_TEMPLATE.md",
       ".agent-backups/20260626-005629/workspace-core/agent-system/templates/STATUS_REPORT_TEMPLATE.md"
     ],
     "decision_template": [
       "agent-system/templates/DECISION_TEMPLATE.md",
       ".agent-backups/20260626-010016/workspace-core/agent-system/templates/DECISION_TEMPLATE.md",
+      ".agent-backups/20260626-011542/workspace-core/agent-system/templates/DECISION_TEMPLATE.md",
       ".agent-backups/20260626-010355/workspace-core/agent-system/templates/DECISION_TEMPLATE.md",
       ".agent-backups/20260626-005629/workspace-core/agent-system/templates/DECISION_TEMPLATE.md"
     ],
     "workspace-changes": [
       "bin/workspace-changes",
       ".agent-backups/20260626-010016/workspace-core/bin/workspace-changes",
+      ".agent-backups/20260626-011542/workspace-core/bin/workspace-changes",
       ".agent-backups/20260626-010355/workspace-core/bin/workspace-changes",
       ".agent-backups/20260626-005629/workspace-core/bin/workspace-changes"
     ],
@@ -8290,30 +9523,35 @@
       "bin/imessage-recent",
       "comms/imessage/scripts/imessage-recent",
       ".agent-backups/20260626-010016/workspace-core/bin/imessage-recent",
+      ".agent-backups/20260626-011542/workspace-core/bin/imessage-recent",
       ".agent-backups/20260626-010355/workspace-core/bin/imessage-recent",
       ".agent-backups/20260626-005629/workspace-core/bin/imessage-recent"
     ],
     "install-imessage-plugin": [
       "bin/install-imessage-plugin",
       ".agent-backups/20260626-010016/workspace-core/bin/install-imessage-plugin",
+      ".agent-backups/20260626-011542/workspace-core/bin/install-imessage-plugin",
       ".agent-backups/20260626-010355/workspace-core/bin/install-imessage-plugin",
       ".agent-backups/20260626-005629/workspace-core/bin/install-imessage-plugin"
     ],
     "next": [
       "bin/next",
       ".agent-backups/20260626-010016/workspace-core/bin/next",
+      ".agent-backups/20260626-011542/workspace-core/bin/next",
       ".agent-backups/20260626-010355/workspace-core/bin/next",
       ".agent-backups/20260626-005629/workspace-core/bin/next"
     ],
     "agent-autoclose": [
       "bin/agent-autoclose",
       ".agent-backups/20260626-010016/workspace-core/bin/agent-autoclose",
+      ".agent-backups/20260626-011542/workspace-core/bin/agent-autoclose",
       ".agent-backups/20260626-010355/workspace-core/bin/agent-autoclose",
       ".agent-backups/20260626-005629/workspace-core/bin/agent-autoclose"
     ],
     "imsg-draft": [
       "bin/imsg-draft",
       ".agent-backups/20260626-010016/workspace-core/bin/imsg-draft",
+      ".agent-backups/20260626-011542/workspace-core/bin/imsg-draft",
       ".agent-backups/20260626-010355/workspace-core/bin/imsg-draft",
       ".agent-backups/20260626-005629/workspace-core/bin/imsg-draft"
     ],
@@ -8321,6 +9559,7 @@
       "bin/mcp-stop",
       "mcp/server/scripts/mcp-stop",
       ".agent-backups/20260626-010016/workspace-core/bin/mcp-stop",
+      ".agent-backups/20260626-011542/workspace-core/bin/mcp-stop",
       ".agent-backups/20260626-010355/workspace-core/bin/mcp-stop",
       ".agent-backups/20260626-005629/workspace-core/bin/mcp-stop"
     ],
@@ -8328,24 +9567,28 @@
       "bin/goal-status",
       "goal-engine/scripts/goal-status",
       ".agent-backups/20260626-010016/workspace-core/bin/goal-status",
+      ".agent-backups/20260626-011542/workspace-core/bin/goal-status",
       ".agent-backups/20260626-010355/workspace-core/bin/goal-status",
       ".agent-backups/20260626-005629/workspace-core/bin/goal-status"
     ],
     "gstack-repair": [
       "bin/gstack-repair",
       ".agent-backups/20260626-010016/workspace-core/bin/gstack-repair",
+      ".agent-backups/20260626-011542/workspace-core/bin/gstack-repair",
       ".agent-backups/20260626-010355/workspace-core/bin/gstack-repair",
       ".agent-backups/20260626-005629/workspace-core/bin/gstack-repair"
     ],
     "use-gemini": [
       "bin/use-gemini",
       ".agent-backups/20260626-010016/workspace-core/bin/use-gemini",
+      ".agent-backups/20260626-011542/workspace-core/bin/use-gemini",
       ".agent-backups/20260626-010355/workspace-core/bin/use-gemini",
       ".agent-backups/20260626-005629/workspace-core/bin/use-gemini"
     ],
     "gstack-create": [
       "bin/gstack-create",
       ".agent-backups/20260626-010016/workspace-core/bin/gstack-create",
+      ".agent-backups/20260626-011542/workspace-core/bin/gstack-create",
       ".agent-backups/20260626-010355/workspace-core/bin/gstack-create",
       ".agent-backups/20260626-005629/workspace-core/bin/gstack-create"
     ],
@@ -8353,30 +9596,35 @@
       "bin/mail-recent",
       "comms/mail/scripts/mail-recent",
       ".agent-backups/20260626-010016/workspace-core/bin/mail-recent",
+      ".agent-backups/20260626-011542/workspace-core/bin/mail-recent",
       ".agent-backups/20260626-010355/workspace-core/bin/mail-recent",
       ".agent-backups/20260626-005629/workspace-core/bin/mail-recent"
     ],
     "system-gaps": [
       "bin/system-gaps",
       ".agent-backups/20260626-010016/workspace-core/bin/system-gaps",
+      ".agent-backups/20260626-011542/workspace-core/bin/system-gaps",
       ".agent-backups/20260626-010355/workspace-core/bin/system-gaps",
       ".agent-backups/20260626-005629/workspace-core/bin/system-gaps"
     ],
     "imsg-send-confirmed": [
       "bin/imsg-send-confirmed",
       ".agent-backups/20260626-010016/workspace-core/bin/imsg-send-confirmed",
+      ".agent-backups/20260626-011542/workspace-core/bin/imsg-send-confirmed",
       ".agent-backups/20260626-010355/workspace-core/bin/imsg-send-confirmed",
       ".agent-backups/20260626-005629/workspace-core/bin/imsg-send-confirmed"
     ],
     "agent-finish": [
       "bin/agent-finish",
       ".agent-backups/20260626-010016/workspace-core/bin/agent-finish",
+      ".agent-backups/20260626-011542/workspace-core/bin/agent-finish",
       ".agent-backups/20260626-010355/workspace-core/bin/agent-finish",
       ".agent-backups/20260626-005629/workspace-core/bin/agent-finish"
     ],
     "comms-doctor": [
       "bin/comms-doctor",
       ".agent-backups/20260626-010016/workspace-core/bin/comms-doctor",
+      ".agent-backups/20260626-011542/workspace-core/bin/comms-doctor",
       ".agent-backups/20260626-010355/workspace-core/bin/comms-doctor",
       ".agent-backups/20260626-005629/workspace-core/bin/comms-doctor"
     ],
@@ -8384,6 +9632,7 @@
       "bin/mcp-test",
       "mcp/server/scripts/mcp-test",
       ".agent-backups/20260626-010016/workspace-core/bin/mcp-test",
+      ".agent-backups/20260626-011542/workspace-core/bin/mcp-test",
       ".agent-backups/20260626-010355/workspace-core/bin/mcp-test",
       ".agent-backups/20260626-005629/workspace-core/bin/mcp-test"
     ],
@@ -8391,6 +9640,7 @@
       "bin/mcp-status",
       "mcp/server/scripts/mcp-status",
       ".agent-backups/20260626-010016/workspace-core/bin/mcp-status",
+      ".agent-backups/20260626-011542/workspace-core/bin/mcp-status",
       ".agent-backups/20260626-010355/workspace-core/bin/mcp-status",
       ".agent-backups/20260626-005629/workspace-core/bin/mcp-status"
     ],
@@ -8398,6 +9648,7 @@
       "bin/mail-search",
       "comms/mail/scripts/mail-search",
       ".agent-backups/20260626-010016/workspace-core/bin/mail-search",
+      ".agent-backups/20260626-011542/workspace-core/bin/mail-search",
       ".agent-backups/20260626-010355/workspace-core/bin/mail-search",
       ".agent-backups/20260626-005629/workspace-core/bin/mail-search"
     ],
@@ -8405,24 +9656,28 @@
       "bin/goal-adapt",
       "goal-engine/scripts/goal-adapt",
       ".agent-backups/20260626-010016/workspace-core/bin/goal-adapt",
+      ".agent-backups/20260626-011542/workspace-core/bin/goal-adapt",
       ".agent-backups/20260626-010355/workspace-core/bin/goal-adapt",
       ".agent-backups/20260626-005629/workspace-core/bin/goal-adapt"
     ],
     "system-audit": [
       "bin/system-audit",
       ".agent-backups/20260626-010016/workspace-core/bin/system-audit",
+      ".agent-backups/20260626-011542/workspace-core/bin/system-audit",
       ".agent-backups/20260626-010355/workspace-core/bin/system-audit",
       ".agent-backups/20260626-005629/workspace-core/bin/system-audit"
     ],
     "use-claude": [
       "bin/use-claude",
       ".agent-backups/20260626-010016/workspace-core/bin/use-claude",
+      ".agent-backups/20260626-011542/workspace-core/bin/use-claude",
       ".agent-backups/20260626-010355/workspace-core/bin/use-claude",
       ".agent-backups/20260626-005629/workspace-core/bin/use-claude"
     ],
     "anticipate": [
       "bin/anticipate",
       ".agent-backups/20260626-010016/workspace-core/bin/anticipate",
+      ".agent-backups/20260626-011542/workspace-core/bin/anticipate",
       ".agent-backups/20260626-010355/workspace-core/bin/anticipate",
       ".agent-backups/20260626-005629/workspace-core/bin/anticipate"
     ],
@@ -8430,18 +9685,21 @@
       "bin/goal-complete",
       "goal-engine/scripts/goal-complete",
       ".agent-backups/20260626-010016/workspace-core/bin/goal-complete",
+      ".agent-backups/20260626-011542/workspace-core/bin/goal-complete",
       ".agent-backups/20260626-010355/workspace-core/bin/goal-complete",
       ".agent-backups/20260626-005629/workspace-core/bin/goal-complete"
     ],
     "agent-start": [
       "bin/agent-start",
       ".agent-backups/20260626-010016/workspace-core/bin/agent-start",
+      ".agent-backups/20260626-011542/workspace-core/bin/agent-start",
       ".agent-backups/20260626-010355/workspace-core/bin/agent-start",
       ".agent-backups/20260626-005629/workspace-core/bin/agent-start"
     ],
     "comms-status": [
       "bin/comms-status",
       ".agent-backups/20260626-010016/workspace-core/bin/comms-status",
+      ".agent-backups/20260626-011542/workspace-core/bin/comms-status",
       ".agent-backups/20260626-010355/workspace-core/bin/comms-status",
       ".agent-backups/20260626-005629/workspace-core/bin/comms-status"
     ],
@@ -8449,12 +9707,14 @@
       "bin/mcp-doctor",
       "mcp/server/scripts/mcp-doctor",
       ".agent-backups/20260626-010016/workspace-core/bin/mcp-doctor",
+      ".agent-backups/20260626-011542/workspace-core/bin/mcp-doctor",
       ".agent-backups/20260626-010355/workspace-core/bin/mcp-doctor",
       ".agent-backups/20260626-005629/workspace-core/bin/mcp-doctor"
     ],
     "workspace-context": [
       "bin/workspace-context",
       ".agent-backups/20260626-010016/workspace-core/bin/workspace-context",
+      ".agent-backups/20260626-011542/workspace-core/bin/workspace-context",
       ".agent-backups/20260626-010355/workspace-core/bin/workspace-context",
       ".agent-backups/20260626-005629/workspace-core/bin/workspace-context"
     ],
@@ -8462,6 +9722,7 @@
       "bin/goal-execute",
       "goal-engine/scripts/goal-execute",
       ".agent-backups/20260626-010016/workspace-core/bin/goal-execute",
+      ".agent-backups/20260626-011542/workspace-core/bin/goal-execute",
       ".agent-backups/20260626-010355/workspace-core/bin/goal-execute",
       ".agent-backups/20260626-005629/workspace-core/bin/goal-execute"
     ],
@@ -8469,6 +9730,7 @@
       "bin/imessage-send-draft",
       "comms/imessage/scripts/imessage-send-draft",
       ".agent-backups/20260626-010016/workspace-core/bin/imessage-send-draft",
+      ".agent-backups/20260626-011542/workspace-core/bin/imessage-send-draft",
       ".agent-backups/20260626-010355/workspace-core/bin/imessage-send-draft",
       ".agent-backups/20260626-005629/workspace-core/bin/imessage-send-draft"
     ],
@@ -8476,30 +9738,35 @@
       "bin/imessage-search",
       "comms/imessage/scripts/imessage-search",
       ".agent-backups/20260626-010016/workspace-core/bin/imessage-search",
+      ".agent-backups/20260626-011542/workspace-core/bin/imessage-search",
       ".agent-backups/20260626-010355/workspace-core/bin/imessage-search",
       ".agent-backups/20260626-005629/workspace-core/bin/imessage-search"
     ],
     "agent-repair": [
       "bin/agent-repair",
       ".agent-backups/20260626-010016/workspace-core/bin/agent-repair",
+      ".agent-backups/20260626-011542/workspace-core/bin/agent-repair",
       ".agent-backups/20260626-010355/workspace-core/bin/agent-repair",
       ".agent-backups/20260626-005629/workspace-core/bin/agent-repair"
     ],
     "idea-start": [
       "bin/idea-start",
       ".agent-backups/20260626-010016/workspace-core/bin/idea-start",
+      ".agent-backups/20260626-011542/workspace-core/bin/idea-start",
       ".agent-backups/20260626-010355/workspace-core/bin/idea-start",
       ".agent-backups/20260626-005629/workspace-core/bin/idea-start"
     ],
     "improve-system": [
       "bin/improve-system",
       ".agent-backups/20260626-010016/workspace-core/bin/improve-system",
+      ".agent-backups/20260626-011542/workspace-core/bin/improve-system",
       ".agent-backups/20260626-010355/workspace-core/bin/improve-system",
       ".agent-backups/20260626-005629/workspace-core/bin/improve-system"
     ],
     "agent-test-loop": [
       "bin/agent-test-loop",
       ".agent-backups/20260626-010016/workspace-core/bin/agent-test-loop",
+      ".agent-backups/20260626-011542/workspace-core/bin/agent-test-loop",
       ".agent-backups/20260626-010355/workspace-core/bin/agent-test-loop",
       ".agent-backups/20260626-005629/workspace-core/bin/agent-test-loop"
     ],
@@ -8507,18 +9774,21 @@
       "bin/goal-monitor",
       "goal-engine/scripts/goal-monitor",
       ".agent-backups/20260626-010016/workspace-core/bin/goal-monitor",
+      ".agent-backups/20260626-011542/workspace-core/bin/goal-monitor",
       ".agent-backups/20260626-010355/workspace-core/bin/goal-monitor",
       ".agent-backups/20260626-005629/workspace-core/bin/goal-monitor"
     ],
     "system-recommend": [
       "bin/system-recommend",
       ".agent-backups/20260626-010016/workspace-core/bin/system-recommend",
+      ".agent-backups/20260626-011542/workspace-core/bin/system-recommend",
       ".agent-backups/20260626-010355/workspace-core/bin/system-recommend",
       ".agent-backups/20260626-005629/workspace-core/bin/system-recommend"
     ],
     "identity-accept": [
       "bin/identity-accept",
       ".agent-backups/20260626-010016/workspace-core/bin/identity-accept",
+      ".agent-backups/20260626-011542/workspace-core/bin/identity-accept",
       ".agent-backups/20260626-010355/workspace-core/bin/identity-accept",
       ".agent-backups/20260626-005629/workspace-core/bin/identity-accept"
     ],
@@ -8526,6 +9796,7 @@
       "bin/imessage-status",
       "comms/imessage/scripts/imessage-status",
       ".agent-backups/20260626-010016/workspace-core/bin/imessage-status",
+      ".agent-backups/20260626-011542/workspace-core/bin/imessage-status",
       ".agent-backups/20260626-010355/workspace-core/bin/imessage-status",
       ".agent-backups/20260626-005629/workspace-core/bin/imessage-status"
     ],
@@ -8533,12 +9804,14 @@
       "bin/route-execute",
       "orchestrator/scripts/route-execute",
       ".agent-backups/20260626-010016/workspace-core/bin/route-execute",
+      ".agent-backups/20260626-011542/workspace-core/bin/route-execute",
       ".agent-backups/20260626-010355/workspace-core/bin/route-execute",
       ".agent-backups/20260626-005629/workspace-core/bin/route-execute"
     ],
     "idea-run": [
       "bin/idea-run",
       ".agent-backups/20260626-010016/workspace-core/bin/idea-run",
+      ".agent-backups/20260626-011542/workspace-core/bin/idea-run",
       ".agent-backups/20260626-010355/workspace-core/bin/idea-run",
       ".agent-backups/20260626-005629/workspace-core/bin/idea-run"
     ],
@@ -8546,41 +9819,48 @@
       "bin/route-task",
       "orchestrator/scripts/route-task",
       ".agent-backups/20260626-010016/workspace-core/bin/route-task",
+      ".agent-backups/20260626-011542/workspace-core/bin/route-task",
       ".agent-backups/20260626-010355/workspace-core/bin/route-task",
       ".agent-backups/20260626-005629/workspace-core/bin/route-task"
     ],
     "comms-permissions-check": [
       "bin/comms-permissions-check",
       ".agent-backups/20260626-010016/workspace-core/bin/comms-permissions-check",
+      ".agent-backups/20260626-011542/workspace-core/bin/comms-permissions-check",
       ".agent-backups/20260626-010355/workspace-core/bin/comms-permissions-check",
       ".agent-backups/20260626-005629/workspace-core/bin/comms-permissions-check"
     ],
     "workflow-audit": [
       "bin/workflow-audit",
       ".agent-backups/20260626-010016/workspace-core/bin/workflow-audit",
+      ".agent-backups/20260626-011542/workspace-core/bin/workflow-audit",
       ".agent-backups/20260626-010355/workspace-core/bin/workflow-audit",
       ".agent-backups/20260626-005629/workspace-core/bin/workflow-audit"
     ],
     "context-reset": [
       "bin/context-reset",
       ".agent-backups/20260626-010016/workspace-core/bin/context-reset",
+      ".agent-backups/20260626-011542/workspace-core/bin/context-reset",
       ".agent-backups/20260626-010355/workspace-core/bin/context-reset"
     ],
     "identity-reject": [
       "bin/identity-reject",
       ".agent-backups/20260626-010016/workspace-core/bin/identity-reject",
+      ".agent-backups/20260626-011542/workspace-core/bin/identity-reject",
       ".agent-backups/20260626-010355/workspace-core/bin/identity-reject",
       ".agent-backups/20260626-005629/workspace-core/bin/identity-reject"
     ],
     "imsg-recent": [
       "bin/imsg-recent",
       ".agent-backups/20260626-010016/workspace-core/bin/imsg-recent",
+      ".agent-backups/20260626-011542/workspace-core/bin/imsg-recent",
       ".agent-backups/20260626-010355/workspace-core/bin/imsg-recent",
       ".agent-backups/20260626-005629/workspace-core/bin/imsg-recent"
     ],
     "workspace-index": [
       "bin/workspace-index",
       ".agent-backups/20260626-010016/workspace-core/bin/workspace-index",
+      ".agent-backups/20260626-011542/workspace-core/bin/workspace-index",
       ".agent-backups/20260626-010355/workspace-core/bin/workspace-index",
       ".agent-backups/20260626-005629/workspace-core/bin/workspace-index"
     ],
@@ -8588,6 +9868,7 @@
       "bin/mcp-reindex",
       "mcp/server/scripts/mcp-reindex",
       ".agent-backups/20260626-010016/workspace-core/bin/mcp-reindex",
+      ".agent-backups/20260626-011542/workspace-core/bin/mcp-reindex",
       ".agent-backups/20260626-010355/workspace-core/bin/mcp-reindex",
       ".agent-backups/20260626-005629/workspace-core/bin/mcp-reindex"
     ],
@@ -8595,12 +9876,14 @@
       "bin/goal-fail",
       "goal-engine/scripts/goal-fail",
       ".agent-backups/20260626-010016/workspace-core/bin/goal-fail",
+      ".agent-backups/20260626-011542/workspace-core/bin/goal-fail",
       ".agent-backups/20260626-010355/workspace-core/bin/goal-fail",
       ".agent-backups/20260626-005629/workspace-core/bin/goal-fail"
     ],
     "use-codex": [
       "bin/use-codex",
       ".agent-backups/20260626-010016/workspace-core/bin/use-codex",
+      ".agent-backups/20260626-011542/workspace-core/bin/use-codex",
       ".agent-backups/20260626-010355/workspace-core/bin/use-codex",
       ".agent-backups/20260626-005629/workspace-core/bin/use-codex"
     ],
@@ -8608,24 +9891,28 @@
       "bin/goal-create",
       "goal-engine/scripts/goal-create",
       ".agent-backups/20260626-010016/workspace-core/bin/goal-create",
+      ".agent-backups/20260626-011542/workspace-core/bin/goal-create",
       ".agent-backups/20260626-010355/workspace-core/bin/goal-create",
       ".agent-backups/20260626-005629/workspace-core/bin/goal-create"
     ],
     "system-capabilities": [
       "bin/system-capabilities",
       ".agent-backups/20260626-010016/workspace-core/bin/system-capabilities",
+      ".agent-backups/20260626-011542/workspace-core/bin/system-capabilities",
       ".agent-backups/20260626-010355/workspace-core/bin/system-capabilities",
       ".agent-backups/20260626-005629/workspace-core/bin/system-capabilities"
     ],
     "identity-adjust": [
       "bin/identity-adjust",
       ".agent-backups/20260626-010016/workspace-core/bin/identity-adjust",
+      ".agent-backups/20260626-011542/workspace-core/bin/identity-adjust",
       ".agent-backups/20260626-010355/workspace-core/bin/identity-adjust",
       ".agent-backups/20260626-005629/workspace-core/bin/identity-adjust"
     ],
     "use-opencode-gemini": [
       "bin/use-opencode-gemini",
       ".agent-backups/20260626-010016/workspace-core/bin/use-opencode-gemini",
+      ".agent-backups/20260626-011542/workspace-core/bin/use-opencode-gemini",
       ".agent-backups/20260626-010355/workspace-core/bin/use-opencode-gemini",
       ".agent-backups/20260626-005629/workspace-core/bin/use-opencode-gemini"
     ],
@@ -8633,12 +9920,14 @@
       "bin/mail-status",
       "comms/mail/scripts/mail-status",
       ".agent-backups/20260626-010016/workspace-core/bin/mail-status",
+      ".agent-backups/20260626-011542/workspace-core/bin/mail-status",
       ".agent-backups/20260626-010355/workspace-core/bin/mail-status",
       ".agent-backups/20260626-005629/workspace-core/bin/mail-status"
     ],
     "agent-maintain": [
       "bin/agent-maintain",
       ".agent-backups/20260626-010016/workspace-core/bin/agent-maintain",
+      ".agent-backups/20260626-011542/workspace-core/bin/agent-maintain",
       ".agent-backups/20260626-010355/workspace-core/bin/agent-maintain",
       ".agent-backups/20260626-005629/workspace-core/bin/agent-maintain"
     ],
@@ -8646,12 +9935,14 @@
       "bin/route-learn",
       "orchestrator/scripts/route-learn",
       ".agent-backups/20260626-010016/workspace-core/bin/route-learn",
+      ".agent-backups/20260626-011542/workspace-core/bin/route-learn",
       ".agent-backups/20260626-010355/workspace-core/bin/route-learn",
       ".agent-backups/20260626-005629/workspace-core/bin/route-learn"
     ],
     "use-opencode": [
       "bin/use-opencode",
       ".agent-backups/20260626-010016/workspace-core/bin/use-opencode",
+      ".agent-backups/20260626-011542/workspace-core/bin/use-opencode",
       ".agent-backups/20260626-010355/workspace-core/bin/use-opencode",
       ".agent-backups/20260626-005629/workspace-core/bin/use-opencode"
     ],
@@ -8659,18 +9950,21 @@
       "bin/mcp-start",
       "mcp/server/scripts/mcp-start",
       ".agent-backups/20260626-010016/workspace-core/bin/mcp-start",
+      ".agent-backups/20260626-011542/workspace-core/bin/mcp-start",
       ".agent-backups/20260626-010355/workspace-core/bin/mcp-start",
       ".agent-backups/20260626-005629/workspace-core/bin/mcp-start"
     ],
     "agent-doctor": [
       "bin/agent-doctor",
       ".agent-backups/20260626-010016/workspace-core/bin/agent-doctor",
+      ".agent-backups/20260626-011542/workspace-core/bin/agent-doctor",
       ".agent-backups/20260626-010355/workspace-core/bin/agent-doctor",
       ".agent-backups/20260626-005629/workspace-core/bin/agent-doctor"
     ],
     "comms-report": [
       "bin/comms-report",
       ".agent-backups/20260626-010016/workspace-core/bin/comms-report",
+      ".agent-backups/20260626-011542/workspace-core/bin/comms-report",
       ".agent-backups/20260626-010355/workspace-core/bin/comms-report",
       ".agent-backups/20260626-005629/workspace-core/bin/comms-report"
     ],
@@ -8678,12 +9972,14 @@
       "bin/mcp-repair",
       "mcp/server/scripts/mcp-repair",
       ".agent-backups/20260626-010016/workspace-core/bin/mcp-repair",
+      ".agent-backups/20260626-011542/workspace-core/bin/mcp-repair",
       ".agent-backups/20260626-010355/workspace-core/bin/mcp-repair",
       ".agent-backups/20260626-005629/workspace-core/bin/mcp-repair"
     ],
     "use-claude-imessage": [
       "bin/use-claude-imessage",
       ".agent-backups/20260626-010016/workspace-core/bin/use-claude-imessage",
+      ".agent-backups/20260626-011542/workspace-core/bin/use-claude-imessage",
       ".agent-backups/20260626-010355/workspace-core/bin/use-claude-imessage",
       ".agent-backups/20260626-005629/workspace-core/bin/use-claude-imessage"
     ],
@@ -8691,6 +9987,7 @@
       "bin/mail-draft-reply",
       "comms/mail/scripts/mail-draft-reply",
       ".agent-backups/20260626-010016/workspace-core/bin/mail-draft-reply",
+      ".agent-backups/20260626-011542/workspace-core/bin/mail-draft-reply",
       ".agent-backups/20260626-010355/workspace-core/bin/mail-draft-reply",
       ".agent-backups/20260626-005629/workspace-core/bin/mail-draft-reply"
     ],
@@ -8698,30 +9995,35 @@
       "bin/goal-plan",
       "goal-engine/scripts/goal-plan",
       ".agent-backups/20260626-010016/workspace-core/bin/goal-plan",
+      ".agent-backups/20260626-011542/workspace-core/bin/goal-plan",
       ".agent-backups/20260626-010355/workspace-core/bin/goal-plan",
       ".agent-backups/20260626-005629/workspace-core/bin/goal-plan"
     ],
     "imsg-search": [
       "bin/imsg-search",
       ".agent-backups/20260626-010016/workspace-core/bin/imsg-search",
+      ".agent-backups/20260626-011542/workspace-core/bin/imsg-search",
       ".agent-backups/20260626-010355/workspace-core/bin/imsg-search",
       ".agent-backups/20260626-005629/workspace-core/bin/imsg-search"
     ],
     "workspace-backup": [
       "bin/workspace-backup",
       ".agent-backups/20260626-010016/workspace-core/bin/workspace-backup",
+      ".agent-backups/20260626-011542/workspace-core/bin/workspace-backup",
       ".agent-backups/20260626-010355/workspace-core/bin/workspace-backup",
       ".agent-backups/20260626-005629/workspace-core/bin/workspace-backup"
     ],
     "agent-status": [
       "bin/agent-status",
       ".agent-backups/20260626-010016/workspace-core/bin/agent-status",
+      ".agent-backups/20260626-011542/workspace-core/bin/agent-status",
       ".agent-backups/20260626-010355/workspace-core/bin/agent-status",
       ".agent-backups/20260626-005629/workspace-core/bin/agent-status"
     ],
     "gstack-verify": [
       "bin/gstack-verify",
       ".agent-backups/20260626-010016/workspace-core/bin/gstack-verify",
+      ".agent-backups/20260626-011542/workspace-core/bin/gstack-verify",
       ".agent-backups/20260626-010355/workspace-core/bin/gstack-verify",
       ".agent-backups/20260626-005629/workspace-core/bin/gstack-verify"
     ],
@@ -8729,12 +10031,14 @@
       "bin/mcp-report",
       "mcp/server/scripts/mcp-report",
       ".agent-backups/20260626-010016/workspace-core/bin/mcp-report",
+      ".agent-backups/20260626-011542/workspace-core/bin/mcp-report",
       ".agent-backups/20260626-010355/workspace-core/bin/mcp-report",
       ".agent-backups/20260626-005629/workspace-core/bin/mcp-report"
     ],
     "workspace-report": [
       "bin/workspace-report",
       ".agent-backups/20260626-010016/workspace-core/bin/workspace-report",
+      ".agent-backups/20260626-011542/workspace-core/bin/workspace-report",
       ".agent-backups/20260626-010355/workspace-core/bin/workspace-report",
       ".agent-backups/20260626-005629/workspace-core/bin/workspace-report"
     ],
@@ -8742,6 +10046,7 @@
       "bin/route-analyze",
       "orchestrator/scripts/route-analyze",
       ".agent-backups/20260626-010016/workspace-core/bin/route-analyze",
+      ".agent-backups/20260626-011542/workspace-core/bin/route-analyze",
       ".agent-backups/20260626-010355/workspace-core/bin/route-analyze",
       ".agent-backups/20260626-005629/workspace-core/bin/route-analyze"
     ],
@@ -8764,48 +10069,56 @@
     "shell-reminder.zsh": [
       "automation/hooks/shell-reminder.zsh",
       ".agent-backups/20260626-010016/workspace-core/automation/hooks/shell-reminder.zsh",
+      ".agent-backups/20260626-011542/workspace-core/automation/hooks/shell-reminder.zsh",
       ".agent-backups/20260626-010355/workspace-core/automation/hooks/shell-reminder.zsh",
       ".agent-backups/20260626-005629/workspace-core/automation/hooks/shell-reminder.zsh"
     ],
     "com.suneelworkspace.autolab.plist": [
       "automation/launchd/com.suneelworkspace.autolab.plist",
       ".agent-backups/20260626-010016/workspace-core/automation/launchd/com.suneelworkspace.autolab.plist",
+      ".agent-backups/20260626-011542/workspace-core/automation/launchd/com.suneelworkspace.autolab.plist",
       ".agent-backups/20260626-010355/workspace-core/automation/launchd/com.suneelworkspace.autolab.plist",
       ".agent-backups/20260626-005629/workspace-core/automation/launchd/com.suneelworkspace.autolab.plist"
     ],
     "com.suneelworkspace.maintenance.plist": [
       "automation/launchd/com.suneelworkspace.maintenance.plist",
       ".agent-backups/20260626-010016/workspace-core/automation/launchd/com.suneelworkspace.maintenance.plist",
+      ".agent-backups/20260626-011542/workspace-core/automation/launchd/com.suneelworkspace.maintenance.plist",
       ".agent-backups/20260626-010355/workspace-core/automation/launchd/com.suneelworkspace.maintenance.plist",
       ".agent-backups/20260626-005629/workspace-core/automation/launchd/com.suneelworkspace.maintenance.plist"
     ],
     "common": [
       "automation/maintenance/common.sh",
       ".agent-backups/20260626-010016/workspace-core/automation/maintenance/common.sh",
+      ".agent-backups/20260626-011542/workspace-core/automation/maintenance/common.sh",
       ".agent-backups/20260626-010355/workspace-core/automation/maintenance/common.sh",
       ".agent-backups/20260626-005629/workspace-core/automation/maintenance/common.sh"
     ],
     "launchd-maintenance.err.log": [
       "automation/reports/launchd-maintenance.err.log",
       ".agent-backups/20260626-010016/workspace-core/automation/reports/launchd-maintenance.err.log",
+      ".agent-backups/20260626-011542/workspace-core/automation/reports/launchd-maintenance.err.log",
       ".agent-backups/20260626-010355/workspace-core/automation/reports/launchd-maintenance.err.log",
       ".agent-backups/20260626-005629/workspace-core/automation/reports/launchd-maintenance.err.log"
     ],
     "status-latest": [
       "automation/reports/status-latest.md",
       ".agent-backups/20260626-010016/workspace-core/automation/reports/status-latest.md",
+      ".agent-backups/20260626-011542/workspace-core/automation/reports/status-latest.md",
       ".agent-backups/20260626-010355/workspace-core/automation/reports/status-latest.md",
       ".agent-backups/20260626-005629/workspace-core/automation/reports/status-latest.md"
     ],
     "test-loop-latest": [
       "automation/reports/test-loop-latest.md",
       ".agent-backups/20260626-010016/workspace-core/automation/reports/test-loop-latest.md",
+      ".agent-backups/20260626-011542/workspace-core/automation/reports/test-loop-latest.md",
       ".agent-backups/20260626-010355/workspace-core/automation/reports/test-loop-latest.md",
       ".agent-backups/20260626-005629/workspace-core/automation/reports/test-loop-latest.md"
     ],
     "launchd-maintenance.out.log": [
       "automation/reports/launchd-maintenance.out.log",
       ".agent-backups/20260626-010016/workspace-core/automation/reports/launchd-maintenance.out.log",
+      ".agent-backups/20260626-011542/workspace-core/automation/reports/launchd-maintenance.out.log",
       ".agent-backups/20260626-010355/workspace-core/automation/reports/launchd-maintenance.out.log",
       ".agent-backups/20260626-005629/workspace-core/automation/reports/launchd-maintenance.out.log"
     ]

@@ -8,10 +8,12 @@ These rules tell agents how to work inside Suneel's shared workspace.
 
 1. Read the startup files listed in `AGENT_SYSTEM.md`.
 2. Run or mentally follow `agent-start` when practical.
-3. Inspect relevant existing files before editing.
-4. Check for existing patterns, scripts, or documentation.
-5. Avoid creating duplicate systems.
-6. Make backups before replacing meaningful files.
+3. Run `duplication-guard <proposed_path> [-i "intent"]` before creating any script or config to verify it conforms to layout and logic-reuse guidelines.
+4. Inspect relevant existing files before editing.
+5. Check for existing patterns, scripts, or documentation.
+6. Avoid creating duplicate systems.
+7. Make backups before replacing meaningful files.
+
 
 Agents should explicitly state "Loading workspace context" before meaningful work.
 

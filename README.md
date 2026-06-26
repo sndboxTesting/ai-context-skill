@@ -767,6 +767,20 @@ Local-first:
 - Hidden state that bypasses plain-file inspection.
 - Safety boundary changes caused by adaptive identity or anticipation.
 
+## Duplication Guard
+
+To prevent code duplication, configuration drift, and system fragmentation, `SuneelWorkSpace` enforces a strict canonical logic and directory layout policy.
+
+### Core Policies
+- **Subsystem Logic Placement**: All subsystem logic, scripts, and utilities must live in their designated subsystem directories (e.g., `goal-engine/scripts/`, `mcp/server/scripts/`, `orchestrator/scripts/`).
+- **bin/ Entrypoints Only**: The root `bin/` directory must only serve as the CLI command entrypoint layer. It must **never** contain duplicate copies of subsystem scripts. Instead, all entrypoint commands in `bin/` must be created as relative symbolic links pointing to their subsystem originals.
+- **Config Folder Standardization**: Configuration files (e.g. JSON/YAML policies) must reside inside designated config subfolders (e.g., `subsystem/config/`, `orchestrator/router/`) rather than the subsystem root.
+
+### Command Reference
+Run `duplication-guard` to pre-check any proposed file creation or modification:
+- `duplication-guard <file_path> [--intent "description of purpose"]`: Validates that a file's proposed path conforms to canonical location rules and scans `audit/file_graph.json` to reject files with duplicate stems or overlapping functional intents.
+- Use `--force` flag to bypass warnings if intentionally creating a fork (explicit confirmation required).
+
 ## 8. How To Extend The System
 
 ### Add A New Tool

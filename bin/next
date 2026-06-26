@@ -61,6 +61,53 @@ def run():
             print(msg)
             return
 
+    # Print Top Workflows (Phase 3)
+    try:
+        import sys
+        sys.path.append(str(ROOT / "scripts"))
+        from workflow_priority_engine import get_ranked_workflows
+        top_workflows = get_ranked_workflows(limit=3)
+        if top_workflows:
+            print("\nTop workflows right now:")
+            for idx, w in enumerate(top_workflows, 1):
+                print(f"  {idx}. {w['name']} [score: {w['priority_score']}]")
+                print(f"     → Run command: bin/{w['command']}")
+    except Exception as e:
+        top_workflows = []
+
+    # Phase 1 Recommendation Layer & Phase 2 Execution (Auto-Suggest Mode)
+    if top_workflows:
+        top_w = top_workflows[0]
+        is_restricted = False
+        try:
+            slug = top_w["slug"]
+            json_path = ROOT / f"brain/workflows/generated/{slug}.json"
+            if json_path.exists():
+                import json
+                w_data = json.loads(json_path.read_text())
+                cmds_str = "".join(w_data.get("commands", [])).lower()
+                if any(k in cmds_str for k in ["rm ", "delete", "write_file"]):
+                    is_restricted = True
+        except Exception:
+            pass
+            
+        top_conf = top_w["priority_score"]
+        if top_conf >= 0.85 and context_strength == "strong" and not is_restricted:
+            print(f"\nRecommended action:\n→ {top_w['name']} (confidence: {top_conf})")
+            try:
+                confirm = input("Auto-run? (y/n) [y]: ").strip().lower()
+            except (EOFError, KeyboardInterrupt):
+                confirm = "n"
+                print()
+                
+            if confirm in ["", "y", "yes"]:
+                print(f"🏃 Running: bin/{top_w['command']}")
+                import subprocess
+                subprocess.run([str(ROOT / "bin" / top_w["command"])])
+                return
+            else:
+                print("Fallback to normal selection list.")
+
     print("\nSuggested next actions:")
     top_3 = suggestions[:3]
     for idx, item in enumerate(top_3, 1):

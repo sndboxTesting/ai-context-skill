@@ -1,6 +1,6 @@
 # Tool And Workflow Recommendations
 
-Generated: 2026-06-26T08:50:04.237219-05:00
+Generated: 2026-06-26T09:08:02.580774-05:00
 
 No external tools were installed. These are proposals for explicit future approval.
 
@@ -46,6 +46,6 @@ No external tools were installed. These are proposals for explicit future approv
 
 ## Inventory Summary
 
-- Tool entries discovered: 120
+- Tool entries discovered: 136
 - CLI tools available: 19
 - Installed app names captured: 25

@@ -4,7 +4,7 @@
 
 Date: 2026-06-26
 
-Summary: integrated Obsidian core brain, daily-evolve loop, tool discovery, and life automation layer
+Summary: Auto-suggest execution mode integrated and README upgraded to AI Spec spec.
 
 Changed:
 

@@ -1,0 +1,6 @@
+{
+  "research": ["search"],
+  "development": ["filesystem", "github"],
+  "automation": ["shortcuts"],
+  "organization": ["filesystem"]
+}

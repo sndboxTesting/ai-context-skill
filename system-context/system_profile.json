@@ -122,11 +122,11 @@
     }
   ],
   "disk": {
-    "home_free_gb": 649.6,
+    "home_free_gb": 649.5,
     "home_total_gb": 926.4,
     "home_used_gb": 276.8
   },
-  "generated_at": "2026-06-26T08:50:04.237219-05:00",
+  "generated_at": "2026-06-26T09:08:02.580774-05:00",
   "hardware": {
     "cpu_count": 16,
     "mac_model": "Mac16,5",
@@ -307,7 +307,7 @@
     "private_file_contents": "not scanned"
   },
   "workspace": {
-    "bin_command_count": 76,
+    "bin_command_count": 92,
     "bin_commands": [
       "agent-autoclose",
       "agent-doctor",
@@ -318,6 +318,7 @@
       "agent-status",
       "agent-test-loop",
       "anticipate",
+      "brave-search-mcp",
       "comms-doctor",
       "comms-permissions-check",
       "comms-report",
@@ -325,6 +326,8 @@
       "context-reset",
       "daily-evolve",
       "duplication-guard",
+      "filesystem-mcp",
+      "github-mcp",
       "goal-adapt",
       "goal-complete",
       "goal-create",
@@ -352,6 +355,7 @@
       "imsg-send-confirmed",
       "install-imessage-plugin",
       "integrity-guard",
+      "macos-shortcuts-mcp",
       "mail-draft-reply",
       "mail-recent",
       "mail-search",
@@ -380,6 +384,18 @@
       "use-opencode",
       "use-opencode-gemini",
       "workflow-audit",
+      "workflow-claude-headroom-setup",
+      "workflow-code-improvement-workflow",
+      "workflow-composed-workflow",
+      "workflow-eval-and-reliability-map",
+      "workflow-implementation-workflow",
+      "workflow-local-ai-stack-overview",
+      "workflow-obsidian-maintenance",
+      "workflow-obsidian-upgrade-handoff",
+      "workflow-rollback-and-recovery",
+      "workflow-system-improvement-workflow",
+      "workflow-telegram-control-plane",
+      "workflow-voice-input",
       "workspace-backup",
       "workspace-changes",
       "workspace-context",
@@ -401,14 +417,14 @@
     "files_by_subsystem": {
       "agent-system": 37,
       "autolab": 163,
-      "bin": 78,
+      "bin": 94,
       "comms": 35,
       "configs": 0,
       "docs": 3,
       "goal-engine": 27,
-      "mcp": 33,
-      "orchestrator": 20,
-      "scripts": 6
+      "mcp": 34,
+      "orchestrator": 22,
+      "scripts": 36
     },
     "non_executable_bin_files": [],
     "root": "/Users/MAC/SuneelWorkSpace",

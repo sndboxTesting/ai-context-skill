@@ -464,7 +464,44 @@ def suggest(command: str, context: str = "general", intent: str | None = None) -
     candidates = built_in_candidates(command) + learned_candidates(command)
     if not candidates:
         candidates = fallback_candidates(intent)
+        
+    # Inject Obsidian-extracted workflows
+    try:
+        workflows_dir = ROOT / "brain/workflows"
+        if workflows_dir.exists():
+            files = list(workflows_dir.glob("*.md"))
+            gen_dir = workflows_dir / "generated"
+            if gen_dir.exists():
+                files.extend(gen_dir.glob("*.json"))
+                
+            for p in files:
+                stem = p.stem.replace("workflow_", "").replace("_workflow", "").replace("-", "_")
+                name = stem.replace("_", " ").title()
+                cmd_name = f"bin/workflow-{stem.replace('_', '-')}"
+                
+                # Check if this candidate is already in the list to prevent duplication
+                if not any(c.get("command") == cmd_name for c in candidates):
+                    candidates.append({
+                        "text": f"Run {name} workflow",
+                        "intent": intent,
+                        "command": cmd_name,
+                        "rank": "HIGH",
+                        "suggestion_score": 5.0  # Force high ranking
+                    })
+    except Exception:
+        pass
+        
     scored = [score_candidate(item, intent) for item in candidates]
+    
+    # Phase 4: Upgrade Suggestions for system improvement workflow
+    for item in scored:
+        cmd = item.get("command", "")
+        txt = item.get("text", "")
+        if cmd == "bin/system-gaps" or "system-gaps" in cmd or "system-gaps" in txt.lower():
+            item["text"] = "Run system improvement workflow"
+            item["command"] = "bin/workflow-system-improvement-workflow"
+            item["suggestion_score"] = 6.0  # Elevate above other suggestions
+            item["rank"] = "HIGH"
     deduped: dict[str, dict[str, Any]] = {}
     for item in scored:
         key = item["text"].strip().lower()

@@ -35,6 +35,77 @@ def write_json(path: pathlib.Path, data: any):
     path.write_text(json.dumps(data, indent=2, sort_keys=True) + "\n")
 
 # ---------------------------------------------------------------------------
+# PHASE 7: AUTOMATIC MCP CHAIN DETECTION & GENERATION
+# ---------------------------------------------------------------------------
+def detect_and_generate_mcp_chains() -> list[str]:
+    print("  - Running MCP Chain Detection Loop...")
+    session_log_path = ROOT / "agent-system/logs/SESSION_LOG.md"
+    if not session_log_path.exists():
+        return []
+
+    log_content = session_log_path.read_text(errors="replace")
+    lines = log_content.splitlines()
+    
+    mcp_kws = ["search_web_brave", "filesystem_read_file", "filesystem_list_dir", "github_create_issue", "github_list_prs", "shortcuts_run", "shortcuts_list", "generate_fix"]
+    
+    current_chain = []
+    chains = []
+    
+    for line in lines:
+        matched_kw = None
+        for kw in mcp_kws:
+            if kw in line:
+                matched_kw = kw
+                break
+        
+        if matched_kw:
+            cmd_clean = line.strip()
+            # Remove markdown formatting like list markers or backticks
+            cmd_clean = re.sub(r"^[\-\*\d\.\s`#]+|`+$", "", cmd_clean).strip()
+            if cmd_clean:
+                current_chain.append(cmd_clean)
+        else:
+            if len(current_chain) >= 2:
+                chains.append(list(current_chain))
+            current_chain = []
+            
+    if len(current_chain) >= 2:
+        chains.append(list(current_chain))
+        
+    chain_counts = {}
+    for c in chains:
+        key = tuple(c)
+        chain_counts[key] = chain_counts.get(key, 0) + 1
+        
+    generated_workflows = []
+    for c_tuple, count in chain_counts.items():
+        steps = []
+        for idx, cmd_str in enumerate(c_tuple, 1):
+            steps.append(f"{idx}. {cmd_str}")
+                
+        if len(steps) >= 2:
+            import hashlib
+            chain_hash = int(hashlib.md5(" ".join(c_tuple).encode()).hexdigest(), 16) % 1000
+            name = f"Detected MCP Chain {chain_hash}"
+            slug = f"detected_mcp_chain_{chain_hash}"
+            w_file = WORKFLOWS_DIR / f"{slug}.md"
+            
+            if not w_file.exists():
+                w_content = [
+                    f"# {name}",
+                    f"",
+                    f"This workflow was automatically detected by daily-evolve based on frequently used MCP chains.",
+                    f"Frequency of detection: {count} times.",
+                    f"",
+                    f"## Steps"
+                ]
+                w_content.extend(steps)
+                w_file.write_text("\n".join(w_content) + "\n")
+                generated_workflows.append(f"{name} (slug: {slug})")
+                
+    return generated_workflows
+
+# ---------------------------------------------------------------------------
 # PHASE 3: DAILY EVOLUTION LOOP
 # ---------------------------------------------------------------------------
 def run_daily_evolution():
@@ -43,6 +114,41 @@ def run_daily_evolution():
     # 1. Run system intelligence generation
     print("  - Running system audit, gap analysis, and recommendations...")
     system_intelligence.generate_all(update_resources=True)
+    
+    # 1.3. Detect MCP Chains
+    mcp_chains_detected = []
+    try:
+        mcp_chains_detected = detect_and_generate_mcp_chains()
+    except Exception as e:
+        print(f"Error detecting MCP chains: {e}")
+        
+    # 1.4. Update Workflow Priority Scores
+    print("  - Updating workflow priority scores...")
+    try:
+        import sys
+        sys.path.append(str(ROOT / "scripts"))
+        import workflow_priority_engine
+        workflow_priority_engine.decay_and_boost_workflows()
+    except Exception as e:
+        print(f"Error updating workflow priority scores: {e}")
+        
+    # 1.45. Run Workflow Self-Optimization Pass
+    print("  - Running Workflow Self-Optimization Pass...")
+    opt_recs = {}
+    try:
+        import workflow_optimizer
+        opt_recs = workflow_optimizer.run_optimization_pass()
+    except Exception as e:
+        print(f"Error running Workflow Self-Optimization Pass: {e}")
+    
+    # 1.5. Run Knowledge-to-Execution Bridge
+    print("  - Running Knowledge-to-Execution Bridge...")
+    kb_results = None
+    try:
+        import knowledge_bridge
+        kb_results = knowledge_bridge.scan_and_generate_workflows()
+    except Exception as e:
+        print(f"Error running Knowledge-to-Execution Bridge: {e}")
     
     # 2. Analyze Obsidian/Workspace logs
     print("  - Analyzing logs for repetitive tasks and inefficiencies...")
@@ -112,7 +218,91 @@ def run_daily_evolution():
         lines.append("- Workspace health check is 100% stable. Doctor reports zero structural issues.")
         
     lines.append("")
-    lines.append("## 3. Selected Top 3 Safe Improvements")
+    lines.append("## 3. Obsidian Workflows (Knowledge-to-Execution Bridge)")
+    if kb_results and kb_results.get("workflows_generated"):
+        lines.append("Successfully converted the following Obsidian notes into actionable system workflows:")
+        for w_name, cmd in zip(kb_results["workflows_generated"], kb_results["commands_created"]):
+            lines.append(f"- **{w_name}** -> Runnable via `bin/{cmd}`")
+    else:
+        lines.append("- No new workflow patterns generated from Obsidian brain today.")
+        
+    if mcp_chains_detected:
+        lines.append("")
+        lines.append("Automatically detected frequently used MCP connector chains and compiled reusable workflows:")
+        for mc in mcp_chains_detected:
+            lines.append(f"- **{mc}**")
+            
+    # Add prioritized workflows section (Phase 4)
+    try:
+        import workflow_priority_engine
+        top_w = workflow_priority_engine.get_ranked_workflows(limit=3)
+        if top_w:
+            lines.append("")
+            lines.append("## 3.5. Workflow Priorities (Global Priority Model)")
+            lines.append("Workflow priority scores have been updated and decayed/boosted based on execution history.")
+            lines.append("Current top workflows by priority:")
+            for idx, w in enumerate(top_w, 1):
+                lines.append(f"{idx}. **{w['name']}** (Score: {w['priority_score']})")
+    except Exception:
+        pass
+        
+    # Phase 4 outcome evaluation analysis
+    try:
+        perf_path = ROOT / "brain/system/workflow_performance.json"
+        if perf_path.exists():
+            import json
+            perf_db = json.loads(perf_path.read_text())
+            lines.append("")
+            lines.append("## 3.7. Workflow Outcomes & Quality Analysis")
+            
+            low_scoring = []
+            high_scoring = []
+            
+            for slug, runs in perf_db.items():
+                if not runs:
+                    continue
+                avg_q = sum(r.get("quality_score", 1.0) for r in runs) / len(runs)
+                w_name = slug.replace("_", " ").title()
+                if avg_q < 0.6:
+                    low_scoring.append((w_name, avg_q, runs[-1].get("errors", [])))
+                elif avg_q >= 0.8:
+                    high_scoring.append((w_name, avg_q))
+                    
+            if low_scoring:
+                lines.append("⚠️ Detected the following low-scoring workflows needing optimization:")
+                for name, score, errs in low_scoring:
+                    err_msg = f" (Errors: {errs[0][:80]})" if errs else ""
+                    lines.append(f"- **{name}** | Average Quality: `{score:.2f}`{err_msg}")
+                    lines.append(f"  *Suggested Optimization:* Review inputs, verify target file permissions, or check for missing MCP connectors.")
+            else:
+                lines.append("✅ All executed workflows maintain high outcome quality (averaging >= 80%).")
+                
+            if high_scoring:
+                lines.append("")
+                lines.append("Highly reliable workflows currently active:")
+                for name, score in high_scoring:
+                    lines.append(f"- **{name}** (Average Quality: `{score:.2f}`)")
+    except Exception as e:
+        print(f"Error generating quality analysis: {e}")
+        
+    # Phase 4 workflow optimizations
+    if opt_recs:
+        lines.append("")
+        lines.append("## 3.8. Workflow Self-Optimizations (Candidate Improvements)")
+        lines.append("The following workflows are low-performing and have pending structural optimization candidates:")
+        for slug, r in opt_recs.items():
+            lines.append(f"- **{r['name']}** (Quality Score: `{r['avg_quality']:.2f}`):")
+            for s in r["suggestions"]:
+                lines.append(f"  - *Controlled Update Candidate*: {s}")
+                
+    if kb_results and kb_results.get("cleaned_up"):
+        lines.append("")
+        lines.append("Cleaned up stale/empty workflows (0 valid commands):")
+        for cl in kb_results["cleaned_up"]:
+            lines.append(f"- Stale: [[{cl}]]")
+
+    lines.append("")
+    lines.append("## 4. Selected Top 3 Safe Improvements")
     
     # Select top 3 bounded improvements based on findings
     top_3 = []
@@ -151,7 +341,7 @@ def run_daily_evolution():
         lines.append(f"{idx}. **{imp['name']}** | Type: `{imp['type']}` | *Status: {safety_str}*")
         
     lines.append("")
-    lines.append("## 4. Execution Logs")
+    lines.append("## 5. Execution Logs")
     
     # 4. Implement/execute safe improvements
     execution_notes = []

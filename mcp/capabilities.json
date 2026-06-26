@@ -1,0 +1,6 @@
+{
+  "github": ["list_prs", "create_issue"],
+  "filesystem": ["list_dir", "read_file"],
+  "shortcuts": ["list", "run"],
+  "search": ["web_search"]
+}

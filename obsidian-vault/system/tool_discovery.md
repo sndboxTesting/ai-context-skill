@@ -1,6 +1,6 @@
 # Tool & MCP Discovery Report
 
-**Discovered On:** 2026-06-26T08:50:05.959632-05:00
+**Discovered On:** 2026-06-26T09:08:04.429560-05:00
 
 ## 1. Discovered Local CLI Tools
 The following useful binaries were found installed on your Mac, but may not be fully integrated into your agent workflows:

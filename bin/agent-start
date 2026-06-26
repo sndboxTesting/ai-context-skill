@@ -166,6 +166,7 @@ if active_context_path.exists():
                 print("Context reset. Starting fresh session.")
             else:
                 print("Continuity active. Resuming...")
+    except Exception:
         pass
 PY
 fi

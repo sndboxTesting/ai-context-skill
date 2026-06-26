@@ -1,5 +1,69 @@
 # SuneelWorkSpace System Blueprint
 
+## EXECUTIVE SUMMARY (FAST LOAD)
+- **Role**: Local-first personal AI operating system workspace.
+- **Components**: Incorporates identity, stateful memory, workflows, MCP connectors, and execution orchestration.
+- **Real-world execution**: Supports direct local tool execution, GitHub, and macOS shortcuts automation.
+- **Knowledge Brain**: Integrated with Obsidian brain storage layer for notes and generated runnable workflows.
+- **Self-Evolution**: Daily self-improvement loops scan log contexts and optimize parameters.
+- **Shared Context**: Enables multi-agent workspace continuity (Claude, Codex, Gemini, OpenCode).
+- **Safety & Integrity**: Enforced via duplication-guard, AST/syntax checks, and canonical integrity checks.
+
+## START HERE (FOR AI AGENTS)
+Welcome external agent! Follow this boot sequence for immediate alignment:
+1. **Load Identity**: Read `identity/prompts/identity_prompt.md` and related profile configs.
+2. **Access memory**: Read `agent-system/memory/MEMORY.md` and active tasks list.
+3. **Read MCP resource map**: Inspect `mcp/server/config/resource_map.json` and capabilities list.
+4. **Inspect context**: Read `agent-system/state/ACTIVE_CONTEXT.json`.
+5. **Check workflows**: Look up priority order in `brain/system/workflow_priority.json`.
+6. **Execution pattern**: Execute using `intent` → `select workflow` → `run workflow` → `record outcome` pipeline.
+*Do NOT treat this as a simple project. This is a stateful AI operating system.*
+
+## CAPABILITY MAP
+### What the system CAN do:
+- **Run Workflows**: Execute MCP and non-MCP workflows compiled dynamically.
+- **Chain Tools**: Compose multi-step pipelines and pass outputs between steps.
+- **Operate GitHub**: List PRs and create tracking issues.
+- **Automate macOS**: Retrieve, list, and run shortcuts.
+- **Manage Files**: Perform scoped reads, writes, listings, and duplication checks.
+- **Research via Web**: Fetch search results using Brave search MCP.
+- **Manage Knowledge**: Keep Obsidian notes synced and extract executable scripts.
+
+### What REQUIRES user approval (CONTROLLED / RESTRICTED):
+- **Outbound Communication**: Sending iMessage or emails (gated approval).
+- **External Installs**: Changing system directories or npm/pip package installations.
+- **Destructive Actions**: Deleting, modifying core files, or running overrides.
+
+## HOW TO SUGGEST ENHANCEMENTS
+If you identify optimization vectors or logic gaps, propose improvements by:
+1. **Adding Workflows**: Write new step-by-step Markdown notes in `brain/workflows/`.
+2. **Expanding Connectors**: Add new capabilities to the MCP config.
+3. **Optimizing**: Refine parameters or suggest script upgrades.
+*DO NOT suggest rebuilding the system, duplicating code, or breaking canonical structures.*
+
+## SYSTEM RULES (NON-NEGOTIABLE)
+- **Zero Duplication**: Do not build parallel features. Upgrade or extend existing systems.
+- **Integrity Gates**: Run `duplication-guard` and `integrity-guard` before editing source files.
+- **Canonical Subsystems**: Always use canonical helpers in `bin/` or `scripts/`.
+- **Clean Symlinks**: All executables in `bin/` must remain as relative symlinks.
+
+## SYSTEM EXPANSION STRATEGY
+The system scales horizontally by:
+1. **MCP Connectors**: Introducing specialized API/tool bridges.
+2. **Workflows**: Defining high-level pipelines in Obsidian notes.
+3. **Identity/Priority Tuning**: Updating score matrices and prompt patterns.
+*Avoid rewriting core engine architectures or introducing redundant logic layers.*
+
+## IDEAL INTERACTION MODEL
+- **User Intent**: The user provides high-level goals.
+- **System Routing**: The system maps the intent to the best workflow, runs it, logs outcome metrics to `workflow_performance.json`, and evolves executing parameters dynamically.
+
+## EXTERNAL AGENT OBJECTIVE
+If you are an external AI:
+Your goals are to reduce user friction, increase automation reliability, enhance execution quality, propose safe optimizations, and expand capability integrations without introducing duplicate code.
+
+---
+
 This README is the complete operating blueprint for `~/SuneelWorkSpace`.
 
 If this file is copied into another environment, another AI agent should understand what the system is, how it thinks, where memory lives, what commands exist, what is safe, what is not safe, and how to extend it without rebuilding.
@@ -922,6 +986,16 @@ The Obsidian vault is exposed to AI agents via the MCP bridge as resources (e.g.
 - `brain_write_note`: Create/append markdown notes.
 - `brain_search`: Query notes case-insensitively.
 - `brain_link_notes`: Link concepts with backlink syntax.
+- `execute_workflow`: Execute a compiled workflow script by slug.
+
+### KNOWLEDGE-TO-EXECUTION BRIDGE
+
+Any markdown note captured in Obsidian that contains step-by-step instructions or command sequences is scanned and parsed automatically. The bridge extracts these sequences, validates them to filter out placeholder arguments, slash commands, or broken loop blocks, and compiles them into:
+1. Runnable Python wrapper scripts at `scripts/workflows/workflow_<name>.py`.
+2. Safe CLI symlinks at `bin/workflow-<name>` (which only contain relative symlinks).
+3. Metadata configuration JSON files at `brain/workflows/generated/<name>.json`.
+
+These workflows are ranked high in command suggestions, registered as MCP tools/resources, and synchronized during the Daily Evolution loop. Stale or empty workflows (with 0 valid commands) are automatically cleaned up.
 
 ## DAILY EVOLUTION
 

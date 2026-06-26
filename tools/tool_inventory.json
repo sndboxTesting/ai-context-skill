@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-06-26T08:50:04.237219-05:00",
+  "generated_at": "2026-06-26T09:08:02.580774-05:00",
   "tools": [
     {
       "install_location": "/Users/MAC/SuneelWorkSpace/bin/agent-autoclose",
@@ -65,6 +65,13 @@
       "safe_to_integrate": true
     },
     {
+      "install_location": "/Users/MAC/SuneelWorkSpace/bin/brave-search-mcp",
+      "integration_potential": "Can be routed through agent workflows and maintenance checks.",
+      "name": "brave-search-mcp",
+      "purpose": "Workspace command",
+      "safe_to_integrate": true
+    },
+    {
       "install_location": "/Users/MAC/SuneelWorkSpace/bin/comms-doctor",
       "integration_potential": "Can be routed through agent workflows and maintenance checks.",
       "name": "comms-doctor",
@@ -110,6 +117,20 @@
       "install_location": "/Users/MAC/SuneelWorkSpace/bin/duplication-guard",
       "integration_potential": "Can be routed through agent workflows and maintenance checks.",
       "name": "duplication-guard",
+      "purpose": "Workspace command",
+      "safe_to_integrate": true
+    },
+    {
+      "install_location": "/Users/MAC/SuneelWorkSpace/bin/filesystem-mcp",
+      "integration_potential": "Can be routed through agent workflows and maintenance checks.",
+      "name": "filesystem-mcp",
+      "purpose": "Workspace command",
+      "safe_to_integrate": true
+    },
+    {
+      "install_location": "/Users/MAC/SuneelWorkSpace/bin/github-mcp",
+      "integration_potential": "Can be routed through agent workflows and maintenance checks.",
+      "name": "github-mcp",
       "purpose": "Workspace command",
       "safe_to_integrate": true
     },
@@ -299,6 +320,13 @@
       "install_location": "/Users/MAC/SuneelWorkSpace/bin/integrity-guard",
       "integration_potential": "Can be routed through agent workflows and maintenance checks.",
       "name": "integrity-guard",
+      "purpose": "Workspace command",
+      "safe_to_integrate": true
+    },
+    {
+      "install_location": "/Users/MAC/SuneelWorkSpace/bin/macos-shortcuts-mcp",
+      "integration_potential": "Can be routed through agent workflows and maintenance checks.",
+      "name": "macos-shortcuts-mcp",
       "purpose": "Workspace command",
       "safe_to_integrate": true
     },
@@ -495,6 +523,90 @@
       "install_location": "/Users/MAC/SuneelWorkSpace/bin/workflow-audit",
       "integration_potential": "Can be routed through agent workflows and maintenance checks.",
       "name": "workflow-audit",
+      "purpose": "Workspace command",
+      "safe_to_integrate": true
+    },
+    {
+      "install_location": "/Users/MAC/SuneelWorkSpace/bin/workflow-claude-headroom-setup",
+      "integration_potential": "Can be routed through agent workflows and maintenance checks.",
+      "name": "workflow-claude-headroom-setup",
+      "purpose": "Workspace command",
+      "safe_to_integrate": true
+    },
+    {
+      "install_location": "/Users/MAC/SuneelWorkSpace/bin/workflow-code-improvement-workflow",
+      "integration_potential": "Can be routed through agent workflows and maintenance checks.",
+      "name": "workflow-code-improvement-workflow",
+      "purpose": "Workspace command",
+      "safe_to_integrate": true
+    },
+    {
+      "install_location": "/Users/MAC/SuneelWorkSpace/bin/workflow-composed-workflow",
+      "integration_potential": "Can be routed through agent workflows and maintenance checks.",
+      "name": "workflow-composed-workflow",
+      "purpose": "Workspace command",
+      "safe_to_integrate": true
+    },
+    {
+      "install_location": "/Users/MAC/SuneelWorkSpace/bin/workflow-eval-and-reliability-map",
+      "integration_potential": "Can be routed through agent workflows and maintenance checks.",
+      "name": "workflow-eval-and-reliability-map",
+      "purpose": "Workspace command",
+      "safe_to_integrate": true
+    },
+    {
+      "install_location": "/Users/MAC/SuneelWorkSpace/bin/workflow-implementation-workflow",
+      "integration_potential": "Can be routed through agent workflows and maintenance checks.",
+      "name": "workflow-implementation-workflow",
+      "purpose": "Workspace command",
+      "safe_to_integrate": true
+    },
+    {
+      "install_location": "/Users/MAC/SuneelWorkSpace/bin/workflow-local-ai-stack-overview",
+      "integration_potential": "Can be routed through agent workflows and maintenance checks.",
+      "name": "workflow-local-ai-stack-overview",
+      "purpose": "Workspace command",
+      "safe_to_integrate": true
+    },
+    {
+      "install_location": "/Users/MAC/SuneelWorkSpace/bin/workflow-obsidian-maintenance",
+      "integration_potential": "Can be routed through agent workflows and maintenance checks.",
+      "name": "workflow-obsidian-maintenance",
+      "purpose": "Workspace command",
+      "safe_to_integrate": true
+    },
+    {
+      "install_location": "/Users/MAC/SuneelWorkSpace/bin/workflow-obsidian-upgrade-handoff",
+      "integration_potential": "Can be routed through agent workflows and maintenance checks.",
+      "name": "workflow-obsidian-upgrade-handoff",
+      "purpose": "Workspace command",
+      "safe_to_integrate": true
+    },
+    {
+      "install_location": "/Users/MAC/SuneelWorkSpace/bin/workflow-rollback-and-recovery",
+      "integration_potential": "Can be routed through agent workflows and maintenance checks.",
+      "name": "workflow-rollback-and-recovery",
+      "purpose": "Workspace command",
+      "safe_to_integrate": true
+    },
+    {
+      "install_location": "/Users/MAC/SuneelWorkSpace/bin/workflow-system-improvement-workflow",
+      "integration_potential": "Can be routed through agent workflows and maintenance checks.",
+      "name": "workflow-system-improvement-workflow",
+      "purpose": "Workspace command",
+      "safe_to_integrate": true
+    },
+    {
+      "install_location": "/Users/MAC/SuneelWorkSpace/bin/workflow-telegram-control-plane",
+      "integration_potential": "Can be routed through agent workflows and maintenance checks.",
+      "name": "workflow-telegram-control-plane",
+      "purpose": "Workspace command",
+      "safe_to_integrate": true
+    },
+    {
+      "install_location": "/Users/MAC/SuneelWorkSpace/bin/workflow-voice-input",
+      "integration_potential": "Can be routed through agent workflows and maintenance checks.",
+      "name": "workflow-voice-input",
       "purpose": "Workspace command",
       "safe_to_integrate": true
     },

@@ -508,6 +508,33 @@ def res_brain_system() -> str:
     """List of all system notes in the Obsidian vault brain"""
     return _get_obsidian_resource_content("system")
 
+@mcp.resource("workspace://brain/patterns")
+def res_brain_patterns() -> str:
+    """List of all behavioral patterns in the system"""
+    p = WORKSPACE / "anticipation/behavior_patterns.json"
+    if p.exists():
+        return p.read_text(errors="replace")
+    return "[]"
+
+@mcp.resource("workspace://brain/workflows/generated")
+def res_brain_workflows_generated() -> str:
+    """List of all compiled workflows with metadata"""
+    gen_dir = WORKSPACE / "brain/workflows/generated"
+    if not gen_dir.exists():
+        return "No compiled workflows found."
+    files = sorted(gen_dir.glob("*.json"))
+    if not files:
+        return "No compiled workflows found."
+    lines = ["# Compiled Workflows (Metadata)\n"]
+    for f in files:
+        try:
+            data = json.loads(f.read_text(errors="replace"))
+            lines.append(f"- **{data.get('name')}** (slug: `{data.get('slug')}`)\n  Commands: {', '.join(data.get('commands', []))}\n  Source: {data.get('source_note')}\n")
+        except Exception as e:
+            lines.append(f"- **{f.stem}** (error loading: {e})")
+    return "\n".join(lines)
+
+
 # ---------------------------------------------------------------------------
 # OBSIDIAN BRAIN TOOLS
 # ---------------------------------------------------------------------------
@@ -597,6 +624,31 @@ def brain_write_note(title: str, category: str, content: str, mode: str = "overw
     else:
         p.write_text(content + "\n")
         return f"Successfully wrote note '{clean_title}' in '{category}' (overwrote existing if any)"
+
+@mcp.tool()
+def execute_workflow(workflow_slug: str) -> str:
+    """Execute a generated workflow script by slug (e.g. 'task-management' or 'rollback-and-recovery').
+    
+    Args:
+        workflow_slug: Slug of the workflow to run (the name after workflow-)
+    """
+    _access("execute_workflow", {"workflow_slug": workflow_slug})
+    slug = workflow_slug.replace("-", "_").lower()
+    script = WORKSPACE / f"scripts/workflows/workflow_{slug}.py"
+    if not script.exists():
+        return f"[Error: Workflow script for slug '{workflow_slug}' does not exist at {script}]"
+        
+    try:
+        import sys
+        res = subprocess.run([sys.executable, str(script)], capture_output=True, text=True, timeout=30, cwd=str(WORKSPACE))
+        out = res.stdout
+        err = res.stderr
+        status = "succeeded" if res.returncode == 0 else "failed"
+        return f"Workflow '{workflow_slug}' execution {status} (code {res.returncode}):\n\n--- stdout ---\n{out}\n\n--- stderr ---\n{err}"
+    except subprocess.TimeoutExpired:
+        return f"[Error: Workflow execution timed out after 30 seconds]"
+    except Exception as e:
+        return f"[Error running workflow: {e}]"
 
 @mcp.tool()
 def brain_search(query: str) -> str:
@@ -1279,6 +1331,11 @@ def res_routing_logs() -> str:
     lines = p.read_text(errors="replace").splitlines()
     recent = lines[-MAX_LINES:] if len(lines) > MAX_LINES else lines
     return "\n".join(recent)
+
+@mcp.resource("workspace://routing/intent-mapping")
+def res_routing_intent_mapping() -> str:
+    """Task intent to MCP connector categories mapping"""
+    return _read_orch("router/intent_mcp_mapping.json")
 
 @mcp.tool()
 def route_task(task: str, dry_run: bool = False) -> str:

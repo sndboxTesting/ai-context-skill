@@ -1,0 +1,10 @@
+[
+  {
+    "timestamp": "2026-06-26T20:12:12.671112+00:00",
+    "query": "run health check on workspace",
+    "intent": "health_check",
+    "confidence": 0.875,
+    "command": "agent-doctor",
+    "args": []
+  }
+]

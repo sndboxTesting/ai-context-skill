@@ -1,0 +1,35 @@
+name: morning_brief
+description: "Generates morning digest of world changes relevant to active goals"
+trigger:
+  type: schedule
+  schedule: "0 7 * * *"
+
+steps:
+  - id: fetch_news
+    name: "Fetch External Monitor"
+    command: "monitor-run"
+    args: ["--no-digest"]
+    execution_level: SAFE
+  - id: check_goals
+    name: "Goal Status"
+    command: "goal-status"
+    execution_level: SAFE
+  - id: check_telemetry
+    name: "Telemetry Summary"
+    command: "telemetry-query"
+    args: ["summary", "--days", "1"]
+    execution_level: SAFE
+  - id: write_brief
+    name: "Write Morning Brief"
+    command: "monitor-digest"
+    depends_on: [fetch_news, check_goals, check_telemetry]
+    execution_level: SAFE
+  - id: generate_hypotheses
+    name: "Generate Hypotheses"
+    command: "hypothesis-generate"
+    depends_on: [write_brief]
+    execution_level: SAFE
+
+on_failure:
+  action: continue
+  notify: log

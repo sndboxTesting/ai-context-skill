@@ -1,0 +1,49 @@
+name: idea_to_goal
+description: "Capture an idea, research it, and create a tracked goal"
+trigger:
+  type: manual
+
+inputs:
+  - name: idea_text
+    required: true
+  - name: idea_context
+    required: false
+    default: ""
+
+steps:
+  - id: capture_idea
+    name: "Capture Idea"
+    command: "idea-start"
+    args: ["{{ inputs.idea_text }}"]
+    execution_level: SAFE
+    outputs:
+      - name: idea_id
+        from: stdout_last_line
+
+  - id: run_research
+    name: "Research Idea"
+    command: "idea-run"
+    args: ["{{ inputs.idea_text }}", "{{ inputs.idea_context }}"]
+    depends_on: [capture_idea]
+    execution_level: CONTROLLED
+    outputs:
+      - name: research_path
+        from: stdout_last_line
+
+  - id: create_goal
+    name: "Create Goal"
+    command: "goal-create"
+    args: ["{{ steps.run_research.outputs.research_path }}"]
+    depends_on: [run_research]
+    execution_level: CONTROLLED
+    condition: "{{ steps.run_research.status }} == 'success'"
+
+  - id: plan_goal
+    name: "Plan Goal"
+    command: "goal-plan"
+    depends_on: [create_goal]
+    execution_level: CONTROLLED
+
+on_failure:
+  action: stop
+  notify: log

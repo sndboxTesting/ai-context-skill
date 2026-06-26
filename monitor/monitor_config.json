@@ -1,0 +1,20 @@
+{
+  "rss_feeds": [
+    {"url": "https://hnrss.org/frontpage", "label": "Hacker News", "tags": ["tech", "ai"]},
+    {"url": "https://feeds.feedburner.com/anthropic-blog", "label": "Anthropic Blog", "tags": ["ai", "claude"]},
+    {"url": "https://openai.com/blog/rss.xml", "label": "OpenAI Blog", "tags": ["ai", "llm"]}
+  ],
+  "github_repos": [
+    {"repo": "anthropics/anthropic-sdk-python", "watch": ["releases", "issues"], "label": "Anthropic Python SDK"},
+    {"repo": "anthropics/claude-code", "watch": ["releases"], "label": "Claude Code"},
+    {"repo": "microsoft/vscode", "watch": ["releases"], "label": "VS Code"}
+  ],
+  "arxiv_topics": [
+    {"query": "large language model prompt engineering", "max_results": 5, "label": "LLM Prompting"},
+    {"query": "AI agent autonomous workflow", "max_results": 5, "label": "AI Agents"},
+    {"query": "retrieval augmented generation", "max_results": 3, "label": "RAG"}
+  ],
+  "relevance_threshold": 0.4,
+  "schedule": "0 7 * * *",
+  "output_dir": "monitor/cache"
+}

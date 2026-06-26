@@ -1,0 +1,40 @@
+name: system_health
+description: "Full system health check and improvement cycle"
+trigger:
+  type: schedule
+  schedule: "0 2 * * *"
+
+steps:
+  - id: audit
+    name: "System Audit"
+    command: "system-audit"
+    execution_level: SAFE
+  - id: gaps
+    name: "Gap Analysis"
+    command: "system-gaps"
+    depends_on: [audit]
+    execution_level: SAFE
+  - id: recommend
+    name: "Recommendations"
+    command: "system-recommend"
+    depends_on: [gaps]
+    execution_level: SAFE
+  - id: improve
+    name: "Apply Improvements"
+    command: "improve-system"
+    depends_on: [recommend]
+    execution_level: SAFE
+  - id: doctor
+    name: "Agent Doctor"
+    command: "agent-doctor"
+    depends_on: [improve]
+    execution_level: SAFE
+  - id: reindex
+    name: "MCP Reindex"
+    command: "mcp-reindex"
+    depends_on: [doctor]
+    execution_level: SAFE
+
+on_failure:
+  action: continue
+  notify: log

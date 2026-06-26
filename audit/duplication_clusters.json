@@ -1,0 +1,71 @@
+{
+  "generated": "2026-06-26T01:14:00",
+  "status": "resolved",
+  "description": "All duplication clusters identified during the workspace cleanup of 2026-06-26.",
+  "clusters_resolved": [
+    {
+      "id": "bin-goal-engine",
+      "type": "exact_copy",
+      "resolution": "symlink",
+      "files": [
+        {"path": "bin/goal-adapt", "role": "symlink -> ../goal-engine/scripts/goal-adapt"},
+        {"path": "bin/goal-complete", "role": "symlink -> ../goal-engine/scripts/goal-complete"},
+        {"path": "bin/goal-create", "role": "symlink -> ../goal-engine/scripts/goal-create"},
+        {"path": "bin/goal-execute", "role": "symlink -> ../goal-engine/scripts/goal-execute"},
+        {"path": "bin/goal-fail", "role": "symlink -> ../goal-engine/scripts/goal-fail"},
+        {"path": "bin/goal-monitor", "role": "symlink -> ../goal-engine/scripts/goal-monitor"},
+        {"path": "bin/goal-plan", "role": "symlink -> ../goal-engine/scripts/goal-plan"},
+        {"path": "bin/goal-status", "role": "symlink -> ../goal-engine/scripts/goal-status"}
+      ],
+      "canonical": "goal-engine/scripts/",
+      "reason": "bin/ is the CLI entrypoint layer; subsystem scripts/ hold the source of truth"
+    },
+    {
+      "id": "bin-mcp",
+      "type": "exact_copy",
+      "resolution": "symlink",
+      "files": [
+        {"path": "bin/mcp-doctor", "role": "symlink -> ../mcp/server/scripts/mcp-doctor"},
+        {"path": "bin/mcp-reindex", "role": "symlink -> ../mcp/server/scripts/mcp-reindex"},
+        {"path": "bin/mcp-repair", "role": "symlink -> ../mcp/server/scripts/mcp-repair"},
+        {"path": "bin/mcp-report", "role": "symlink -> ../mcp/server/scripts/mcp-report"},
+        {"path": "bin/mcp-start", "role": "symlink -> ../mcp/server/scripts/mcp-start"},
+        {"path": "bin/mcp-status", "role": "symlink -> ../mcp/server/scripts/mcp-status"},
+        {"path": "bin/mcp-stop", "role": "symlink -> ../mcp/server/scripts/mcp-stop"},
+        {"path": "bin/mcp-test", "role": "symlink -> ../mcp/server/scripts/mcp-test"}
+      ],
+      "canonical": "mcp/server/scripts/",
+      "reason": "bin/ is the CLI entrypoint layer; subsystem scripts/ hold the source of truth"
+    },
+    {
+      "id": "bin-orchestrator",
+      "type": "exact_copy",
+      "resolution": "symlink",
+      "files": [
+        {"path": "bin/route-analyze", "role": "symlink -> ../orchestrator/scripts/route-analyze"},
+        {"path": "bin/route-execute", "role": "symlink -> ../orchestrator/scripts/route-execute"},
+        {"path": "bin/route-learn", "role": "symlink -> ../orchestrator/scripts/route-learn"},
+        {"path": "bin/route-task", "role": "symlink -> ../orchestrator/scripts/route-task"}
+      ],
+      "canonical": "orchestrator/scripts/",
+      "reason": "bin/ is the CLI entrypoint layer; subsystem scripts/ hold the source of truth"
+    },
+    {
+      "id": "agent-backups",
+      "type": "full_workspace_copy",
+      "resolution": "consolidated",
+      "description": "51 timestamped full workspace backups reduced to 3 most recent + 1 compressed archive",
+      "files_before": 4545,
+      "files_after": "~366 (3 snapshots)",
+      "kept": ["20260626-010355", "20260626-010016", "20260626-005629"],
+      "archived": "archive-pre-cleanup.tar.gz"
+    },
+    {
+      "id": "autolab-history",
+      "type": "experiment_snapshots",
+      "resolution": "archived",
+      "description": "autolab/snapshots/ and autolab/quarantine/ compressed into autolab/archive/",
+      "files_archived": "~180 files across 9 snapshot/quarantine dirs"
+    }
+  ]
+}

@@ -23,6 +23,8 @@ autolab/reports/
 autolab/state/
 autolab/meta/
 autolab/patches/
+autolab/archive/
+
 
 # Auto-generated MCP server state (regenerated automatically)
 mcp/server/state/

@@ -665,3 +665,8 @@ async def api_autolab_generate() -> Any:
         return {"status": "done", "count": len(lines), "output": result.stdout[:600]}
     except Exception as e:
         return {"status": "error", "error": str(e)}
+
+
+if __name__ == "__main__":
+    import uvicorn
+    uvicorn.run("eyes.dashboard.server:app", host="127.0.0.1", port=7777, log_level="warning", reload=False)

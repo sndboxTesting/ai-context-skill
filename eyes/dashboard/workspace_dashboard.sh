@@ -11,5 +11,5 @@ else
     (sleep 1 && open http://localhost:7777) &
     # Run uvicorn server
     cd "/Users/MAC/SuneelWorkSpace"
-    exec uvicorn dashboard.server:app --host 127.0.0.1 --port 7777 --log-level warning
+    exec uvicorn eyes.dashboard.server:app --host 127.0.0.1 --port 7777 --log-level warning
 fi

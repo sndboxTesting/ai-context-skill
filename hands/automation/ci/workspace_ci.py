@@ -49,16 +49,30 @@ def check(name: str, passed: bool, detail: str = ""):
 
 
 def check_health_score():
+    # Primary: README health cache (authoritative)
+    readme_cache = WORKSPACE / 'spine/readme_health_cache.json'
+    if readme_cache.exists():
+        try:
+            cache = json.loads(readme_cache.read_text())
+            scores = [v['health_score'] for v in cache.values()
+                      if isinstance(v, dict) and 'health_score' in v]
+            if scores:
+                score = round(sum(scores) / len(scores), 1)
+                passed = score >= 60
+                check("Workspace health (README avg)", passed,
+                      f"score={score}/100 folders={len(scores)}")
+                return
+        except Exception:
+            pass
+    # Fallback: WORKSPACE_HEALTH.json
     if not HEALTH_FILE.exists():
         check("Workspace health check", False, "WORKSPACE_HEALTH.json not found")
         return
     try:
         with open(HEALTH_FILE) as f:
             data = json.load(f)
-        # Real health json uses issue_count and error_count
         errors = int(data.get('error_count', 0))
         issues = int(data.get('issue_count', 0))
-        # Compute a synthetic score: 100 - 20*errors - 5*issues
         score = max(0, 100 - errors * 20 - issues * 5)
         # Try direct score fields too
         if 'health_score' in data:

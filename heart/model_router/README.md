@@ -73,13 +73,13 @@ Emits `readme_updated` events to nervous system on change.
 **Wiring mismatches:**
 - README links heart/ but not in dep map
 
-*Last reconciled: 2026-06-27T03:54:39*
+*Last reconciled: 2026-06-27T04:24:48*
 
 ## 🎯 Intent Alignment
 
 **Alignment:** ⚠️ PARTIAL (60/100)
 
-*Last checked: 2026-06-27T03:54:39*
+*Last checked: 2026-06-27T04:24:48*
 
 ## 🌐 Failure Impact Map
 
@@ -93,7 +93,7 @@ Emits `readme_updated` events to nervous system on change.
 **Cascade (depth 1-1):**
 - Depth 1: `eyes/dashboard`, `eyes/dashboard/widgets`, `eyes/visual`
 
-*Computed: 2026-06-27T03:54:39*
+*Computed: 2026-06-27T04:24:48*
 
 ## 📈 Trends
 

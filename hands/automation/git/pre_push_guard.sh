@@ -118,21 +118,13 @@ while read local_ref local_sha remote_ref remote_sha; do
     fi
 
     # Policy: health score (from cache)
+    # Use env vars to pass paths into Python — never string-interpolate into -c code
     HEALTH_SCORE=100
     CACHE="$WORKSPACE/spine/readme_health_cache.json"
     if [[ -f "$CACHE" ]]; then
-      HEALTH_SCORE=$(python3 -c "
-import json, sys
-try:
-    c = json.load(open('$CACHE'))
-    entry = c.get('$REL_FOLDER', {})
-    if isinstance(entry, dict):
-        print(entry.get('health_score', 100))
-    else:
-        print(100)
-except:
-    print(100)
-" 2>/dev/null || echo 100)
+      HEALTH_SCORE=$(README_CACHE="$CACHE" README_FOLDER="$REL_FOLDER" python3 -c \
+        'import json,os; c=json.load(open(os.environ["README_CACHE"])); e=c.get(os.environ["README_FOLDER"],{}); print(e.get("health_score",100) if isinstance(e,dict) else 100)' \
+        2>/dev/null || echo 100)
     fi
 
     if [[ "$HEALTH_SCORE" -lt "$HEALTH_BLOCK_THRESHOLD" ]]; then

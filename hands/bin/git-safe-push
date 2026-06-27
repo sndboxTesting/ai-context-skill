@@ -43,7 +43,7 @@ fi
 
 echo ""
 echo "  Step 4/4: Pushing..."
-git push "${GIT_ARGS[@]}"
+git push ${GIT_ARGS[@]+"${GIT_ARGS[@]}"}
 
 echo ""
 echo "✅ git-safe-push complete."

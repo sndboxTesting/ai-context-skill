@@ -180,8 +180,14 @@ def auto_commit(dry_run: bool = False, force_push: bool = False) -> int:
         _log("DRY RUN — no changes made.")
         return 0
 
-    # Stage files
+    # Stage files (skip non-existent and gitignored paths)
     for path in stageable:
+        full = WORKSPACE / path
+        if not full.exists():
+            continue
+        rc, _, err = _run(["git", "check-ignore", "-q", path])
+        if rc == 0:
+            continue  # gitignored — skip silently
         rc, _, err = _run(["git", "add", path])
         if rc != 0:
             _log(f"  ⚠️  Could not stage {path}: {err}")

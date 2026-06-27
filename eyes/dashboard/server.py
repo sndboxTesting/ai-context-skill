@@ -26,6 +26,7 @@ from widgets.memory_health import get_memory_health
 from widgets.mcp_status import get_mcp_status
 from widgets.anticipation import get_suggestions
 from widgets.autolab_status import get_autolab_status
+from widgets.readme_health import get_readme_health
 
 WORKSPACE = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 LOG_DIR = os.path.join(WORKSPACE, "agent-system", "logs")
@@ -289,6 +290,11 @@ async def api_anticipation() -> Any:
 @app.get("/api/autolab")
 async def api_autolab() -> Any:
     return get_autolab_status()
+
+
+@app.get("/api/readme-health")
+async def api_readme_health() -> Any:
+    return get_readme_health()
 
 
 @app.get("/api/health")

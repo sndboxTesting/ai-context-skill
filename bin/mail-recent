@@ -1,3 +1,1 @@
-#!/bin/sh
-ROOT="${SUNEEL_WORKSPACE:-$HOME/SuneelWorkSpace}"
-exec python3 "$ROOT/comms/mail/scripts/mail-recent" "$@"
+../hands/bin/mail-recent

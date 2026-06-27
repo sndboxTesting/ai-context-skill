@@ -9,7 +9,7 @@ HEALTH_JSON="$ROOT/spine/state/WORKSPACE_HEALTH.json"
 STATE_JSON="$ROOT/spine/state/CURRENT_STATE.json"
 INDEX_JSON="$ROOT/spine/state/INDEX.json"
 LAUNCHD_LABEL="com.suneelworkspace.maintenance"
-LAUNCHD_WORKSPACE_PLIST="$ROOT/automation/launchd/$LAUNCHD_LABEL.plist"
+LAUNCHD_WORKSPACE_PLIST="$ROOT/hands/automation/launchd/$LAUNCHD_LABEL.plist"
 LAUNCHD_USER_PLIST="$HOME/Library/LaunchAgents/$LAUNCHD_LABEL.plist"
 
 now_stamp() {
@@ -24,19 +24,34 @@ ensure_core_dirs() {
   mkdir -p \
     "$BACKUP_ROOT" \
     "$ROOT/bin" \
-    "$ROOT/automation/doctor" \
-    "$ROOT/automation/repair" \
-    "$ROOT/automation/maintenance" \
-    "$ROOT/automation/launchd" \
-    "$ROOT/automation/hooks" \
-    "$ROOT/automation/reports" \
-    "$ROOT/brain/memory/shared" \
-    "$ROOT/brain/memory/memory" \
-    "$ROOT/brain/memory/tasks" \
-    "$ROOT/brain/memory/logs" \
-    "$ROOT/brain/memory/state" \
-    "$ROOT/brain/memory/templates" \
-    "$ROOT/brain/memory/docs" \
+    "$ROOT/brain/memory" \
+    "$ROOT/brain/research" \
+    "$ROOT/brain/anticipation" \
+    "$ROOT/brain/graph" \
+    "$ROOT/brain/injector" \
+    "$ROOT/heart/tasks" \
+    "$ROOT/heart/goals" \
+    "$ROOT/heart/model_router" \
+    "$ROOT/heart/orchestrator" \
+    "$ROOT/eyes/dashboard" \
+    "$ROOT/eyes/visual" \
+    "$ROOT/ears/monitor" \
+    "$ROOT/nervous/gateway" \
+    "$ROOT/nervous/mcp" \
+    "$ROOT/skeleton/rules" \
+    "$ROOT/blood/telemetry" \
+    "$ROOT/blood/logs" \
+    "$ROOT/hands/bin" \
+    "$ROOT/hands/scripts" \
+    "$ROOT/hands/automation" \
+    "$ROOT/mouth/dispatcher" \
+    "$ROOT/mouth/comms" \
+    "$ROOT/dna/identity" \
+    "$ROOT/dna/feedback" \
+    "$ROOT/lab/autolab" \
+    "$ROOT/lab/evolution" \
+    "$ROOT/spine/state" \
+    "$ROOT/spine/tools" \
     "$ROOT/projects"
 }
 

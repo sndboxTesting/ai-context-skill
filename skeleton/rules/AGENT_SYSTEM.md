@@ -1,6 +1,6 @@
 @~/.claude/RTK.md
 
-# Shared Agent System
+# Shared Agent System — SuneelWorkSpace (AGENTS.md)
 
 ## README Blueprint Boot
 
@@ -10,44 +10,26 @@
 
 Before drafting, planning, or communicating for Suneel, load the identity subsystem:
 
-- `~/SuneelWorkSpace/dna/dna/dna/dna/dna/dna/identity/prompts/identity_prompt.md`
-- `~/SuneelWorkSpace/dna/dna/dna/dna/dna/dna/identity/prompts/communication_prompt.md`
-- `~/SuneelWorkSpace/dna/dna/dna/dna/dna/dna/identity/profile/identity_profile.md`
-- `~/SuneelWorkSpace/dna/dna/dna/dna/dna/dna/identity/profile/tone_profile.md`
-- `~/SuneelWorkSpace/dna/dna/dna/dna/dna/dna/identity/profile/decision_profile.md`
+- `~/SuneelWorkSpace/dna/identity/prompts/identity_prompt.md`
+- `~/SuneelWorkSpace/dna/identity/prompts/communication_prompt.md`
+- `~/SuneelWorkSpace/dna/identity/profile/identity_profile.md`
+- `~/SuneelWorkSpace/dna/identity/profile/tone_profile.md`
+- `~/SuneelWorkSpace/dna/identity/profile/decision_profile.md`
 
-Apply Suneel's voice: short, direct, casual, conversational, smart, structured, softened, never harsh or condescending. Default to safe autopilot, but ask before serious system risk, destructive actions, important deletion, money/account actions, external installs, private deep indexing, or outbound communication.
+Apply Suneel's voice: short, direct, casual, conversational, smart, structured, softened, never harsh or condescending. Default to safe autopilot, but ask before serious system risk, destructive actions, money/account actions, or outbound communication.
 
 ## Purpose
 
 This is the canonical instruction source for Suneel's living shared agent workspace at `~/SuneelWorkSpace`.
-
-Claude Code and Codex CLI must use this workspace as the shared source for instructions, dna/dna/dna/identity/context, memory, task state, logs, maintenance state, and session handoffs.
+Claude Code, Codex CLI, and other agents all share this workspace for instructions, memory, tasks, logs, and state.
 
 ## Source Of Truth
 
 - Canonical workspace: `~/SuneelWorkSpace`
-- Canonical instruction file: `~/SuneelWorkSpace/skeleton/rules/AGENT_SYSTEM.md`
-- Workspace entrypoints: `~/SuneelWorkSpace/AGENTS.md` and `~/SuneelWorkSpace/CLAUDE.md`
-- Claude global entrypoint: `~/.claude/CLAUDE.md`
-- Codex global entrypoint: `~/.hands/hands/hands/codex/AGENTS.md`
-- Antigravity global entrypoint: `~/.gemini/config/AGENTS.md`
-- Antigravity workspace customization: `~/SuneelWorkSpace/.agents/AGENTS.md`
-
-If instructions conflict inside this workspace, the canonical shared docs under `~/SuneelWorkSpace/brain/memory/` are the source of truth. Project-specific instructions may add local detail, but they must not weaken safety boundaries.
-
-## Rules
-
-- Keep shared state file-based, transparent, and easy to inspect.
-- Prefer clean organization, minimal duplication, and a single source of truth.
-- Keep real source files under `~/SuneelWorkSpace` whenever possible.
-- Use symlinks or thin loader files outside the workspace only when a tool needs global discovery.
-- Do not perform purchases, billing changes, account upgrades, or other money-related actions.
-- Avoid destructive actions. Do not delete or overwrite important files without a timestamped backup and clear reason.
-- Before changing files, inspect relevant existing files and prefer upgrading over recreating.
-- Perform approved local setup actions directly when safe instead of asking Suneel to copy and paste commands.
-- Explain work clearly and step by step because Suneel is new to development.
-- Leave a concise, high-value handoff for the next agent.
+- Canonical instructions: `~/SuneelWorkSpace/skeleton/rules/AGENT_SYSTEM.md`
+- Entrypoints: `~/SuneelWorkSpace/CLAUDE.md` and `~/SuneelWorkSpace/AGENTS.md`
+- Customization customizations: `~/SuneelWorkSpace/.agents/AGENTS.md`
+- Memory files: `~/SuneelWorkSpace/brain/memory/`
 
 ## Startup
 
@@ -66,177 +48,53 @@ Before meaningful work, read these files in order:
 11. `~/SuneelWorkSpace/spine/state/CURRENT_STATE.json`
 12. `~/SuneelWorkSpace/spine/state/WORKSPACE_HEALTH.json`
 
-Use `~/SuneelWorkSpace/bin/agent-start` or `~/SuneelWorkSpace/bin/workspace-context` to print the startup brief.
+Use `~/SuneelWorkSpace/hands/bin/agent-start` or `~/SuneelWorkSpace/hands/bin/workspace-context` to print the startup brief.
 
 Mandatory startup behavior:
-
 - State: "Loading workspace context".
-- Read the startup checklist files before making meaningful changes.
-- Summarize current state, health, active tasks, and latest handoff before acting.
-- If a previous session was left open, run or rely on `agent-start` fail-safe recovery to checkpoint it.
+- Read startup checklist files.
+- Summarize current state, health, tasks, and handoff.
+- If a previous session was open, run or rely on `agent-autoclose --startup-recovery` recovery.
 
 ## Closeout
 
 After completing meaningful work, update:
-
 - `brain/memory/SESSION_HANDOFF.md`
 - `heart/tasks/ACTIVE_TASKS.md` and/or `heart/tasks/COMPLETED_TASKS.md`
 - `blood/logs/SESSION_LOG.md`
 - `spine/state/CURRENT_STATE.json`
-- `spine/state/WORKSPACE_HEALTH.json` if system condition changed
+- `spine/state/WORKSPACE_HEALTH.json` if health changed
 - `brain/memory/MEMORY.md` or `brain/memory/DECISIONS.md` if durable knowledge was created
 
-Use `~/SuneelWorkSpace/bin/agent-finish "summary"` for simple closeouts.
+Use `~/SuneelWorkSpace/hands/bin/agent-finish "summary"` to mark session end.
 
-Automatic closeout:
+## Rules
 
-- `use-codex`, `use-claude`, and shell exit hooks run `agent-autoclose` automatically.
-- Manual `agent-finish` is no longer required for normal operation.
-- Agents must still attempt to update handoff, logs, memory, decisions, and tasks before finishing when they can.
-- If an agent misses closeout, the next startup must detect the open session and repair it with `agent-autoclose --startup-recovery`.
+- Keep shared state file-based, transparent, and easy to inspect.
+- Avoid money-related actions and billing changes.
+- Avoid destructive actions (never delete/overwrite important files without backup).
+- New CLI commands must always be symlinked inside `hands/bin/` — never copied.
+- Notify nervous subscribers of changes: `python3 nervous/nerve_propagator.py notify <organ> "update" <path>`.
 
-## Memory Policy
+## Nerve System & Human Body Architecture
+The workspace is structured into 12 Organs (folders) interconnected via `nervous/nerve_propagator.py` events:
+- **brain**: vector search memory, anticipation, research.
+- **heart**: goals scheduler, task queues, model fallback router.
+- **eyes**: control center Web dashboard, visual screenshot healer.
+- **ears**: external RSS/GitHub monitors, morning briefing builder.
+- **nervous**: gateway gateway, central MCP connectors, nerve propagator.
+- **skeleton**: shared instructions, safety gates, rules markdown files.
+- **blood**: SQLite telemetry databases, logs anomaly indicators.
+- **hands**: scripts executables, launchd plist automation, CI runner.
+- **mouth**: ws dispatcher, communication plugins (Mail, iMessage).
+- **dna**: identity prompt models, adapt loop scorers.
+- **lab**: autolab experiments, self-evolution challenger cycles.
+- **spine**: health profiles, workspace current index registers.
 
-Put stable facts in `MEMORY.md`.
-
-Put important choices and their reasons in `DECISIONS.md`.
-
-Use `NOTES.md` for temporary notes that should not become permanent truth yet.
-
-Do not store secrets, tokens, passwords, private keys, billing data, or financial details in shared memory.
-
-## Task Policy
-
-Use `ACTIVE_TASKS.md` for current work.
-
-Use `TASK_QUEUE.md` for queued future work.
-
-Move completed work to `COMPLETED_TASKS.md` with the date and a short result.
-
-Keep task entries short enough for future agents to scan quickly.
-
-## Handoff Policy
-
-`SESSION_HANDOFF.md` should always describe:
-
-- What was requested.
-- What changed.
-- What was verified.
-- What remains.
-- Risks, limits, or follow-up recommendations.
-
-## Maintenance Policy
-
-- Use `agent-doctor` to inspect workspace health.
-- Use `agent-repair` to safely fix small issues.
-- Use `agent-maintain` for recurring health, repair, index, backup, and report refresh.
-- Use `agent-autoclose` for automatic, idempotent session checkpointing on wrapper exit, shell exit, and startup recovery.
-- Use `lab/lab/lab/autolab/` for bounded workspace self-improvement experiments. Autolab may improve prompts, docs, scripts, reports, and repair logic only within its mutation policy.
-- Autolab changes must be measurable, reversible, logged, and kept only when safety gates pass and score improves.
-
-## Autolab Startup Note
-
-If a user asks for workspace self-improvement, read:
-
-1. `~/SuneelWorkSpace/lab/lab/lab/autolab/program.md`
-2. `~/SuneelWorkSpace/lab/lab/lab/autolab/mutation_policy.md`
-3. `~/SuneelWorkSpace/lab/lab/lab/autolab/safeguards.md`
-4. `~/SuneelWorkSpace/lab/lab/lab/autolab/evaluator.md`
-5. `~/SuneelWorkSpace/lab/lab/lab/autolab/current_frontier.md`
-- Log maintenance in `blood/logs/MAINTENANCE_LOG.md`.
-- Track health in `spine/state/WORKSPACE_HEALTH.json`.
-- Track file locations in `spine/state/INDEX.json`.
-
-## Safety Boundaries
-
-See `skeleton/rules/SAFETY_BOUNDARIES.md`.
-
-Short version:
-
-- No money actions.
-- No destructive actions without explicit approval and backup where applicable.
-- No blind merges between similar workspace folders.
-- No complicated database or external service for shared state.
-- No hidden state when a plain file will work.
-
-## gstack Skills Available
-
-gstack is installed at `~/.claude/skills/gstack/`. These skills are invoked as slash commands at the start of a Claude Code session to activate a specialist reasoning mode.
-
-**Claude should dynamically choose a gstack skill when the task warrants it. Prefer structured thinking over generic responses.**
-
-| Skill | When to use |
-|---|---|
-| `/investigate` | Debugging — unknown root cause, multi-file failures, intermittent errors |
-| `/cso` | Security — before shipping auth/input/API changes; any security audit |
-| `/review` | Code quality — after implementation, before commit |
-| `/office-hours` | Planning — before decomposing a new goal; validate framing first |
-| `/plan-eng-review` | Architecture — before building a new subsystem; lock interfaces |
-| `/ship` | Release — test → version bump → CHANGELOG → PR in one flow |
-| `/careful` | Scripting / file ops — preview destructive commands before running |
-| `/qa` | UI testing — browser-based flow testing with auto bug filing |
-| `/autoplan` | Full pipeline — runs CEO + design + eng review sequentially |
-| `/self-repair` | Self-Healing — diagnoses failures, runs doctor/repair, fixes syntax, and manages rollbacks |
-| `/copilot-optimizer` | Prompt Engineering — packages raw brainstorm ideas into structured prompts for Copilot Chat |
-
-**Routing integration:** The orchestrator's `route-task` recommends a gstack skill alongside agent selection. The goal engine shows skill hints in task cards.
-
-**Usage pattern:**
-1. `route-task "describe your task"` → see recommended skill
-2. Open Claude Code → type the skill name (e.g. `/investigate`)
-3. Describe the task → skill activates its structured methodology
-
-**Policy file:** `heart/heart/heart/heart/heart/heart/orchestrator/router/gstack_policy.json`
-
-## Copilot Prompt Engineering Workflow
-
-Suneel uses Microsoft 365 Copilot Chat (running locally on his Mac) as his primary prompt engineering companion:
-- **Role**: Copilot brainstorms ideas and designs/engineers the execution prompts.
-- **Workflow**: Suneel refines ideas in Copilot, and then copy-pastes the engineered prompts into whichever workspace agent is active.
-- **Execution**: Active agents must execute the pasted Copilot-engineered prompts precisely, aligning the requested tasks with the workspace's directories, CLI tools, safety boundaries, and closeout routines.
-
-## Existing Note
-
-Before this shared system was created, Claude had a global `CLAUDE.md` pointing at `@RTK.md`. That file was preserved in backups. It appeared to be a technical note, not the main workspace policy.
-
-## Free Fallback Agents
-
-When Claude Code or Codex CLI tokens are exhausted, two free alternatives are configured for this workspace:
-
-### 1. Gemini CLI (`swgemini`)
-- **Model**: Gemini 2.5 Pro (1M context window)
-- **Cost**: Free — 1,000 requests/day with personal Google account
-- **Auth**: OAuth via Google account (sign in on first run with `gemini auth login`)
-- **Launch**: `swgemini` or `cd ~/SuneelWorkSpace && gemini`
-- **Workspace instructions**: `~/SuneelWorkSpace/GEMINI.md` (auto-loaded by Gemini CLI)
-
-### 2. OpenCode + Groq (`swopencode`)
-- **Model**: Llama 3.3 70B via Groq (fastest free inference available)
-- **Cost**: Free — generous rate limits on Groq's free tier
-- **Auth**: `GROQ_API_KEY` env var in `~/.zshrc` (set after getting key from console.groq.com)
-- **Launch**: `swopencode` or `cd ~/SuneelWorkSpace && opencode`
-- **Workspace config**: `~/SuneelWorkSpace/opencode.json` (auto-loaded by OpenCode)
-- **Alternate free models**: `groq/qwen/qwen3-32b`, `groq/meta-llama/llama-4-scout-17b-16e-instruct`
-
-### Agent Comparison
-
-| Agent | Shell Alias | Model | Routing | Best For |
-|---|---|---|---|---|
-| Antigravity (agy) | *(this tool)* | claude-sonnet/opus | Headroom proxy | Primary orchestrator |
-| Claude Code | `swclaude` | claude-sonnet/opus | Headroom proxy | Deep coding sessions |
-| Codex CLI | `swcodex` | gpt-5.5 | Headroom proxy | Agentic task runs |
-| Gemini CLI | `swgemini` | Gemini 2.5 Pro | Direct (free) | Free fallback, 1M ctx |
-| OpenCode | `swopencode` | Llama 3.3 70B (Groq) | Direct (free) | Free fallback, fast |
-
-All agents read/write the same shared memory and task files in `~/SuneelWorkSpace/brain/memory/`.
-
-### Antigravity (agy) Integration
-
-- **Global entrypoint**: `~/.gemini/config/AGENTS.md` (always loaded)
-- **Workspace customization**: `~/SuneelWorkSpace/.agents/AGENTS.md` (loaded when in SuneelWorkSpace)
-- **MCP servers**: `headroom` + `workspace-brain` (configured in `~/.gemini/config/mcp_config.json`)
-- **RTK skill**: `~/SuneelWorkSpace/.agents/skills/headroom-rtk/SKILL.md`
-- **Headroom**: Routes via `ANTHROPIC_BASE_URL=http://127.0.0.1:8787` (set in env at launch)
+## Token Optimization & RTK
+* **Headroom proxy**: Run proxy on port 8787 via `ANTHROPIC_BASE_URL` to compress context.
+* **RTK hook**: Pre-tool execution auto-rewriter reduces CLI output tokens by 50-90%.
+* **RTK Commands**: Always prefix bash commands with `rtk` (e.g. `rtk git status`, `rtk cargo test`, `rtk next build`).
 
 <!-- rtk-instructions v2 -->
 

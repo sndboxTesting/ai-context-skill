@@ -19,16 +19,33 @@ _MEMORY_FILES = [
 ]
 
 _CRITICAL_DIRS = [
-    "agent-system",
-    "autolab",
-    "dispatcher",
-    "monitor",
-    "orchestrator",
-    "dashboard",
-    "tools",
+    "brain",
+    "heart",
+    "eyes",
+    "ears",
+    "nervous",
+    "skeleton",
+    "blood",
+    "hands",
+    "mouth",
+    "dna",
+    "lab",
+    "spine",
 ]
 
 Broadcaster = Callable[[str, str], Awaitable[None]]
+
+
+def get_repair_depth(score: int) -> str:
+    """Return repair depth string based on current health score."""
+    if score >= 95:
+        return "light"
+    elif score >= 80:
+        return "standard"
+    elif score >= 60:
+        return "deep"
+    else:
+        return "full"
 
 
 def _run_cmd(cmd: str, timeout: int = 30) -> tuple[int, str]:
@@ -187,6 +204,7 @@ async def run_health_repair(broadcast: Broadcaster, job_id: str) -> dict:
         "timestamp": datetime.now(timezone.utc).isoformat(),
         "initial_score": initial,
         "final_score": final,
+        "depth": get_repair_depth(initial),
         "fixes": fixes,
         "warnings": warnings,
         "stages": stages,
@@ -211,7 +229,7 @@ async def run_health_repair(broadcast: Broadcaster, job_id: str) -> dict:
 
     await broadcast(
         "success",
-        f"  ✓ Repair complete: {initial} → {final} score | {len(fixes)} fix(es) applied",
+        f"  ✓ Repair complete ({get_repair_depth(initial)}): {initial} → {final} score | {len(fixes)} fix(es) applied",
     )
     await broadcast(
         "repair_complete",

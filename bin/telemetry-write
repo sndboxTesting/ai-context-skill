@@ -1,1 +1,1 @@
-../agent-system/telemetry/telemetry_writer.py
+../hands/bin/telemetry-write

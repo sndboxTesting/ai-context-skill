@@ -9,25 +9,25 @@ from datetime import datetime, timezone
 from pathlib import Path
 
 _HERE = Path(__file__).parent
-WORKSPACE = _HERE.parent
+WORKSPACE = _HERE.parent.parent
 GAP_OUTPUT = WORKSPACE / "brain/system/gap_analysis_latest.json"
 
 EXPECTED_CAPABILITIES = [
     {"id": "model_router",     "path": "heart/model_router/router.py",               "desc": "Multi-model routing with fallback"},
-    {"id": "visual_monitor",   "path": "eyes/visual/screenshot_manager.py",                       "desc": "Visual monitoring + screenshot manager"},
-    {"id": "vision_analyzer",  "path": "eyes/visual/vision_analyzer.py",                          "desc": "AI vision analysis of screenshots"},
-    {"id": "visual_repair",    "path": "eyes/visual/visual_repair_agent.py",                      "desc": "Visual repair agent"},
-    {"id": "vision_impl",      "path": "eyes/visual/vision_implementer.py",                       "desc": "Vision-to-implementation bridge"},
-    {"id": "evolution_engine", "path": "lab/evolution/engine.py",                                "desc": "Autonomous evolution engine"},
-    {"id": "night_shift",      "path": "hands/automation/dag/pipelines/night_shift.yaml",        "desc": "Night shift scheduler"},
-    {"id": "health_repair",    "path": "eyes/eyes/dashboard/execution/health_repair_pipeline.py",      "desc": "Health repair pipeline"},
-    {"id": "autolab",          "path": "lab/autolab/runner.py",                                  "desc": "Autolab experiment runner"},
-    {"id": "memory_vector",    "path": "brain/memory/vector/chroma_store",            "desc": "Vector memory store"},
-    {"id": "mcp_server",       "path": "nervous/nervous/mcp/server/main.py",                                 "desc": "MCP server"},
-    {"id": "orchestrator",     "path": "heart/heart/orchestrator/router/router.py",                      "desc": "Task orchestrator"},
-    {"id": "goal_engine",      "path": "heart/goals/goal_tracker.py",                        "desc": "Goal tracking"},
-    {"id": "challenger",       "path": "lab/evolution/challenger.py",                            "desc": "Self-challenge generator"},
-    {"id": "gap_finder",       "path": "lab/evolution/gap_finder.py",                            "desc": "Gap finder (this file)"},
+    {"id": "visual_monitor",   "path": "eyes/visual/screenshot_manager.py",          "desc": "Visual monitoring + screenshot manager"},
+    {"id": "vision_analyzer",  "path": "eyes/visual/vision_analyzer.py",             "desc": "AI vision analysis of screenshots"},
+    {"id": "visual_repair",    "path": "eyes/visual/visual_repair_agent.py",         "desc": "Visual repair agent"},
+    {"id": "vision_impl",      "path": "eyes/visual/vision_implementer.py",          "desc": "Vision-to-implementation bridge"},
+    {"id": "evolution_engine", "path": "lab/evolution/engine.py",                    "desc": "Autonomous evolution engine"},
+    {"id": "night_shift",      "path": "heart/orchestrator/dag/pipelines/night_shift.yaml", "desc": "Night shift scheduler"},
+    {"id": "health_repair",    "path": "eyes/dashboard/execution/health_repair_pipeline.py", "desc": "Health repair pipeline"},
+    {"id": "autolab",          "path": "lab/autolab/runner.py",                      "desc": "Autolab experiment runner"},
+    {"id": "memory_vector",    "path": "brain/memory/vector",                        "desc": "Vector memory store"},
+    {"id": "mcp_server",       "path": "nervous/mcp/server/main.py",                 "desc": "MCP server"},
+    {"id": "orchestrator",     "path": "heart/orchestrator/router/workflow_composer.py", "desc": "Task orchestrator"},
+    {"id": "goal_engine",      "path": "heart/goals",                                "desc": "Goal tracking"},
+    {"id": "challenger",       "path": "lab/evolution/challenger.py",                "desc": "Self-challenge generator"},
+    {"id": "gap_finder",       "path": "lab/evolution/gap_finder.py",                "desc": "Gap finder (this file)"},
 ]
 
 

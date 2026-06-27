@@ -10,7 +10,7 @@ from datetime import datetime, timezone
 from pathlib import Path
 
 _HERE = Path(__file__).parent
-WORKSPACE = _HERE.parent
+WORKSPACE = _HERE.parent.parent
 CHALLENGES_LOG = _HERE / "challenges.jsonl"
 
 CHALLENGE_TEMPLATES = [

@@ -12,11 +12,29 @@ from datetime import datetime, timezone
 from pathlib import Path
 
 _HERE = Path(__file__).parent
-WORKSPACE = _HERE.parent
+WORKSPACE = _HERE.parent.parent
 EVO_LOG    = _HERE / "evolution_log.jsonl"
 STATE_FILE = _HERE / "engine_state.json"
 
-NIGHT_HOURS = (22, 6)   # 10 pm → 6 am
+def load_config() -> dict:
+    config_path = _HERE / "evolution_config.json"
+    default = {
+        "night_hours": [22, 6],
+        "day_interval_minutes": 45,
+        "night_interval_minutes": 30
+    }
+    if not config_path.exists():
+        return default
+    try:
+        return json.loads(config_path.read_text())
+    except Exception:
+        return default
+
+
+def get_night_hours() -> tuple[int, int]:
+    cfg = load_config()
+    hours = cfg.get("night_hours", [22, 6])
+    return tuple(hours[:2])
 
 
 # ── Public helpers ────────────────────────────────────────────────────────────
@@ -24,7 +42,7 @@ NIGHT_HOURS = (22, 6)   # 10 pm → 6 am
 def is_night_mode() -> bool:
     """Return True if the current local hour is in the night-shift window."""
     hour = datetime.now().hour
-    start, end = NIGHT_HOURS
+    start, end = get_night_hours()
     if start > end:        # wraps midnight
         return hour >= start or hour < end
     return start <= hour < end
@@ -90,6 +108,13 @@ def run_evolution_cycle() -> dict:
 
 def start_engine(interval_minutes: int = 45) -> None:
     """Start the evolution engine daemon loop."""
+    cfg = load_config()
+    # prioritize command line interval argument if provided explicitly, otherwise config
+    if len(sys.argv) > 2:
+        interval_minutes = int(sys.argv[2])
+    else:
+        interval_minutes = cfg.get("day_interval_minutes", 45)
+
     state = {
         "status": "running",
         "started_at": datetime.now(timezone.utc).isoformat(),
@@ -98,7 +123,7 @@ def start_engine(interval_minutes: int = 45) -> None:
     }
     _save_state(state)
     _log_event("engine_start", {"interval_minutes": interval_minutes})
-    print(f"🧬 Evolution engine started (interval: {interval_minutes}m, night boost: 30m)")
+    print(f"🧬 Evolution engine started (interval: {interval_minutes}m, night boost: {cfg.get('night_interval_minutes', 30)}m)")
 
     def _handle_stop(sig, frame):
         s = _load_state()
@@ -123,7 +148,10 @@ def start_engine(interval_minutes: int = 45) -> None:
         s["last_cycle"] = datetime.now(timezone.utc).isoformat()
         _save_state(s)
 
-        sleep_secs = (30 if is_night_mode() else interval_minutes) * 60
+        cfg = load_config()
+        night_int = cfg.get("night_interval_minutes", 30)
+        day_int = s.get("interval_minutes", interval_minutes)
+        sleep_secs = (night_int if is_night_mode() else day_int) * 60
         print(f"[{datetime.now().strftime('%H:%M')}] Cycle {s['cycles']} complete — "
               f"gaps: {result.get('gaps', {}).get('count', '?')} | "
               f"next in {sleep_secs // 60}m")

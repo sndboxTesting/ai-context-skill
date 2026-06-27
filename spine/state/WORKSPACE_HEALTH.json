@@ -1,9 +1,15 @@
 {
-  "auto_fixes_applied": 53,
-  "checked_at": "2026-06-26T18:49:09-0500",
-  "error_count": 1,
-  "issue_count": 4,
+  "auto_fixes_applied": 55,
+  "checked_at": "2026-06-26T20:49:11-0500",
+  "error_count": 0,
+  "issue_count": 3,
   "issues": [
+    {
+      "code": "gstack_drift",
+      "message": "GStack: unknown drift",
+      "path": "/Users/MAC/SuneelWorkSpace/bin/gstack-verify",
+      "severity": "warning"
+    },
     {
       "code": "codex_not_on_path",
       "message": "codex CLI is not on PATH",
@@ -13,75 +19,32 @@
       "code": "claude_not_on_path",
       "message": "claude CLI is not on PATH",
       "severity": "info"
-    },
-    {
-      "code": "non_symlink_bin_file",
-      "message": "Regular files found in bin/ (expected symlinks only): evolution-stop, model-route, visual-repair, evolution-start, model-status, screenshot-take, visual-monitor, model-health",
-      "severity": "warning"
-    },
-    {
-      "code": "misplaced_script",
-      "message": "Scripts found outside canonical subsystem directories: vision_analyzer.py, visual_monitor.py, __init__.py, visual_repair_agent.py, vision_implementer.py, screenshot_manager.py, __init__.py, __init__.py, health_checker.py, router.py, quota_tracker.py, __init__.py, engine.py, gap_finder.py, challenger.py",
-      "severity": "error"
     }
   ],
-  "last_doctor_run": "2026-06-26T18:49:09-0500",
+  "last_doctor_run": "2026-06-26T20:49:11-0500",
+  "last_repair_run": "2026-06-26T20:49:12-0500",
   "launchd": {
     "configured": true,
     "label": "com.suneelworkspace.maintenance",
     "loaded": true,
     "plist": "/Users/MAC/Library/LaunchAgents/com.suneelworkspace.maintenance.plist"
   },
-  "repair_suggestions": [
-    {
-      "code": "convert_bin_to_symlink",
-      "paths": [
-        "/Users/MAC/SuneelWorkSpace/bin/evolution-stop",
-        "/Users/MAC/SuneelWorkSpace/bin/model-route",
-        "/Users/MAC/SuneelWorkSpace/bin/visual-repair",
-        "/Users/MAC/SuneelWorkSpace/bin/evolution-start",
-        "/Users/MAC/SuneelWorkSpace/bin/model-status",
-        "/Users/MAC/SuneelWorkSpace/bin/screenshot-take",
-        "/Users/MAC/SuneelWorkSpace/bin/visual-monitor",
-        "/Users/MAC/SuneelWorkSpace/bin/model-health"
-      ]
-    },
-    {
-      "code": "move_misplaced_scripts",
-      "paths": [
-        "/Users/MAC/SuneelWorkSpace/eyes/visual/vision_analyzer.py",
-        "/Users/MAC/SuneelWorkSpace/eyes/visual/visual_monitor.py",
-        "/Users/MAC/SuneelWorkSpace/eyes/visual/__init__.py",
-        "/Users/MAC/SuneelWorkSpace/eyes/visual/visual_repair_agent.py",
-        "/Users/MAC/SuneelWorkSpace/eyes/visual/vision_implementer.py",
-        "/Users/MAC/SuneelWorkSpace/eyes/visual/screenshot_manager.py",
-        "/Users/MAC/SuneelWorkSpace/agent_system/__init__.py",
-        "/Users/MAC/SuneelWorkSpace/heart/model_router/__init__.py",
-        "/Users/MAC/SuneelWorkSpace/heart/model_router/health_checker.py",
-        "/Users/MAC/SuneelWorkSpace/heart/model_router/router.py",
-        "/Users/MAC/SuneelWorkSpace/heart/model_router/quota_tracker.py",
-        "/Users/MAC/SuneelWorkSpace/lab/evolution/__init__.py",
-        "/Users/MAC/SuneelWorkSpace/lab/evolution/engine.py",
-        "/Users/MAC/SuneelWorkSpace/lab/evolution/gap_finder.py",
-        "/Users/MAC/SuneelWorkSpace/lab/evolution/challenger.py"
-      ]
-    }
-  ],
-  "state_updated_at": "2026-06-26T18:49:09.990677-05:00",
+  "repair_suggestions": [],
+  "state_updated_at": "2026-06-26T20:49:11.964840-05:00",
   "status": "repairable",
   "system_intelligence": {
     "checks": {
-      "gap_analysis": true,
-      "improvement_plan": true,
-      "mcp_resource_coverage": true,
-      "research_engine": true,
-      "system_audit": true,
+      "gap_analysis": false,
+      "improvement_plan": false,
+      "mcp_resource_coverage": false,
+      "research_engine": false,
+      "system_audit": false,
       "system_profile": true,
       "tool_inventory": true,
       "tool_recommendations": true
     },
-    "ready": true,
-    "updated_at": "2026-06-26T18:49:09.990677-05:00"
+    "ready": false,
+    "updated_at": "2026-06-26T20:49:11.964840-05:00"
   },
   "tools": {
     "claude": null,

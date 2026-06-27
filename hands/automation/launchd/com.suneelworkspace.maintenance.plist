@@ -13,9 +13,9 @@
   <key>StartInterval</key>
   <integer>3600</integer>
   <key>StandardOutPath</key>
-  <string>/Users/MAC/SuneelWorkSpace/automation/reports/launchd-maintenance.out.log</string>
+  <string>/Users/MAC/SuneelWorkSpace/hands/automation/reports/launchd-maintenance.out.log</string>
   <key>StandardErrorPath</key>
-  <string>/Users/MAC/SuneelWorkSpace/automation/reports/launchd-maintenance.err.log</string>
+  <string>/Users/MAC/SuneelWorkSpace/hands/automation/reports/launchd-maintenance.err.log</string>
   <key>WorkingDirectory</key>
   <string>/Users/MAC/SuneelWorkSpace</string>
 </dict>

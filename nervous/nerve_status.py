@@ -2,7 +2,7 @@
 """nerve-status — shows health of all 12 organs in the nervous system."""
 import json, os, sys
 
-WORKSPACE = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+WORKSPACE = os.path.dirname(os.path.dirname(os.path.realpath(__file__)))
 REGISTRY_PATH = os.path.join(WORKSPACE, "nervous/nerve_registry.json")
 
 ORGANS = ["brain","heart","eyes","ears","nervous","skeleton","blood","hands","mouth","dna","lab","spine"]

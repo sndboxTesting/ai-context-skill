@@ -1,17 +1,1 @@
-#!/usr/bin/env bash
-# mesh-monitor-start — Start mesh monitor in background tmux session
-set -euo pipefail
-
-WORKSPACE="${WORKSPACE:-$HOME/SuneelWorkSpace}"
-SESSION="mesh-monitor"
-
-if tmux has-session -t "$SESSION" 2>/dev/null; then
-  echo "Mesh monitor already running (tmux: $SESSION)"
-  exit 0
-fi
-
-tmux new-session -d -s "$SESSION" -x 200 -y 50
-tmux send-keys -t "$SESSION" "cd $WORKSPACE && python3 orchestrator/mesh/mesh_monitor.py" Enter
-echo "✅ Mesh monitor started in tmux session '$SESSION'"
-echo "   View logs: tail -f $WORKSPACE/agent-system/logs/mesh_monitor.log"
-echo "   Stop: mesh-monitor-stop"
+../hands/bin/mesh-monitor-start

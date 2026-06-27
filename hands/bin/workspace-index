@@ -2,7 +2,7 @@
 set -eu
 
 ROOT="${SUNEEL_WORKSPACE:-$HOME/SuneelWorkSpace}"
-. "$ROOT/automation/maintenance/common.sh"
+. "$ROOT/hands/automation/maintenance/common.sh"
 ensure_core_dirs
 
 python3 - "$ROOT" "$INDEX_JSON" <<'PY'
@@ -10,15 +10,18 @@ import json, os, pathlib, sys
 root = pathlib.Path(sys.argv[1])
 out = pathlib.Path(sys.argv[2])
 groups = {
-    "shared": root / "agent-system" / "shared",
-    "memory": root / "agent-system" / "memory",
-    "tasks": root / "agent-system" / "tasks",
-    "logs": root / "agent-system" / "logs",
-    "state": root / "agent-system" / "state",
-    "templates": root / "agent-system" / "templates",
-    "docs": root / "agent-system" / "docs",
-    "scripts": root / "bin",
-    "automation": root / "automation",
+    "brain": root / "brain",
+    "heart": root / "heart",
+    "eyes": root / "eyes",
+    "ears": root / "ears",
+    "nervous": root / "nervous",
+    "skeleton": root / "skeleton",
+    "blood": root / "blood",
+    "hands": root / "hands",
+    "mouth": root / "mouth",
+    "dna": root / "dna",
+    "lab": root / "lab",
+    "spine": root / "spine",
 }
 def entry(path: pathlib.Path):
     try:
@@ -63,7 +66,7 @@ PY
 
 # Call memory write hook on any memory/decision/pattern/insight/handoff files modified in the last 10 minutes
 find "$ROOT" -type f -mmin -10 -not -path "*/.git/*" -not -path "*/.agent-backups/*" -not -path "*/vector/.hf_cache/*" -not -path "*/vector/chroma_store/*" 2>/dev/null | while read -r file; do
-  "$ROOT/scripts/memory_write_hook.sh" "$file" >/dev/null 2>&1 || true
+  "$ROOT/hands/scripts/memory_write_hook.sh" "$file" >/dev/null 2>&1 || true
 done
 
 [ "${1:-}" = "--quiet" ] || echo "Updated $INDEX_JSON"

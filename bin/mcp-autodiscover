@@ -1,3 +1,1 @@
-#!/usr/bin/env bash
-WORKSPACE="${WORKSPACE:-$HOME/SuneelWorkSpace}"
-python3 "$WORKSPACE/mcp/server/scripts/auto_discover.py" "$@"
+../hands/bin/mcp-autodiscover

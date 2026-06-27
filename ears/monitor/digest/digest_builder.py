@@ -7,10 +7,10 @@ import sys
 from datetime import datetime
 from pathlib import Path
 
-CACHE_DIR = Path(__file__).parent.parent / "cache"
-CONFIG_PATH = Path(__file__).parent.parent / "config" / "monitor_config.json"
-ACTIVE_TASKS_PATH = Path(__file__).parent.parent.parent / "agent-system" / "tasks" / "ACTIVE_TASKS.md"
-BRAIN_LOGS = Path(__file__).parent.parent.parent / "obsidian-vault" / "logs"
+CACHE_DIR = Path(__file__).resolve().parent.parent / "cache"
+CONFIG_PATH = Path(__file__).resolve().parent.parent / "config" / "monitor_config.json"
+ACTIVE_TASKS_PATH = Path(__file__).resolve().parent.parent.parent.parent / "heart" / "tasks" / "ACTIVE_TASKS.md"
+BRAIN_LOGS = Path(__file__).resolve().parent.parent.parent.parent / "blood" / "logs"
 
 
 def _goal_keywords() -> set[str]:

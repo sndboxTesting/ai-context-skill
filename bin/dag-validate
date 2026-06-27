@@ -1,1 +1,1 @@
-../orchestrator/dag/dag_validator.py
+../hands/bin/dag-validate

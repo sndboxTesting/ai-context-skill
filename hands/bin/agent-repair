@@ -2,7 +2,7 @@
 set -eu
 
 ROOT="${SUNEEL_WORKSPACE:-$HOME/SuneelWorkSpace}"
-. "$ROOT/automation/maintenance/common.sh"
+. "$ROOT/hands/automation/maintenance/common.sh"
 QUIET="${1:-}"
 
 ensure_core_dirs
@@ -20,7 +20,7 @@ done
 for s in agent-status agent-start agent-finish agent-doctor agent-repair agent-maintain agent-autoclose use-codex use-claude workspace-context workspace-backup workspace-index workspace-report workspace-changes agent-test-loop workflow-audit gstack-create; do
   [ -f "$ROOT/bin/$s" ] && chmod 755 "$ROOT/bin/$s"
 done
-[ -f "$ROOT/automation/maintenance/common.sh" ] && chmod 755 "$ROOT/automation/maintenance/common.sh"
+[ -f "$ROOT/hands/automation/maintenance/common.sh" ] && chmod 755 "$ROOT/hands/automation/maintenance/common.sh"
 if [ -d "$ROOT/autolab/scripts" ]; then
   chmod 755 "$ROOT"/autolab/scripts/autolab-* 2>/dev/null || true
 fi
@@ -38,15 +38,15 @@ create_if_missing() {
   fi
 }
 
-create_if_missing "$ROOT/agent-system/memory/SESSION_HANDOFF.md" "Session Handoff" "No prior handoff was available. Read CURRENT_STATE.json and SESSION_LOG.md for additional context."
-create_if_missing "$ROOT/agent-system/memory/MEMORY.md" "Shared Memory" "Durable workspace facts go here."
-create_if_missing "$ROOT/agent-system/memory/DECISIONS.md" "Decisions" "Important decisions and reasons go here."
-create_if_missing "$ROOT/agent-system/tasks/ACTIVE_TASKS.md" "Active Tasks" "Current workspace tasks go here."
-create_if_missing "$ROOT/agent-system/tasks/COMPLETED_TASKS.md" "Completed Tasks" "Completed workspace tasks go here."
-create_if_missing "$ROOT/agent-system/tasks/TASK_QUEUE.md" "Task Queue" "Future workspace tasks go here."
-create_if_missing "$ROOT/agent-system/logs/SESSION_LOG.md" "Session Log" "Session activity is appended here."
-create_if_missing "$ROOT/agent-system/logs/MAINTENANCE_LOG.md" "Maintenance Log" "Maintenance activity is appended here."
-create_if_missing "$ROOT/agent-system/logs/CHANGE_LOG.md" "Change Log" "Important workspace changes go here."
+create_if_missing "$ROOT/brain/memory/SESSION_HANDOFF.md" "Session Handoff" "No prior handoff was available. Read CURRENT_STATE.json and SESSION_LOG.md for additional context."
+create_if_missing "$ROOT/brain/memory/MEMORY.md" "Shared Memory" "Durable workspace facts go here."
+create_if_missing "$ROOT/brain/memory/DECISIONS.md" "Decisions" "Important decisions and reasons go here."
+create_if_missing "$ROOT/heart/tasks/ACTIVE_TASKS.md" "Active Tasks" "Current workspace tasks go here."
+create_if_missing "$ROOT/heart/tasks/COMPLETED_TASKS.md" "Completed Tasks" "Completed workspace tasks go here."
+create_if_missing "$ROOT/heart/tasks/TASK_QUEUE.md" "Task Queue" "Future workspace tasks go here."
+create_if_missing "$ROOT/blood/logs/SESSION_LOG.md" "Session Log" "Session activity is appended here."
+create_if_missing "$ROOT/blood/logs/MAINTENANCE_LOG.md" "Maintenance Log" "Maintenance activity is appended here."
+create_if_missing "$ROOT/blood/logs/CHANGE_LOG.md" "Change Log" "Important workspace changes go here."
 
 python3 - "$ROOT" "$STATE_JSON" "$HEALTH_JSON" "$INDEX_JSON" <<'PY'
 import json, pathlib, sys
@@ -57,10 +57,10 @@ stamp = datetime.now().astimezone().strftime("%Y-%m-%dT%H:%M:%S%z")
 defaults = {
     state: {
         "workspace_root": str(root),
-        "canonical_instruction_file": str(root / "agent-system/shared/AGENT_SYSTEM.md"),
-        "shared_memory_dir": str(root / "agent-system/memory"),
-        "tasks_dir": str(root / "agent-system/tasks"),
-        "logs_dir": str(root / "agent-system/logs"),
+        "canonical_instruction_file": str(root / "skeleton/rules/AGENT_SYSTEM.md"),
+        "shared_memory_dir": str(root / "brain/memory"),
+        "tasks_dir": str(root / "heart/tasks"),
+        "logs_dir": str(root / "blood/logs"),
         "state_updated_at": stamp,
         "last_summary": "State file repaired or refreshed.",
         "active_agent": "unknown",
@@ -80,12 +80,12 @@ defaults = {
         "entrypoints": [],
         "groups": {},
     },
-    pathlib.Path(root / "agent-system/state/ACTIVE_SESSION.json"): {
+    pathlib.Path(root / "spine/state/ACTIVE_SESSION.json"): {
         "active": False,
         "session_id": None,
         "repaired_at": stamp,
     },
-    pathlib.Path(root / "agent-system/state/LAST_KNOWN_GOOD.json"): {
+    pathlib.Path(root / "spine/state/LAST_KNOWN_GOOD.json"): {
         "created_at": stamp,
         "status": "repaired-baseline",
         "validation": {},
@@ -111,7 +111,7 @@ PY
 
 "$ROOT/bin/workspace-index" --quiet >/dev/null 2>&1 || true
 "$ROOT/bin/agent-doctor" --quiet >/dev/null 2>&1 || true
-python3 "$ROOT/scripts/auto_repair_extensions.py" >/dev/null 2>&1 || true
+python3 "$ROOT/hands/scripts/auto_repair_extensions.py" >/dev/null 2>&1 || true
 python3 - "$HEALTH_JSON" <<'PY' >/dev/null 2>&1 || true
 import json, pathlib, sys
 from datetime import datetime

@@ -11,12 +11,12 @@ import sys
 from datetime import datetime, timezone
 from pathlib import Path
 
-WORKSPACE = Path(__file__).parent.parent
-ANOMALIES_PATH = WORKSPACE / "agent-system" / "telemetry" / "anomalies.json"
-LEADERBOARD_PATH = WORKSPACE / "agent-system" / "telemetry" / "comparison" / "leaderboard.json"
-BRAIN_LOGS = WORKSPACE / "brain" / "logs"
-QUEUE_PATH = Path(__file__).parent / "experiment_queue.md"
-HYPOTHESIS_LOG = Path(__file__).parent / "hypothesis_log.jsonl"
+WORKSPACE = Path(__file__).resolve().parent.parent.parent
+ANOMALIES_PATH = WORKSPACE / "blood" / "telemetry" / "anomalies.json"
+LEADERBOARD_PATH = WORKSPACE / "blood" / "telemetry" / "comparison" / "leaderboard.json"
+BRAIN_LOGS = WORKSPACE / "blood" / "logs"
+QUEUE_PATH = Path(__file__).resolve().parent / "experiment_queue.md"
+HYPOTHESIS_LOG = Path(__file__).resolve().parent / "hypothesis_log.jsonl"
 
 
 def _load_json(path: Path) -> dict | list | None:

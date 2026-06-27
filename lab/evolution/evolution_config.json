@@ -1,0 +1,8 @@
+{
+  "night_hours": [
+    22,
+    6
+  ],
+  "day_interval_minutes": 45,
+  "night_interval_minutes": 30
+}

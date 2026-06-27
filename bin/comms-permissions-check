@@ -1,7 +1,1 @@
-#!/bin/sh
-ROOT="${SUNEEL_WORKSPACE:-$HOME/SuneelWorkSpace}"
-echo "=== iMessage ==="
-python3 "$ROOT/comms/imessage/scripts/imessage-permissions-check" 2>&1
-echo
-echo "=== Mail ==="
-python3 "$ROOT/comms/mail/scripts/mail-permissions-check" 2>&1
+../hands/bin/comms-permissions-check

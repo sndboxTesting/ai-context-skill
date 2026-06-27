@@ -1,0 +1,116 @@
+{
+  "scanned_at": "2026-06-27T00:47:59.107480+00:00",
+  "total_capabilities": 15,
+  "present": 0,
+  "present_ids": [],
+  "gaps": [
+    {
+      "id": "model_router",
+      "path": "heart/model_router/router.py",
+      "desc": "Multi-model routing with fallback",
+      "status": "missing",
+      "priority": "high"
+    },
+    {
+      "id": "visual_monitor",
+      "path": "eyes/visual/screenshot_manager.py",
+      "desc": "Visual monitoring + screenshot manager",
+      "status": "missing",
+      "priority": "high"
+    },
+    {
+      "id": "vision_analyzer",
+      "path": "eyes/visual/vision_analyzer.py",
+      "desc": "AI vision analysis of screenshots",
+      "status": "missing",
+      "priority": "high"
+    },
+    {
+      "id": "visual_repair",
+      "path": "eyes/visual/visual_repair_agent.py",
+      "desc": "Visual repair agent",
+      "status": "missing",
+      "priority": "high"
+    },
+    {
+      "id": "vision_impl",
+      "path": "eyes/visual/vision_implementer.py",
+      "desc": "Vision-to-implementation bridge",
+      "status": "missing",
+      "priority": "high"
+    },
+    {
+      "id": "evolution_engine",
+      "path": "lab/evolution/engine.py",
+      "desc": "Autonomous evolution engine",
+      "status": "missing",
+      "priority": "high"
+    },
+    {
+      "id": "night_shift",
+      "path": "hands/automation/dag/pipelines/night_shift.yaml",
+      "desc": "Night shift scheduler",
+      "status": "missing",
+      "priority": "high"
+    },
+    {
+      "id": "health_repair",
+      "path": "eyes/eyes/dashboard/execution/health_repair_pipeline.py",
+      "desc": "Health repair pipeline",
+      "status": "missing",
+      "priority": "high"
+    },
+    {
+      "id": "autolab",
+      "path": "lab/autolab/runner.py",
+      "desc": "Autolab experiment runner",
+      "status": "missing",
+      "priority": "high"
+    },
+    {
+      "id": "memory_vector",
+      "path": "brain/memory/vector/chroma_store",
+      "desc": "Vector memory store",
+      "status": "missing",
+      "priority": "high"
+    },
+    {
+      "id": "mcp_server",
+      "path": "nervous/nervous/mcp/server/main.py",
+      "desc": "MCP server",
+      "status": "missing",
+      "priority": "high"
+    },
+    {
+      "id": "orchestrator",
+      "path": "heart/heart/orchestrator/router/router.py",
+      "desc": "Task orchestrator",
+      "status": "missing",
+      "priority": "high"
+    },
+    {
+      "id": "goal_engine",
+      "path": "heart/goals/goal_tracker.py",
+      "desc": "Goal tracking",
+      "status": "missing",
+      "priority": "high"
+    },
+    {
+      "id": "challenger",
+      "path": "lab/evolution/challenger.py",
+      "desc": "Self-challenge generator",
+      "status": "missing",
+      "priority": "high"
+    },
+    {
+      "id": "gap_finder",
+      "path": "lab/evolution/gap_finder.py",
+      "desc": "Gap finder (this file)",
+      "status": "missing",
+      "priority": "high"
+    }
+  ],
+  "stale_files": [],
+  "gap_count": 15,
+  "health_pct": 0.0
+}

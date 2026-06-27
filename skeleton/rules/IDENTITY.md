@@ -40,11 +40,11 @@ This file describes Suneel's stable preferences and workspace context for agents
 
 Load the identity subsystem for user-facing responses, planning, routing, and communication drafts:
 
-- `dna/dna/identity/profile/identity_profile.md`
-- `dna/dna/identity/profile/tone_profile.md`
-- `dna/dna/identity/profile/decision_profile.md`
-- `dna/dna/identity/prompts/identity_prompt.md`
-- `dna/dna/identity/prompts/communication_prompt.md`
+- `dna/identity/profile/identity_profile.md`
+- `dna/identity/profile/tone_profile.md`
+- `dna/identity/profile/decision_profile.md`
+- `dna/identity/prompts/identity_prompt.md`
+- `dna/identity/prompts/communication_prompt.md`
 
 Core identity: short, direct, casual, conversational, smart, structured, softened, and never harsh or condescending.
 

@@ -2,7 +2,7 @@
 set -eu
 
 ROOT="${SUNEEL_WORKSPACE:-$HOME/SuneelWorkSpace}"
-. "$ROOT/automation/maintenance/common.sh"
+. "$ROOT/hands/automation/maintenance/common.sh"
 
 ensure_core_dirs
 
@@ -60,15 +60,15 @@ PY
 
 echo
 echo "Recent handoff:"
-sed -n '1,60p' "$ROOT/agent-system/memory/SESSION_HANDOFF.md"
+sed -n '1,60p' "$ROOT/brain/memory/SESSION_HANDOFF.md"
 
 echo
 echo "Active tasks:"
-sed -n '1,80p' "$ROOT/agent-system/tasks/ACTIVE_TASKS.md"
+sed -n '1,80p' "$ROOT/heart/tasks/ACTIVE_TASKS.md"
 
 echo
 echo "Goal Engine:"
-python3 - "$ROOT/goal-engine/state/goal_state.json" "$ROOT/goal-engine/state/current_goal.json" "$ROOT/goal-engine/graph/task_graph.json" <<'PY'
+python3 - "$ROOT/heart/goals/state/goal_state.json" "$ROOT/heart/goals/state/current_goal.json" "$ROOT/heart/goals/graph/task_graph.json" <<'PY'
 import json, pathlib, sys
 state_path = pathlib.Path(sys.argv[1])
 current_path = pathlib.Path(sys.argv[2])
@@ -95,7 +95,7 @@ PY
 
 echo
 echo "Orchestrator:"
-python3 - "$ROOT/orchestrator/state/current_routing_state.json" "$ROOT/orchestrator/router/history.json" "$ROOT/orchestrator/models/routing_patterns.json" <<'PY'
+python3 - "$ROOT/heart/orchestrator/state/current_routing_state.json" "$ROOT/heart/orchestrator/router/history.json" "$ROOT/heart/orchestrator/models/routing_patterns.json" <<'PY'
 import json, pathlib, sys
 state_path = pathlib.Path(sys.argv[1])
 history_path = pathlib.Path(sys.argv[2])
@@ -125,7 +125,7 @@ PY
 
 echo
 echo "MCP subsystem:"
-python3 - "$ROOT/mcp/server/state/mcp_state.json" "$ROOT/mcp/server/storage/memory_index.db" "$ROOT/mcp/server/state/last_index.json" <<'PY'
+python3 - "$ROOT/nervous/mcp/server/state/mcp_state.json" "$ROOT/nervous/mcp/server/storage/memory_index.db" "$ROOT/nervous/mcp/server/state/last_index.json" <<'PY'
 import json, pathlib, sys
 state_path = pathlib.Path(sys.argv[1])
 db_path = pathlib.Path(sys.argv[2])
@@ -154,10 +154,10 @@ except Exception:
     pass
 PY
 
-if [ -f "$ROOT/autolab/state/latest_eval.json" ]; then
+if [ -f "$ROOT/lab/autolab/state/latest_eval.json" ]; then
   echo
   echo "Autolab:"
-  python3 - "$ROOT/autolab/state/latest_eval.json" "$ROOT/autolab/state/loop_status.json" <<'PY'
+  python3 - "$ROOT/lab/autolab/state/latest_eval.json" "$ROOT/lab/autolab/state/loop_status.json" <<'PY'
 import json, pathlib, sys
 eval_path = pathlib.Path(sys.argv[1])
 status_path = pathlib.Path(sys.argv[2])
@@ -176,6 +176,6 @@ print(f"loop_status: {status.get('status', 'unknown')}")
 print("report: autolab/reports/latest_report.md")
 PY
 fi
-if [ -f "$ROOT/scripts/system_intelligence.py" ]; then
-  python3 "$ROOT/scripts/system_intelligence.py" status 2>/dev/null || true
+if [ -f "$ROOT/hands/scripts/system_intelligence.py" ]; then
+  python3 "$ROOT/hands/scripts/system_intelligence.py" status 2>/dev/null || true
 fi

@@ -1,1 +1,1 @@
-../orchestrator/dag/dag_runner.py
+../hands/bin/dag-run

@@ -1,8 +1,1 @@
-#!/usr/bin/env bash
-SESSION="agent-gateway"
-if tmux has-session -t "$SESSION" 2>/dev/null; then
-  tmux kill-session -t "$SESSION"
-  echo "✅ Gateway stopped"
-else
-  echo "Gateway is not running"
-fi
+../hands/bin/gateway-stop

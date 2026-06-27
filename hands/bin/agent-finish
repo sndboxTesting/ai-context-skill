@@ -2,7 +2,7 @@
 set -eu
 
 ROOT="${SUNEEL_WORKSPACE:-$HOME/SuneelWorkSpace}"
-. "$ROOT/automation/maintenance/common.sh"
+. "$ROOT/hands/automation/maintenance/common.sh"
 
 SUMMARY="${*:-}"
 if [ -z "$SUMMARY" ]; then
@@ -18,7 +18,7 @@ fi
 ensure_core_dirs
 DATE="$(today)"
 STAMP="$(now_stamp)"
-HANDOFF="$ROOT/agent-system/memory/SESSION_HANDOFF.md"
+HANDOFF="$ROOT/brain/memory/SESSION_HANDOFF.md"
 
 tmp="$HANDOFF.tmp"
 cat > "$tmp" <<EOF
@@ -32,15 +32,15 @@ Summary: $SUMMARY
 
 Changed:
 
-- See \`agent-system/logs/SESSION_LOG.md\` for the session entry.
+- See \`blood/logs/SESSION_LOG.md\` for the session entry.
 
 Verification:
 
-- Run \`~/SuneelWorkSpace/bin/agent-status\` or \`~/SuneelWorkSpace/bin/agent-doctor\`.
+- Run \`~/SuneelWorkSpace/hands/bin/agent-status\` or \`~/SuneelWorkSpace/hands/bin/agent-doctor\`.
 
 Open Items:
 
-- Review \`agent-system/tasks/ACTIVE_TASKS.md\` and \`agent-system/tasks/TASK_QUEUE.md\`.
+- Review \`heart/tasks/ACTIVE_TASKS.md\` and \`heart/tasks/TASK_QUEUE.md\`.
 EOF
 mv "$tmp" "$HANDOFF"
 
@@ -65,7 +65,7 @@ tmp.write_text(json.dumps(data, indent=2, sort_keys=True) + "\n")
 tmp.replace(path)
 PY
 
-"$ROOT/bin/workspace-index" --quiet >/dev/null 2>&1 || true
-"$ROOT/bin/workspace-report" --quiet >/dev/null 2>&1 || true
+"$ROOT/hands/bin/workspace-index" --quiet >/dev/null 2>&1 || true
+"$ROOT/hands/bin/workspace-report" --quiet >/dev/null 2>&1 || true
 
 echo "Updated handoff, session log, current state, index, and latest report."

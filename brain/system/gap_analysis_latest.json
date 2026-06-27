@@ -1,0 +1,26 @@
+{
+  "scanned_at": "2026-06-27T00:59:38.612691+00:00",
+  "total_capabilities": 15,
+  "present": 15,
+  "present_ids": [
+    "model_router",
+    "visual_monitor",
+    "vision_analyzer",
+    "visual_repair",
+    "vision_impl",
+    "evolution_engine",
+    "night_shift",
+    "health_repair",
+    "autolab",
+    "memory_vector",
+    "mcp_server",
+    "orchestrator",
+    "goal_engine",
+    "challenger",
+    "gap_finder"
+  ],
+  "gaps": [],
+  "stale_files": [],
+  "gap_count": 0,
+  "health_pct": 100.0
+}

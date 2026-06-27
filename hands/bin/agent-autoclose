@@ -2,7 +2,7 @@
 set -eu
 
 ROOT="${SUNEEL_WORKSPACE:-$HOME/SuneelWorkSpace}"
-. "$ROOT/automation/maintenance/common.sh"
+. "$ROOT/hands/automation/maintenance/common.sh"
 
 QUIET=0
 FORCE=0

@@ -1,2 +1,3 @@
 {"timestamp": "2026-06-27T00:07:56.675570+00:00", "source_organ": "brain", "event_type": "migration_complete", "detail": "Phase 1", "notified": ["heart", "spine"]}
 {"timestamp": "2026-06-27T00:13:23.536843+00:00", "source_organ": "brain", "event_type": "migration_test", "detail": "Phase 14 propagation test", "notified": ["heart", "spine"]}
+{"timestamp": "2026-06-27T01:02:21.365073+00:00", "source_organ": "spine", "event_type": "file_updated", "detail": "update README.md", "notified": []}

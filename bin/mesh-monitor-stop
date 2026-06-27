@@ -1,12 +1,1 @@
-#!/usr/bin/env bash
-# mesh-monitor-stop — Stop the mesh monitor tmux session
-set -euo pipefail
-
-SESSION="mesh-monitor"
-
-if tmux has-session -t "$SESSION" 2>/dev/null; then
-  tmux kill-session -t "$SESSION"
-  echo "✅ Mesh monitor stopped"
-else
-  echo "Mesh monitor is not running"
-fi
+../hands/bin/mesh-monitor-stop

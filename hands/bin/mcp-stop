@@ -1,12 +1,1 @@
-#!/bin/sh
-# Stop any running workspace-brain MCP server processes.
-set -eu
-KILLED=0
-for PID in $(pgrep -f "mcp/server/main.py" 2>/dev/null); do
-    kill "$PID" 2>/dev/null && KILLED=$((KILLED+1))
-done
-if [ "$KILLED" -gt 0 ]; then
-    echo "Stopped $KILLED workspace-brain process(es)."
-else
-    echo "No workspace-brain processes running."
-fi
+../../nervous/mcp/server/scripts/mcp-stop

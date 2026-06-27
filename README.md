@@ -1,1190 +1,524 @@
-# SuneelWorkSpace System Blueprint
+# 🧠 SuneelWorkSpace
 
-## EXECUTIVE SUMMARY (FAST LOAD)
-- **Role**: Local-first personal AI operating system workspace.
-- **Components**: Incorporates identity, stateful memory, workflows, MCP connectors, and execution orchestration.
-- **Real-world execution**: Supports direct local tool execution, GitHub, and macOS shortcuts automation.
-- **Knowledge Brain**: Integrated with Obsidian brain storage layer for notes and generated runnable workflows.
-- **Self-Evolution**: Daily self-improvement loops scan log contexts and optimize parameters.
-- **Shared Context**: Enables multi-agent workspace continuity (Claude, Codex, Gemini, OpenCode).
-- **Safety & Integrity**: Enforced via duplication-guard, AST/syntax checks, and canonical integrity checks.
-
-## START HERE (FOR AI AGENTS)
-Welcome external agent! Follow this boot sequence for immediate alignment:
-1. **Load Identity**: Read `dna/dna/identity/prompts/identity_prompt.md` and related profile configs.
-2. **Access memory**: Read `brain/memory/MEMORY.md` and active tasks list.
-3. **Read MCP resource map**: Inspect `nervous/nervous/mcp/server/config/resource_map.json` and capabilities list.
-4. **Inspect context**: Read `spine/state/ACTIVE_CONTEXT.json`.
-5. **Check workflows**: Look up priority order in `brain/system/workflow_priority.json`.
-6. **Execution pattern**: Execute using `intent` → `select workflow` → `run workflow` → `record outcome` pipeline.
-*Do NOT treat this as a simple project. This is a stateful AI operating system.*
-
-## CAPABILITY MAP
-### What the system CAN do:
-- **Run Workflows**: Execute MCP and non-MCP workflows compiled dynamically.
-- **Chain Tools**: Compose multi-step pipelines and pass outputs between steps.
-- **Operate GitHub**: List PRs and create tracking issues.
-- **Automate macOS**: Retrieve, list, and run shortcuts.
-- **Manage Files**: Perform scoped reads, writes, listings, and duplication checks.
-- **Research via Web**: Fetch search results using Brave search MCP.
-- **Manage Knowledge**: Keep Obsidian notes synced and extract executable scripts.
-
-### What REQUIRES user approval (CONTROLLED / RESTRICTED):
-- **Outbound Communication**: Sending iMessage or emails (gated approval).
-- **External Installs**: Changing system directories or npm/pip package installations.
-- **Destructive Actions**: Deleting, modifying core files, or running overrides.
-
-## HOW TO SUGGEST ENHANCEMENTS
-If you identify optimization vectors or logic gaps, propose improvements by:
-1. **Adding Workflows**: Write new step-by-step Markdown notes in `brain/workflows/`.
-2. **Expanding Connectors**: Add new capabilities to the MCP config.
-3. **Optimizing**: Refine parameters or suggest script upgrades.
-*DO NOT suggest rebuilding the system, duplicating code, or breaking canonical structures.*
-
-## SYSTEM RULES (NON-NEGOTIABLE)
-- **Zero Duplication**: Do not build parallel features. Upgrade or extend existing systems.
-- **Integrity Gates**: Run `duplication-guard` and `integrity-guard` before editing source files.
-- **Canonical Subsystems**: Always use canonical helpers in `bin/` or `scripts/`.
-- **Clean Symlinks**: All executables in `bin/` must remain as relative symlinks.
-
-## SYSTEM EXPANSION STRATEGY
-The system scales horizontally by:
-1. **MCP Connectors**: Introducing specialized API/tool bridges.
-2. **Workflows**: Defining high-level pipelines in Obsidian notes.
-3. **Identity/Priority Tuning**: Updating score matrices and prompt patterns.
-*Avoid rewriting core engine architectures or introducing redundant logic layers.*
-
-## IDEAL INTERACTION MODEL
-- **User Intent**: The user provides high-level goals.
-- **System Routing**: The system maps the intent to the best workflow, runs it, logs outcome metrics to `workflow_performance.json`, and evolves executing parameters dynamically.
-
-## EXTERNAL AGENT OBJECTIVE
-If you are an external AI:
-Your goals are to reduce user friction, increase automation reliability, enhance execution quality, propose safe optimizations, and expand capability integrations without introducing duplicate code.
+## EXECUTIVE SUMMARY
+* **Human Body Architecture**: The workspace is structured as a living organism with 12 distinct organs, each having a single clear purpose, fully decoupled yet connected via a centralized nervous system.
+* **Nerve Propagation**: Event-driven communication routes state changes and notifications automatically to dependent organs through inbox messaging.
+* **Model Router with Fallback**: A quota-aware router that dynamically forwards tasks to the optimal model (Claude 3.5 Sonnet, Claude 3 Opus, GPT-4o, Gemini 2.5 Pro) with automatic fallback upon failure or quota exhaustion.
+* **Control Center Dashboard**: A Web UI dashboard (port 7777) featuring panels for goal tracking, agent activity, model routing metrics, and an autonomous health repair pipeline.
+* **Autonomous Evolution Engine**: A background daemon that continuous scans the workspace for capability gaps, generates self-improvement challenges, and queues autolab experiments.
+* **Stateful Memory & Context**: Programmatic vector memory store (ChromaDB) and knowledge graph integrated with Obsidian brain vaults and context-injectors for zero-drift agent alignment.
 
 ---
 
-This README is the complete operating blueprint for `~/SuneelWorkSpace`.
+## HUMAN BODY ARCHITECTURE
 
-If this file is copied into another environment, another AI agent should understand what the system is, how it thinks, where memory lives, what commands exist, what is safe, what is not safe, and how to extend it without rebuilding.
+SuneelWorkSpace is organized as a human body. Every folder is an organ with a single clear purpose. Everything is connected through a nervous system. One change anywhere propagates to all dependent organs automatically.
 
-## 1. System Overview
+### The 12 Organs
 
-`SuneelWorkSpace` is Suneel's local-first personal AI operating system workspace.
+| Organ | Folder | Purpose | Key Files |
+|---|---|---|---|
+| 🧠 **Brain** | [brain/](file:///Users/MAC/SuneelWorkSpace/brain) | Long-term memory, vector store, intent prediction, knowledge graph, and research engine | [MEMORY.md](file:///Users/MAC/SuneelWorkSpace/brain/memory/MEMORY.md), [DECISIONS.md](file:///Users/MAC/SuneelWorkSpace/brain/memory/DECISIONS.md), [semantic_search.py](file:///Users/MAC/SuneelWorkSpace/brain/memory/vector/semantic_search.py), [prediction_engine.py](file:///Users/MAC/SuneelWorkSpace/brain/anticipation/prediction_engine.py) |
+| 💓 **Heart** | [heart/](file:///Users/MAC/SuneelWorkSpace/heart) | Task orchestration, model fallback router, goal planner and task dependency engine | [router.py](file:///Users/MAC/SuneelWorkSpace/heart/model_router/router.py), [quota_tracker.py](file:///Users/MAC/SuneelWorkSpace/heart/model_router/quota_tracker.py), [mesh_monitor.py](file:///Users/MAC/SuneelWorkSpace/heart/orchestrator/mesh/mesh_monitor.py), [ACTIVE_TASKS.md](file:///Users/MAC/SuneelWorkSpace/heart/tasks/ACTIVE_TASKS.md) |
+| 👁️ **Eyes** | [eyes/](file:///Users/MAC/SuneelWorkSpace/eyes) | Control Center UI dashboard, visual monitor daemon, and screenshot repair loop | [server.py](file:///Users/MAC/SuneelWorkSpace/eyes/dashboard/server.py), [style.css](file:///Users/MAC/SuneelWorkSpace/eyes/dashboard/static/style.css), [visual_repair_agent.py](file:///Users/MAC/SuneelWorkSpace/eyes/visual/visual_repair_agent.py), [health_repair_pipeline.py](file:///Users/MAC/SuneelWorkSpace/eyes/dashboard/execution/health_repair_pipeline.py) |
+| 👂 **Ears** | [ears/](file:///Users/MAC/SuneelWorkSpace/ears) | World monitor fetching GitHub, RSS, and Arxiv feeds to compile daily morning briefs | [monitor_runner.py](file:///Users/MAC/SuneelWorkSpace/ears/monitor/monitor_runner.py), [digest_builder.py](file:///Users/MAC/SuneelWorkSpace/ears/monitor/digest/digest_builder.py), [arxiv_monitor.py](file:///Users/MAC/SuneelWorkSpace/ears/monitor/sources/arxiv_monitor.py) |
+| 🫀 **Nervous** | [nervous/](file:///Users/MAC/SuneelWorkSpace/nervous) | Event propagator, central nerve registry, REST API gateway, and MCP server | [nerve_propagator.py](file:///Users/MAC/SuneelWorkSpace/nervous/nerve_propagator.py), [nerve_registry.json](file:///Users/MAC/SuneelWorkSpace/nervous/nerve_registry.json), [main.py](file:///Users/MAC/SuneelWorkSpace/nervous/mcp/server/main.py), [api.py](file:///Users/MAC/SuneelWorkSpace/nervous/gateway/api.py) |
+| 🦴 **Skeleton** | [skeleton/](file:///Users/MAC/SuneelWorkSpace/skeleton) | Shared system policy instructions, safety boundaries, and session checklists | [AGENT_SYSTEM.md](file:///Users/MAC/SuneelWorkSpace/skeleton/rules/AGENT_SYSTEM.md), [IDENTITY.md](file:///Users/MAC/SuneelWorkSpace/skeleton/rules/IDENTITY.md), [SAFETY_BOUNDARIES.md](file:///Users/MAC/SuneelWorkSpace/skeleton/rules/SAFETY_BOUNDARIES.md) |
+| 🩸 **Blood** | [blood/](file:///Users/MAC/SuneelWorkSpace/blood) | telemetry writing/querying, SQLite analytics db, logs, and anomaly detection | [telemetry_writer.py](file:///Users/MAC/SuneelWorkSpace/blood/telemetry/telemetry_writer.py), [telemetry_anomaly.py](file:///Users/MAC/SuneelWorkSpace/blood/telemetry/telemetry_anomaly.py), [SESSION_LOG.md](file:///Users/MAC/SuneelWorkSpace/blood/logs/SESSION_LOG.md), [telemetry.db](file:///Users/MAC/SuneelWorkSpace/blood/telemetry/telemetry.db) |
+| 🤲 **Hands** | [hands/](file:///Users/MAC/SuneelWorkSpace/hands) | CLI executable binary links, Cron/Launchd automation scripts, hooks, and CI pipelines | [workspace-changes](file:///Users/MAC/SuneelWorkSpace/hands/bin/workspace-changes), [common.sh](file:///Users/MAC/SuneelWorkSpace/hands/automation/maintenance/common.sh), [workspace_ci.py](file:///Users/MAC/SuneelWorkSpace/hands/automation/ci/workspace_ci.py) |
+| 👄 **Mouth** | [mouth/](file:///Users/MAC/SuneelWorkSpace/mouth) | Natural language command dispatcher (intent classifier) and outbound comms (Mail, iMessage) | [ws.py](file:///Users/MAC/SuneelWorkSpace/mouth/dispatcher/ws.py), [intent_map.json](file:///Users/MAC/SuneelWorkSpace/mouth/dispatcher/intent_map.json), [mail-accounts](file:///Users/MAC/SuneelWorkSpace/mouth/comms/mail/scripts/mail-accounts) |
+| 🧬 **DNA** | [dna/](file:///Users/MAC/SuneelWorkSpace/dna) | Core identity prompting files, tone profile, decision profile, and adaptive learning logic | [identity_prompt.md](file:///Users/MAC/SuneelWorkSpace/dna/identity/prompts/identity_prompt.md), [tone_profile.md](file:///Users/MAC/SuneelWorkSpace/dna/identity/profile/tone_profile.md), [adaptive_identity.py](file:///Users/MAC/SuneelWorkSpace/dna/identity/adaptive/adaptive_identity.py) |
+| 🔬 **Lab** | [lab/](file:///Users/MAC/SuneelWorkSpace/lab) | Autolab experiments, challenger generator, evolution loop, and test harnesses | [runner.py](file:///Users/MAC/SuneelWorkSpace/lab/autolab/runner.py), [evaluator.py](file:///Users/MAC/SuneelWorkSpace/lab/autolab/evaluator.py), [engine.py](file:///Users/MAC/SuneelWorkSpace/lab/evolution/engine.py), [challenger.py](file:///Users/MAC/SuneelWorkSpace/lab/evolution/challenger.py) |
+| 📋 **Spine** | [spine/](file:///Users/MAC/SuneelWorkSpace/spine) | System profile context, workspace health scoring, resource maps, snapshots, and backups | [CURRENT_STATE.json](file:///Users/MAC/SuneelWorkSpace/spine/state/CURRENT_STATE.json), [WORKSPACE_HEALTH.json](file:///Users/MAC/SuneelWorkSpace/spine/state/WORKSPACE_HEALTH.json), [system_profile.json](file:///Users/MAC/SuneelWorkSpace/spine/system-context/system_profile.json), [tool_inventory.json](file:///Users/MAC/SuneelWorkSpace/spine/tools/tool_inventory.json) |
 
-It is designed to be:
+### Nerve System
+The nerve system is implemented via [nerve_propagator.py](file:///Users/MAC/SuneelWorkSpace/nervous/nerve_propagator.py) and configured in the central [nerve_registry.json](file:///Users/MAC/SuneelWorkSpace/nervous/nerve_registry.json). 
+* **Registry**: Tracks each organ's metadata path, subscriber list (`notifies`), and `inbox` directory.
+* **Propagation**: When `notify_change(organ, event_type, detail)` is called, a JSON payload is generated and written to the `inbox` folder of all subscriber organs (e.g. `heart/nerve_inbox/`). Events are durably logged to [nerve_events.jsonl](file:///Users/MAC/SuneelWorkSpace/blood/logs/nerve_events.jsonl).
+* **Consuming**: Organs query their inboxes using `check_inbox(organ)` and prune them with `clear_inbox(organ)`.
 
-- Predictive, not only reactive.
-- Identity-aware, so outputs match Suneel's style.
-- Adaptive, so identity improves from real feedback without drifting.
-- Research-capable, so rough ideas become plans, comparisons, and decisions.
-- Agent-shared, so Claude, Codex, Gemini, OpenCode, and MCP tools use the same memory.
-- Safe and inspectable, with plain files as the source of truth.
+---
 
-The system helps with:
+## FOR AI AGENTS — BOOT SEQUENCE
 
-- Coding and local automation.
-- Workspace self-improvement.
-- Research and idea development.
-- Goal planning and execution.
-- Email and messaging support.
-- Tool discovery and recommendations.
-- MCP-backed shared memory.
-- Autolab experiments and repair loops.
-- Anticipatory next-action suggestions.
+Every agent session MUST start with this exact sequence:
 
-### Architecture Diagram
+1. Read `skeleton/rules/AGENT_SYSTEM.md`
+2. Read `skeleton/rules/IDENTITY.md`
+3. Read `skeleton/rules/SAFETY_BOUNDARIES.md`
+4. Read `dna/identity/prompts/identity_prompt.md`
+5. Read `dna/identity/profile/tone_profile.md`
+6. Read `dna/identity/profile/decision_profile.md`
+7. Read `brain/memory/SESSION_HANDOFF.md`
+8. Read `spine/state/CURRENT_STATE.json`
+9. Read `nervous/mcp/server/config/resource_map.json`
+10. Run: `memory-search "current active goals and recent decisions" --k 10`
 
-```text
-Suneel
-  |
-  v
-Agent Entry Points
-  - Claude: CLAUDE.md, ~/.claude/CLAUDE.md
-  - Codex: AGENTS.md, ~/.hands/codex/AGENTS.md
-  - Gemini/OpenCode launchers in bin/
-  |
-  v
-Shared Workspace Brain
-  brain/memory/
-    shared rules, identity, safety, memory, decisions, tasks, state, logs
-  |
-  +--> dna/identity/
-  |     base profile, tone profile, decision profile, prompts
-  |     adaptive loop: feedback -> weighted signals -> bounded updates
-  |
-  +--> brain/anticipation/
-  |     command/workflow events -> sequence patterns -> suggested next actions
-  |
-  +--> brain/research/
-  |     idea capture -> research plan -> analysis -> decision
-  |
-  +--> heart/orchestrator/
-  |     task routing, agent selection, routing history, gstack hints
-  |
-  +--> heart/goals/
-  |     goal creation, planning, execution, monitoring, dependency graph
-  |
-  +--> mouth/comms/
-  |     mail and iMessage search/draft/status support with send approval gates
-  |
-  +--> nervous/mcp/
-  |     workspace-brain resources, indexes, shared context access
-  |
-  +--> lab/autolab/
-        bounded self-improvement experiments, evaluator, reports, rollback state
+Confirm: ✅ Context, identity, memory, and capabilities loaded
+
+---
+
+## CONTROL CENTER (EYES)
+
+Dashboard running at: http://localhost:7777
+Start with: `workspace-dashboard`
+
+### What It Does
+Provides a centralized, real-time Web dashboard UI (built using HTML, static/style.css, static/dashboard.js, and a FastAPI/WebSocket server in `eyes/dashboard/server.py`) to manage and monitor SuneelWorkSpace. It tracks goals, agent activities, telemetry, model status, and the evolution engine status.
+
+### 6-Stage Execution Pipeline
+Designed for complex workflow runs, this pipeline monitors step-by-step progress via WebSockets:
+1. **brainstorm** (🧠): Explores intent, extracts goals, and identifies parameters.
+2. **plan** (📋): Builds a structured step-by-step action plan.
+3. **confirm** (✋): Pauses for Suneel's visual approval (WebSocket confirm gate) if execution is CONTROLLED.
+4. **implement** (⚙️): Dispatches commands and executes each action.
+5. **test** (🧪): Runs tests to validate outputs.
+6. **wire** (🔗): Commits changes, updates workspace state, and saves telemetry logs.
+
+### API Routes
+* `GET /`: Serves the dashboard HTML client.
+* `GET /api/goals`: Retrieves goal status lists.
+* `GET /api/agent`: Gets recent agent activity events.
+* `GET /api/memory`: Views brain memory files.
+* `GET /api/mcp`: Checks MCP server status.
+* `GET /api/health`: Polls current workspace health.
+* `GET /api/telemetry`: Fetches SQL telemetry metrics.
+* `GET /api/history`: Returns execution logs.
+* `GET /api/suggestions`: Polls anticipation suggestions.
+* `GET /api/status`: General status summary.
+* `GET /api/models/status`: Retrives model fallback quotas.
+* `POST /api/approvals/approve`: Visual click to approve pending actions.
+* `POST /api/approvals/reject`: Visual click to reject pending actions.
+* `POST /api/health/repair`: Triggers 8-stage repair pipeline.
+* `POST /api/lab/autolab/run`: Launches experiment loop.
+
+### Quick Actions
+* **Night Shift**: Triggers `dag-run orchestrator/dag/pipelines/night_shift.yaml` to run background maintenance.
+* **Gap Scan**: Triggers `python3 evolution/gap_finder.py` to evaluate capability coverage.
+* **Challenge Generation**: Triggers `python3 evolution/challenger.py` to compile optimization templates.
+* **Screenshot**: Triggers `screenshot-take` to capture current dashboard state.
+* **Model Health Check**: Triggers `model-health` to test provider latencies.
+* **Evolution Cycle**: Triggers `python3 evolution/engine.py cycle` to run a gap and challenge evolution cycle.
+* **Morning Brief**: Triggers `morning-brief` to fetch feeds and compile the daily briefing.
+* **Workspace CI**: Triggers `workspace-ci` to execute the automated testing suite.
+
+### Panels
+* **Health & Repair**: Shows workspace health score, launchd status, and repair triggers.
+* **Model Router**: Displays priority models, call limits, and error rates.
+* **Goal Tracker**: Lists active and failed goals with progress bars.
+* **Visual Approvals**: Shows pending execution requests requiring approval.
+* **Evolution & Gaps**: Visualizes gaps found and queued self-challenge templates.
+
+---
+
+## AUTONOMOUS HEALTH REPAIR
+
+Click 🔧 Repair to 98% in the dashboard health panel to trigger.
+Or: POST http://localhost:7777/api/health/repair
+
+### 8-Stage Repair Pipeline
+Defined in [health_repair_pipeline.py](file:///Users/MAC/SuneelWorkSpace/eyes/dashboard/execution/health_repair_pipeline.py):
+1. **Memory File Integrity**: Verifies critical markdown files (`MEMORY.md`, `DECISIONS.md`, `SESSION_HANDOFF.md`) and reconstructs them if deleted.
+2. **Broken Symlink Scan**: Searches for broken links in core folders and logs warning reports.
+3. **MCP Server Health**: Pings main.py with `--health-check` to test WebSocket/gateway.
+4. **Vector Store Accessibility**: Verifies vector search DB is present on disk.
+5. **Pipeline State Recovery**: Audits pipeline_state.json and recovers interrupted executions.
+6. **JSON Config Validation**: Scans all folders for malformed JSON configs.
+7. **Workspace Health Tools**: Runs CLI diagnostics `agent-doctor` and `agent-repair`.
+8. **Score & Report**: Computes post-repair score (adding 3 points per fix) and saves run metrics to `blood/logs/repair_reports/`.
+
+### Score-Aware Depth
+Implemented in [health_repair_pipeline.py](file:///Users/MAC/SuneelWorkSpace/eyes/dashboard/execution/health_repair_pipeline.py), the `get_repair_depth(score)` function maps current health score to specific repair stages:
+* **95%+** → **light** (runs Stage 3 and Stage 7 only)
+* **80%+** → **standard** (runs Stages 1-4 and Stage 7)
+* **60%+** → **deep** (runs all 8 stages)
+* **<60%** → **full** (runs all 8 stages + full issue surfacing)
+
+---
+
+## AUTONOMOUS EVOLUTION ENGINE (LAB)
+
+Driven by background engine loops scanning gaps and drafting hypotheses.
+
+### Day Mode vs Night Mode
+Configured dynamically via [evolution_config.json](file:///Users/MAC/SuneelWorkSpace/lab/evolution/evolution_config.json) and managed by [engine.py](file:///Users/MAC/SuneelWorkSpace/lab/evolution/engine.py):
+* **Day Shift**: Runs one cycle every 45 minutes (customizable in config), scanning gaps and enqueuing challenger logs.
+* **Night Shift (wraps midnight, customizable in config, e.g., 10 PM - 6 AM)**: Boosts cycle interval to run every 30 minutes, running backup/repair tools and enqueuing safe autolab experiments.
+
+### Self-Challenge System
+Defined in [challenger.py](file:///Users/MAC/SuneelWorkSpace/lab/evolution/challenger.py). It randomly compiles optimization templates across areas (performance, coverage, reliability, intelligence, automation, integration) and logs them to `lab/evolution/challenges.jsonl`.
+
+### Gap Finder
+Defined in [gap_finder.py](file:///Users/MAC/SuneelWorkSpace/lab/evolution/gap_finder.py). It checks the existence of 15 expected core capabilities and outputs status JSON reports to `brain/system/gap_analysis_latest.json`.
+
+### Night Shift Pipeline
+Configured in [night_shift.yaml](file:///Users/MAC/SuneelWorkSpace/heart/orchestrator/dag/pipelines/night_shift.yaml), executing 15 steps:
+1. `backup`: Runs `workspace-backup`
+2. `model_health`: Pings model providers
+3. `visual_screenshot`: Captures current dashboard view
+4. `visual_repair`: Auto-heals visual bugs
+5. `gap_scan`: Evaluates capability statuses
+6. `challenge`: Compiles self-improvement templates
+7. `hypothesis_generate`: Enqueues autolab hypotheses
+8. `autolab_run`: Runs SAFE level experiments
+9. `health_repair`: Runs 8-stage repair pipeline
+10. `memory_reindex`: Reindexes vector Chroma DB
+11. `graph_rebuild`: Builds obsidian markdown backlink map
+12. `capability_update`: Refreshes gap statuses
+13. `prompt_eval`: Runs evaluation scores on current prompts
+14. `morning_brief`: Fetches feeds and compiles daily briefing digest
+15. `workspace_ci`: Runs unit tests
+16. `agent_finish`: Updates session logs and completes run
+
+### Starting the Evolution Engine
+```sh
+evolution-start    # starts engine daemon (or in tmux session 'evolution-engine')
+evolution-stop     # stops the engine
 ```
 
-## 2. Core Subsystems
+---
 
-### Agent System
+## MODEL ROUTER WITH AUTOMATIC FALLBACK (HEART)
 
-Path: `brain/memory/`
+Exposes smart provider fallbacks to avoid token limits or developer lockouts.
 
-This is the shared source for workspace rules, identity context, memory, tasks, logs, and state.
+### Model Priority Order
+Configured dynamically inside [model_registry.json](file:///Users/MAC/SuneelWorkSpace/heart/model_router/model_registry.json) and checked by [router.py](file:///Users/MAC/SuneelWorkSpace/heart/model_router/router.py):
+1. `claude-sonnet-4-6` (Primary developer & analyst model, priority 1)
+2. `claude-opus-4-8` (Heavy reasoning fallback, priority 2)
+3. `gpt-4o` (General purpose agent fallback, priority 3)
+4. `gemini-2.5-pro` (Long context fallback, priority 4)
 
-Important files:
+### Quota Tracking
+Persisted in [quota_state.json](file:///Users/MAC/SuneelWorkSpace/heart/model_router/quota_state.json) and tracked by [quota_tracker.py](file:///Users/MAC/SuneelWorkSpace/heart/model_router/quota_tracker.py). It records daily token usage and calls, resetting quotas automatically at midnight.
 
-- `skeleton/rules/AGENT_SYSTEM.md`: canonical shared system policy.
-- `skeleton/rules/IDENTITY.md`: shared user/workspace identity context.
-- `skeleton/rules/SAFETY_BOUNDARIES.md`: safety rules.
-- `skeleton/rules/BOUNDED_SELF_UPGRADE.md`: allowed and approval-gated self-upgrades.
-- `brain/memory/MEMORY.md`: stable facts.
-- `brain/memory/DECISIONS.md`: important choices and reasons.
-- `brain/memory/PATTERNS.md`: recurring operating patterns.
-- `brain/memory/INSIGHTS.md`: higher-level learning.
-- `heart/tasks/ACTIVE_TASKS.md`: current tasks.
-- `heart/tasks/COMPLETED_TASKS.md`: completed task history.
-- `brain/memory/SESSION_HANDOFF.md`: latest handoff.
-- `spine/state/CURRENT_STATE.json`: current state.
-- `spine/state/WORKSPACE_HEALTH.json`: health and readiness.
+### Fallback Behavior
+When `get_best_model(task_type, preferred)` is called, the router checks if the preferred model is marked `available: true`. If exhausted, it logs a fallback event to `heart/model_router/fallback_log.jsonl` and selects the next available model in the priority chain.
 
-### Identity System
+### Commands
+```sh
+model-status    # show all models with availability and token usage
+model-health    # ping each model with test prompt
+```
 
-Path: `dna/identity/`
+---
 
-The identity system defines how agents should sound, decide, plan, and communicate for Suneel.
+## VISUAL MONITOR SYSTEM (EYES)
 
-Base files:
+Tracks visual state representation of the workspace.
 
-- `dna/dna/identity/profile/identity_profile.md`: core identity profile.
-- `dna/dna/identity/profile/tone_profile.md`: writing and tone rules.
-- `dna/dna/identity/profile/decision_profile.md`: decision rules.
-- `dna/dna/identity/profile/preferences.json`: structured preferences.
-- `dna/dna/identity/profile/behavioral_patterns.json`: behavior patterns.
-- `dna/dna/identity/prompts/identity_prompt.md`: agent identity prompt.
-- `dna/dna/identity/prompts/communication_prompt.md`: email/message/summarization voice prompt.
-- `dna/identity/integration/routing_identity.json`: routing and autonomy rules.
-- `dna/identity/reports/identity_summary.md`: human-readable summary.
+### Screenshot Management
+Screenshots are taken via [screenshot_manager.py](file:///Users/MAC/SuneelWorkSpace/eyes/visual/screenshot_manager.py) and stored as [dashboard-live.png](file:///Users/MAC/SuneelWorkSpace/eyes/dashboard/screenshots/dashboard-live.png) inside the dashboard static folder for real-time visual inspection.
 
-Suneel's base style:
+### Visual Repair Agent
+Implemented in [visual_repair_agent.py](file:///Users/MAC/SuneelWorkSpace/eyes/visual/visual_repair_agent.py). It processes screenshot comparisons and enqueues adjustments or automatically patches CSS files if styling mismatches are found.
 
-- Short.
-- Direct.
-- Casual.
-- Conversational.
-- Smart.
-- Structured when useful.
-- Softened, not harsh.
-- Never condescending.
+### Vision Implementer
+Implemented in [vision_implementer.py](file:///Users/MAC/SuneelWorkSpace/eyes/visual/vision_implementer.py), providing a translation layer to compile mocked screenshot designs directly into HTML/CSS files.
 
-Decision style:
+### Commands
+```sh
+screenshot-take     # take dashboard screenshot manually
+visual-monitor      # start background screenshot daemon
+visual-repair       # process visual repair queue
+```
 
-- Analysis first.
-- Intuition second.
-- Break uncertainty into small problems.
-- Prefer tools by simplicity, cost, power, speed, reliability.
-- Autopilot by default.
-- Ask only for serious system risk or safety-gated actions.
+---
+
+## WORLD MONITOR (EARS)
+
+Scans external feeds and provides daily intelligence context.
+
+### Sources
+Configured in [monitor_config.json](file:///Users/MAC/SuneelWorkSpace/ears/monitor/config/monitor_config.json):
+* GitHub releases and PRs of tracked repositories
+* RSS news directories
+* Arxiv academic publications
+
+### Morning Brief
+Generated daily by [digest_builder.py](file:///Users/MAC/SuneelWorkSpace/ears/monitor/digest/digest_builder.py) combining external news with active goal status reports, outputting the markdown file inside the workspace for daily briefing.
+
+### Commands
+```sh
+monitor-run        # fetch from all sources
+morning-brief      # build today's digest
+```
+
+---
+
+## MEMORY SYSTEM (BRAIN)
+
+Handles semantic query indexing and knowledge graphing.
+
+### Semantic Search
+Exposes vector search tools in [semantic_search.py](file:///Users/MAC/SuneelWorkSpace/brain/memory/vector/semantic_search.py) querying a local ChromaDB store directory to return context matches within memory.
+
+### Memory Files
+* [MEMORY.md](file:///Users/MAC/SuneelWorkSpace/brain/memory/MEMORY.md): Permanent facts.
+* [DECISIONS.md](file:///Users/MAC/SuneelWorkSpace/brain/memory/DECISIONS.md): Architectural decisions.
+* [SESSION_HANDOFF.md](file:///Users/MAC/SuneelWorkSpace/brain/memory/SESSION_HANDOFF.md): Work session persistence.
+* [NOTES.md](file:///Users/MAC/SuneelWorkSpace/brain/memory/NOTES.md): Temp scratch note entries.
+
+### Knowledge Graph
+Built via [build_graph.py](file:///Users/MAC/SuneelWorkSpace/brain/graph/build_graph.py) (saving graph lists to `brain/graph/knowledge_graph.json`), allowing agents to crawl note relationships and isolate orphan pages (logged to [orphan_notes.md](file:///Users/MAC/SuneelWorkSpace/brain/graph/reports/orphan_notes.md)).
+
+### Brain Context Injector
+Defined in [context_injector.py](file:///Users/MAC/SuneelWorkSpace/brain/injector/context_injector.py) (and linked CLI `brain-inject`), resolving context dependencies by ranking notes based on a recency decay scoring algorithm.
+
+### Commands
+```sh
+memory-search "query"    # semantic search across all memory
+memory-reindex           # re-embed all memory files
+brain-inject --task "..."  # inject relevant context before a task
+brain-graph-build        # rebuild knowledge graph
+brain-graph-query        # query the knowledge graph
+brain-staleness          # find stale/orphan notes
+```
+
+---
+
+## IDENTITY SYSTEM (DNA)
+
+Specifies Suneel's identity profile, communication style, and adaptive learning loops.
+
+### Voice and Tone
+Tone parameters defined in [tone_profile.md](file:///Users/MAC/SuneelWorkSpace/dna/identity/profile/tone_profile.md): casual, direct, smart, softened, structured, and CASUAL conversational.
+
+### Decision Style
+Configured in [decision_profile.md](file:///Users/MAC/SuneelWorkSpace/dna/identity/profile/decision_profile.md): leads with analysis, split uncertainty into subproblems, autopilot by default.
 
 ### Adaptive Identity
+Adjusts profiles from feedback via [adaptive_identity.py](file:///Users/MAC/SuneelWorkSpace/dna/identity/adaptive/adaptive_identity.py). Takes input from `identity-accept`, `identity-reject`, and `identity-adjust` commands, applying weight parameters from [signal_weights.json](file:///Users/MAC/SuneelWorkSpace/dna/identity/adaptive/signal_weights.json) to prevent sudden stylistic drifts.
 
-Path: `dna/dna/identity/adaptive/`
+### Prompt Versioning
+Stores incremental prompts under `dna/identity/prompts/versions/` and validates adjustments using the testing scripts in `dna/identity/prompts/eval/`.
 
-The adaptive identity loop improves Suneel's voice and decision behavior from real interaction outcomes.
-
-Files:
-
-- `dna/dna/identity/adaptive/feedback_log.json`: raw feedback events.
-- `dna/dna/identity/adaptive/signal_weights.json`: quality weights for signal types.
-- `dna/dna/identity/adaptive/signal_memory.json`: extracted weighted signals.
-- `dna/dna/identity/adaptive/pattern_updates.json`: proposed and active adjustments.
-- `dna/dna/identity/adaptive/drift_guardrails.json`: strict drift limits.
-- `dna/dna/identity/adaptive/adaptation_state.json`: current loop state.
-- `dna/dna/identity/adaptive/reports/adaptation_report.md`: report.
-- `dna/dna/identity/adaptive/adaptive_identity.py`: learning engine.
-
-Signal weights:
-
-```json
-{
-  "accepted": 0.2,
-  "light_edit": 0.4,
-  "heavy_edit": 0.8,
-  "rejected": 1.0,
-  "manual_adjust": 1.2,
-  "repeat_preference": 1.0,
-  "goal_outcome_success": 0.7,
-  "goal_outcome_failure": 1.1
-}
-```
-
-Learning rule:
-
-- Patterns are based on weighted evidence, not raw counts.
-- Rejections and manual adjustments matter more than simple acceptances.
-- Multiple signals are required before behavior changes.
-- Updates are small.
-- Base identity rules are never overridden.
-
-### Anticipation Engine
-
-Path: `brain/anticipation/`
-
-The anticipation engine records command and workflow sequences, detects repeated patterns, and suggests next actions before Suneel asks.
-
-Files:
-
-- `brain/anticipation/prediction_engine.py`: prediction engine.
-- `brain/anticipation/prediction_memory.json`: command/workflow event memory.
-- `brain/anticipation/behavior_patterns.json`: built-in and learned behavior patterns.
-- `brain/anticipation/action_suggestions.md`: latest suggestions.
-- `brain/anticipation/reports/anticipation_report.md`: report.
-
-Rules:
-
-- Suggest only.
-- Pre-plan only.
-- Pre-compute only.
-- Never auto-execute actions.
-- Never override safety boundaries.
-
-Example suggestions:
-
-- After `imsg-recent`: suggest reviewing messages or drafting replies.
-- After `goal-create`: suggest `goal-plan`.
-- After `idea-run`: suggest reviewing analysis and converting accepted work into a goal.
-- After `system-gaps`: suggest opening the improvement plan or running `improve-system`.
-
-### Research Engine
-
-Path: `brain/research/`
-
-Turns rough ideas into durable local research artifacts.
-
-Files:
-
-- `brain/research/research_engine.py`: engine.
-- `brain/research/ideas/`: captured ideas.
-- `brain/research/plans/`: research plans.
-- `brain/research/analyses/`: comparisons and analysis.
-- `brain/research/decisions/`: decision records.
-
-Main commands:
-
-- `idea-start`: capture an idea.
-- `idea-run`: capture, plan, analyze, and draft a decision.
-
-### Comms Subsystem
-
-Path: `mouth/comms/`
-
-Supports email and iMessage workflows while preserving safety boundaries.
-
-Important files:
-
-- `mouth/mouth/comms/config/comms_config.json`: comms config, identity, adaptive identity, anticipation pointers.
-- `mouth/comms/mail/`: mail state/logs/scripts.
-- `mouth/comms/imessage/`: iMessage state/logs/scripts.
-- `mouth/comms/reports/latest_comms_report.md`: report.
-
-Rules:
-
-- Drafting is allowed.
-- Searching/status is allowed.
-- Sending requires explicit approval.
-- Deleting/archive/forward/contact actions require approval.
-- Drafts should use `dna/dna/identity/prompts/communication_prompt.md`.
-
-### MCP Workspace Brain
-
-Path: `nervous/mcp/`
-
-The MCP subsystem exposes workspace resources to connected agents.
-
-Important files:
-
-- `nervous/nervous/mcp/server/main.py`: MCP server.
-- `nervous/nervous/mcp/server/config/resource_map.json`: resource registry.
-- `nervous/nervous/mcp/server/storage/memory_index.db`: local index.
-- `nervous/nervous/mcp/server/state/last_index.json`: latest index metadata.
-
-Important resources include:
-
-- `workspace://dna/identity/profile`
-- `workspace://dna/dna/identity/adaptive/feedback-log`
-- `workspace://dna/dna/identity/adaptive/signal-weights`
-- `workspace://brain/anticipation/memory`
-- `workspace://brain/anticipation/suggestions`
-- `workspace://spine/audit/system`
-- `workspace://readme/blueprint`
-- `workspace://spine/tools/inventory`
-- `workspace://research/index`
-- `workspace://memory/patterns`
-
-### Orchestrator
-
-Path: `heart/orchestrator/`
-
-Routes tasks to the right agent/tool mode.
-
-Important files:
-
-- `heart/heart/orchestrator/router/task_types.json`
-- `heart/heart/orchestrator/router/agent_profiles.json`
-- `heart/heart/orchestrator/router/gstack_policy.json`
-- `heart/heart/orchestrator/router/system_intelligence_policy.md`
-- `heart/orchestrator/state/current_routing_state.json`
-- `heart/orchestrator/reports/routing_report.md`
-
-It uses:
-
-- Task type.
-- Agent profiles.
-- GStack hints.
-- Identity routing rules.
-- Anticipatory suggestions.
-
-### Goal Engine
-
-Path: `heart/goals/`
-
-Turns goals into tasks, plans, dependency graphs, execution runs, and reports.
-
-Important files:
-
-- `heart/goals/goals/active_goals.md`
-- `heart/goals/planner/planner.md`
-- `heart/goals/planner/idea_execution_pipeline.md`
-- `heart/goals/graph/task_graph.json`
-- `heart/goals/state/goal_state.json`
-- `heart/goals/execution/execution_log.md`
-
-Goal execution records adaptive identity and anticipation events.
-
-### Autolab
-
-Path: `lab/autolab/`
-
-Autolab is the bounded workspace self-improvement lab.
-
-Important files:
-
-- `lab/autolab/program.md`
-- `lab/autolab/mutation_policy.md`
-- `lab/autolab/safeguards.md`
-- `lab/autolab/evaluator.md`
-- `lab/autolab/current_frontier.md`
-- `lab/autolab/meta/adaptive_identity_strategy.md`
-- `lab/autolab/meta/anticipation_strategy.md`
-- `lab/autolab/reports/latest_report.md`
-
-Autolab may recommend improvements, but it must not override identity or execute unsafe changes automatically.
-
-## 3. How The System Thinks
-
-The system uses three layers:
-
-1. Identity drives tone and decisions.
-2. Adaptive identity learns from behavior.
-3. Anticipation predicts next actions.
-
-Flow:
-
-```text
-User request
-  -> load shared rules and identity
-  -> inspect current workspace state
-  -> decide whether to act or ask
-  -> execute safe local work
-  -> record feedback/workflow signals
-  -> update adaptive memory and anticipation memory
-  -> suggest next actions
-  -> update handoff/logs/state
-```
-
-Identity is the anchor. Adaptive learning is tuning. Anticipation is suggestion. Safety boundaries override all three.
-
-## Intent Layer
-
-The system must infer user intent before acting.
-
-Intent categories:
-
-- `messaging`
-- `email`
-- `research`
-- `system_improvement`
-- `development`
-- `idea_execution`
-- `maintenance`
-- `unknown`
-
-Intent is inferred from:
-
-- Command used.
-- Recent actions.
-- Goal context.
-- Task wording or route context.
-
-Intent is stored in:
-
-- `brain/anticipation/current_context.json`
-
-Agent behavior:
-
-1. Infer intent.
-2. Align the response to that intent.
-3. Filter suggestions based on that intent.
-4. Keep suggestions relevant, minimal, and safe.
-
-The intent layer does not execute anything. It only helps the system choose the right tone, workflow, and next-step suggestions.
-
-## Ranked Suggestions
-
-After any meaningful action, the system may suggest next steps.
-
-Suggestion rules:
-
-- Suggestions must be ranked.
-- Suggestions must be limited to the top 3-5.
-- Suggestions must be relevant to current intent.
-- Suggestions must be high-signal, not generic.
-- Suggestions must never auto-execute.
-
-Scoring contract:
-
-```text
-suggestion_score =
-  frequency_weight
-  + success_weight
-  + recency_weight
-  + identity_alignment
-  + intent_alignment
-```
-
-Output format:
-
-```text
-Suggested next actions:
-1. [HIGH] ...
-2. [MED] ...
-3. [LOW] ...
-```
-
-Ranking is implemented in `brain/anticipation/prediction_engine.py`.
-
-## 4. Command Reference
-
-Run commands from `~/SuneelWorkSpace` or ensure `~/SuneelWorkSpace/bin` is on `PATH`.
-
-### Agent And Maintenance
-
-| Command | What it does | When to use |
-|---|---|---|
-| `agent-start` | Loads startup context and session state. | Start of an agent session. |
-| `agent-finish "summary"` | Updates handoff, logs, state, and reports. | End of meaningful work. |
-| `agent-status` | Shows workspace health/status summary. | Quick system check. |
-| `agent-doctor` | Runs workspace health checks. | Before repair or after upgrades. |
-| `agent-repair` | Repairs small known workspace issues. | When doctor reports repairable issues. |
-| `agent-maintain` | Runs maintenance, doctor, reports, and refreshes. | Routine upkeep. |
-| `agent-autoclose` | Idempotent session closeout/recovery. | Used by wrappers and startup recovery. |
-| `agent-test-loop` | Test loop helper. | Validate repeated agent workflows. |
-
-### System Intelligence
-
-| Command | What it does | When to use |
-|---|---|---|
-| `system-audit` | Refreshes `spine/audit/system_audit.md`. | Need full system overview. |
-| `system-gaps` | Refreshes `spine/audit/gap_analysis.md`. | Need current gaps and priorities. |
-| `system-capabilities` | Refreshes `spine/system-context/system_profile.json`. | Need safe machine/workspace capability summary. |
-| `system-recommend` | Refreshes `spine/tools/recommendations.md`. | Need improvement ideas. |
-| `improve-system` | Runs bounded system intelligence refresh. | Safe local self-improvement scan. |
-| `anticipate` | Records or asks for next-action suggestions. | Work with prediction engine directly. |
-
-`anticipate` subcommands:
-
-- `anticipate intent <command>`: infer and store intent.
-- `anticipate suggest <command>`: print ranked suggestions.
-- `anticipate record --command <command>`: record an action and update prediction memory.
-- `anticipate report`: refresh anticipation report.
-
-### Identity
-
-| Command | What it does | When to use |
-|---|---|---|
-| `identity-accept <id>` | Records accepted output feedback. | Mark an output as good. |
-| `identity-reject <id> "reason"` | Records rejected output feedback. | Teach the system what missed. |
-| `identity-adjust "instruction"` | Records a manual identity adjustment. | Give direct style/behavior correction. |
-
-### Research And Ideas
-
-| Command | What it does | When to use |
-|---|---|---|
-| `idea-start` | Captures a raw idea. | Save a new idea. |
-| `idea-run` | Captures, researches, analyzes, and drafts a decision. | Turn an idea into a plan. |
-
-Lower-level scripts also exist in `brain/research/scripts/`: `idea-bootstrap`, `idea-capture`, `idea-research`, `idea-analyze`, `idea-decide`.
-
-### Goal Engine
-
-| Command | What it does | When to use |
-|---|---|---|
-| `goal-create` | Creates a goal. | Start goal-driven work. |
-| `goal-plan` | Decomposes a goal into tasks. | Before execution. |
-| `goal-execute` | Executes planned goal tasks. | Run safe planned work. |
-| `goal-monitor` | Monitors active goals. | Track progress. |
-| `goal-status` | Shows goal status. | Check current goal state. |
-| `goal-complete` | Marks a goal complete. | After verification. |
-| `goal-fail` | Marks a goal failed. | When a goal cannot continue. |
-| `goal-adapt` | Adjusts goal planning/state. | When plan needs revision. |
-
-### Orchestrator
-
-| Command | What it does | When to use |
-|---|---|---|
-| `route-task` | Recommends agent/tool/mode for a task. | Before assigning work. |
-| `route-execute` | Executes routed work. | Run routed workflows. |
-| `route-analyze` | Analyzes routing behavior. | Improve routing. |
-| `route-learn` | Updates routing learning. | After repeated routing evidence. |
-
-### Comms
-
-| Command | What it does | When to use |
-|---|---|---|
-| `comms-status` | Shows comms subsystem status. | Check email/message readiness. |
-| `comms-doctor` | Checks comms setup. | Diagnose comms issues. |
-| `comms-permissions-check` | Checks permissions. | Before mail/message automation. |
-| `comms-report` | Generates comms report. | Review comms state. |
-| `mail-status` | Shows mail state. | Check mail readiness. |
-| `mail-recent` | Lists recent mail metadata. | Triage mail. |
-| `mail-search` | Searches mail metadata/content as configured. | Find mail. |
-| `mail-draft-reply` | Drafts a mail reply. | Prepare a reply for review. |
-| `imessage-status` | Shows iMessage state. | Check message readiness. |
-| `imessage-recent` | Lists recent message metadata. | Triage messages. |
-| `imessage-search` | Searches messages. | Find message context. |
-| `imessage-send-draft` | Creates/sends through approval flow as configured. | Draft message flow. |
-| `imsg-recent` | Short alias for recent iMessage workflow. | Quick message triage. |
-| `imsg-search` | Short alias for iMessage search. | Quick message search. |
-| `imsg-draft` | Short alias for drafting message. | Draft message. |
-| `imsg-send-confirmed` | Confirmed send path. | Only after explicit approval. |
-| `install-imessage-plugin` | Installs/links iMessage plugin support. | Only when intentionally configuring comms. |
-
-### MCP
-
-| Command | What it does | When to use |
-|---|---|---|
-| `mcp-start` | Starts MCP server. | Enable MCP workspace brain. |
-| `mcp-stop` | Stops MCP server. | Stop MCP. |
-| `mcp-status` | Shows MCP status. | Check server/index state. |
-| `mcp-doctor` | Checks MCP health. | Diagnose MCP. |
-| `mcp-reindex` | Rebuilds workspace-brain index. | After new memory/resources. |
-| `mcp-repair` | Repairs known MCP issues. | When doctor finds repairable problems. |
-| `mcp-report` | Generates MCP report. | Review MCP state. |
-| `mcp-test` | Tests MCP functionality. | Validate MCP. |
-
-### GStack
-
-| Command | What it does | When to use |
-|---|---|---|
-| `gstack-create` | Creates/sets up gstack assets. | Advanced specialist mode setup. |
-| `gstack-repair` | Repairs gstack setup. | When gstack verification fails. |
-| `gstack-verify` | Verifies gstack integration. | Before specialist workflows. |
-
-### Workspace Utilities
-
-| Command | What it does | When to use |
-|---|---|---|
-| `workspace-context` | Prints startup/workspace context. | Fast orientation. |
-| `workspace-index` | Refreshes/prints workspace index. | Inspect file map. |
-| `workspace-report` | Generates workspace report. | Review system state. |
-| `workspace-backup` | Creates backup. | Before risky changes. |
-| `workspace-changes` | Shows workspace changes. | Review uncommitted work. |
-| `workflow-audit` | Audits workflow setup. | Check workflow health. |
-
-### Agent Launchers
-
-| Command | What it does | When to use |
-|---|---|---|
-| `use-claude` | Starts Claude wrapper/context. | Claude session. |
-| `use-codex` | Starts Codex wrapper/context. | Codex session. |
-| `use-gemini` | Starts Gemini fallback. | Free/fallback agent. |
-| `use-opencode` | Starts OpenCode fallback. | Free/fallback agent. |
-| `use-opencode-gemini` | Hybrid fallback launcher. | Alternative fallback path. |
-| `use-claude-imessage` | Claude with iMessage context. | Comms-focused Claude work. |
-
-## 5. Workflow Examples
-
-### Idea To Execution
-
+### Commands
 ```sh
-idea-run "Build a new workflow" "What it should do"
-goal-create
-goal-plan
-route-task "implement the accepted workflow"
-route-execute
-goal-monitor
-goal-complete
-agent-finish "summary"
+prompt-eval --version current    # score current prompt version
+prompt-new                       # create new version
+prompt-promote <version>         # promote after passing eval
+prompt-rollback                  # revert to previous version
+identity-accept <id>             # record accepted output
+identity-reject <id> "reason"    # record rejected output
+identity-adjust "instruction"    # manual adjustment
+feedback-ingest                  # process feedback inbox
 ```
 
-What happens:
+---
 
-- Research engine captures and analyzes the idea.
-- Goal engine turns it into tasks.
-- Orchestrator chooses the right execution path.
-- Adaptive identity records feedback.
-- Anticipation suggests the next step.
+## TELEMETRY SYSTEM (BLOOD)
 
-### Messaging Workflow
+SQLite-driven query tracking and execution logging.
 
+### Schema
+Maintained inside [schema.sql](file:///Users/MAC/SuneelWorkSpace/blood/telemetry/schema.sql) defining tables for `traces`, `metrics`, and `logs` to capture execution outcomes.
+
+### Nested Traces
+The trace system tracks execution hierarchy by linking parent and child operations through `trace_id` and `parent_trace_id` columns, persisted inside [telemetry.db](file:///Users/MAC/SuneelWorkSpace/blood/telemetry/telemetry.db).
+
+### Anomaly Detection
+Implemented in [telemetry_anomaly.py](file:///Users/MAC/SuneelWorkSpace/blood/telemetry/telemetry_anomaly.py). Scans performance indices and flags latency regression or unexpected token consumption peaks.
+
+### Commands
 ```sh
-imsg-recent
-imsg-draft
-imsg-send-confirmed
+telemetry-query summary --days 7    # agent performance table
+telemetry-anomalies                 # flag regressions
 ```
 
-Rules:
+---
 
-- Recent/search/draft workflows can run locally.
-- Drafts follow Suneel's communication profile.
-- Sending requires explicit approval.
-- Anticipation may suggest drafting replies after recent-message review.
+## AUTOLAB SYSTEM (LAB)
 
-### Mail Workflow
+Safely performs self-evolution experiment runs.
 
-```sh
-mail-recent
-mail-search "topic"
-mail-draft-reply
-```
-
-Rules:
-
-- Draft only unless Suneel confirms send.
-- Use `dna/dna/identity/prompts/communication_prompt.md`.
-- Keep tone short, direct, casual, and softened.
-
-### System Improvement Workflow
-
-```sh
-system-audit
-system-gaps
-system-recommend
-improve-system
-agent-doctor
-mcp-reindex
-agent-finish "summary"
-```
-
-What happens:
-
-- Audit detects current state.
-- Gaps are classified.
-- Recommendations are generated.
-- Safe local improvements refresh.
-- Health and MCP index are validated.
-
-## 6. Data And Memory Map
-
-| Area | Path | Purpose |
-|---|---|---|
-| Canonical rules | `skeleton/rules/` | System policy, identity, workflow, safety. |
-| Durable memory | `brain/memory/` | Facts, decisions, patterns, insights, handoff. |
-| Tasks | `heart/tasks/` | Active, queued, and completed tasks. |
-| State | `spine/state/` | Current state and health JSON. |
-| Logs | `blood/logs/` | Session logs. |
-| Identity | `dna/identity/` | Profile, tone, decision, prompts. |
-| Adaptive identity | `dna/dna/identity/adaptive/` | Feedback, weighted signals, bounded adjustments. |
-| Anticipation | `brain/anticipation/` | Prediction memory, behavior patterns, suggestions. |
-| Research | `brain/research/` | Ideas, plans, analyses, decisions. |
-| Orchestrator | `heart/orchestrator/` | Routing policies, state, reports. |
-| Goals | `heart/goals/` | Goals, plans, graphs, execution logs. |
-| Comms | `mouth/comms/` | Mail/iMessage config, state, logs, reports. |
-| MCP | `nervous/mcp/` | Server, resource map, index DB, state. |
-| Autolab | `lab/autolab/` | Self-improvement experiments, evaluator, reports. |
-| Audit | `spine/audit/` | System audit, gap analysis, improvement plan. |
-| Tools | `spine/tools/` | Tool inventory and recommendations. |
-
-### Full Folder Coverage
-
-These top-level folders are part of the workspace and are intentionally documented:
-
-| Folder | Purpose |
-|---|---|
-| `.agent-backups/` | Timestamped backups created before/around agent maintenance and repairs. |
-| `.agents/` | Antigravity/agent-specific config and skills. |
-| `.claude/` | Workspace Claude-related config/cache when present. |
-| `.gstack/` | GStack specialist-mode local files. |
-| `.rtk/` | RTK/token-filter local state. |
-| `.serena/` | Serena/tooling state if enabled. |
-| `.vscode/` | Local editor configuration. |
-| `brain/memory/` | Shared brain, rules, memory, logs, state. |
-| `brain/anticipation/` | Intent detection, prediction memory, ranked next-action suggestions. |
-| `spine/audit/` | System audit, gap analysis, improvement plan. |
-| `lab/autolab/` | Bounded self-improvement lab. |
-| `automation/` | Local automation helpers and maintenance support. |
-| `bin/` | User-facing command wrappers. |
-| `hands/codex/` | Codex-specific workspace files. |
-| `mouth/comms/` | Mail and iMessage workflows. |
-| `spine/docs/` | Documentation and specs. |
-| `heart/goals/` | Goals, planning, execution, monitoring. |
-| `dna/identity/` | Identity, adaptive identity, tone, decision profiles. |
-| `nervous/mcp/` | Workspace-brain MCP server and resource index. |
-| `brain/vault/` | Obsidian-facing knowledge vault. |
-| `heart/orchestrator/` | Routing and agent selection. |
-| `projects/` | Project work area. |
-| `brain/research/` | Idea capture, research, analysis, decisions. |
-| `scripts/` | Shared local scripts behind commands. |
-| `spine/snapshots/` | Snapshot state for recovery/experiments. |
-| `spine/system-context/` | Safe metadata-only machine/workspace profile. |
-| `spine/tools/` | Tool inventory and recommendations. |
-| System context | `spine/system-context/` | Safe machine/workspace profile. |
-
-Inspect commands:
-
-```sh
-agent-status
-agent-doctor
-mcp-status
-system-gaps
-anticipate report
-python3 -m json.tool dna/dna/identity/adaptive/signal_memory.json
-```
-
-## 7. Safety Model
-
-Hard rules:
-
-- No money actions.
-- No account upgrades.
-- No purchases.
-- No destructive actions without explicit approval and backup.
-- No automatic system wipe.
-- No automatic deletion of important files.
-- No automatic sending of emails/messages.
-- No deep private indexing outside approved scope.
-- No hidden state when a plain file will work.
-- No blind merges between similar workspace folders.
-
-Bounded adaptation:
-
-- Base identity is protected.
-- Drift guardrails control all adaptive changes.
-- Weighted signals improve quality, but do not override explicit preferences.
-- Large tone or safety changes require review.
-
-Anticipation safety:
-
-- SAFE actions (read-only, status checks) are automatically executed when the suggestion has high confidence (>= 0.8) AND context strength is strong (> 0.7).
-- SAFE actions that do not meet these criteria, and all CONTROLLED actions (drafting, planning, creating files), require explicit user confirmation.
-- RESTRICTED actions (destructives, installs, comms) are blocked by default and require explicit justification/reasoning.
-- Suggestions can pre-plan or pre-compute only.
-- User approval is required before risky action.
-
-Local-first:
-
-- Plain files are the source of truth.
-- MCP index is local.
-- Research artifacts are local.
-- Machine awareness is metadata-only unless explicitly expanded.
-
-## System Capabilities
-
-### The System Can Do
-
-- Inspect and summarize workspace files under `~/SuneelWorkSpace`.
-- Run local maintenance, audit, doctor, and report commands.
-- Generate research plans, analyses, and decision records.
-- Draft email/message replies for review.
-- Search configured mail/message metadata and accessible local records.
-- Create and execute local goals through the goal engine.
-- Route tasks through orchestrator policies.
-- Record adaptive identity feedback.
-- Infer intent and suggest ranked next actions.
-- Reindex MCP workspace-brain resources.
-
-### Requires Explicit Approval
-
-- Sending email or messages.
-- Deleting, moving, or overwriting important files.
-- External tool/plugin installs.
-- Account, billing, purchase, or subscription actions.
-- Deep indexing of private folders outside approved scope.
-- Destructive git/filesystem/database operations.
-- Any action with serious system risk.
-
-### Blocked By Default
-
-- Automatic system wipe.
-- Automatic deletion of important files.
-- Automatic outbound communication.
-- Automatic money/account changes.
-- Hidden state that bypasses plain-file inspection.
-- Safety boundary changes caused by adaptive identity or anticipation.
-
-## Duplication Guard
-
-To prevent code duplication, configuration drift, and system fragmentation, `SuneelWorkSpace` enforces a strict canonical logic and directory layout policy.
-
-### Core Policies
-- **Subsystem Logic Placement**: All subsystem logic, scripts, and utilities must live in their designated subsystem directories (e.g., `heart/goals/scripts/`, `nervous/nervous/mcp/server/scripts/`, `heart/orchestrator/scripts/`).
-- **bin/ Entrypoints Only**: The root `bin/` directory must only serve as the CLI command entrypoint layer. It must **never** contain duplicate copies of subsystem scripts. Instead, all entrypoint commands in `bin/` must be created as relative symbolic links pointing to their subsystem originals.
-- **Config Folder Standardization**: Configuration files (e.g. JSON/YAML policies) must reside inside designated config subfolders (e.g., `subsystem/config/`, `heart/heart/orchestrator/router/`) rather than the subsystem root.
-
-### Command Reference
-Run `duplication-guard` to pre-check any proposed file creation or modification:
-- `duplication-guard <file_path> [--intent "description of purpose"]`: Validates that a file's proposed path conforms to canonical location rules and scans `spine/audit/file_graph.json` to reject files with duplicate stems or overlapping functional intents.
-- Use `--force` flag to bypass warnings if intentionally creating a fork (explicit confirmation required).
-
-## Canonical Integrity
-
-To keep the codebase maintainable and free of redundant logic, `SuneelWorkSpace` enforces an internal code integrity standard for modifying existing files.
-
-### Integrity Policies
-- **Duplication vs. Integrity**: While the **Duplication Guard** prevents the creation of duplicate files, the **Canonical Integrity Guard** prevents the introduction of copy-paste function clones, repeated logic blocks, or parallel implementations inside existing core files.
-- **Merge Audits**: All code modifications and merges must enhance code reuse and structure, not degrade it with repeated blocks of code.
-- **Canonical Code Cleanliness**: Canonical scripts and programs must maintain clean definitions. Duplicate function declarations inside the same script are strictly blocked.
-
-### Command Reference
-Run `integrity-guard` before staging or merging edits into any existing file:
-- `integrity-guard <target_file> [--proposed <proposed_content_file>]`: Parses the current code AST and structure (AST-based validation for Python, regex-based validation for Shell/JS) to detect internal duplicates. If duplicate function names or duplicate body logic are detected, it blocks with a Warning.
-- Use `--override-integrity` flag to bypass warnings if a duplicate or fork is explicitly required.
-
-## 8. How To Extend The System
-
-### Add A New Tool
-
-1. Add or install only after explicit approval if external.
-2. Create a small wrapper in `bin/`.
-3. Document it in `README.md`.
-4. Add MCP resource entries if it creates durable files.
-5. Add safety notes if it touches private data, network, accounts, or files.
-6. Run `agent-doctor` and `mcp-reindex`.
-
-### Add A New Subsystem
-
-1. Create a top-level folder under `~/SuneelWorkSpace`.
-2. Add a `README.md`.
-3. Store state in plain JSON/Markdown.
-4. Add command wrappers in `bin/`.
-5. Register resources in `nervous/nervous/mcp/server/config/resource_map.json`.
-6. Add memory/decision entries if durable.
-7. Add health/status integration if relevant.
-8. Update this README.
-
-### Upgrade Safely
-
-1. Inspect first.
-2. Prefer upgrading over recreating.
-3. Keep changes scoped.
-4. Back up important files before risky edits.
-5. Validate JSON/scripts.
-6. Run `agent-doctor`.
-7. Run `mcp-reindex` after new shared resources.
-8. Close out with `agent-finish`.
-
-## 9. Current Limitations And Gaps
-
-Honest current gaps:
-
-- Anticipation is early. It has built-in patterns and sequence learning, but needs real usage history to become strong.
-- Adaptive identity is bounded and safe, but needs actual accept/edit/reject feedback to learn meaningful refinements.
-- Comms workflows are intentionally safety-limited. Sending still requires explicit approval.
-- Some command descriptions depend on local scripts and may need deeper per-command docs over time.
-- README can explain the system, but it does not replace reading canonical safety files before risky changes.
-- Tool inventory recommends additions but does not install external tools automatically.
-- Autolab recommends identity and anticipation tweaks, but does not apply major behavior changes automatically.
-- MCP resource coverage must be updated whenever new durable files are added.
-- Private files outside the workspace are not deeply indexed by default.
-
-## SEMI-AUTONOMOUS EXECUTION
-
-The system includes a semi-autonomous execution layer that transitions the operating workflow from simple recommendations into level-appropriate action execution.
+### Experiment Lifecycle
+Hypotheses are enqueued in `lab/autolab/experiment_queue.md`, run via [runner.py](file:///Users/MAC/SuneelWorkSpace/lab/autolab/runner.py), graded by [evaluator.py](file:///Users/MAC/SuneelWorkSpace/lab/autolab/evaluator.py), and promoted by [promotion_gate.py](file:///Users/MAC/SuneelWorkSpace/lab/autolab/promotion_gate.py) if baseline metrics improve; otherwise rolled back.
 
 ### Execution Levels
-- **SAFE**: Read-only operations, metadata queries, and workspace health analysis (e.g. `git status`, `agent-doctor`, `agent-status`). These run automatically once selected.
-- **CONTROLLED**: Local file creation, drafting, and planning operations (e.g. `goal-plan`, `git commit`). These prompt the user for quick verification (`Run this now? (y/n)`).
-- **RESTRICTED**: Actions with outbound effects, file deletions, or environment changes (e.g. `imsg-send-confirmed`, `npm install`). These trigger warnings, require explicit approval (`Are you sure?`), and demand a justification reason.
+* **SAFE**: Commands with zero system mutation risks. Runs automatically.
+* **CONTROLLED**: Moderate mutation risks. Requires manual approval click.
+* **RESTRICTED**: High system risks. Banned from auto-runs; requires CLI escalation.
 
-### Execution Command
-Run `next` from the shell to fetch intent-aware ranked suggestions, view their safety categories, and quickly execute the desired next step:
+### Hypothesis Generator
+Defined in [hypothesis_generator.py](file:///Users/MAC/SuneelWorkSpace/lab/autolab/hypothesis_generator.py), sourcing improvement ideas from error logs and capability gaps.
+
+### Commands
 ```sh
-next
+autolab-run              # run queued experiments
+autolab-status           # show experiment queue
+autolab-promote          # promote successful experiment
+hypothesis-generate      # generate new hypotheses
+hypothesis-rank --top 5  # rank by priority
 ```
 
-## WORKSPACE STRUCTURE
+---
 
-The workspace is organized to keep code modular, state inspectable, and configurations protected:
+## NATURAL LANGUAGE DISPATCHER (MOUTH)
 
-- `bin/` — User-facing CLI executables and tool wrappers.
-- `spine/docs/` — System architecture maps, workspace map, and integration guides.
-- `brain/memory/` — Shared memory (`memory/`), tasks (`tasks/`), policies (`shared/`), live states (`state/`), and compressed logs (`logs/archive/`).
-- `brain/anticipation/` — Anticipatory intelligence: prediction engine, execution engine, and execution history.
-- `spine/audit/` — Security, cleanup plans, and workspace capability analyses.
-- `lab/autolab/` — Bounded self-improvement sandboxes.
-- `mouth/comms/` — macOS system communication scripts.
-- `heart/goals/` — Bounded goal graph planners.
-- `dna/identity/` — User behavioral profile, voice prompts, and drift guards.
-- `nervous/mcp/` — Workspace-brain MCP configurations.
-- `projects/` — Active projects development area.
-- `brain/research/` — Local idea capture and decision recording.
+Processes user natural language commands.
 
-## SESSION CONTINUITY
+### How It Works
+Exposes dispatcher hooks via [ws.py](file:///Users/MAC/SuneelWorkSpace/mouth/dispatcher/ws.py). Categorizes prompts against intents, filters confidence scores below thresholds, and allows dry-runs.
 
-To enable seamless context transitions across workspace sessions, the continuity manager saves and restores state across tool invocations.
+### Available Intents
+Configured in [intent_map.json](file:///Users/MAC/SuneelWorkSpace/mouth/dispatcher/intent_map.json):
+* `status` -> `agent-status`
+* `search_memory` -> `memory-search`
+* `morning_brief` -> `morning-brief`
+* `goals` -> `goal-status`
+* `repair` -> `health-repair`
 
-- **Automated Work Resumption**: The system tracks the current intent, goals, and workflows inside `spine/state/ACTIVE_CONTEXT.json`. When launching a new agent session via `agent-start`, the system will automatically query the active context and prompt the user to resume their work from where they left off.
-- **Workflow-Aware Execution**: Running the `next` command queries this context to prioritize and display recommendations targeted directly at the active goal or workflow.
-- **User Control Overrides**: Continuity is a helper, not a boundary. The user can switch workflows at any point or fully clear session history using `context-reset`.
-
-### Context Switch Commands
-- To switch active workflows:
-  ```sh
-  context-reset --workflow MESSAGE_OR_DEVELOPMENT
-  ```
-- To execute a soft reset (preserves goals, resets intents):
-  ```sh
-  context-reset --soft
-  ```
-- To perform a complete context reset:
-  ```sh
-  context-reset
-  ```
-
-### SAFETY RULES FOR CONTEXT
-- **Guidance, Not Authority**: Context is treated purely as user-habits metadata and does not override configuration policies, workflow rules, or user intents.
-- **Safety Gating Unaffected**: Context state changes never bypass or elevate the execution level constraints (SAFE, CONTROLLED, RESTRICTED).
-- **No Autonomous Execution**: Active context never triggers automatic code execution or outbound communications without user input or safety confirmation.
-
-## OBSIDIAN BRAIN
-
-The system uses Obsidian as the primary knowledge, memory, and learning vault at `~/SuneelWorkSpace/brain/`. All durable insights, workflow captures, decisions, and system improvement logs are stored directly in Markdown files, connected using double-bracket [[backlinks]].
-
-The brain folder structure is organized as:
-- `brain/inbox/` — Drafts and quick captures.
-- `brain/ideas/` — Proactive brainstorms and project options.
-- `brain/decisions/` — Durable architecture locks and choices.
-- `brain/workflows/` — Reusable execution traces and procedural patterns.
-- `brain/system/` — System intelligence files, improvements, and discoveries.
-- `brain/learning/` — Core learnings, training loops, and evaluations.
-- `brain/experiments/` — Bounded sandbox tests.
-- `brain/logs/` — Daily activity and run histories.
-
-The Obsidian vault is exposed to AI agents via the MCP bridge as resources (e.g. `workspace://brain/ideas`) and specialized tools:
-- `brain_read_note`: Read note content.
-- `brain_write_note`: Create/append markdown notes.
-- `brain_search`: Query notes case-insensitively.
-- `brain_link_notes`: Link concepts with backlink syntax.
-- `execute_workflow`: Execute a compiled workflow script by slug.
-
-### KNOWLEDGE-TO-EXECUTION BRIDGE
-
-Any markdown note captured in Obsidian that contains step-by-step instructions or command sequences is scanned and parsed automatically. The bridge extracts these sequences, validates them to filter out placeholder arguments, slash commands, or broken loop blocks, and compiles them into:
-1. Runnable Python wrapper scripts at `scripts/workflows/workflow_<name>.py`.
-2. Safe CLI symlinks at `bin/workflow-<name>` (which only contain relative symlinks).
-3. Metadata configuration JSON files at `brain/workflows/generated/<name>.json`.
-
-These workflows are ranked high in command suggestions, registered as MCP spine/tools/resources, and synchronized during the Daily Evolution loop. Stale or empty workflows (with 0 valid commands) are automatically cleaned up.
-
-## DAILY EVOLUTION
-
-The workspace is configured to self-improve daily at 2:00 AM using an automated evolution loop. Traces are stored in `brain/system/daily_improvements.md`.
-
-The daily evolution loop:
-1. Performs `system-audit`, `system-gaps`, and `system-recommend` to map structural needs.
-2. Analyzes activity logs to detect inefficiencies, test failures, and repetitive patterns.
-3. Automatically runs safe (SAFE level) optimization actions such as database re-indexing, log rotation, and router training.
-4. Searches for new local CLI tools and MCP connectors, planning integrations in `brain/system/tool_discovery.md` (no automatic installs).
-
-## LIFE AUTOMATION
-
-The workspace includes a natural language interpretation layer that maps user requests to specific automation workflows.
-
-When a user provides triggers such as:
-- *"organize my life"* -> Runs doctor audits, checks directory structures, and suggests file cleanup.
-- *"stay on top of tasks"* -> Runs status evaluations on active goals and lists current priorities.
-- *"handle messages"* -> Traces email and message subsystem statuses.
-
-Workflows execute safe status actions and write reusable plans to `brain/workflows/` for continuous optimization.
-
-## APPROVED SYSTEM MCP CONNECTORS
-
-The workspace integrates native Model Context Protocol (MCP) server connectors to interact safely with macOS applications, external research directories, and development tools:
-- **GitHub Connector (`bin/github-mcp`)**: Connects to the GitHub API via the local `gh` utility to query PR lists, issues, and repositories. Outbound mutations require explicit user confirmation. Mapped as `workspace://github/status`.
-- **Filesystem Connector (`bin/filesystem-mcp`)**: Exposes safe, boundary-checked read-only file reading and listing tools. Access attempts outside SuneelWorkSpace are blocked. Mapped as `workspace://filesystem/status`.
-- **macOS Shortcuts Connector (`bin/macos-shortcuts-mcp`)**: Queries the native macOS Shortcuts list and executes authorized system automation scripts. Running individual Shortcuts requires explicit user confirmation. Mapped as `workspace://shortcuts/status`.
-- **Brave Search Connector (`bin/brave-search-mcp`)**: Searches the web for fresh development research and packages the top titles, URLs, and snippets. Mapped as `workspace://search/status`.
-
-## 10. For AI Agents
-
-
-This section is the compressed drop-in intelligence context.
-
-### Session Boot (Mandatory)
-
-Every agent must begin by saying:
-
-```text
-✅ Loading workspace shared brain
+### Usage
+```sh
+ws "what's broken"                          # health check
+ws "search memory for auth decisions"       # semantic search
+ws "run morning brief"                      # world monitor digest
+ws "what are my current goals"              # goal status
+ws "any intent" --explain                   # show resolution details
+ws "any intent" --dry-run                   # preview without executing
+ws --list                                   # show all available intents
 ```
 
-Then load:
+---
 
-- `skeleton/rules/AGENT_SYSTEM.md`
-- `skeleton/rules/IDENTITY.md`
-- `skeleton/rules/SAFETY_BOUNDARIES.md`
+## WORKFLOW DAG COMPOSER (HANDS)
 
-Load identity:
+Orchestrates sequential task executions.
 
-- `dna/dna/dna/identity/profile/identity_profile.md`
-- `dna/dna/dna/identity/profile/tone_profile.md`
-- `dna/dna/dna/identity/profile/decision_profile.md`
-- `dna/dna/dna/identity/profile/preferences.json`
-- `dna/dna/dna/identity/profile/behavioral_patterns.json`
-- `dna/dna/dna/identity/prompts/identity_prompt.md`
-- `dna/dna/dna/identity/prompts/communication_prompt.md`
+### Scheduled Pipelines
+Pipelines defined under `heart/orchestrator/dag/pipelines/`:
+* [system_health.yaml](file:///Users/MAC/SuneelWorkSpace/heart/orchestrator/dag/pipelines/system_health.yaml): Scheduled daily at 2:00 AM. Runs audit, gaps, recommendations, and doctor.
+* [idea_to_goal.yaml](file:///Users/MAC/SuneelWorkSpace/heart/orchestrator/dag/pipelines/idea_to_goal.yaml): Manual trigger. Processes capture, research, goal creation, and planning.
+* [morning_brief.yaml](file:///Users/MAC/SuneelWorkSpace/heart/orchestrator/dag/pipelines/morning_brief.yaml): Scheduled daily at 7:00 AM. Fetches news, checks goals, queries telemetry, and builds brief.
+* [night_shift.yaml](file:///Users/MAC/SuneelWorkSpace/heart/orchestrator/dag/pipelines/night_shift.yaml): Scheduled daily at 10:00 PM. Runs backups, screenshots, gaps, autolab loops, reindexing, and CI.
 
-Load adaptive identity:
-
-- `dna/dna/dna/identity/adaptive/feedback_log.json`
-- `dna/dna/dna/identity/adaptive/signal_weights.json`
-- `dna/dna/dna/identity/adaptive/signal_memory.json`
-- `dna/dna/dna/identity/adaptive/pattern_updates.json`
-- `dna/dna/dna/identity/adaptive/drift_guardrails.json`
-- `dna/dna/dna/identity/adaptive/adaptation_state.json`
-
-Load capability context:
-
-- `brain/brain/anticipation/current_context.json`
-- `brain/brain/anticipation/prediction_memory.json`
-- `brain/brain/anticipation/behavior_patterns.json`
-- `brain/brain/anticipation/action_suggestions.md`
-- `brain/research/README.md`
-- `mouth/mouth/mouth/comms/config/comms_config.json`
-- `heart/heart/heart/orchestrator/router/system_intelligence_policy.md`
-- `heart/goals/planner/planner.md`
-- `nervous/nervous/nervous/mcp/server/config/resource_map.json`
-
-Load session state:
-
-- `brain/memory/SESSION_HANDOFF.md`
-- `spine/state/CURRENT_STATE.json`
-- `spine/state/WORKSPACE_HEALTH.json`
-
-Then confirm:
-
-```text
-✅ Context, identity, memory, and capabilities loaded
+### Commands
+```sh
+dag-run <pipeline.yaml>                              # execute pipeline
+dag-run <pipeline.yaml> --dry-run                    # preview
+dag-validate <pipeline.yaml>                         # validate
 ```
 
-Rules:
+---
 
-- No agent may operate without this boot step.
-- All outputs must assume the shared brain is loaded.
-- If context is missing or stale, reinitialize context before acting.
-- If safety files are missing, stop and repair context before meaningful work.
+## COMPLETE COMMAND REFERENCE
 
-You are operating in `~/SuneelWorkSpace`, Suneel's local-first personal AI operating system workspace.
+All executable commands reside inside `hands/bin/` as symlinks pointing to target organ implementations.
 
-Startup:
+### 🧠 Brain Commands
+* `memory-search` -> [semantic_search.py](file:///Users/MAC/SuneelWorkSpace/brain/memory/vector/semantic_search.py): Semantic query matches.
+* `memory-reindex`: Reindexes vector embedding databases.
+* `brain-inject` -> [context_injector.py](file:///Users/MAC/SuneelWorkSpace/brain/injector/context_injector.py): Injects context before runs.
+* `brain-graph-build` -> [build_graph.py](file:///Users/MAC/SuneelWorkSpace/brain/graph/build_graph.py): Rebuilds backlink files.
+* `brain-graph-query` -> [graph_query.py](file:///Users/MAC/SuneelWorkSpace/brain/graph/graph_query.py): Queries backlink nodes.
+* `brain-staleness` -> [staleness_detector.py](file:///Users/MAC/SuneelWorkSpace/brain/injector/staleness_detector.py): Finds stale notes.
 
-1. Say: `✅ Loading workspace shared brain`.
-2. Run or rely on `bin/agent-start`.
-3. Read canonical shared files under `skeleton/rules/`.
-4. Load identity:
-   - `dna/dna/identity/prompts/identity_prompt.md`
-   - `dna/dna/identity/prompts/communication_prompt.md`
-   - `dna/dna/identity/profile/identity_profile.md`
-   - `dna/dna/identity/profile/tone_profile.md`
-   - `dna/dna/identity/profile/decision_profile.md`
-5. Check recent handoff: `brain/memory/SESSION_HANDOFF.md`.
-6. Confirm: `✅ Context, identity, memory, and capabilities loaded`.
+### 💓 Heart Commands
+* `model-route` -> [router.py](file:///Users/MAC/SuneelWorkSpace/heart/model_router/router.py): Best model mapping resolver.
+* `model-status`: Prints usage metrics and availabilities.
+* `model-health` -> [health_checker.py](file:///Users/MAC/SuneelWorkSpace/heart/model_router/health_checker.py): Provider latency diagnostics.
+* `goal-create`: Instantiates goal tracker.
+* `goal-plan`: Resolves step dependencies.
+* `goal-status`: Goal progress and queues.
 
-Voice:
+### 👁️ Eyes Commands
+* `workspace-dashboard` -> [dashboard_start.sh](file:///Users/MAC/SuneelWorkSpace/hands/scripts/dashboard_start.sh): Start Control Center server.
+* `screenshot-take` -> [screenshot_manager.py](file:///Users/MAC/SuneelWorkSpace/eyes/visual/screenshot_manager.py): Visual capture helper.
+* `visual-monitor`: Background screenshot loops.
+* `visual-repair` -> [visual_repair_agent.py](file:///Users/MAC/SuneelWorkSpace/eyes/visual/visual_repair_agent.py): CSS/HTML repair pipeline.
 
-- Short.
-- Direct.
-- Casual.
-- Conversational.
-- Smart.
-- Structured enough to be clear.
-- Softened.
-- Never harsh.
-- Never condescending.
+### 👂 Ears Commands
+* `monitor-run` -> [monitor_runner.py](file:///Users/MAC/SuneelWorkSpace/ears/monitor/monitor_runner.py): Fetch news/RSS.
+* `morning-brief` -> [digest_builder.py](file:///Users/MAC/SuneelWorkSpace/ears/monitor/digest/digest_builder.py): Compile daily digest.
 
-Decision behavior:
+### 🫀 Nervous Commands
+* `nerve-status` -> [nerve_status.py](file:///Users/MAC/SuneelWorkSpace/nervous/nerve_status.py): Centralized registry status.
+* `mcp-start`: Launches MCP server.
+* `mcp-status`: Checks MCP gateway connectivity.
+* `mcp-doctor`: Pings server health.
+* `mcp-reindex`: Re-indexes MCP assets.
 
-- Autopilot for safe local work.
-- Ask only for serious system risk or safety-gated actions.
-- Use analysis first, intuition second.
-- Split uncertainty into smaller problems.
-- Prefer tools by simplicity, cost, power, speed, reliability.
+### 🩸 Blood Commands
+* `telemetry-query` -> [telemetry_query.py](file:///Users/MAC/SuneelWorkSpace/blood/telemetry/telemetry_query.py): SQLite telemetry reporting.
+* `telemetry-anomalies` -> [telemetry_anomaly.py](file:///Users/MAC/SuneelWorkSpace/blood/telemetry/telemetry_anomaly.py): Performance regression checks.
 
-Safety:
+### 🤲 Hands Commands
+* `agent-start`: marcar startup session checkpoints.
+* `agent-finish`: Marks closeouts and logs.
+* `agent-doctor`: Checks workspace health rules.
+* `agent-repair`: Auto-heals symlinks and directories.
+* `workspace-backup`: Packs tar snapshots of the workspace.
+* `workspace-ci`: Runs automated unit testing suites.
 
-- Never wipe the system.
-- Never delete important files automatically.
-- Never send emails/messages without explicit approval.
-- Never install external tools without explicit approval.
-- Never make money/account changes.
-- Never deep-index private folders unless explicitly requested.
-- Use backups before risky changes.
+### 👄 Mouth Commands
+* `ws` -> [ws.py](file:///Users/MAC/SuneelWorkSpace/mouth/dispatcher/ws.py): NL command routing.
+* `mail-status`: outbound email status.
+* `imessage-status`: iMessage permissions and delivery.
 
-Identity learning:
+### 🧬 DNA Commands
+* `prompt-eval`: Evaluates system prompts.
+* `prompt-promote`: Commits prompt candidate changes.
+* `identity-accept`: Learns stylistic accept patterns.
+* `identity-reject`: Logs style rejection constraints.
 
-- Record feedback through `dna/dna/identity/adaptive/adaptive_identity.py` or commands:
-  - `identity-accept`
-  - `identity-reject`
-  - `identity-adjust`
-- Weighted identity signals live in `dna/dna/identity/adaptive/signal_weights.json`.
-- Pattern updates live in `dna/dna/identity/adaptive/pattern_updates.json`.
-- Drift guardrails live in `dna/dna/identity/adaptive/drift_guardrails.json`.
-- Never let adaptive identity override explicit base identity.
+### 🔬 Lab Commands
+* `autolab-run` -> [runner.py](file:///Users/MAC/SuneelWorkSpace/lab/autolab/runner.py): Safe experiment loop.
+* `autolab-status`: Lists autolab queues.
+* `evolution-start` -> [engine.py](file:///Users/MAC/SuneelWorkSpace/lab/evolution/engine.py): Evolution engine daemon launch.
 
-Anticipation:
+### 📋 Spine Commands
+* `workspace-index`: Re-scans indexing patterns.
+* `log-enhancement` -> [enhancement_logger.py](file:///Users/MAC/SuneelWorkSpace/spine/enhancement_logger.py): Logs updates to main enhancement indices.
 
-- Prediction engine: `brain/anticipation/prediction_engine.py`.
-- Current intent: `brain/anticipation/current_context.json`.
-- Memory: `brain/anticipation/prediction_memory.json`.
-- Suggestions: `brain/anticipation/action_suggestions.md`.
-- You may suggest next actions.
-- You may pre-plan.
-- You may not auto-execute suggestions without approval if safety-gated.
-- Suggestions must be ranked, intent-aware, and limited to top 3-5.
+---
 
-Research:
+## SAFETY MODEL
 
-- Use `idea-run` for idea to analysis.
-- Store decisions in `brain/research/decisions/` and shared memory when durable.
+Enforced by [SAFETY_BOUNDARIES.md](file:///Users/MAC/SuneelWorkSpace/skeleton/rules/SAFETY_BOUNDARIES.md) and [BOUNDED_SELF_UPGRADE.md](file:///Users/MAC/SuneelWorkSpace/skeleton/rules/BOUNDED_SELF_UPGRADE.md).
 
-Goals:
+### Execution Levels
+* **SAFE**: Zero mutation risk (reads, status lookups). Auto-executes.
+* **CONTROLLED**: Medium risk (code edit, goal plans). Pauses for dashboard visual approval.
+* **RESTRICTED**: High risk (outbound messaging, package installs, deletions). Requires explicit CLI confirmation.
 
-- Use `goal-create`, `goal-plan`, `goal-execute`, `goal-monitor`, `goal-complete`.
-- Route with `route-task` and `route-execute` when agent selection matters.
+### What Is Never Auto-Executed
+* Outbound iMessages or emails.
+* Destructive filesystem deletes.
+* Money/account modifications.
+* Unverified package installations.
 
-MCP:
+---
 
-- Resource map: `nervous/nervous/mcp/server/config/resource_map.json`.
-- Reindex after adding important resources: `mcp-reindex`.
+## HOW TO EXTEND THE SYSTEM
 
-Closeout:
+### Adding a New Capability
+1. Identify target organ for placement.
+2. Run `duplication-guard <path> --intent "description"` to ensure no overlap.
+3. Write script/module files in target organ subdirectory.
+4. Symlink entrypoint into [hands/bin/](file:///Users/MAC/SuneelWorkSpace/hands/bin/).
+5. Register resource inside [resource_map.json](file:///Users/MAC/SuneelWorkSpace/nervous/mcp/server/config/resource_map.json).
+6. Add intent mapping to [intent_map.json](file:///Users/MAC/SuneelWorkSpace/mouth/dispatcher/intent_map.json).
+7. Notify nervous subscribers: `python3 nervous/nerve_propagator.py notify <organ> "new_capability" <path>`
+8. Validate health and re-index: `agent-doctor` and `mcp-reindex`.
+9. Log update: `log-enhancement <organ> "Added new capability..."`
 
-1. Update memory/decisions/tasks if durable knowledge was created.
-2. Run validation relevant to the task.
-3. Run `agent-doctor`.
-4. Run `agent-finish "summary"`.
+### Rules That Never Change
+1. No root-level file clutter; all files belong inside their organ.
+2. Log updates to the enhancement index.
+3. Propagate changes via nervous system notifications.
+4. Execute `duplication-guard` and `integrity-guard` before changes.
 
-Core principle:
+---
 
-Do not rebuild. Upgrade what exists. Keep it local, inspectable, reversible, identity-aligned, and safe.
+## CURRENT LIMITATIONS AND KNOWN GAPS
+
+* **Outdated Diagnostic Tools**: Diagnostic scripts `agent-doctor` and `agent-repair` search for old `agent-system/` paths and do not recognize the new 12-organ layout, reporting incorrect misplaced file errors and lowering health score to "repairable" or "attention".
+* **Manual Setup Symlink**: The global Claude config symlink `~/.claude/CLAUDE.md` -> `~/SuneelWorkSpace/CLAUDE.md` must still be configured manually in new host setups.
+
+---
+
+## ENHANCEMENT LOG
+
+* 2026-06-26: Complete documentation update — README rewritten end-to-end based on full system scan, all 12 organ READMEs created, CLAUDE.md and AGENTS.md updated, nerve_registry.json verified
+* 2026-06-26: Gap analysis and full repair — fixed all broken symlinks in hands/bin/, created dynamic evolution_config.json and model_registry.json, resolved paths and import errors, implemented get_repair_depth in health_repair_pipeline.py, and updated all documentation.

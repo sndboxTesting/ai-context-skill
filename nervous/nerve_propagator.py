@@ -6,7 +6,7 @@ import os
 import sys
 from datetime import datetime, timezone
 
-WORKSPACE = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+WORKSPACE = os.path.dirname(os.path.dirname(os.path.realpath(__file__)))
 REGISTRY_PATH = os.path.join(WORKSPACE, "nervous/nerve_registry.json")
 NERVE_LOG_PATH = os.path.join(WORKSPACE, "blood/logs/nerve_events.jsonl")
 

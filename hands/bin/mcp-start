@@ -1,18 +1,1 @@
-#!/bin/sh
-# Start the workspace-brain MCP server in the foreground (stdio mode).
-# MCP clients (Claude, Codex) start it automatically as a subprocess.
-# Use this script only for manual testing.
-set -eu
-# Resolve symlinks to get the real directory of this script
-TARGET="$0"
-while [ -L "$TARGET" ]; do
-    DIR="$(dirname "$TARGET")"
-    TARGET="$(readlink "$TARGET")"
-    case "$TARGET" in
-        /*) ;;
-        *) TARGET="$DIR/$TARGET" ;;
-    esac
-done
-MCP_ROOT="$(cd "$(dirname "$TARGET")/../.." && pwd)"
-SERVER="$MCP_ROOT/server/main.py"
-exec uv run --with-requirements "$MCP_ROOT/server/requirements.txt" python3 "$SERVER"
+../../nervous/mcp/server/scripts/mcp-start

@@ -1,4 +1,1 @@
-#!/usr/bin/env bash
-# brain-graph-orphans — List all orphan notes (no connections)
-WORKSPACE="${WORKSPACE:-$HOME/SuneelWorkSpace}"
-python3 "$WORKSPACE/brain/graph/graph_query.py" --orphans "$@"
+../hands/bin/brain-graph-orphans

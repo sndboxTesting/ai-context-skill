@@ -2,7 +2,7 @@
 set -eu
 
 ROOT="${SUNEEL_WORKSPACE:-$HOME/SuneelWorkSpace}"
-. "$ROOT/automation/maintenance/common.sh"
+. "$ROOT/hands/automation/maintenance/common.sh"
 ensure_core_dirs
 
 LAUNCHD_LOADED=false
@@ -33,43 +33,28 @@ def issue(severity, code, message, path=None):
     issues.append(item)
 
 required_dirs = [
-    "bin", "automation/doctor", "automation/repair", "automation/maintenance",
-    "automation/launchd", "automation/hooks", "automation/reports",
-    "agent-system/shared", "agent-system/memory", "agent-system/tasks",
-    "agent-system/logs", "agent-system/state", "agent-system/templates",
-    "agent-system/docs", "projects", ".agent-backups",
+    "brain", "heart", "eyes", "ears", "nervous", "skeleton",
+    "blood", "hands", "mouth", "dna", "lab", "spine",
+    "projects", ".agent-backups",
 ]
 required_files = [
-    "agent-system/shared/AGENT_SYSTEM.md",
-    "agent-system/shared/IDENTITY.md",
-    "agent-system/shared/WORKFLOW_RULES.md",
-    "agent-system/shared/SAFETY_BOUNDARIES.md",
-    "agent-system/shared/STARTUP_CHECKLIST.md",
-    "agent-system/shared/SESSION_CLOSEOUT_CHECKLIST.md",
-    "agent-system/memory/MEMORY.md",
-    "agent-system/memory/DECISIONS.md",
-    "agent-system/memory/SESSION_HANDOFF.md",
-    "agent-system/memory/NOTES.md",
-    "agent-system/tasks/ACTIVE_TASKS.md",
-    "agent-system/tasks/COMPLETED_TASKS.md",
-    "agent-system/tasks/TASK_QUEUE.md",
-    "agent-system/logs/SESSION_LOG.md",
-    "agent-system/logs/MAINTENANCE_LOG.md",
-    "agent-system/logs/CHANGE_LOG.md",
-    "agent-system/state/CURRENT_STATE.json",
-    "agent-system/state/WORKSPACE_HEALTH.json",
-    "agent-system/state/INDEX.json",
-    "agent-system/state/ACTIVE_SESSION.json",
-    "agent-system/state/LAST_KNOWN_GOOD.json",
-    "autolab/README.md",
-    "autolab/program.md",
-    "autolab/evaluator.md",
-    "autolab/mutation_policy.md",
-    "autolab/safeguards.md",
-    "autolab/results.tsv",
-    "autolab/state/frontier.json",
-    "autolab/state/latest_eval.json",
-    "autolab/state/loop_status.json",
+    "skeleton/rules/AGENT_SYSTEM.md",
+    "skeleton/rules/IDENTITY.md",
+    "skeleton/rules/WORKFLOW_RULES.md",
+    "skeleton/rules/SAFETY_BOUNDARIES.md",
+    "skeleton/rules/STARTUP_CHECKLIST.md",
+    "brain/memory/MEMORY.md",
+    "brain/memory/DECISIONS.md",
+    "brain/memory/SESSION_HANDOFF.md",
+    "brain/memory/NOTES.md",
+    "heart/tasks/ACTIVE_TASKS.md",
+    "heart/tasks/COMPLETED_TASKS.md",
+    "heart/tasks/TASK_QUEUE.md",
+    "blood/logs/SESSION_LOG.md",
+    "blood/logs/MAINTENANCE_LOG.md",
+    "spine/state/CURRENT_STATE.json",
+    "spine/state/WORKSPACE_HEALTH.json",
+    "spine/state/INDEX.json",
     "README.md", ".gitignore",
 ]
 scripts = [
@@ -77,16 +62,7 @@ scripts = [
     "agent-maintain", "agent-autoclose", "use-codex", "use-claude", "workspace-context",
     "workspace-backup", "workspace-index", "workspace-report", "workspace-changes", "workflow-audit", "gstack-create",
 ]
-autolab_scripts = [
-    "autolab-run", "autolab-once", "autolab-eval", "autolab-commit",
-    "autolab-revert", "autolab-report", "autolab-frontier",
-    "autolab-enqueue", "autolab-watch", "autolab-analyze",
-    "autolab-evolve-strategy", "autolab-core",
-    # Phase 8 new commands
-    "autolab-status", "autolab-promote", "autolab-rollback",
-    # Phase 3 prompt versioning
-    "prompt-eval", "prompt-new", "prompt-promote", "prompt-rollback",
-]
+autolab_scripts = []
 entrypoints = [
     root / "AGENTS.md",
     root / "CLAUDE.md",
@@ -110,19 +86,20 @@ for p in entrypoints:
         text = p.read_text(errors="ignore")
         if str(canon) not in text and "~/SuneelWorkSpace/agent-system/shared/AGENT_SYSTEM.md" not in text:
             issue("warning", "wrapper_drift", "Entrypoint is not aligned with canonical instructions", p)
-for f in ["CURRENT_STATE.json", "WORKSPACE_HEALTH.json", "INDEX.json", "ACTIVE_SESSION.json", "LAST_KNOWN_GOOD.json"]:
-    p = root / "agent-system/state" / f
+for f in ["CURRENT_STATE.json", "WORKSPACE_HEALTH.json", "INDEX.json"]:
+    p = root / "spine/state" / f
     try:
         json.loads(p.read_text())
     except Exception as exc:
         issue("error", "malformed_json", f"{f} is not valid JSON: {exc}", p)
 for f in ["frontier.json", "latest_eval.json", "loop_status.json"]:
-    p = root / "autolab/state" / f
-    try:
-        json.loads(p.read_text())
-    except Exception as exc:
-        issue("error", "malformed_json", f"autolab/state/{f} is not valid JSON: {exc}", p)
-handoff = root / "agent-system/memory/SESSION_HANDOFF.md"
+    p = root / "lab/autolab/state" / f
+    if p.exists():
+        try:
+            json.loads(p.read_text())
+        except Exception as exc:
+            issue("error", "malformed_json", f"lab/autolab/state/{f} is not valid JSON: {exc}", p)
+handoff = root / "brain/memory/SESSION_HANDOFF.md"
 if handoff.exists():
     text = handoff.read_text(errors="ignore").strip()
     if len(text) < 80:
@@ -222,11 +199,8 @@ core_runner_files = {
 
 
 subsystem_dirs = {
-    "agent-system", "anticipation", "autolab", "automation", "comms",
-    "codex", "docs", "goal-engine", "identity", "mcp", "obsidian-vault",
-    "orchestrator", "projects", "research-engine", "scripts", "system-context",
-    "tools", "testing", "dashboard", "gateway", "monitor", "dispatcher",
-    "tests", "audit",
+    "brain", "heart", "eyes", "ears", "nervous", "skeleton",
+    "blood", "hands", "mouth", "dna", "lab", "spine"
 }
 
 
@@ -287,7 +261,7 @@ for p in root.rglob("*"):
     # Check misplaced configs
     is_config = ext in (".json", ".yaml", ".yml", ".toml") and ("config" in filename.lower() or "policy" in filename.lower() or "weights" in filename.lower())
     if is_config and filename != "opencode.json":
-        in_config_dir = any(part in ("config", "router", "adaptive", "settings") for part in parts)
+        in_config_dir = any(part in ("config", "router", "adaptive", "settings", "evolution", "mcp", "model_router") for part in parts)
         if not in_config_dir and top_dir not in (".agents", ".claude", ".gstack", ".rtk", ".serena"):
             misplaced_configs.append(str(p))
 
@@ -342,6 +316,6 @@ PY
 
 log_maintenance "Doctor ran."
 
-if [ -f "$ROOT/scripts/system_intelligence.py" ]; then
-  python3 "$ROOT/scripts/system_intelligence.py" health-update >/dev/null 2>&1 || true
+if [ -f "$ROOT/hands/scripts/system_intelligence.py" ]; then
+  python3 "$ROOT/hands/scripts/system_intelligence.py" health-update >/dev/null 2>&1 || true
 fi

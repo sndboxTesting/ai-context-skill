@@ -2,10 +2,10 @@
 set -eu
 
 ROOT="${SUNEEL_WORKSPACE:-$HOME/SuneelWorkSpace}"
-. "$ROOT/automation/maintenance/common.sh"
+. "$ROOT/hands/automation/maintenance/common.sh"
 ensure_core_dirs
 
-OUT="$ROOT/automation/reports/status-latest.md"
+OUT="$ROOT/hands/automation/reports/status-latest.md"
 python3 - "$ROOT" "$STATE_JSON" "$HEALTH_JSON" "$OUT" <<'PY'
 import json, pathlib, sys
 from datetime import datetime
@@ -17,8 +17,8 @@ def load(p):
         return {"error": str(exc)}
 state = load(state_p)
 health = load(health_p)
-handoff = (root / "agent-system/memory/SESSION_HANDOFF.md").read_text(errors="ignore").splitlines()[:28]
-tasks = (root / "agent-system/tasks/ACTIVE_TASKS.md").read_text(errors="ignore").splitlines()[:28]
+handoff = (root / "brain/memory/SESSION_HANDOFF.md").read_text(errors="ignore").splitlines()[:28]
+tasks = (root / "heart/tasks/ACTIVE_TASKS.md").read_text(errors="ignore").splitlines()[:28]
 lines = [
     "# Workspace Status Report",
     "",

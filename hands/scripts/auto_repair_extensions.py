@@ -9,8 +9,8 @@ import time
 from datetime import datetime, timezone
 
 ROOT = pathlib.Path(os.environ.get("SUNEEL_WORKSPACE", str(pathlib.Path.home() / "SuneelWorkSpace"))).resolve()
-LOGS_DIR = ROOT / "brain/memory/logs"
-MCP_LOGS_DIR = ROOT / "nervous/nervous/nervous/mcp/server/logs"
+LOGS_DIR = ROOT / "blood/logs"
+MCP_LOGS_DIR = ROOT / "nervous/mcp/server/logs"
 
 def log_event(message: str):
     stamp = datetime.now(timezone.utc).astimezone().isoformat()

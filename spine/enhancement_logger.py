@@ -1,8 +1,9 @@
+#!/usr/bin/env python3
 """Enhancement logger — appends to blood/logs/enhancements.jsonl"""
 import json, os
 from datetime import datetime, timezone
 
-WORKSPACE = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+WORKSPACE = os.path.dirname(os.path.dirname(os.path.realpath(__file__)))
 LOG_PATH = os.path.join(WORKSPACE, "blood/logs/enhancements.jsonl")
 
 

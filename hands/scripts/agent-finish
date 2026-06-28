@@ -1,0 +1,71 @@
+#!/bin/sh
+set -eu
+
+ROOT="${SUNEEL_WORKSPACE:-$HOME/SuneelWorkSpace}"
+. "$ROOT/hands/automation/maintenance/common.sh"
+
+SUMMARY="${*:-}"
+if [ -z "$SUMMARY" ]; then
+  printf 'Short session summary: '
+  IFS= read -r SUMMARY
+fi
+
+if [ -z "$SUMMARY" ]; then
+  echo "No summary provided; nothing changed." >&2
+  exit 1
+fi
+
+ensure_core_dirs
+DATE="$(today)"
+STAMP="$(now_stamp)"
+HANDOFF="$ROOT/brain/memory/SESSION_HANDOFF.md"
+
+tmp="$HANDOFF.tmp"
+cat > "$tmp" <<EOF
+# Session Handoff
+
+## Latest Handoff
+
+Date: $DATE
+
+Summary: $SUMMARY
+
+Changed:
+
+- See \`blood/logs/SESSION_LOG.md\` for the session entry.
+
+Verification:
+
+- Run \`~/SuneelWorkSpace/hands/bin/agent-status\` or \`~/SuneelWorkSpace/hands/bin/agent-doctor\`.
+
+Open Items:
+
+- Review \`heart/tasks/ACTIVE_TASKS.md\` and \`heart/tasks/TASK_QUEUE.md\`.
+EOF
+mv "$tmp" "$HANDOFF"
+
+log_session "$SUMMARY"
+
+python3 - "$STATE_JSON" "$STAMP" "$SUMMARY" <<'PY'
+import json, pathlib, sys
+path = pathlib.Path(sys.argv[1])
+stamp = sys.argv[2]
+summary = sys.argv[3]
+try:
+    data = json.loads(path.read_text())
+except Exception:
+    data = {}
+data.update({
+    "state_updated_at": stamp,
+    "last_summary": summary,
+    "status": "handoff-updated",
+})
+tmp = path.with_suffix(path.suffix + ".tmp")
+tmp.write_text(json.dumps(data, indent=2, sort_keys=True) + "\n")
+tmp.replace(path)
+PY
+
+"$ROOT/hands/bin/workspace-index" --quiet >/dev/null 2>&1 || true
+"$ROOT/hands/bin/workspace-report" --quiet >/dev/null 2>&1 || true
+
+echo "Updated handoff, session log, current state, index, and latest report."

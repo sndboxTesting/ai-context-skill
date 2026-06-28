@@ -107,3 +107,12 @@ blood/logs/repair_reports/
 
 # Misplaced paths from wrong WORKSPACE resolution (should never exist)
 eyes/blood/
+
+# Nerve inbox runtime messages (ephemeral, regenerated on every notify_change)
+**/nerve_inbox/
+
+# Test JUnit XML (parsed into JSON reports, raw XML not needed)
+tests/reports/junit_*.xml
+
+# Repair loop runtime logs (append-only, high churn)
+blood/logs/repair_loop.jsonl

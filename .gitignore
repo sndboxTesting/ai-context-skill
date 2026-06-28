@@ -116,3 +116,6 @@ tests/reports/junit_*.xml
 
 # Repair loop runtime logs (append-only, high churn)
 blood/logs/repair_loop.jsonl
+
+# High-churn auto-sync logs (updated every 30 min by background process)
+blood/logs/readme_intelligence.log

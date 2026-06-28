@@ -1,0 +1,18 @@
+[
+  {
+    "fix_type": "fix_symlink",
+    "target_path": "evil",
+    "fix_command": "/etc/passwd",
+    "execution_level": "SAFE",
+    "confidence": 0.9,
+    "queued_at": "2026-06-28T16:09:24.404183+00:00"
+  },
+  {
+    "fix_type": "create_file",
+    "target_path": "nervous/nerve.json",
+    "fix_command": "x",
+    "execution_level": "SAFE",
+    "confidence": 0.9,
+    "queued_at": "2026-06-28T16:09:24.404533+00:00"
+  }
+]

@@ -1,0 +1,22 @@
+{
+  "passed": 101,
+  "failed": 2,
+  "errors": 0,
+  "skipped": 0,
+  "total": 103,
+  "failures": [
+    {
+      "test": "tests.integration.test_full_pipeline.TestCLICompleteness.test_all_essential_commands_exist",
+      "message": "AssertionError: Missing CLI commands: ['agent-start', 'agent-finish', 'agent-doctor', 'workspace-dashboard']\nassert 4 == 0\n +  where 4 = len(['agent-start', 'agent-finish', 'agent-doctor', 'workspace-",
+      "type": ""
+    },
+    {
+      "test": "tests.organs.eyes.test_eyes.TestEyesCLI.test_workspace_dashboard_command",
+      "message": "AssertionError: workspace-dashboard symlink missing\nassert False\n +  where False = symlink_valid('workspace-dashboard')",
+      "type": ""
+    }
+  ],
+  "duration_seconds": 2.5,
+  "timestamp": "2026-06-28T18:40:51.145164+00:00",
+  "exit_code": 1
+}

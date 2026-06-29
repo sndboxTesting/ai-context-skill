@@ -1,81 +1,22 @@
-# 📁 mcp
+# mcp
 
-## 🧠 Purpose
-Workspace component
+MCP (Model Context Protocol) server for SuneelWorkSpace.
 
-## ⚙️ Responsibilities
-- General workspace operations
+## What It Does
 
-## 🔗 System Role
-Supporting component within SuneelWorkSpace.
+Hosts the workspace MCP server that Claude Code, Codex, and other agents connect to for workspace-aware tooling.
 
-## 📂 Contents
-- `README.md`
-- `server/` *(directory)*
+## Contents
 
-## 🔄 Dependencies
-None detected
+```
+mcp/
+  server/
+    README.md        # Server configuration notes
+    logs/            # MCP server logs
+```
 
-## 🧩 Interactions
-Emits `readme_updated` events to nervous system on change.
+## Integration
 
-## 📈 Current Capabilities
-- HTTP API
+MCP connectors are primarily managed by `nervous/connectors/`. This directory holds the server configuration and logs.
 
-## ⚠️ Gaps & Weaknesses
-- No test coverage detected
-- No executable code found
-
-## 🚀 Suggested Enhancements
-- Add unit and integration tests
-
-## 🔗 Connected Modules
-*(no cross-organ references detected)*
-
-
-## 🏥 Health Score
-🟢 **100/100**
-
-| Category | Deduction |
-|----------|----------|
-_No deductions_
-
-## 🔥 Critical Issues
-None — folder is healthy ✅
-
-## ✅ Runtime Status
-- Python files: 0 (0 valid, 0 broken)
-- Shell scripts: 0 (0 valid)
-- Tests detected: ❌
-
-## 📝 Change Log (Auto)
-- 2026-06-28: README auto-updated by README Intelligence System
-- 2026-06-27: README auto-updated by README Intelligence System
-
-## 🧬 State Alignment
-
-**Status:** ⚠️ DRIFTED
-
-**Ghost references (in README, not on disk):**
-- `README.md` *(referenced but missing)*
-
-*Last reconciled: 2026-06-28T00:00:07*
-
-## 🎯 Intent Alignment
-
-**Alignment:** ⚠️ PARTIAL (60/100)
-
-*Last checked: 2026-06-28T00:00:07*
-
-## 🌐 Failure Impact Map
-
-**Blast Radius:** 🟢 0 folders affected if this fails
-
-No downstream dependents. Failure is isolated.
-
-*Computed: 2026-06-28T00:00:07*
-
-## 📈 Trends
-
-**7-day trend:** ❓ INSUFFICIENT_DATA
-*0 day(s) of history | updated daily by nightly automation*
+*Updated: 2026-06-28*

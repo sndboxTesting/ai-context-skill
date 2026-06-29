@@ -1,90 +1,122 @@
-# 📁 hands
+# hands
 
-## 🧠 Purpose
-Script execution, LaunchD automation, and CI runner
+194 CLI symlinks, 50+ scripts, launchd automation, and the night shift DAG pipeline.
 
-## ⚙️ Responsibilities
-- Script execution
-- LaunchD automation
-- CI runner
+## What It Does
 
-## 🔗 System Role
-Part of the **hands** organ in the 12-organ SuneelWorkSpace architecture.
+- **CLI interface** — `hands/bin/` holds 194 symlinks (every workspace command)
+- **Scripts** — `hands/scripts/` holds the actual implementations (50+ scripts)
+- **Night shift DAG** — `hands/automation/dag/pipelines/night_shift.yaml` — nightly pipeline
+- **Launchd plists** — `hands/automation/plists/` for scheduled macOS background jobs
+- **Git hooks** — `hands/scripts/pre_commit_hook.sh` (codellama code review on commit)
+- **Codex integration** — `hands/codex/` for Codex CLI project configs
 
-## 📂 Contents
-- `README.md`
-- `__init__.py`
-- `nerve.json`
-- `automation/` *(directory)*
-- `bin/` *(directory)*
-- `codex/` *(directory)*
-- `projects/` *(directory)*
-- `prompts/` *(directory)*
-- `scripts/` *(directory)*
+## The Symlink Rule
 
-## 🔄 Dependencies
-None detected
+**Every command in `hands/bin/` must be a symlink** — never a plain file or copy. Enforced by `tests/organs/hands/test_hands.py` (`os.path.islink()` checked for every entry).
 
-## 🧩 Interactions
-Emits `readme_updated` events to nervous system on change.
+```bash
+# Add a new CLI command (always symlink)
+ln -sf "$WORKSPACE/hands/scripts/my_script.sh" "$WORKSPACE/hands/bin/my-command"
+```
 
-## 📈 Current Capabilities
-- Basic workspace component
+## Key CLI Commands
 
-## ⚠️ Gaps & Weaknesses
-- No test coverage detected
+### Agent Lifecycle
+```bash
+agent-start              # Load startup context, print workspace brief
+agent-finish "summary"   # Close session, update handoffs, log session
+agent-doctor             # Diagnose workspace health (all organs)
+workspace-context        # Print current state JSON
+workspace-dashboard      # Start FastAPI dashboard at port 7777
+```
 
-## 🚀 Suggested Enhancements
-- Add unit and integration tests
+### Testing & CI
+```bash
+run-tests                # Run 103-test pytest suite → JUnit XML → JSON report
+repair-loop              # Autonomous repair: Ollama analyzes failures, retries up to 5x
+readme-sync              # Sync all READMEs with latest test results
+install-git-hooks        # Install codellama pre-commit hook into .git/hooks/
+```
 
-## 🔗 Connected Modules
-*(no cross-organ references detected)*
+### Memory & Knowledge
+```bash
+memory-search "q"        # Semantic vector search over brain/memory/
+memory-curate            # Ollama memory curation pass
+memory-reindex           # Rebuild ChromaDB vector index
+morning-brief            # Build daily digest
+morning-brief-personal   # Personalized Ollama-scored brief
+```
 
+### Ollama Stack
+```bash
+ollama-stack-start       # Start orchestrator + nerve healer in tmux sessions
+ollama-stack-status      # Check engine DUE vs IDLE status
+ollama-stack-stop        # Stop tmux sessions
+ollama-orchestrate       # Run orchestrator directly (one scheduling pass)
+ollama-repair            # Run repair engine
+ollama-review            # Run code review engine
+ollama-learn             # Run learning engine
+security-scan            # Run security scanner (mistral model)
+rebuild-model            # Rebuild suneelworkspace Modelfile from live state
+consume-suggestions      # Run suggestion→task converter
+build-training-data      # Extract 103 training pairs from workspace history
+```
 
-## 🏥 Health Score
-🟢 **90/100**
+### Goals & Tasks
+```bash
+goal-create              # Create a goal
+goal-status              # View active goals
+goal-execute             # Execute a goal step
+goal-complete            # Mark goal complete
+goal-monitor             # Monitor goal progress
+```
 
-| Category | Deduction |
-|----------|----------|
-| no_tests | -10 |
+### Nerve System
+```bash
+nerve-heal               # Run Ollama nerve healer
+nerve-status             # Print all 12 organ statuses
+nerve-check              # Quick nerve.json validation
+```
 
-## 🔥 Critical Issues
-- No test files detected
+### Model Routing
+```bash
+model-route              # Route task to best model
+model-health             # Check model availability
+model-rotate             # Get best model for task type
+model-status             # View rotation stats + quota
+```
 
-## ✅ Runtime Status
-- Python files: 1 (1 valid, 0 broken)
-- Shell scripts: 0 (0 valid)
-- Tests detected: ❌
+## Night Shift Pipeline
 
-## 📝 Change Log (Auto)
-- 2026-06-28: README auto-updated by README Intelligence System
-- 2026-06-27: README auto-updated by README Intelligence System
-- 2026-06-26: README auto-updated by README Intelligence System
+`hands/automation/dag/pipelines/night_shift.yaml` — nightly automated pipeline:
 
-## 🧬 State Alignment
+```yaml
+steps:
+  - memory_curate        # Curate MEMORY.md
+  - brain_synthesize     # Synthesize context
+  - ollama_learn         # Generate skills from experiments
+  - hermes_telegram_brief  # Morning brief
+  - run_tests            # Full pytest suite
+  - repair_loop          # Autonomous repair (only if TEST_FAILURES > 0)
+  - readme_sync          # Sync all READMEs
+```
 
-**Status:** ⚠️ DRIFTED
+## Git Pre-Commit Hook
 
-**Ghost references (in README, not on disk):**
-- `README.md` *(referenced but missing)*
+`hands/scripts/pre_commit_hook.sh`:
+- Runs on every `git commit`
+- Captures staged Python diff (`git diff --cached -- *.py`)
+- Sends to `codellama` via Ollama API (warn-only, commit is never blocked)
+- Logs result to `blood/logs/pre_commit_review.jsonl`
+- **Security**: all dynamic values passed via `sys.argv` — zero shell variable interpolation into code strings
 
-*Last reconciled: 2026-06-28T00:00:06*
+Install with: `install-git-hooks`
 
-## 🎯 Intent Alignment
+## Tests
 
-**Alignment:** ⚠️ PARTIAL (60/100)
+Covered by `tests/organs/hands/test_hands.py` — part of the 103/103 passing suite.
 
-*Last checked: 2026-06-28T00:00:06*
+Key assertions: every entry in `hands/bin/` is a symlink; key scripts exist in `hands/scripts/`.
 
-## 🌐 Failure Impact Map
-
-**Blast Radius:** 🟢 0 folders affected if this fails
-
-No downstream dependents. Failure is isolated.
-
-*Computed: 2026-06-28T00:00:06*
-
-## 📈 Trends
-
-**7-day trend:** ❓ INSUFFICIENT_DATA
-*0 day(s) of history | updated daily by nightly automation*
+*Updated: 2026-06-28*

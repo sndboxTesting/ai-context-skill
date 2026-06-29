@@ -1,86 +1,61 @@
-# 📁 mouth
+# mouth
 
-## 🧠 Purpose
-Communication dispatch, Mail and iMessage delivery
+Intent dispatcher, communication channel adapters (mail, iMessage), and outbound message routing.
 
-## ⚙️ Responsibilities
-- Communication dispatch
-- Mail delivery
-- iMessage delivery
+## What It Does
 
-## 🔗 System Role
-Part of the **mouth** organ in the 12-organ SuneelWorkSpace architecture.
+- **Intent dispatcher** (`mouth/ws.py`) — receives intents, routes to the right channel
+- **Intent map** — `mouth/intent_map.json` defines 9+ intent→handler mappings
+- **Mail adapter** — `mouth/comms/mail.py` sends email via Gmail
+- **iMessage adapter** — `mouth/comms/imessage.py` sends iMessages (macOS only)
+- **SAFETY**: all outbound communication requires explicit human approval before sending
 
-## 📂 Contents
-- `README.md`
-- `__init__.py`
-- `nerve.json`
-- `comms/` *(directory)*
-- `dispatcher/` *(directory)*
+## Key Files
 
-## 🔄 Dependencies
-None detected
+| File | Purpose |
+|------|---------|
+| `mouth/ws.py` | Intent dispatcher — routes intents to channels |
+| `mouth/intent_map.json` | Intent name → handler + channel mapping (9 intents) |
+| `mouth/comms/mail.py` | Gmail email adapter |
+| `mouth/comms/imessage.py` | iMessage adapter |
+| `mouth/dispatcher/` | Dispatcher core logic |
+| `mouth/nerve.json` | Organ manifest v1.1 |
 
-## 🧩 Interactions
-Emits `readme_updated` events to nervous system on change.
+## Intent Map
 
-## 📈 Current Capabilities
-- Event dispatch
+`intent_map.json` defines how incoming intents route to channels:
 
-## ⚠️ Gaps & Weaknesses
-- No test coverage detected
+| Intent | Channel | Notes |
+|--------|---------|-------|
+| `send_email` | mail | Requires approval |
+| `send_imessage` | iMessage | Requires approval |
+| `morning_brief` | mail | Built by ears/digest_builder |
+| `alert` | iMessage | High-priority |
+| + 5 more | varies | See intent_map.json |
 
-## 🚀 Suggested Enhancements
-- Add unit and integration tests
+## Safety Boundary
 
-## 🔗 Connected Modules
-*(no cross-organ references detected)*
+**Never send outbound comms without explicit approval.** This organ is `HUMAN_REQUIRED` per `skeleton/rules/SAFETY_BOUNDARIES.md`.
 
+The dispatcher must check the Approval Queue (dashboard widget or `blood/logs/suggestion_controlled_queue.json`) before executing any send action.
 
-## 🏥 Health Score
-🟢 **90/100**
+## CLI Commands
 
-| Category | Deduction |
-|----------|----------|
-| no_tests | -10 |
+```bash
+mouth-dispatch "intent"  # Dispatch an intent through the router
+mouth-status             # Check channel adapter health
+```
 
-## 🔥 Critical Issues
-- No test files detected
+## Tests
 
-## ✅ Runtime Status
-- Python files: 1 (1 valid, 0 broken)
-- Shell scripts: 0 (0 valid)
-- Tests detected: ❌
+Covered by `tests/organs/mouth/test_mouth.py` — part of the 103/103 passing suite.
 
-## 📝 Change Log (Auto)
-- 2026-06-28: README auto-updated by README Intelligence System
-- 2026-06-27: README auto-updated by README Intelligence System
-- 2026-06-26: README auto-updated by README Intelligence System
+## Nerve Events
 
-## 🧬 State Alignment
+```python
+from nervous.nerve_propagator import notify_change
+notify_change("mouth", "message_sent", "mouth/comms/")
+notify_change("mouth", "intent_dispatched", "mouth/ws.py")
+```
 
-**Status:** ⚠️ DRIFTED
-
-**Ghost references (in README, not on disk):**
-- `README.md` *(referenced but missing)*
-
-*Last reconciled: 2026-06-28T00:00:07*
-
-## 🎯 Intent Alignment
-
-**Alignment:** ⚠️ PARTIAL (60/100)
-
-*Last checked: 2026-06-28T00:00:07*
-
-## 🌐 Failure Impact Map
-
-**Blast Radius:** 🟢 0 folders affected if this fails
-
-No downstream dependents. Failure is isolated.
-
-*Computed: 2026-06-28T00:00:07*
-
-## 📈 Trends
-
-**7-day trend:** ❓ INSUFFICIENT_DATA
-*0 day(s) of history | updated daily by nightly automation*
+*Updated: 2026-06-28*

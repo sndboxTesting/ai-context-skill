@@ -1,86 +1,66 @@
-# 📁 blood
+# blood
 
-## 🧠 Purpose
-Telemetry logging, SQLite database management, and anomaly detection
+Telemetry SQLite databases, all workspace logs (JSONL), and anomaly detection.
 
-## ⚙️ Responsibilities
-- Telemetry logging
-- SQLite database management
-- Anomaly detection
+## What It Does
 
-## 🔗 System Role
-Part of the **blood** organ in the 12-organ SuneelWorkSpace architecture.
+- **Log sink** — every agent, engine, and script appends structured JSONL to `blood/logs/`
+- **SQLite telemetry** — `blood/telemetry/` stores metrics, performance, and event history
+- **Anomaly detection** — `blood/telemetry/anomaly_detector.py` flags unusual patterns
+- **Log query** — `blood/telemetry/log_query.py` queries both SQLite and JSONL
+- **Controlled queues** — LLM-suggested destructive actions land here for human review before any execution
 
-## 📂 Contents
-- `README.md`
-- `__init__.py`
-- `nerve.json`
-- `metrics/` *(directory)*
-- `telemetry/` *(directory)*
+## Key Log Files
 
-## 🔄 Dependencies
-None detected
+| File | Written By | Purpose |
+|------|-----------|---------|
+| `blood/logs/SESSION_LOG.md` | All agents | Human-readable session summaries |
+| `blood/logs/pre_commit_review.jsonl` | `pre_commit_hook.sh` | codellama code review results |
+| `blood/logs/nerve_events.jsonl` | `nerve_propagator.py` | All organ nerve events |
+| `blood/logs/execution_history.jsonl` | Dashboard pipeline | 6-stage execution history |
+| `blood/logs/ollama_suggestions.md` | All Ollama engines | Raw LLM suggestions |
+| `blood/logs/code_review_report.md` | `code_review_engine.py` | Python file analysis |
+| `blood/logs/nerve_healer.jsonl` | `nerve_healer.py` | Organ healing events |
+| `blood/logs/repair_loop.jsonl` | `autonomous_repair_loop.py` | Test repair iterations |
+| `blood/logs/repair_loop_controlled_queue.json` | Repair loop | LLM symlink fixes — queued for human review |
+| `blood/logs/suggestion_controlled_queue.json` | `suggestion_consumer.py` | Low-confidence suggestions — queued for review |
 
-## 🧩 Interactions
-Emits `readme_updated` events to nervous system on change.
+## Gitignored Log Files
 
-## 📈 Current Capabilities
-- Basic workspace component
+These are high-churn runtime files excluded from git (see `.gitignore`):
 
-## ⚠️ Gaps & Weaknesses
-- No test coverage detected
+- `blood/logs/readme_intelligence.log` — rewritten every 30 min by auto-sync
+- `tests/reports/junit_*.xml` — JUnit XML from pytest runs
+- `blood/logs/repair_loop.jsonl` — high-volume test repair logs
 
-## 🚀 Suggested Enhancements
-- Add unit and integration tests
+## SQLite Telemetry
 
-## 🔗 Connected Modules
-*(no cross-organ references detected)*
+```
+blood/telemetry/
+  telemetry.db          # Main metrics database
+  log_query.py          # Query telemetry + JSONL logs
+  anomaly_detector.py   # Flag unusual patterns
+```
 
+## Controlled Queues
 
-## 🏥 Health Score
-🟢 **90/100**
+LLM-generated destructive actions are **never** auto-applied. They land here first:
 
-| Category | Deduction |
-|----------|----------|
-| no_tests | -10 |
+- **Symlink fixes** (from repair loop) → `blood/logs/repair_loop_controlled_queue.json`
+- **Low-confidence suggestions** (from suggestion_consumer) → `blood/logs/suggestion_controlled_queue.json`
 
-## 🔥 Critical Issues
-- No test files detected
+Review and apply manually, or use the Approval Queue widget in the dashboard at `http://localhost:7777`.
 
-## ✅ Runtime Status
-- Python files: 1 (1 valid, 0 broken)
-- Shell scripts: 0 (0 valid)
-- Tests detected: ❌
+## Tests
 
-## 📝 Change Log (Auto)
-- 2026-06-28: README auto-updated by README Intelligence System
-- 2026-06-27: README auto-updated by README Intelligence System
-- 2026-06-26: README auto-updated by README Intelligence System
+Covered by `tests/organs/blood/test_blood.py` — part of the 103/103 passing suite.
 
-## 🧬 State Alignment
+## Nerve Events
 
-**Status:** ⚠️ DRIFTED
+```python
+from nervous.nerve_propagator import notify_change
+notify_change("blood", "log_written", "blood/logs/SESSION_LOG.md")
+notify_change("blood", "anomaly_detected", "blood/telemetry/anomaly_detector.py")
+```
 
-**Ghost references (in README, not on disk):**
-- `README.md` *(referenced but missing)*
-
-*Last reconciled: 2026-06-28T00:00:06*
-
-## 🎯 Intent Alignment
-
-**Alignment:** ⚠️ PARTIAL (60/100)
-
-*Last checked: 2026-06-28T00:00:06*
-
-## 🌐 Failure Impact Map
-
-**Blast Radius:** 🟢 0 folders affected if this fails
-
-No downstream dependents. Failure is isolated.
-
-*Computed: 2026-06-28T00:00:06*
-
-## 📈 Trends
-
-**7-day trend:** ❓ INSUFFICIENT_DATA
-*0 day(s) of history | updated daily by nightly automation*
+*Updated: 2026-06-28*

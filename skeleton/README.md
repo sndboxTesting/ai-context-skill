@@ -1,88 +1,57 @@
-# 📁 skeleton
+# skeleton
 
-## 🧠 Purpose
-Agent rules enforcement, safety gate checks, and shared instructions
+Canonical agent rules, safety boundaries, identity spec, and shared operating instructions.
 
-## ⚙️ Responsibilities
-- Agent rules enforcement
-- Safety gate checks
-- Shared instructions
+## What It Does
 
-## 🔗 System Role
-Part of the **skeleton** organ in the 12-organ SuneelWorkSpace architecture.
+- **Canonical rules** — all agents (Claude Code, Codex, others) read these before meaningful work
+- **Safety boundaries** — hard limits that agents must never cross
+- **Identity spec** — describes how to speak and behave on Suneel's behalf
+- **Workflow rules** — guidelines for code changes, commits, and agent handoffs
+- **Startup checklist** — ordered steps required at session start
+- **Bounded self-upgrade** — rules for how agents may safely extend the workspace
 
-## 📂 Contents
-- `README.md`
-- `__init__.py`
-- `nerve.json`
-- `rules/` *(directory)*
+## Key Files
 
-## 🔄 Dependencies
-None detected
+| File | Purpose |
+|------|---------|
+| `skeleton/rules/AGENT_SYSTEM.md` | Canonical operating rules — source of truth |
+| `skeleton/rules/IDENTITY.md` | Identity spec: voice, tone, communication style |
+| `skeleton/rules/WORKFLOW_RULES.md` | Code change workflow, commit style, handoffs |
+| `skeleton/rules/SAFETY_BOUNDARIES.md` | Hard limits — what agents must NEVER do |
+| `skeleton/rules/STARTUP_CHECKLIST.md` | Ordered startup steps (11 files to read) |
+| `skeleton/rules/BOUNDED_SELF_UPGRADE.md` | Rules for SAFE self-modification of workspace |
 
-## 🧩 Interactions
-Emits `readme_updated` events to nervous system on change.
+## Safety Boundaries (summary)
 
-## 📈 Current Capabilities
-- Basic workspace component
+Full details in `SAFETY_BOUNDARIES.md`. Key rules:
 
-## ⚠️ Gaps & Weaknesses
-- No test coverage detected
+- **Never** delete files without backup or explicit approval
+- **Never** touch billing, accounts, or payment methods
+- **Never** send outbound comms (email, iMessage, Slack) without explicit approval
+- **Never** run database migrations without explicit approval
+- **Never** hard-reset git branches without backup
+- **SAFE** actions: read, analyze, search, generate files, append logs — autopilot
+- **CONTROLLED** actions: modify configs, install packages — check first
+- **HUMAN_REQUIRED** actions: send messages, delete branches, billing — always ask
 
-## 🚀 Suggested Enhancements
-- Add unit and integration tests
+## Session Startup Order
 
-## 🔗 Connected Modules
-*(no cross-organ references detected)*
+Agents must read all startup files before meaningful work — defined in `STARTUP_CHECKLIST.md`:
 
+1. `AGENT_SYSTEM.md` → `IDENTITY.md` → `WORKFLOW_RULES.md` → `SAFETY_BOUNDARIES.md` → `STARTUP_CHECKLIST.md`
+2. `brain/memory/MEMORY.md` → `brain/memory/DECISIONS.md`
+3. `heart/tasks/ACTIVE_TASKS.md` → `brain/memory/SESSION_HANDOFF.md`
+4. `spine/state/CURRENT_STATE.json` → `spine/state/WORKSPACE_HEALTH.json`
 
-## 🏥 Health Score
-🟢 **90/100**
+Shortcut: `agent-start` handles all of this automatically.
 
-| Category | Deduction |
-|----------|----------|
-| no_tests | -10 |
+## Hands/Bin Rule
 
-## 🔥 Critical Issues
-- No test files detected
+Every CLI command in `hands/bin/` MUST be a symlink — never a plain file or copy. Enforced by the test suite (`tests/organs/hands/test_hands.py` checks `os.path.islink()` for every entry).
 
-## ✅ Runtime Status
-- Python files: 1 (1 valid, 0 broken)
-- Shell scripts: 0 (0 valid)
-- Tests detected: ❌
+## Tests
 
-## 📝 Change Log (Auto)
-- 2026-06-28: README auto-updated by README Intelligence System
-- 2026-06-27: README auto-updated by README Intelligence System
-- 2026-06-26: README auto-updated by README Intelligence System
+Skeleton rules are static files — no direct test file. Indirectly validated by all other organ tests that require rules files at expected paths. The `test_hands.py` symlink check enforces the hands/bin rule.
 
-## 🧬 State Alignment
-
-**Status:** ⚠️ DRIFTED
-
-**Ghost references (in README, not on disk):**
-- `README.md` *(referenced but missing)*
-
-*Last reconciled: 2026-06-28T00:00:07*
-
-## 🎯 Intent Alignment
-
-**Alignment:** ⚠️ PARTIAL (65/100)
-
-**Supported by decisions:**
-- 2026-06-24 - use a file-based shared agent workspace
-
-*Last checked: 2026-06-28T00:00:07*
-
-## 🌐 Failure Impact Map
-
-**Blast Radius:** 🟢 0 folders affected if this fails
-
-No downstream dependents. Failure is isolated.
-
-*Computed: 2026-06-28T00:00:07*
-
-## 📈 Trends
-
-**7-day trend:** ❓ INSUFFICIENT_DATA
-*0 day(s) of history | updated daily by nightly automation*
+*Updated: 2026-06-28*

@@ -1,90 +1,83 @@
-# 📁 nervous
+# nervous
 
-## 🧠 Purpose
-Event propagation, MCP server connections, and nerve routing
+Central event bus, nerve propagator, organ registry, MCP connectors, and nerve healer.
 
-## ⚙️ Responsibilities
-- Event propagation
-- MCP server connections
-- Nerve routing
+## What It Does
 
-## 🔗 System Role
-Part of the **nervous** organ in the 12-organ SuneelWorkSpace architecture.
+- **Nerve propagator** — inter-organ event bus: all 12 organs publish and subscribe here
+- **Nerve healer** — Ollama-powered auto-healer detects and repairs broken nerve connections
+- **Nerve registry** — `nerve_registry.json` maps all 12 organs and their dependencies
+- **MCP connectors** — gateway to Claude, Codex, and other model connectors
+- **Nerve status** — `nerve_status.py` checks all 12 organ statuses
+- **Nerve inbox** — per-organ event inbox dirs (gitignored; runtime only)
 
-## 📂 Contents
-- `README.md`
-- `__init__.py`
-- `nerve.json`
-- `nerve_propagator.py`
-- `nerve_registry.json`
-- `nerve_status.py`
-- `gateway/` *(directory)*
-- `mcp/` *(directory)*
-- `skills/` *(directory)*
+## Key Files
 
-## 🔄 Dependencies
-- `spine/`
+| File | Purpose |
+|------|---------|
+| `nervous/nerve_propagator.py` | Event bus: `notify_change()` + `get_status()` |
+| `nervous/nerve_healer.py` | Auto-healer (Ollama): detects + repairs broken connections |
+| `nervous/nerve_registry.json` | Registry of all 12 organs, their `provides` + `needs` |
+| `nervous/nerve_status.py` | Prints organ statuses |
+| `nervous/gateway/` | MCP gateway |
+| `nervous/mcp/` | MCP connectors (Claude, Codex) |
+| `nervous/skills/` | Nerve skills |
 
-## 🧩 Interactions
-Emits `readme_updated` events to nervous system on change.
+## API
 
-## 📈 Current Capabilities
-- Basic workspace component
+```python
+from nervous.nerve_propagator import notify_change, get_status
 
-## ⚠️ Gaps & Weaknesses
-- No test coverage detected
+# Publish an event
+payload = notify_change("brain", "memory_updated", "brain/memory/MEMORY.md")
+# payload["event_type"] == "memory_updated"  (not "change_type")
 
-## 🚀 Suggested Enhancements
-- Add unit and integration tests
+# Get health status of all 12 organs
+status = get_status()
+# → {"brain": {"healthy": True, ...}, "heart": {...}, ...}
+```
 
-## 🔗 Connected Modules
-- [`../spine/README.md`](../spine/README.md)
+**Key**: returned payloads use `event_type` — not `change_type`.
 
+## Nerve.json Format (v1.1)
 
-## 🏥 Health Score
-🟢 **90/100**
+Every organ has a `nerve.json` at its root:
 
-| Category | Deduction |
-|----------|----------|
-| no_tests | -10 |
+```json
+{
+  "version": "1.1",
+  "organ": "brain",
+  "provides": ["memory", "search", "context"],
+  "needs": ["spine/state", "heart/tasks"],
+  "key_files": ["brain/memory/MEMORY.md"],
+  "cli_commands": ["memory-search", "memory-curate"]
+}
+```
 
-## 🔥 Critical Issues
-- No test files detected
+## Nerve Healer
 
-## ✅ Runtime Status
-- Python files: 3 (3 valid, 0 broken)
-- Shell scripts: 0 (0 valid)
-- Tests detected: ❌
+`nervous/nerve_healer.py` runs every 6h via `lab/autolab/ollama_orchestrator.py`:
+- Calls `get_status()` to check all 12 organs
+- Asks `suneelworkspace` model for SAFE repair suggestions
+- Applies SAFE fixes; symlink fixes always queued for human review
+- Logs all actions to `blood/logs/nerve_healer.jsonl`
 
-## 📝 Change Log (Auto)
-- 2026-06-28: README auto-updated by README Intelligence System
-- 2026-06-27: README auto-updated by README Intelligence System
-- 2026-06-26: README auto-updated by README Intelligence System
+## CLI Commands
 
-## 🧬 State Alignment
+```bash
+nerve-status   # Print all 12 organ statuses
+nerve-heal     # Run Ollama nerve healer
+nerve-check    # Quick filesystem check of all nerve.json files
+```
 
-**Status:** ⚠️ DRIFTED
+## Tests
 
-**Ghost references (in README, not on disk):**
-- `README.md` *(referenced but missing)*
+Covered by `tests/nerve_system/test_nervous.py` — part of the 103/103 passing suite.
 
-*Last reconciled: 2026-06-28T00:00:07*
+Key assertion: `notify_change()` returns `event_type` in payload (not `change_type`).
 
-## 🎯 Intent Alignment
+## Dependencies
 
-**Alignment:** ⚠️ PARTIAL (60/100)
+- `spine/` (for CURRENT_STATE.json)
 
-*Last checked: 2026-06-28T00:00:07*
-
-## 🌐 Failure Impact Map
-
-**Blast Radius:** 🟢 0 folders affected if this fails
-
-No downstream dependents. Failure is isolated.
-
-*Computed: 2026-06-28T00:00:07*
-
-## 📈 Trends
-
-**7-day trend:** ❓ INSUFFICIENT_DATA
-*0 day(s) of history | updated daily by nightly automation*
+*Updated: 2026-06-28*

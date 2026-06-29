@@ -1,85 +1,53 @@
-# 📁 ears
+# ears
 
-## 🧠 Purpose
-External RSS monitoring, GitHub event watching, and morning briefing build
+External RSS/GitHub monitors, morning brief builder, and personalized digest.
 
-## ⚙️ Responsibilities
-- External RSS monitoring
-- GitHub event watching
-- Morning briefing build
+## What It Does
 
-## 🔗 System Role
-Part of the **ears** organ in the 12-organ SuneelWorkSpace architecture.
+- **Monitor runner** — polls RSS feeds, GitHub notifications, and custom sources on a schedule
+- **Digest builder** — assembles structured daily digest from all monitor outputs
+- **Personalized brief** — Ollama-scored, priority-ranked morning brief matching Suneel's interests
+- **Morning brief CLI** — `morning-brief` and `morning-brief-personal` commands
 
-## 📂 Contents
-- `README.md`
-- `__init__.py`
-- `nerve.json`
-- `monitor/` *(directory)*
+## Key Files
 
-## 🔄 Dependencies
-None detected
+| File/Dir | Purpose |
+|----------|---------|
+| `ears/monitor_runner.py` | Runs all monitors (RSS, GitHub) on schedule |
+| `ears/digest_builder.py` | Assembles digest from monitor outputs |
+| `ears/personalized_brief.py` | Ollama-powered personal scoring + ranking |
+| `ears/monitors/` | Individual monitors (RSS, GitHub, custom) |
+| `ears/briefs/` | Historical brief archives |
+| `ears/nerve.json` | Organ manifest v1.1 |
 
-## 🧩 Interactions
-Emits `readme_updated` events to nervous system on change.
+## CLI Commands
 
-## 📈 Current Capabilities
-- Basic workspace component
+```bash
+morning-brief             # Build daily digest from all sources
+morning-brief-personal    # Personalized digest with Ollama relevance scoring
+monitor-run               # Run all monitors (one-shot)
+monitor-status            # Show last monitor run results
+```
 
-## ⚠️ Gaps & Weaknesses
-- No test coverage detected
+## Data Flow
 
-## 🚀 Suggested Enhancements
-- Add unit and integration tests
+```
+External sources (RSS, GitHub)
+  → ears/monitors/
+  → digest_builder.py → digest.json
+  → personalized_brief.py (Ollama scoring)
+  → morning brief output
+```
 
-## 🔗 Connected Modules
-*(no cross-organ references detected)*
+## Tests
 
+Covered by `tests/organs/ears/test_ears.py` — part of the 103/103 passing suite.
 
-## 🏥 Health Score
-🟢 **90/100**
+## Nerve Events
 
-| Category | Deduction |
-|----------|----------|
-| no_tests | -10 |
+```python
+notify_change("ears", "brief_built", "ears/briefs/")
+notify_change("ears", "monitor_run_complete", "ears/")
+```
 
-## 🔥 Critical Issues
-- No test files detected
-
-## ✅ Runtime Status
-- Python files: 1 (1 valid, 0 broken)
-- Shell scripts: 0 (0 valid)
-- Tests detected: ❌
-
-## 📝 Change Log (Auto)
-- 2026-06-28: README auto-updated by README Intelligence System
-- 2026-06-27: README auto-updated by README Intelligence System
-- 2026-06-26: README auto-updated by README Intelligence System
-
-## 🧬 State Alignment
-
-**Status:** ⚠️ DRIFTED
-
-**Ghost references (in README, not on disk):**
-- `README.md` *(referenced but missing)*
-
-*Last reconciled: 2026-06-28T00:00:06*
-
-## 🎯 Intent Alignment
-
-**Alignment:** ⚠️ PARTIAL (60/100)
-
-*Last checked: 2026-06-28T00:00:06*
-
-## 🌐 Failure Impact Map
-
-**Blast Radius:** 🟢 0 folders affected if this fails
-
-No downstream dependents. Failure is isolated.
-
-*Computed: 2026-06-28T00:00:06*
-
-## 📈 Trends
-
-**7-day trend:** ❓ INSUFFICIENT_DATA
-*0 day(s) of history | updated daily by nightly automation*
+*Updated: 2026-06-28*

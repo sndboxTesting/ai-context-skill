@@ -1,104 +1,104 @@
-# 📁 spine
+# spine
 
-## 🧠 Purpose
-Health state tracking and workspace index management
+Workspace health state, diagnostics, audit, backups, and README intelligence.
 
-## ⚙️ Responsibilities
-- Health state tracking
-- Workspace index management
+## What It Does
 
-## 🔗 System Role
-Part of the **spine** organ in the 12-organ SuneelWorkSpace architecture.
+- **Health state** — `CURRENT_STATE.json` and `WORKSPACE_HEALTH.json` track live workspace state
+- **Diagnostics** — `spine/diagnostics/diagnostic_scheduler.py` runs periodic health checks
+- **Audit** — `spine/audit/` logs workspace-wide audits and decisions
+- **Backups** — `spine/backups/` and `spine/snapshots/` hold periodic state backups
+- **README intelligence** — tracks README freshness across all organs (auto-updates every 30 min)
+- **Enhancement logger** — `spine/enhancement_logger.py` records workspace improvements
 
-## 📂 Contents
-- `README.md`
-- `__init__.py`
-- `enhancement_logger.py`
-- `nerve.json`
-- `readme_dependency_map.json`
-- `readme_health_cache.json`
-- `readme_metrics_history.json`
-- `readme_policy.json`
-- `readme_priority_queue.json`
-- `readme_repair_report.json`
-- `readme_self_reflection.json`
-- `audit/` *(directory)*
-- `backups/` *(directory)*
-- `docs/` *(directory)*
-- `snapshots/` *(directory)*
-- `state/` *(directory)*
-- `system-context/` *(directory)*
-- `tools/` *(directory)*
+## Key Files
 
-## 🔄 Dependencies
-None detected
+| File/Dir | Purpose |
+|----------|---------|
+| `spine/state/CURRENT_STATE.json` | Live workspace state (agent, tasks, health) |
+| `spine/state/WORKSPACE_HEALTH.json` | Health score, issues list, organ statuses |
+| `spine/enhancement_logger.py` | Records enhancements and improvements |
+| `spine/diagnostics/diagnostic_scheduler.py` | Periodic health check scheduler |
+| `spine/audit/` | Audit logs and decision records |
+| `spine/backups/` | Periodic state backups |
+| `spine/snapshots/` | Point-in-time workspace snapshots |
+| `spine/readme_health_cache.json` | Cached README health scores |
+| `spine/readme_metrics_history.json` | README health score history |
+| `spine/readme_dependency_map.json` | Cross-README dependency graph |
+| `spine/readme_repair_report.json` | Last README repair analysis |
+| `spine/readme_self_reflection.json` | README system self-assessment |
+| `spine/readme_policy.json` | README update policy rules |
+| `spine/readme_priority_queue.json` | READMEs queued for update |
 
-## 🧩 Interactions
-Emits `readme_updated` events to nervous system on change.
+## CURRENT_STATE.json
 
-## 📈 Current Capabilities
-- Basic workspace component
+Written by `agent-start` / `agent-finish` / `agent-doctor`:
 
-## ⚠️ Gaps & Weaknesses
-- No test coverage detected
+```json
+{
+  "session_id": "...",
+  "agent": "claude-code",
+  "active_tasks": [...],
+  "last_updated": "...",
+  "health_score": 0-100,
+  "open_issues": [...]
+}
+```
 
-## 🚀 Suggested Enhancements
-- Add unit and integration tests
+## WORKSPACE_HEALTH.json
 
-## 🔗 Connected Modules
-*(no cross-organ references detected)*
+Updated by diagnostic runs and `agent-doctor`:
 
+```json
+{
+  "health_score": 0-100,
+  "issues": [
+    {"organ": "...", "severity": "low|medium|high", "description": "..."}
+  ],
+  "organs": {
+    "brain": {"healthy": true, ...},
+    ...12 organs
+  },
+  "last_check": "..."
+}
+```
 
-## 🏥 Health Score
-🟡 **75/100**
+## README Intelligence
 
-| Category | Deduction |
-|----------|----------|
-| readme_drift | -15 |
-| no_tests | -10 |
+The README intelligence system tracks and auto-updates README freshness:
+- Detects stale auto-generated content ("Basic workspace component")
+- Tracks last meaningful update per organ
+- Feeds the `/api/readme-health` dashboard widget
+- Background auto-sync runs every 30 min (logs to `blood/logs/readme_intelligence.log`)
+- Policy defined in `spine/readme_policy.json`
 
-## 🔥 Critical Issues
-- README is older than folder contents
-- No test files detected
+## Diagnostics
 
-## ✅ Runtime Status
-- Python files: 2 (2 valid, 0 broken)
-- Shell scripts: 0 (0 valid)
-- Tests detected: ❌
+`spine/diagnostics/diagnostic_scheduler.py` checks:
+- All 12 organ `nerve.json` files present and valid (v1.1)
+- Key files exist: MEMORY.md, DECISIONS.md, ACTIVE_TASKS.md, SESSION_HANDOFF.md
+- Ollama reachable on port 11434
+- Symlink integrity in `hands/bin/` (194 symlinks)
+- Test suite green
 
-## 📝 Change Log (Auto)
-- 2026-06-28: README auto-updated by README Intelligence System
-- 2026-06-27: README auto-updated by README Intelligence System
-- 2026-06-26: README auto-updated by README Intelligence System
+```bash
+agent-doctor    # Run full diagnostic → update WORKSPACE_HEALTH.json
+```
 
-## 🧬 State Alignment
+## Dependencies
 
-**Status:** ⚠️ DRIFTED
+- `nervous/` depends on `spine/state/` for org status reads
 
-**Ghost references (in README, not on disk):**
-- `README.md` *(referenced but missing)*
+## Tests
 
-*Last reconciled: 2026-06-28T00:00:07*
+Covered by `tests/organs/spine/test_spine.py` — part of the 103/103 passing suite.
 
-## 🎯 Intent Alignment
+## Nerve Events
 
-**Alignment:** ⚠️ PARTIAL (60/100)
+```python
+from nervous.nerve_propagator import notify_change
+notify_change("spine", "health_updated", "spine/state/WORKSPACE_HEALTH.json")
+notify_change("spine", "diagnostic_complete", "spine/diagnostics/")
+```
 
-*Last checked: 2026-06-28T00:00:07*
-
-## 🌐 Failure Impact Map
-
-**Blast Radius:** 🟢 1 folders affected if this fails
-
-**Direct dependents:**
-- `nervous/`
-
-**Cascade (depth 1-1):**
-- Depth 1: `nervous`
-
-*Computed: 2026-06-28T00:00:07*
-
-## 📈 Trends
-
-**7-day trend:** ❓ INSUFFICIENT_DATA
-*0 day(s) of history | updated daily by nightly automation*
+*Updated: 2026-06-28*

@@ -1,91 +1,98 @@
-# 📁 dna
+# dna
 
-## 🧠 Purpose
-Identity prompt management and adapt loop scoring
+Identity profiles, Hermes agent, Ollama Modelfile, training data, and adapt loop.
 
-## ⚙️ Responsibilities
-- Identity prompt management
-- Adapt loop scoring
+## What It Does
 
-## 🔗 System Role
-Part of the **dna** organ in the 12-organ SuneelWorkSpace architecture.
+- **Identity profiles** — Suneel's voice, tone, communication style, decision-making style
+- **Hermes agent** — tirith-powered agent orchestrator built on Ollama
+- **Ollama Modelfile** — `Modelfile.workspace` defines the `suneelworkspace` model (9,553-char system prompt)
+- **Training data** — 103 training pairs extracted from workspace history for fine-tuning
+- **Adapt loop** — scores and updates identity + communication style over time
 
-## 📂 Contents
-- `README.md`
-- `__init__.py`
-- `nerve.json`
-- `agents/` *(directory)*
-- `feedback/` *(directory)*
-- `identity/` *(directory)*
+## Identity Profiles
 
-## 🔄 Dependencies
-None detected
+Load all 5 files when drafting, planning, or communicating on Suneel's behalf:
 
-## 🧩 Interactions
-Emits `readme_updated` events to nervous system on change.
+| File | Purpose |
+|------|---------|
+| `dna/identity/prompts/identity_prompt.md` | Prompt template for identity injection |
+| `dna/identity/prompts/communication_prompt.md` | Communication style prompt |
+| `dna/identity/profile/identity_profile.md` | Who Suneel is, goals, domain expertise |
+| `dna/identity/profile/tone_profile.md` | Voice: short, direct, casual, conversational, smart, structured |
+| `dna/identity/profile/decision_profile.md` | How Suneel makes decisions |
 
-## 📈 Current Capabilities
-- Database storage
+**Voice**: short, direct, casual, conversational, smart, structured, softened. Never harsh or condescending.
 
-## ⚠️ Gaps & Weaknesses
-- No test coverage detected
+## Hermes Agent
 
-## 🚀 Suggested Enhancements
-- Add unit and integration tests
+```
+dna/agents/hermes/
+  ollama_models/
+    Modelfile.workspace      # suneelworkspace model definition (9,553-char system prompt)
+    build_modelfile.py       # Rebuilds Modelfile from live workspace state
+    build_training_data.py   # Extracts training pairs from workspace history
+    training_data.jsonl      # 103 training pairs (~41KB)
+  skills/                    # Hermes skill definitions
+  tools/                     # Hermes tool integrations
+dna/feedback/                # Adapt loop feedback records
+dna/identity/                # Identity + tone + decision profiles
+```
 
-## 🔗 Connected Modules
-*(no cross-organ references detected)*
+## suneelworkspace Model
 
+`Modelfile.workspace` builds `suneelworkspace` from `llama3.3:70b`:
 
-## 🏥 Health Score
-🟡 **75/100**
+```
+FROM llama3.3:70b
+SYSTEM """[9,553-char system prompt covering: Suneel's identity, all 12 organs,
+           active tasks, decisions, patterns, operating rules, safety boundaries]"""
+PARAMETER temperature 0.2
+PARAMETER num_ctx 8192
+PARAMETER top_p 0.9
+PARAMETER repeat_penalty 1.1
+```
 
-| Category | Deduction |
-|----------|----------|
-| readme_drift | -15 |
-| no_tests | -10 |
+Rebuild when workspace state changes significantly:
 
-## 🔥 Critical Issues
-- README is older than folder contents
-- No test files detected
+```bash
+rebuild-model     # Regenerate Modelfile.workspace + run: ollama create suneelworkspace
+```
 
-## ✅ Runtime Status
-- Python files: 1 (1 valid, 0 broken)
-- Shell scripts: 0 (0 valid)
-- Tests detected: ❌
+## Training Data
 
-## 📝 Change Log (Auto)
-- 2026-06-28: README auto-updated by README Intelligence System
-- 2026-06-27: README auto-updated by README Intelligence System
-- 2026-06-26: README auto-updated by README Intelligence System
+`training_data.jsonl` — 103 pairs extracted by `build_training_data.py`:
+- 100 git commit messages → what changed + why
+- 3 repair loop suggestions → problem + fix
+- Future: session logs, security findings
 
-## 🧬 State Alignment
+```bash
+build-training-data    # Re-extract from current workspace history
+```
 
-**Status:** ⚠️ DRIFTED
+## Context Injector Integration
 
-**Ghost references (in README, not on disk):**
-- `README.md` *(referenced but missing)*
+Every Ollama engine call is enriched by `lab/autolab/context_injector.py` which injects 4,000 chars of live workspace state (identity_profile.md, tone_profile.md, MEMORY.md, ACTIVE_TASKS.md, SESSION_HANDOFF.md, DECISIONS.md, PATTERNS.md) as a system prompt. 5-minute TTL cache.
 
-*Last reconciled: 2026-06-28T00:00:06*
+## CLI Commands
 
-## 🎯 Intent Alignment
+```bash
+rebuild-model          # Rebuild suneelworkspace from live state
+build-training-data    # Extract training pairs from workspace history
+hermes-run             # Run Hermes agent
+hermes-status          # Check Hermes + Ollama status
+```
 
-**Alignment:** ⚠️ PARTIAL (65/100)
+## Tests
 
-**Supported by decisions:**
-- 2026-06-26 - adaptive identity loop
+Covered by `tests/organs/dna/test_dna.py` — part of the 103/103 passing suite.
 
-*Last checked: 2026-06-28T00:00:06*
+## Nerve Events
 
-## 🌐 Failure Impact Map
+```python
+from nervous.nerve_propagator import notify_change
+notify_change("dna", "model_rebuilt", "dna/agents/hermes/ollama_models/Modelfile.workspace")
+notify_change("dna", "training_data_updated", "dna/agents/hermes/ollama_models/training_data.jsonl")
+```
 
-**Blast Radius:** 🟢 0 folders affected if this fails
-
-No downstream dependents. Failure is isolated.
-
-*Computed: 2026-06-28T00:00:06*
-
-## 📈 Trends
-
-**7-day trend:** ❓ INSUFFICIENT_DATA
-*0 day(s) of history | updated daily by nightly automation*
+*Updated: 2026-06-28*
